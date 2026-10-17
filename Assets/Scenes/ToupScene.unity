@@ -450,7 +450,7 @@ GameObject:
   - component: {fileID: 1200689084}
   - component: {fileID: 1200689085}
   m_Layer: 0
-  m_Name: _ScoreManager
+  m_Name: __ScoreManager
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -486,6 +486,7 @@ MonoBehaviour:
   scoreText: {fileID: 818618137}
   countDuration: 3
   iconSqueeze: {fileID: 1988191133}
+  scoreGainLoopSound: {fileID: 8300000, guid: 75b99d1b02bc05441b320b34b366cfe0, type: 3}
 --- !u!1 &1311738136
 GameObject:
   m_ObjectHideFlags: 0
@@ -798,12 +799,58 @@ MonoBehaviour:
   ySqueeze: 1.3
   duration: 0.1
   delay: 0
+--- !u!1 &2067058343
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2067058344}
+  - component: {fileID: 2067058345}
+  m_Layer: 0
+  m_Name: __SoundManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2067058344
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2067058343}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 1705.9164, y: 1128.0449, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &2067058345
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2067058343}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5dcee9d63c853224196fd0eee4e741ad, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SFXManager
+  audioSourcePrefab: {fileID: 4261137926694444932, guid: 658532294b526b345b9dc5cc890655a8, type: 3}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
   m_Roots:
   - {fileID: 1311738139}
   - {fileID: 1370037086}
+  - {fileID: 2067058344}
   - {fileID: 1200689084}
   - {fileID: 564277169}
   - {fileID: 30790952}

@@ -1,3 +1,4 @@
+using System.Collections;
 using TMPro;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -13,6 +14,11 @@ public class ScoreManager : MonoBehaviour
     private int lastShownScore = -1;
     private float countFrom;
     private float countTimer;
+
+    //Sound
+    [SerializeField] private AudioClip scoreGainLoopSound;
+    private Coroutine coinSoundRoutine;
+    private AudioSource coinSource;
 
     private void Awake()
     {
@@ -50,6 +56,23 @@ public class ScoreManager : MonoBehaviour
 
         if (iconSqueeze != null)
             iconSqueeze.SqueezeForDuration(countDuration);
+
+        if (coinSoundRoutine != null)
+            StopCoroutine(coinSoundRoutine);
+
+        coinSoundRoutine = StartCoroutine(CoinSoundLoop());
+    }
+
+    private IEnumerator CoinSoundLoop()
+    {
+        if (coinSource == null)
+            coinSource = SFXManager.Instance.PlaySFX(scoreGainLoopSound, loop: true);
+
+        yield return new WaitForSeconds(countDuration);
+
+        Destroy(coinSource.gameObject);
+        coinSource = null;
+        coinSoundRoutine = null;
     }
 
     private void UpdateUI()
