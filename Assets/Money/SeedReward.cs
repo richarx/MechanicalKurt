@@ -2,9 +2,9 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class SeedFlyEffect : MonoBehaviour
+public class SeedReward : MonoBehaviour
 {
-    public static SeedFlyEffect instance { get; private set; }
+    public static SeedReward instance { get; private set; }
     [SerializeField] private RectTransform seedPrefab;
     [SerializeField] private RectTransform seedLayer;
     [SerializeField] private Camera worldCamera;
@@ -44,7 +44,13 @@ public class SeedFlyEffect : MonoBehaviour
             ScoreManager.instance.SyncDisplay();
     }
 
-    public void SpawnFromWorld(Vector3 worldPosition, int amount)
+    public void GetReward(Vector3 worldPosition, int amount)
+    {
+        SpawnFromWorld(worldPosition, amount);
+    }
+
+
+    private void SpawnFromWorld(Vector3 worldPosition, int amount)
     {
         Vector3 screenPos = worldCamera.WorldToScreenPoint(worldPosition);
 
@@ -57,12 +63,7 @@ public class SeedFlyEffect : MonoBehaviour
         SpawnFromScreen(screenPos, amount);
     }
 
-    public void SpawnFromScreenCenter(int amount)
-    {
-        SpawnFromScreen(new Vector2(Screen.width * 0.5f, Screen.height * 0.5f), amount);
-    }
-
-    public void SpawnFromScreen(Vector2 screenPosition, int amount)
+    private void SpawnFromScreen(Vector2 screenPosition, int amount)
     {
         if (amount <= 0) return;
 
@@ -109,7 +110,6 @@ public class SeedFlyEffect : MonoBehaviour
         Vector2 from = seed.position;
         Vector2 initialTo = target.position;
 
-        // Control point: the midpoint pushed sideways, to the left or right at random.
         Vector2 dir = (initialTo - from).normalized;
         Vector2 side = new Vector2(-dir.y, dir.x) * (Random.value < 0.5f ? -1f : 1f);
         Vector2 control = (from + initialTo) * 0.5f

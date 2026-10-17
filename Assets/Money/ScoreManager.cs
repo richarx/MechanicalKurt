@@ -39,7 +39,10 @@ public class ScoreManager : MonoBehaviour
     private void Update()
     {
         if (Keyboard.current.kKey.wasPressedThisFrame)
-            SeedFlyEffect.instance.SpawnFromScreenCenter(200);
+        {
+            Transform cam = Camera.main.transform;
+            SeedReward.instance.GetReward(cam.position + cam.forward * 5f, 200);
+        }
 
         if (countTimer < countDuration)
         {
