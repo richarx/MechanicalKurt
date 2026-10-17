@@ -1,0 +1,17 @@
+config_version=5
+
+[application]
+config/name="Psx Sky Sampler"
+run/main_scene="res://main.tscn"
+
+[display]
+window/size/viewport_width=320
+window/size/viewport_height=240
+window/size/window_width_override=960
+window/size/window_height_override=720
+window/stretch/mode="viewport"
+
+[rendering]
+textures/canvas_textures/default_texture_filter=0
+textures/default_filters/use_nearest_mipmap_filter=true
+renderer/rendering_method="forward_plus"
