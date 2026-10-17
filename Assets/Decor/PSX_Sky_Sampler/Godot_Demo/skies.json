@@ -1,0 +1,122 @@
+[
+ {
+  "id": "v1_summer_cumulus",
+  "name": "Summer Cumulus",
+  "file": "Summer_Cumulus.png",
+  "light": {
+   "az": 40,
+   "el": 55,
+   "col": "#fff6d0",
+   "energy": 1.3,
+   "ambient": 1.0
+  },
+  "fog": "#e8eef2",
+  "fog_density": 0.01,
+  "views": [
+   [
+    40,
+    40
+   ],
+   [
+    190,
+    10
+   ]
+  ]
+ },
+ {
+  "id": "v1_sunset_orange",
+  "name": "Sunset Orange",
+  "file": "Sunset_Orange.png",
+  "light": {
+   "az": 0,
+   "el": 3,
+   "col": "#ffb050",
+   "energy": 0.35,
+   "ambient": 1.4
+  },
+  "fog": "#ffb060",
+  "fog_density": 0.006,
+  "views": [
+   [
+    0,
+    8
+   ],
+   [
+    150,
+    10
+   ]
+  ]
+ },
+ {
+  "id": "v1_full_moon_night",
+  "name": "Full Moon Night",
+  "file": "Full_Moon_Night.png",
+  "light": {
+   "az": 150,
+   "el": 35,
+   "col": "#c8d4ff",
+   "energy": 0.35,
+   "ambient": 1.4
+  },
+  "fog": "#26304e",
+  "fog_density": 0.006,
+  "views": [
+   [
+    150,
+    25
+   ],
+   [
+    300,
+    10
+   ]
+  ]
+ },
+ {
+  "id": "hr_blood_moon",
+  "name": "Blood Moon",
+  "file": "Blood_Moon.png",
+  "light": {
+   "az": 200,
+   "el": 28,
+   "col": "#ff2010",
+   "energy": 0.35,
+   "ambient": 1.4
+  },
+  "fog": "#5a1010",
+  "fog_density": 0.006,
+  "views": [
+   [
+    200,
+    18
+   ],
+   [
+    350,
+    10
+   ]
+  ]
+ },
+ {
+  "id": "hr_silent_fog",
+  "name": "Silent Fog",
+  "file": "Silent_Fog.png",
+  "light": {
+   "az": 30,
+   "el": 60,
+   "col": "#9c9c98",
+   "energy": 0.5,
+   "ambient": 1.0
+  },
+  "fog": "#c0c0ba",
+  "fog_density": 0.024,
+  "views": [
+   [
+    0,
+    8
+   ],
+   [
+    150,
+    10
+   ]
+  ]
+ }
+]
