@@ -107,3 +107,9 @@ InitTestScene*.unity*
 
 # Auto-generated cache in Assets folder
 /[Aa]ssets/[Ss]ceneDependencyCache*
+
+# Local AI assistant instructions and configuration
+AGENTS.md
+AGENTS.override.md
+.codex/
+.agents/
