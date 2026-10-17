@@ -295,6 +295,7 @@ RectTransform:
   m_Children:
   - {fileID: 818618136}
   - {fileID: 1988191130}
+  - {fileID: 1357689069}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -449,6 +450,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1200689084}
   - component: {fileID: 1200689085}
+  - component: {fileID: 1200689086}
   m_Layer: 0
   m_Name: __ScoreManager
   m_TagString: Untagged
@@ -484,9 +486,33 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ScoreManager
   scoreText: {fileID: 818618137}
+  scoreIcon: {fileID: 1988191130}
   countDuration: 3
   iconSqueeze: {fileID: 1988191133}
-  scoreGainLoopSound: {fileID: 8300000, guid: 75b99d1b02bc05441b320b34b366cfe0, type: 3}
+  seedArriveClip: {fileID: 8300000, guid: 75b99d1b02bc05441b320b34b366cfe0, type: 3}
+--- !u!114 &1200689086
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1200689083}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 098e0a35b10dede4097647bdf348f8e2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SeedFlyEffect
+  seedPrefab: {fileID: 5361655999485533240, guid: 0fff97c7e3671ff48a9f7d2ca2636a2b, type: 3}
+  seedLayer: {fileID: 1357689069}
+  worldCamera: {fileID: 1311738138}
+  burstRadius: 120
+  burstDuration: 0.35
+  flyDurationMin: 0.5
+  flyDurationMax: 0.8
+  delayBetweenSeeds: 0.05
+  curveStrength: 200
+  endScale: 0.6
+  maxVisualSeeds: 15
 --- !u!1 &1311738136
 GameObject:
   m_ObjectHideFlags: 0
@@ -579,6 +605,41 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1357689068
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1357689069}
+  m_Layer: 5
+  m_Name: SeedLayer
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &1357689069
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1357689068}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 564277169}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: -0.000061035, y: -0.000061035}
+  m_SizeDelta: {x: 1920, y: 1080}
+  m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &1370037084
 GameObject:
   m_ObjectHideFlags: 0

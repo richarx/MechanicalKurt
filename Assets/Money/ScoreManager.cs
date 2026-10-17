@@ -1,4 +1,3 @@
-using System.Collections;
 using TMPro;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -7,25 +6,29 @@ public class ScoreManager : MonoBehaviour
 {
     public static ScoreManager instance { get; private set; }
     [SerializeField] private TMP_Text scoreText;
+    [SerializeField] private RectTransform scoreIcon;
     [SerializeField] private float countDuration = 2f;
     [SerializeField] private Squeeze iconSqueeze;
-    private int score;
-    private float displayedScore;
+    public int Score { get; private set; }
+    public RectTransform ScoreIcon => scoreIcon;
+
+    private int displayTarget;
+    private float displayedScore; 
     private int lastShownScore = -1;
     private float countFrom;
     private float countTimer;
 
     //Sound
-    [SerializeField] private AudioClip scoreGainLoopSound;
-    private Coroutine coinSoundRoutine;
-    private AudioSource coinSource;
+    [SerializeField] private AudioClip seedArriveClip;
 
     private void Awake()
     {
-        if (instance != null && instance != this) 
+        if (instance != null && instance != this)
             Destroy(gameObject);
         else
             instance = this;
+
+        countTimer = countDuration;
     }
 
     private void Start()
@@ -36,43 +39,59 @@ public class ScoreManager : MonoBehaviour
     private void Update()
     {
         if (Keyboard.current.kKey.wasPressedThisFrame)
-            AddScore(200);
+        {
+            Transform cam = Camera.main.transform;
+            SeedReward.instance.GetReward(cam.position + cam.forward * 5f, 200);
+        }
 
         if (countTimer < countDuration)
         {
             countTimer += Time.deltaTime;
             float t = Mathf.Clamp01(countTimer / countDuration);
-            displayedScore = Mathf.Lerp(countFrom, score, t);
+            displayedScore = Mathf.Lerp(countFrom, displayTarget, t);
             UpdateUI();
         }
     }
 
     public void AddScore(int amount)
     {
-        score += amount;
-        
+        Score += amount;
+        displayTarget = Score;
+
         countFrom = displayedScore;
         countTimer = 0f;
 
         if (iconSqueeze != null)
             iconSqueeze.SqueezeForDuration(countDuration);
-
-        if (coinSoundRoutine != null)
-            StopCoroutine(coinSoundRoutine);
-
-        coinSoundRoutine = StartCoroutine(CoinSoundLoop());
     }
 
-    private IEnumerator CoinSoundLoop()
+    public void AddScoreDeferred(int amount)
     {
-        if (coinSource == null)
-            coinSource = SFXManager.Instance.PlaySFX(scoreGainLoopSound, loop: true);
+        Score += amount;
+    }
 
-        yield return new WaitForSeconds(countDuration);
+    public void OnSeedArrived(int amount)
+    {
+        displayTarget = Mathf.Min(displayTarget + amount, Score);
+        SnapDisplay();
 
-        Destroy(coinSource.gameObject);
-        coinSource = null;
-        coinSoundRoutine = null;
+        if (iconSqueeze != null)
+            iconSqueeze.Trigger();
+
+        SFXManager.Instance.PlaySFX(seedArriveClip);
+    }
+
+    public void SyncDisplay()
+    {
+        displayTarget = Score;
+        SnapDisplay();
+    }
+
+    private void SnapDisplay()
+    {
+        displayedScore = displayTarget;
+        countTimer = countDuration;
+        UpdateUI();
     }
 
     private void UpdateUI()
@@ -81,7 +100,7 @@ public class ScoreManager : MonoBehaviour
 
         if (shown == lastShownScore)
             return;
-            
+
         lastShownScore = shown;
         scoreText.text = $"x{shown}";
     }
