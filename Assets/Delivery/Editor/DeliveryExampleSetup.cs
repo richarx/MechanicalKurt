@@ -4,7 +4,7 @@ using UnityEngine;
 
 public static class DeliveryExampleSetup
 {
-    private const string _menuPath = "Tools/Delivery/Créer les 3 lieux et 3 offres de test";
+    private const string _menuPath = "Tools/Delivery/Create Points and Offers Test";
     private const string _exampleFolder = "Assets/Delivery/Examples/";
 
     [MenuItem(_menuPath)]
@@ -16,28 +16,28 @@ public static class DeliveryExampleSetup
 
         if (letter == null || parcel == null || telegram == null)
         {
-            Debug.LogError("Setup Delivery : les trois assets exemple sont requis dans " + _exampleFolder);
+            Debug.LogError("Delivery setup requires the three example assets in " + _exampleFolder);
             return;
         }
 
         Undo.IncrementCurrentGroup();
         int undoGroup = Undo.GetCurrentGroup();
-        const string undoName = "Créer les lieux et offres Delivery";
+        const string undoName = "Create Delivery Points and Offers";
         Undo.SetCurrentGroupName(undoName);
 
         try
         {
-            GameObject root = CreateObject("Delivery - Test étape 1", null);
-            GameObject points = CreateObject("Lieux", root.transform);
-            GameObject offers = CreateObject("Offres simultanées", root.transform);
+            GameObject root = CreateObject("Delivery - Points and Offers Test", null);
+            GameObject points = CreateObject("Points", root.transform);
+            GameObject offers = CreateObject("Simultaneous Offers", root.transform);
 
-            DeliveryPoint post = CreatePoint("Poste", new Vector3(0f, 0f, 0f), points.transform);
-            DeliveryPoint market = CreatePoint("Marché", new Vector3(12f, 0f, 0f), points.transform);
-            DeliveryPoint workshop = CreatePoint("Atelier", new Vector3(6f, 0f, 10f), points.transform);
+            DeliveryPoint post = CreatePoint("Post Office", new Vector3(0f, 0f, 0f), points.transform);
+            DeliveryPoint market = CreatePoint("Market", new Vector3(12f, 0f, 0f), points.transform);
+            DeliveryPoint workshop = CreatePoint("Workshop", new Vector3(6f, 0f, 10f), points.transform);
 
-            CreateOffer("Lettre - Poste vers Marché", letter, post, market, offers.transform);
-            CreateOffer("Petit colis - Atelier vers Poste", parcel, workshop, post, offers.transform);
-            CreateOffer("Télégramme - Marché vers Atelier", telegram, market, workshop, offers.transform);
+            CreateOffer("Letter - Post Office to Market", letter, post, market, offers.transform);
+            CreateOffer("Small Parcel - Workshop to Post Office", parcel, workshop, post, offers.transform);
+            CreateOffer("Telegram - Market to Workshop", telegram, market, workshop, offers.transform);
 
             EditorSceneManager.MarkSceneDirty(root.scene);
             Selection.activeGameObject = root;
@@ -63,10 +63,10 @@ public static class DeliveryExampleSetup
     private static GameObject CreateObject(string objectName, Transform parent)
     {
         GameObject createdObject = new GameObject(objectName);
-        Undo.RegisterCreatedObjectUndo(createdObject, "Créer " + objectName);
+        Undo.RegisterCreatedObjectUndo(createdObject, "Create " + objectName);
 
         if (parent != null)
-            Undo.SetTransformParent(createdObject.transform, parent, "Rattacher " + objectName);
+            Undo.SetTransformParent(createdObject.transform, parent, "Parent " + objectName);
 
         return createdObject;
     }
@@ -74,7 +74,7 @@ public static class DeliveryExampleSetup
     private static DeliveryPoint CreatePoint(string pointName, Vector3 position, Transform parent)
     {
         GameObject pointObject = CreateObject(pointName, parent);
-        Undo.RecordObject(pointObject.transform, "Positionner " + pointName);
+        Undo.RecordObject(pointObject.transform, "Position " + pointName);
         pointObject.transform.position = position;
         DeliveryPoint point = Undo.AddComponent<DeliveryPoint>(pointObject);
         SerializedObject serializedPoint = new SerializedObject(point);

@@ -19,10 +19,10 @@ public sealed class DeliveryData : ScriptableObject
         get
         {
             if (string.IsNullOrWhiteSpace(_label))
-                return "Renseigner le libellé de la livraison.";
+                return "Enter a delivery label.";
 
             if (string.IsNullOrWhiteSpace(_content))
-                return "Renseigner le contenu de la livraison.";
+                return "Enter the delivery content.";
 
             return string.Empty;
         }

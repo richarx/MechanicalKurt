@@ -19,8 +19,8 @@ public sealed class DeliveryOffer : MonoBehaviour
     [ShowInInspector, ReadOnly]
     public bool IsValid => string.IsNullOrEmpty(ValidationMessage);
 
-    // La disponibilité ne représente pas une progression : toutes les offres valides
-    // et actives peuvent être consultées simultanément à cette étape.
+    // Availability describes scene/data validity. Selection and delivery progress
+    // belong to the selector/manager, so renewing never disables shared points.
     [ShowInInspector, ReadOnly]
     public bool IsAvailable => isActiveAndEnabled && IsValid
         && _departure.isActiveAndEnabled && _destination.isActiveAndEnabled;
@@ -30,25 +30,25 @@ public sealed class DeliveryOffer : MonoBehaviour
         get
         {
             if (_data == null)
-                return "Affecter un asset DeliveryData à l'offre.";
+                return "Assign a DeliveryData asset to the offer.";
 
             if (!_data.IsValid)
-                return "Données invalides : " + _data.ValidationMessage;
+                return "Invalid data: " + _data.ValidationMessage;
 
             if (_departure == null)
-                return "Affecter un lieu de départ à l'offre.";
+                return "Assign a departure point to the offer.";
 
             if (_destination == null)
-                return "Affecter un lieu de destination à l'offre.";
+                return "Assign a destination point to the offer.";
 
             if (_departure == _destination)
-                return "Le départ et la destination doivent être deux lieux différents.";
+                return "Departure and destination must be different points.";
 
             if (!_departure.IsValid)
-                return "Départ invalide : " + _departure.ValidationMessage;
+                return "Invalid departure: " + _departure.ValidationMessage;
 
             if (!_destination.IsValid)
-                return "Destination invalide : " + _destination.ValidationMessage;
+                return "Invalid destination: " + _destination.ValidationMessage;
 
             return string.Empty;
         }

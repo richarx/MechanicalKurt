@@ -12,5 +12,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e1902fc5be21484ab113a8c64723e1c2, type: 3}
   m_Name: Lettre
   m_EditorClassIdentifier: 
-  _label: Lettre du facteur
-  _content: Une lettre cachetée à transporter par pigeon.
+  _label: Postman's letter
+  _content: A sealed letter to deliver by pigeon.

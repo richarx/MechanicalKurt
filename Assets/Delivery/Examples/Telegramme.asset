@@ -12,5 +12,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e1902fc5be21484ab113a8c64723e1c2, type: 3}
   m_Name: Telegramme
   m_EditorClassIdentifier: 
-  _label: Télégramme urgent
-  _content: Un message urgent à transmettre par pigeon.
+  _label: "T\xE9l\xE9gramme urgent"
+  _content: "Un message urgent \xE0 transmettre par pigeon."

@@ -6,7 +6,7 @@ public sealed class DeliveryPoint : MonoBehaviour
 {
     [InfoBox("$ValidationMessage", InfoMessageType.Error, nameof(HasConfigurationError))]
     [SerializeField, Required] private string _displayName;
-    [SerializeField, MinValue(0.01f), SuffixLabel("unités monde", true)] private float _radius = 2f;
+    [SerializeField, MinValue(0.01f), SuffixLabel("world units", true)] private float _radius = 2f;
     [SerializeField] private Color _gizmoColor = new Color(0.2f, 0.85f, 1f, 1f);
 
     public string DisplayName => _displayName;
@@ -23,10 +23,10 @@ public sealed class DeliveryPoint : MonoBehaviour
         get
         {
             if (string.IsNullOrWhiteSpace(_displayName))
-                return "Renseigner le nom du lieu.";
+                return "Enter a point name.";
 
             if (float.IsNaN(_radius) || float.IsInfinity(_radius) || _radius <= 0f)
-                return "Le rayon du lieu doit être un nombre fini strictement positif.";
+                return "Point radius must be a finite number greater than zero.";
 
             return string.Empty;
         }
