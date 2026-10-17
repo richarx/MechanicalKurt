@@ -12,6 +12,9 @@ public sealed class DeliveryInteractionStartedEvent : UnityEvent<int> { }
 [DefaultExecutionOrder(100)]
 public sealed class DeliveryManager : MonoBehaviour
 {
+
+    public static DeliveryManager instance;
+
     [SerializeField, Required] private DeliverySession _session;
     [SerializeField, Required] private DeliveryOfferSelector _selector;
     [SerializeField, MinValue(0.01f), SuffixLabel("seconds", true)] private float _dropOffHoldSeconds = 0.75f;
@@ -105,6 +108,14 @@ public sealed class DeliveryManager : MonoBehaviour
 
     private void OnEnable()
     {
+        if (instance != null)
+        {
+            Debug.LogWarning("Two instance of DeliveryManager active");
+        }
+        else
+        {
+            instance = this;
+        }
         if (_session == null && _selector != null) _session = _selector.Session;
         Subscribe();
         ClearDelivery(false, true);
@@ -112,6 +123,8 @@ public sealed class DeliveryManager : MonoBehaviour
 
     private void OnDisable()
     {
+        if (instance == this)
+            instance = null;
         ClearDelivery(true, false);
     }
 

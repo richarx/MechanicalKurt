@@ -12,6 +12,8 @@ public sealed class DeliveryGuidance : MonoBehaviour
     [SerializeField] private TMP_Text _distanceText;
     [SerializeField] private RectTransform _arrow;
     [SerializeField, Min(0f)] private float _screenMargin = 48f;
+    [SerializeField, Tooltip("Optional mesh / visual prefab. Its root is centered on the delivery point; materials, rotation and scale are preserved. Use child objects for visual offsets. Leave empty to use the default circle.")]
+    private GameObject _destinationVisualPrefab;
     [SerializeField] private Material _destinationMaterial;
     [SerializeField] private Color _destinationColor = new Color(1f, 0.78f, 0.16f, 1f);
 
@@ -126,11 +128,11 @@ public sealed class DeliveryGuidance : MonoBehaviour
         if (_ringTarget == target) return;
         ClearRing();
         _ringTarget = target;
-        if (_ringTarget == null || _destinationMaterial == null) return;
+        if (_ringTarget == null || (_destinationVisualPrefab == null && _destinationMaterial == null)) return;
         GameObject ringObject = new GameObject("Delivery Destination Ring");
         ringObject.transform.SetParent(transform, true);
         _ring = ringObject.AddComponent<DeliverySelectionCircle>();
-        _ring.Configure(_ringTarget, _destinationMaterial, _destinationColor);
+        _ring.Configure(_ringTarget, _destinationMaterial, _destinationColor, _destinationVisualPrefab);
     }
 
     private void ClearRing()

@@ -1,4 +1,5 @@
 using Sirenix.OdinInspector;
+using Unity.Cinemachine;
 using UnityEngine;
 
 [DisallowMultipleComponent]
@@ -8,6 +9,8 @@ public sealed class DeliveryPoint : MonoBehaviour
     [SerializeField, Required] private string _displayName;
     [SerializeField, MinValue(0.01f), SuffixLabel("world units", true)] private float _radius = 2f;
     [SerializeField] private Color _gizmoColor = new Color(0.2f, 0.85f, 1f, 1f);
+
+    [field:SerializeField] public  CinemachineCamera CameraCinematic {get; private set;}
 
     public string DisplayName => _displayName;
     public float Radius => _radius;

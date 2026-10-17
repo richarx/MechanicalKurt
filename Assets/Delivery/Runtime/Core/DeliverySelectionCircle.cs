@@ -12,15 +12,39 @@ public sealed class DeliverySelectionCircle : MonoBehaviour
     private float _configuredRadius = -1f;
     private Vector3 _configuredPosition;
     private Material _runtimeMaterial;
+    private GameObject _customVisual;
 
-    public void Configure(DeliveryPoint point, Material material, Color color)
+    public void Configure(DeliveryPoint point, Material material, Color color, GameObject visualPrefab = null)
     {
         _point = point;
-        if (_point == null || material == null || material.shader == null)
+        ReleaseRuntimeMaterial();
+        if (_customVisual != null)
+        {
+            _customVisual.SetActive(false);
+            if (Application.isPlaying) Destroy(_customVisual);
+            else DestroyImmediate(_customVisual);
+            _customVisual = null;
+        }
+        if (_line == null) _line = GetComponent<LineRenderer>();
+        if (_line != null) _line.enabled = false;
+        _configuredRadius = -1f;
+        if (_point == null)
             return;
 
-        if (_line == null) _line = GetComponent<LineRenderer>();
+        if (visualPrefab != null)
+        {
+            // A prefab dragged from a scene can retain its old scene position.
+            // Anchor its root to the interaction point; authored child offsets remain intact.
+            transform.position = _point.Position + Vector3.up * _verticalOffset;
+            _customVisual = Instantiate(visualPrefab, transform, false);
+            _customVisual.transform.localPosition = Vector3.zero;
+            return;
+        }
+        if (material == null || material.shader == null)
+            return;
+
         if (_line == null) _line = gameObject.AddComponent<LineRenderer>();
+        _line.enabled = true;
         _line.useWorldSpace = true;
         _line.alignment = LineAlignment.View;
         _line.loop = true;
@@ -29,7 +53,6 @@ public sealed class DeliverySelectionCircle : MonoBehaviour
         _line.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
         _line.receiveShadows = false;
 
-        ReleaseRuntimeMaterial();
         _runtimeMaterial = new Material(material) { name = material.name + " (Selection Ring)" };
         if (_runtimeMaterial.HasProperty("_Cull")) _runtimeMaterial.SetFloat("_Cull", 0f);
         _line.sharedMaterial = _runtimeMaterial;
@@ -61,10 +84,15 @@ public sealed class DeliverySelectionCircle : MonoBehaviour
 
     private void RefreshGeometry()
     {
-        if (_point == null || _line == null || _line.positionCount < 3)
+        if (_point == null || !_point.IsValid)
             return;
 
-        if (!_point.IsValid)
+        if (_customVisual != null)
+        {
+            transform.position = _point.Position + Vector3.up * _verticalOffset;
+            return;
+        }
+        if (_line == null || _line.positionCount < 3)
             return;
         float radius = _point.Radius;
         Vector3 pointPosition = _point.Position;

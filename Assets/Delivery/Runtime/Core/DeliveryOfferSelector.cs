@@ -13,7 +13,9 @@ public sealed class DeliveryOfferSelector : MonoBehaviour
     [SerializeField, Required] private Transform _player;
     [InfoBox("$ValidationMessage", InfoMessageType.Error, nameof(HasConfigurationError))]
     [SerializeField] private List<DeliveryOffer> _offers = new List<DeliveryOffer>();
-    [SerializeField, Required] private Material _circleMaterial;
+    [SerializeField, AssetsOnly, Tooltip("Optional mesh / visual prefab. Its root is centered on the delivery point; materials, rotation and scale are preserved. Use child objects for visual offsets. Leave empty to use the default circle.")]
+    private GameObject _selectionVisualPrefab;
+    [SerializeField, Tooltip("Used only when Selection Visual Prefab is empty.")] private Material _circleMaterial;
     [SerializeField, MinValue(0.1f)] private float _holdSeconds = 1f;
     [SerializeField, MinValue(0f), SuffixLabel("units / second", true)] private float _maximumSpeed = 1.5f;
     [SerializeField, MinValue(0f)] private float _verticalTolerance = 2f;
@@ -57,8 +59,8 @@ public sealed class DeliveryOfferSelector : MonoBehaviour
             if (_session == null) return "Assign a DeliverySession.";
             if (!_session.IsValid) return "Set a valid session duration greater than zero.";
             if (_player == null) return "Assign the player Transform.";
-            if (_circleMaterial == null || _circleMaterial.shader == null)
-                return "Assign a valid circle material. Use Tools > Delivery > Repair Selected Selection Test if needed.";
+            if (_selectionVisualPrefab == null && (_circleMaterial == null || _circleMaterial.shader == null))
+                return "Assign a selection visual prefab or a valid circle material. Use Tools > Delivery > Repair Selected Selection Test if needed.";
             if (!IsFinite(_holdSeconds) || _holdSeconds <= 0f) return "Hold duration must be finite and greater than zero.";
             if (!IsFinite(_maximumSpeed) || _maximumSpeed < 0f) return "Maximum speed must be finite and zero or greater.";
             if (!IsFinite(_verticalTolerance) || _verticalTolerance < 0f) return "Vertical tolerance must be finite and zero or greater.";
@@ -306,7 +308,7 @@ public sealed class DeliveryOfferSelector : MonoBehaviour
             }
         _circles.Clear();
         _circleOffers.Clear();
-        if (_circleMaterial == null || _circleMaterial.shader == null)
+        if (_selectionVisualPrefab == null && (_circleMaterial == null || _circleMaterial.shader == null))
             return;
         for (int i = 0; i < _offers.Count; i++)
         {
@@ -316,7 +318,7 @@ public sealed class DeliveryOfferSelector : MonoBehaviour
             GameObject circleObject = new GameObject("Selection - " + offer.Departure.name);
             circleObject.transform.SetParent(transform, true);
             DeliverySelectionCircle circle = circleObject.AddComponent<DeliverySelectionCircle>();
-            circle.Configure(offer.Departure, _circleMaterial, _circleColor);
+            circle.Configure(offer.Departure, _circleMaterial, _circleColor, _selectionVisualPrefab);
             _circles.Add(circle);
             _circleOffers.Add(offer);
         }
