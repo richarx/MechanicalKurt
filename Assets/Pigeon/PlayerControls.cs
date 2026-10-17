@@ -56,6 +56,6 @@ public class PlayerControls : MonoBehaviour, IPigeonControls
             return false;
         }
     }
-    bool IPigeonControls.Dive => _controls.Player.Dive.WasPressedThisFrame();
+    bool IPigeonControls.Dive => _controls.Player.Dive.IsPressed();
 
 }
