@@ -1,14 +1,16 @@
 using Sirenix.OdinInspector;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 [DisallowMultipleComponent]
 public class AmbientWalker : MonoBehaviour
 {
     private static readonly int AnimationOffsetHash = Animator.StringToHash("AnimationOffset");
 
-    [Header("Parcours")]
-    [Tooltip("La liste de points du WalkerPath definit la boucle dans l'ordre.")]
-    [SerializeField] private WalkerPath _path;
+    [field: Header("Parcours")]
+    [field: Tooltip("La liste de points du WalkerPath definit la boucle dans l'ordre.")]
+    [field: SerializeField, FormerlySerializedAs("_path")]
+    public WalkerPath Path { get; private set; }
 
     [Header("Deplacement")]
     [Tooltip("Vitesse minimale et maximale en unites/seconde. Une vitesse est tiree a chaque activation.")]
@@ -32,10 +34,10 @@ public class AmbientWalker : MonoBehaviour
 
     public void SetPaused(bool paused)
     {
-        if (IsPaused && !paused && _path != null && _path.PointCount >= 2)
+        if (IsPaused && !paused && Path != null && Path.PointCount >= 2)
         {
             // The hit may have moved the character to the other side of its next waypoint.
-            Vector3 heading = _path.GetPosition(_targetIndex % _path.PointCount) - transform.position;
+            Vector3 heading = Path.GetPosition(_targetIndex % Path.PointCount) - transform.position;
             heading.y = 0f;
             if (heading.sqrMagnitude > 0.0001f)
                 transform.rotation = Quaternion.LookRotation(heading, Vector3.up);
@@ -47,12 +49,24 @@ public class AmbientWalker : MonoBehaviour
     }
 
     private int _targetIndex;
+    private bool _hasSpawnTarget;
     private float _speed;
     private float _pauseRemaining;
     private bool _arrivedAtTarget;
     private int _walkingParameterHash;
     private bool _canSetWalkingParameter;
     private bool? _lastAnimationValue;
+
+    public void Initialize(WalkerPath path, int targetIndex)
+    {
+        Path = path;
+        _targetIndex = path != null && path.PointCount > 0
+            ? Mathf.Clamp(targetIndex, 0, path.PointCount - 1) : 0;
+        _hasSpawnTarget = !isActiveAndEnabled;
+        _pauseRemaining = 0f;
+        _arrivedAtTarget = false;
+        IsPaused = false;
+    }
 
     private void Reset()
     {
@@ -79,14 +93,16 @@ public class AmbientWalker : MonoBehaviour
         _arrivedAtTarget = false;
         _speed = Random.Range(_speedRange.x, _speedRange.y);
 
-        if (_path == null || _path.PointCount < 2)
+        if (Path == null || Path.PointCount < 2)
         {
             Debug.LogWarning("AmbientWalker : assigner un WalkerPath avec au moins deux points.", this);
             return;
         }
 
         // Start from the closest point without teleporting the character.
-        _targetIndex = _path.GetClosestPointIndex(transform.position);
+        if (!_hasSpawnTarget)
+            _targetIndex = Path.GetClosestPointIndex(transform.position);
+        _hasSpawnTarget = false;
     }
 
     private void Update()
@@ -95,7 +111,7 @@ public class AmbientWalker : MonoBehaviour
             return;
 
         float deltaTime = Time.deltaTime;
-        if (_path == null || _path.PointCount < 2 || _speed <= 0f || deltaTime <= 0f)
+        if (Path == null || Path.PointCount < 2 || _speed <= 0f || deltaTime <= 0f)
         {
             SetWalking(false);
             return;
@@ -108,20 +124,20 @@ public class AmbientWalker : MonoBehaviour
             return;
         }
 
-        _targetIndex %= _path.PointCount;
+        _targetIndex %= Path.PointCount;
         Vector3 position = transform.position;
-        Vector3 target = _path.GetPosition(_targetIndex);
+        Vector3 target = Path.GetPosition(_targetIndex);
 
         // Bound the search so coincident points cannot cause an infinite loop.
         for (int i = 0; (target - position).sqrMagnitude <= 0.0001f; i++)
         {
-            if (i >= _path.PointCount)
+            if (i >= Path.PointCount)
             {
                 SetWalking(false);
                 return;
             }
 
-            CityPathPoint point = _path.GetPoint(_targetIndex);
+            CityPathPoint point = Path.GetPoint(_targetIndex);
             if (!_arrivedAtTarget)
             {
                 _arrivedAtTarget = true;
@@ -139,10 +155,10 @@ public class AmbientWalker : MonoBehaviour
                 return;
             }
 
-            _targetIndex = (_targetIndex + 1) % _path.PointCount;
+            _targetIndex = (_targetIndex + 1) % Path.PointCount;
             _arrivedAtTarget = false;
 
-            target = _path.GetPosition(_targetIndex);
+            target = Path.GetPosition(_targetIndex);
         }
 
         Vector3 heading = target - position;

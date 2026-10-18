@@ -224,7 +224,7 @@ public class PigeonController : MonoBehaviour
         {
             float steeringFactor = 4f;
 
-            if (transform.forward.y > 0.15f && speed < _flapMinSpeed * 2f)
+            if (!_controls.Flap && transform.forward.y > 0.15f && speed < _flapMinSpeed * 2f)
             {
                 steeringFactor = 0f;
             }
