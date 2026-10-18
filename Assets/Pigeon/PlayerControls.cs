@@ -24,6 +24,11 @@ public class PlayerControls : MonoBehaviour, IPigeonControls
         _controls.Disable();
     }
 
+    void OnDestroy()
+    {
+        _controls?.Dispose();
+    }
+
     void Update()
     {
         _flap |= _controls.Player.Flap.WasPressedThisFrame();
