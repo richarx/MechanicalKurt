@@ -1,10 +1,10 @@
 using UnityEngine;
 
 [DisallowMultipleComponent]
-public sealed class AmbientWalker : MonoBehaviour
+public class AmbientWalker : MonoBehaviour
 {
     [Header("Parcours")]
-    [Tooltip("Les enfants directs du parcours sont les points de la boucle, dans l'ordre de la Hierarchy.")]
+    [Tooltip("La liste de points du WalkerPath definit la boucle dans l'ordre.")]
     [SerializeField] private WalkerPath _path;
 
     [Header("Deplacement")]
@@ -25,6 +25,7 @@ public sealed class AmbientWalker : MonoBehaviour
     private int _targetIndex;
     private float _speed;
     private float _pauseRemaining;
+    private bool _arrivedAtTarget;
     private int _walkingParameterHash;
     private bool _canSetWalkingParameter;
     private bool? _lastAnimationValue;
@@ -51,11 +52,12 @@ public sealed class AmbientWalker : MonoBehaviour
         ConfigureAnimation();
         SetWalking(false);
         _pauseRemaining = 0f;
+        _arrivedAtTarget = false;
         _speed = Random.Range(_speedRange.x, _speedRange.y);
 
         if (_path == null || _path.PointCount < 2)
         {
-            Debug.LogWarning("AmbientWalker : assigner un WalkerPath avec au moins deux enfants directs.", this);
+            Debug.LogWarning("AmbientWalker : assigner un WalkerPath avec au moins deux points.", this);
             return;
         }
 
@@ -92,13 +94,26 @@ public sealed class AmbientWalker : MonoBehaviour
                 return;
             }
 
-            _targetIndex = (_targetIndex + 1) % _path.PointCount;
-            _pauseRemaining = Random.Range(_pauseRange.x, _pauseRange.y);
+            CityPathPoint point = _path.GetPoint(_targetIndex);
+            if (!_arrivedAtTarget)
+            {
+                _arrivedAtTarget = true;
+                _pauseRemaining = Random.Range(_pauseRange.x, _pauseRange.y) + point.RollWaitDuration();
+            }
             if (_pauseRemaining > 0f)
             {
                 SetWalking(false);
                 return;
             }
+
+            if (point.GetWaitDuration() > 0f)
+            {
+                SetWalking(false);
+                return;
+            }
+
+            _targetIndex = (_targetIndex + 1) % _path.PointCount;
+            _arrivedAtTarget = false;
 
             target = _path.GetPosition(_targetIndex);
         }
