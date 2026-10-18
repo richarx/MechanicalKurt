@@ -1,52 +1,47 @@
 using System;
+using System.Threading;
+using Cysharp.Threading.Tasks;
 using Sirenix.OdinInspector;
 using UnityEngine;
 
 [DisallowMultipleComponent]
 public class TrafficLightPoint : MonoBehaviour
 {
-    [field: SerializeField, BoxGroup("Feu"), MinValue(0.01f), SuffixLabel("s", true)]
+    [field: SerializeField, MinValue(0.01f), SuffixLabel("s", true)]
     [field: Tooltip("Duree de chaque phase : stop pendant X secondes, puis passage pendant X secondes.")]
     public float PhaseDuration { get; private set; } = 5f;
 
-    [field: SerializeField, BoxGroup("Feu")]
+    [field: SerializeField]
     public bool StartWithStop { get; private set; } = true;
 
-    [ShowInInspector, ReadOnly, BoxGroup("Etat")]
-    public bool IsStop
-    {
-        get
-        {
-            GetState(out bool isStop, out _, out _);
-            return isStop;
-        }
-    }
+    [ShowInInspector, ReadOnly]
+    public bool IsStop { get; private set; }
 
-    [ShowInInspector, ReadOnly, BoxGroup("Etat")]
-    public float TimeElapsed
-    {
-        get
-        {
-            GetState(out _, out float timeElapsed, out _);
-            return timeElapsed;
-        }
-    }
+    [ShowInInspector, ReadOnly]
+    public float TimeElapsed => Application.isPlaying
+        ? Mathf.Clamp((float)(Time.timeAsDouble - _phaseStartTime), 0f, _currentPhaseDuration)
+        : 0f;
 
-    [ShowInInspector, ReadOnly, BoxGroup("Etat")]
-    public float RemainingDuration
-    {
-        get
-        {
-            GetState(out _, out _, out float remainingDuration);
-            return remainingDuration;
-        }
-    }
+    [ShowInInspector, ReadOnly]
+    public float RemainingDuration => Mathf.Max(0f, _currentPhaseDuration - TimeElapsed);
 
     private double _startTime;
+    private double _phaseStartTime;
+    private float _currentPhaseDuration;
+    private CancellationTokenSource _cycleCancellation;
 
     private void OnEnable()
     {
         _startTime = Time.timeAsDouble;
+        _cycleCancellation = CancellationTokenSource.CreateLinkedTokenSource(destroyCancellationToken);
+        RunCycle(_cycleCancellation.Token).Forget();
+    }
+
+    private void OnDisable()
+    {
+        _cycleCancellation?.Cancel();
+        _cycleCancellation?.Dispose();
+        _cycleCancellation = null;
     }
 
     public float GetWaitDuration()
@@ -54,15 +49,25 @@ public class TrafficLightPoint : MonoBehaviour
         if (!isActiveAndEnabled)
             return 0f;
 
-        GetState(out bool isStop, out _, out float remainingDuration);
-        return isStop ? remainingDuration : 0f;
+        return IsStop ? RemainingDuration : 0f;
     }
 
-    private void GetState(out bool isStop, out float timeElapsed, out float remainingDuration)
+    private async UniTaskVoid RunCycle(CancellationToken cancellationToken)
     {
-        double elapsed = Application.isPlaying ? Time.timeAsDouble - _startTime : 0d;
-        TrafficLightCycle.Evaluate(elapsed, PhaseDuration, StartWithStop,
-            out isStop, out timeElapsed, out remainingDuration);
+        while (!cancellationToken.IsCancellationRequested)
+        {
+            double now = Time.timeAsDouble;
+            _currentPhaseDuration = Mathf.Max(0.01f, PhaseDuration);
+            TrafficLightCycle.Evaluate(now - _startTime, _currentPhaseDuration, StartWithStop,
+                out bool isStop, out float timeElapsed, out float remainingDuration);
+            IsStop = isStop;
+            _phaseStartTime = now - timeElapsed;
+
+            bool cancelled = await UniTask.Delay(TimeSpan.FromSeconds(remainingDuration),
+                cancellationToken: cancellationToken).SuppressCancellationThrow();
+            if (cancelled)
+                return;
+        }
     }
 
     private void OnValidate()
@@ -75,15 +80,11 @@ public class TrafficLightPoint : MonoBehaviour
         if (!isActiveAndEnabled)
             return;
 
-        GetState(out bool isStop, out _, out float remainingDuration);
         Color previousColor = Gizmos.color;
+        bool isStop = Application.isPlaying ? IsStop : StartWithStop;
         Gizmos.color = isStop ? Color.red : Color.green;
         Gizmos.DrawWireCube(transform.position + Vector3.up * 0.75f, Vector3.one * 0.8f);
         Gizmos.color = previousColor;
-#if UNITY_EDITOR
-        UnityEditor.Handles.Label(transform.position + Vector3.up * 1.3f,
-            $"{(isStop ? "STOP" : "PASS")} {remainingDuration:0.0} s");
-#endif
     }
 }
 
