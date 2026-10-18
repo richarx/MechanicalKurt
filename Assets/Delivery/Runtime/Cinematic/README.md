@@ -65,6 +65,9 @@ Sans ce signal, la séquence reste volontairement en attente.
 - Après l'arrivée caméra, attendre une seconde : un seul SendOff sur ce PNJ, puis retour
   caméra, disparition des bandes et reprise du timer. L'état devient Carrying.
 - Essayer un autre point : cadrage et PNJ propres à ce point.
+- Mettre les caméras de gameplay et du point à la même priorité (par exemple 0) :
+  après SendOff, la vue revient au gameplay sans attendre le timeout. Vérifier aussi
+  ce retour en désactivant ManagerCinematic pendant la séquence.
 - Mettre Seconds à 3 pour vérifier que le geste attend bien cette durée.
 - Reset/restart pendant l'attente : caméra, bandes et commandes sont restaurées ;
   un ancien token ne doit pas terminer la récupération suivante.
@@ -77,6 +80,8 @@ Sans ce signal, la séquence reste volontairement en attente.
 
 Les blends Cinemachine utilisent les réglages du Brain. Camera Timeout Seconds limite
 l'attente d'une caméra qui ne prendrait pas la main (canal, priorité ou Brain mal réglé).
+Au retour, la caméra précédente repasse devant les caméras de même priorité ; les
+priorités configurées sont conservées.
 La fin du timer, un reset, une offre invalidée ou une désactivation interrompent la
 séquence et restaurent les réglages sauvegardés. On Cinematic Ended s'exécute aussi à
 l'interruption ; ce n'est pas un événement de réussite de livraison.
