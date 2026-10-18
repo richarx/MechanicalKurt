@@ -20,6 +20,6 @@ public class PigeonAnimationControl : MonoBehaviour
         _animator.SetBool("IsGrounded", _character.isGrounded);
         _animator.SetBool("Flap", _pigeonControls.Flap);
         _animator.SetBool("Dive", _pigeonControls.Dive);
-        _animator.SetBool("Dance", false); // TODO
+        _animator.SetBool("Dance", _pigeonControls.Flex);
     }
 }
