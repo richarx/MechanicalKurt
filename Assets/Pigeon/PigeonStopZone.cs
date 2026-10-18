@@ -4,8 +4,7 @@ using UnityEngine.Events;
 
 public class PigeonStopZone : MonoBehaviour
 {
-    [field: SerializeField, Tooltip("Trouvé automatiquement si laissé vide.")]
-    public PigeonController Pigeon { get; private set; }
+    [SerializeField] PigeonController _pigeon;
 
     [field: SerializeField, MinValue(0.01f), SuffixLabel("unités", true)]
     public float Radius { get; private set; } = 2f;
@@ -30,16 +29,16 @@ public class PigeonStopZone : MonoBehaviour
         if (Time.deltaTime <= 0f)
             return;
 
-        if (Pigeon == null && Time.time >= _nextPigeonSearch)
+        if (_pigeon == null && Time.time >= _nextPigeonSearch)
         {
-            Pigeon = FindAnyObjectByType<PigeonController>();
+            _pigeon = FindAnyObjectByType<PigeonController>();
             _nextPigeonSearch = Time.time + 1f;
         }
 
         // Evaluate after the player has moved in Update, using its actual speed.
-        bool stoppedInside = Pigeon != null && Pigeon.isActiveAndEnabled &&
-                             (Pigeon.transform.position - transform.position).sqrMagnitude <= Radius * Radius &&
-                             Pigeon.Speed <= StopSpeedThreshold;
+        bool stoppedInside = _pigeon != null && _pigeon.isActiveAndEnabled &&
+                             (_pigeon.transform.position - transform.position).sqrMagnitude <= Radius * Radius &&
+                             _pigeon.Speed <= StopSpeedThreshold;
 
         if (!stoppedInside)
         {
