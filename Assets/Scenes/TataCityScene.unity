@@ -3659,10 +3659,15 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::WalkerSpawner
   <WalkerPrefabs>k__BackingField:
   - {fileID: 1775360063487542869, guid: e7bc1a9cdd117f149862d34eac0dfc05, type: 3}
+  - {fileID: 8408737719586184800, guid: 31bd6f1dc02aaa2469e301174cea22eb, type: 3}
   - {fileID: 6773350083929208017, guid: d0cf99bcfb055d84b9f8f7e2d25ab125, type: 3}
+  - {fileID: 6339784497681982255, guid: fedcf8be09b00334ebf8853c8583d2e1, type: 3}
+  - {fileID: 4786012013490836441, guid: 2eb4b2b38179b314a888bba3abde6726, type: 3}
+  - {fileID: 7527338089569186036, guid: 6d173f64e705bd7449b8795dc9cc0fd9, type: 3}
+  - {fileID: -4766417195942967880, guid: 77a3f3edcd3b93946a606e1ce94aff1c, type: 3}
   <Paths>k__BackingField:
   - {fileID: 1685479685}
-  <WalkersPerPath>k__BackingField: 8
+  <WalkersPerPath>k__BackingField: 16
   <SpawnOnStart>k__BackingField: 1
 --- !u!1001 &249035813
 PrefabInstance:
@@ -11939,10 +11944,15 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::WalkerSpawner
   <WalkerPrefabs>k__BackingField:
   - {fileID: 1775360063487542869, guid: e7bc1a9cdd117f149862d34eac0dfc05, type: 3}
+  - {fileID: 8408737719586184800, guid: 31bd6f1dc02aaa2469e301174cea22eb, type: 3}
   - {fileID: 6773350083929208017, guid: d0cf99bcfb055d84b9f8f7e2d25ab125, type: 3}
+  - {fileID: 6339784497681982255, guid: fedcf8be09b00334ebf8853c8583d2e1, type: 3}
+  - {fileID: 4786012013490836441, guid: 2eb4b2b38179b314a888bba3abde6726, type: 3}
+  - {fileID: 7527338089569186036, guid: 6d173f64e705bd7449b8795dc9cc0fd9, type: 3}
+  - {fileID: -4766417195942967880, guid: 77a3f3edcd3b93946a606e1ce94aff1c, type: 3}
   <Paths>k__BackingField:
   - {fileID: 232787743}
-  <WalkersPerPath>k__BackingField: 32
+  <WalkersPerPath>k__BackingField: 48
   <SpawnOnStart>k__BackingField: 1
 --- !u!1001 &828530638
 PrefabInstance:
@@ -12502,14 +12512,19 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::WalkerSpawner
   <WalkerPrefabs>k__BackingField:
   - {fileID: 1775360063487542869, guid: e7bc1a9cdd117f149862d34eac0dfc05, type: 3}
+  - {fileID: 8408737719586184800, guid: 31bd6f1dc02aaa2469e301174cea22eb, type: 3}
   - {fileID: 6773350083929208017, guid: d0cf99bcfb055d84b9f8f7e2d25ab125, type: 3}
+  - {fileID: 6339784497681982255, guid: fedcf8be09b00334ebf8853c8583d2e1, type: 3}
+  - {fileID: 4786012013490836441, guid: 2eb4b2b38179b314a888bba3abde6726, type: 3}
+  - {fileID: 7527338089569186036, guid: 6d173f64e705bd7449b8795dc9cc0fd9, type: 3}
+  - {fileID: -4766417195942967880, guid: 77a3f3edcd3b93946a606e1ce94aff1c, type: 3}
   <Paths>k__BackingField:
   - {fileID: 353083400}
   - {fileID: 1059497216}
   - {fileID: 842259780}
   - {fileID: 749344066}
   - {fileID: 1363237186}
-  <WalkersPerPath>k__BackingField: 16
+  <WalkersPerPath>k__BackingField: 24
   <SpawnOnStart>k__BackingField: 1
 --- !u!1001 &866980612
 PrefabInstance:
