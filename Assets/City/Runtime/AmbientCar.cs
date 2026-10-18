@@ -5,11 +5,11 @@ using UnityEngine.Serialization;
 public class AmbientCar : MonoBehaviour
 {
     [field: SerializeField, BoxGroup("Circuit"), Required]
-    [field: Tooltip("Circuit independant de la voiture. Ses enfants directs definissent la boucle en 3D.")]
+    [field: Tooltip("Circuit independant de la voiture. Sa liste de points definit la boucle en 3D.")]
     public TrafficPath Path { get; private set; }
 
     [field: SerializeField, BoxGroup("Conduite"), MinValue(0f)]
-    public float MaxSpeed { get; private set; } = 6f;
+    public float MaxSpeed { get;  set; } = 6f;
 
     [field: SerializeField, BoxGroup("Conduite"), MinValue(0.01f)]
     public float Acceleration { get; private set; } = 2f;
@@ -48,10 +48,10 @@ public class AmbientCar : MonoBehaviour
     private TrafficPath _registeredPath;
     private float _plannedTravel;
     private float _plannedSpeed;
-    private TrafficStopPoint _nextStop;
+    private CityPathPoint _nextStop;
     private float _distanceToStop = float.PositiveInfinity;
     private float? _initialDistance;
-    private TrafficLightPoint _nextLight;
+    private CityPathPoint _nextLight;
     private float _distanceToLight = float.PositiveInfinity;
 
     private void OnEnable()
@@ -125,7 +125,7 @@ public class AmbientCar : MonoBehaviour
             return;
         }
 
-        if (_nextStop == null || !_nextStop.isActiveAndEnabled)
+        if (_nextStop == null || !_nextStop.HasStop)
             SelectNextStop(true);
 
         _registeredPath.GetLeader(this, out float availableDistance, out float leaderSpeed);

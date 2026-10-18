@@ -3,6 +3,7 @@ using Sirenix.OdinInspector;
 using UnityEngine;
 
 [DisallowMultipleComponent]
+[AddComponentMenu("")] // Legacy: use the point type on TrafficPath / WalkerPath.
 public class TrafficStopPoint : MonoBehaviour
 {
     [field: SerializeField, BoxGroup("Arret"), MinValue(0f), SuffixLabel("s", true)]

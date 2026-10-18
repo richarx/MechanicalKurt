@@ -11,6 +11,10 @@ public class TrafficSpawner : MonoBehaviour
     [field: Tooltip("Prefabs avec AmbientCar sur leur objet racine. Le chemin est assigne par le spawner.")]
     public AmbientCar[] CarPrefabs { get; private set; } = Array.Empty<AmbientCar>();
 
+    [SerializeField, BoxGroup("Voitures")]
+    [Tooltip("Vitesse Min/Max"), MinMaxSlider(0.01f, 10f)]
+    private Vector2 _minMaxVelocity = new Vector2(6f,6f);
+
     [field: SerializeField, BoxGroup("Voitures"), MinValue(0)]
     public int CarCount { get; private set; } = 8;
 
@@ -97,6 +101,7 @@ public class TrafficSpawner : MonoBehaviour
                 continue;
 
             AmbientCar car = Instantiate(prefab, Path.GetPosition(distances[i]), Quaternion.identity, _spawnRoot.transform);
+            car.MaxSpeed = UnityEngine.Random.Range(_minMaxVelocity.x, _minMaxVelocity.y);
             car.Initialize(Path, distances[i]);
             car.enabled = true;
             car.gameObject.SetActive(true);

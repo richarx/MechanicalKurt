@@ -1,17 +1,9 @@
 using UnityEngine;
 
 [DisallowMultipleComponent]
-public sealed class WalkerPath : MonoBehaviour
+public class WalkerPath : CityPath
 {
-    [SerializeField] private Color _gizmoColor = new Color(0.3f, 0.9f, 0.5f, 1f);
-
-    // Direct children define the loop in their Hierarchy order.
-    public int PointCount => transform.childCount;
-
-    public Vector3 GetPosition(int index)
-    {
-        return transform.GetChild(index).position;
-    }
+    public Vector3 GetPosition(int index) => GetPointPosition(index);
 
     public int GetClosestPointIndex(Vector3 position)
     {
@@ -30,20 +22,9 @@ public sealed class WalkerPath : MonoBehaviour
         return closestIndex;
     }
 
-    private void OnDrawGizmosSelected()
+    protected override void Reset()
     {
-        Color previousColor = Gizmos.color;
-        Gizmos.color = _gizmoColor;
-        for (int i = 0; i < PointCount; i++)
-        {
-            Vector3 position = GetPosition(i);
-            Gizmos.DrawWireSphere(position, 0.15f);
-            if (PointCount > 1)
-                Gizmos.DrawLine(position, GetPosition((i + 1) % PointCount));
-#if UNITY_EDITOR
-            UnityEditor.Handles.Label(position + Vector3.up * 0.25f, $"{i + 1}");
-#endif
-        }
-        Gizmos.color = previousColor;
+        base.Reset();
+        SetGizmoColor(new Color(0.3f, 0.9f, 0.5f, 1f));
     }
 }

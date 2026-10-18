@@ -5,6 +5,7 @@ using Sirenix.OdinInspector;
 using UnityEngine;
 
 [DisallowMultipleComponent]
+[AddComponentMenu("")] // Legacy: use the point type on TrafficPath / WalkerPath.
 public class TrafficLightPoint : MonoBehaviour
 {
     [field: SerializeField, MinValue(0.01f), SuffixLabel("s", true)]
@@ -14,15 +15,12 @@ public class TrafficLightPoint : MonoBehaviour
     [field: SerializeField]
     public bool StartWithStop { get; private set; } = true;
 
-    [ShowInInspector, ReadOnly]
     public bool IsStop { get; private set; }
 
-    [ShowInInspector, ReadOnly]
     public float TimeElapsed => Application.isPlaying
         ? Mathf.Clamp((float)(Time.timeAsDouble - _phaseStartTime), 0f, _currentPhaseDuration)
         : 0f;
 
-    [ShowInInspector, ReadOnly]
     public float RemainingDuration => Mathf.Max(0f, _currentPhaseDuration - TimeElapsed);
 
     private double _startTime;
@@ -32,7 +30,7 @@ public class TrafficLightPoint : MonoBehaviour
 
     private void OnEnable()
     {
-        _startTime = Time.timeAsDouble;
+        _startTime = Time.timeAsDouble - UnityEngine.Random.Range(0f, Mathf.Max(0.01f, PhaseDuration));
         _cycleCancellation = CancellationTokenSource.CreateLinkedTokenSource(destroyCancellationToken);
         RunCycle(_cycleCancellation.Token).Forget();
     }
@@ -54,6 +52,7 @@ public class TrafficLightPoint : MonoBehaviour
 
     private async UniTaskVoid RunCycle(CancellationToken cancellationToken)
     {
+    
         while (!cancellationToken.IsCancellationRequested)
         {
             double now = Time.timeAsDouble;
@@ -68,11 +67,6 @@ public class TrafficLightPoint : MonoBehaviour
             if (cancelled)
                 return;
         }
-    }
-
-    private void OnValidate()
-    {
-        PhaseDuration = Mathf.Max(0.01f, PhaseDuration);
     }
 
     private void OnDrawGizmos()

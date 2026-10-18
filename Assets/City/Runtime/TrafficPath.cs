@@ -2,14 +2,11 @@ using System.Collections.Generic;
 using UnityEngine;
 
 
-public class TrafficPath : MonoBehaviour
+public class TrafficPath : CityPath
 {
-    [SerializeField] private Color _gizmoColor = new Color(1f, 0.65f, 0.15f, 1f);
-
     private readonly List<AmbientCar> _cars = new List<AmbientCar>();
     private TrafficRoute _route;
-    private TrafficStopPoint[] _stopPoints;
-    private TrafficLightPoint[] _lightPoints;
+    private Matrix4x4 _routeMatrix;
 
     public float Length => Route.Length;
     public bool IsValid => Route.IsValid;
@@ -18,18 +15,13 @@ public class TrafficPath : MonoBehaviour
     {
         get
         {
-            if (_route == null)
+            if (_route == null || _routeMatrix != transform.localToWorldMatrix)
             {
-                Vector3[] points = new Vector3[transform.childCount];
-                _stopPoints = new TrafficStopPoint[points.Length];
-                _lightPoints = new TrafficLightPoint[points.Length];
+                Vector3[] points = new Vector3[PointCount];
                 for (int i = 0; i < points.Length; i++)
-                {
-                    points[i] = transform.GetChild(i).position;
-                    _stopPoints[i] = transform.GetChild(i).GetComponent<TrafficStopPoint>();
-                    _lightPoints[i] = transform.GetChild(i).GetComponent<TrafficLightPoint>();
-                }
+                    points[i] = GetPointPosition(i);
                 _route = new TrafficRoute(points);
+                _routeMatrix = transform.localToWorldMatrix;
             }
             return _route;
         }
@@ -39,6 +31,8 @@ public class TrafficPath : MonoBehaviour
     public Vector3 GetDirection(float distance, float sampleDistance) => Route.GetDirection(distance, sampleDistance);
     public float GetClosestDistance(Vector3 position) => Route.GetClosestDistance(position);
     public float WrapDistance(float distance) => Route.WrapDistance(distance);
+
+    public override void InvalidatePath() => _route = null;
 
     public void Register(AmbientCar car)
     {
@@ -88,17 +82,17 @@ public class TrafficPath : MonoBehaviour
         }
     }
 
-    public bool TryGetNextStop(float distance, bool includeCurrent, out TrafficStopPoint stop, out float remainingDistance)
+    public bool TryGetNextStop(float distance, bool includeCurrent, out CityPathPoint stop, out float remainingDistance)
     {
         stop = null;
         remainingDistance = float.PositiveInfinity;
         if (!IsValid)
             return false;
 
-        for (int i = 0; i < _stopPoints.Length; i++)
+        for (int i = 0; i < PointCount; i++)
         {
-            TrafficStopPoint candidate = _stopPoints[i];
-            if (candidate == null || !candidate.isActiveAndEnabled)
+            CityPathPoint candidate = GetPoint(i);
+            if (!candidate.HasStop)
                 continue;
 
             float forwardDistance = Route.GetForwardDistance(distance, Route.GetPointDistance(i), includeCurrent);
@@ -111,17 +105,17 @@ public class TrafficPath : MonoBehaviour
         return stop != null;
     }
 
-    public bool TryGetNextRedLight(float distance, out TrafficLightPoint light, out float remainingDistance)
+    public bool TryGetNextRedLight(float distance, out CityPathPoint light, out float remainingDistance)
     {
         light = null;
         remainingDistance = float.PositiveInfinity;
         if (!IsValid)
             return false;
 
-        for (int i = 0; i < _lightPoints.Length; i++)
+        for (int i = 0; i < PointCount; i++)
         {
-            TrafficLightPoint candidate = _lightPoints[i];
-            if (candidate == null || !candidate.isActiveAndEnabled || !candidate.IsStop)
+            CityPathPoint candidate = GetPoint(i);
+            if (!candidate.HasTrafficLight || !candidate.IsStop)
                 continue;
 
             float forwardDistance = Route.GetForwardDistance(distance, Route.GetPointDistance(i), true);
@@ -153,33 +147,4 @@ public class TrafficPath : MonoBehaviour
         }
     }
 
-    private void OnDrawGizmosSelected()
-    {
-        Color previousColor = Gizmos.color;
-        Gizmos.color = _gizmoColor;
-        int count = transform.childCount;
-        for (int i = 0; i < count; i++)
-        {
-            Vector3 position = transform.GetChild(i).position;
-            Gizmos.DrawWireSphere(position, 0.25f);
-            if (count > 1)
-            {
-                Vector3 next = transform.GetChild((i + 1) % count).position;
-                Gizmos.DrawLine(position, next);
-                Vector3 direction = next - position;
-                if (direction.sqrMagnitude > 0.0001f)
-                {
-                    Vector3 middle = (position + next) * 0.5f;
-                    Vector3 back = -direction.normalized * 0.7f;
-                    Vector3 side = Vector3.Cross(direction.normalized, Vector3.up) * 0.3f;
-                    Gizmos.DrawLine(middle, middle + back + side);
-                    Gizmos.DrawLine(middle, middle + back - side);
-                }
-            }
-#if UNITY_EDITOR
-            UnityEditor.Handles.Label(position + Vector3.up * 0.4f, $"{i + 1}");
-#endif
-        }
-        Gizmos.color = previousColor;
-    }
 }
