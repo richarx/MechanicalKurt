@@ -37,6 +37,7 @@ public class PigeonController : MonoBehaviour
     [SerializeField] float _diveDragAtMaxSpeed = 1.5f;
 
     Vector3 _velocity;
+    Vector3 _pendingImpulse;
     float _currentPitch;
     float _yaw;
 
@@ -44,6 +45,10 @@ public class PigeonController : MonoBehaviour
     IPigeonControls _controls;
 
     public float Speed => _controller != null ? _controller.velocity.magnitude : 0f;
+    public Vector3 Velocity => _controller != null ? _controller.velocity : Vector3.zero;
+
+    // Applied once on the next flight physics step (cleared while grounded).
+    public void AddImpulse(Vector3 impulse) => _pendingImpulse += impulse;
 
     void Awake()
     {
@@ -116,6 +121,7 @@ public class PigeonController : MonoBehaviour
     void GroundMovement()
     {
         _currentPitch = 0f;
+        _pendingImpulse = Vector3.zero;
         Vector2 input = Vector2.ClampMagnitude(_controls.Movement, 1f);
         Vector3 direction = new Vector3(input.x, 0f, input.y);
         float directionMagnitude = direction.magnitude;
@@ -196,7 +202,8 @@ public class PigeonController : MonoBehaviour
         float targetSpeed;
         float dragAtMaxSpeed;
 
-        _velocity = _controller.velocity + Physics.gravity * dt;
+        _velocity = _controller.velocity + Physics.gravity * dt + _pendingImpulse;
+        _pendingImpulse = Vector3.zero;
         if (_controls.Flap)
         {
             targetSpeed = _flapMaxSpeed;
