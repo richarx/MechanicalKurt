@@ -1,8 +1,11 @@
+using Sirenix.OdinInspector;
 using UnityEngine;
 
 [DisallowMultipleComponent]
 public class AmbientWalker : MonoBehaviour
 {
+    private static readonly int AnimationOffsetHash = Animator.StringToHash("AnimationOffset");
+
     [Header("Parcours")]
     [Tooltip("La liste de points du WalkerPath definit la boucle dans l'ordre.")]
     [SerializeField] private WalkerPath _path;
@@ -20,7 +23,19 @@ public class AmbientWalker : MonoBehaviour
     [Tooltip("Parametre bool de l'Animator. Laisser vide pour ne pas piloter l'animation.")]
     [SerializeField] private string _walkingParameter = "IsWalking";
 
+    [field: SerializeField, MinMaxSlider(0f, 1f, true)]
+    [field: Tooltip("Decalage aleatoire du cycle de marche a chaque activation (0 a 1 = un cycle).")]
+    public Vector2 AnimationOffsetRange { get; private set; } = new Vector2(0f, 1f);
+
     public bool IsWalking { get; private set; }
+    public bool IsPaused { get; private set; }
+
+    public void SetPaused(bool paused)
+    {
+        IsPaused = paused;
+        if (paused)
+            SetWalking(false);
+    }
 
     private int _targetIndex;
     private float _speed;
@@ -67,6 +82,9 @@ public class AmbientWalker : MonoBehaviour
 
     private void Update()
     {
+        if (IsPaused)
+            return;
+
         float deltaTime = Time.deltaTime;
         if (_path == null || _path.PointCount < 2 || _speed <= 0f || deltaTime <= 0f)
         {
@@ -143,18 +161,27 @@ public class AmbientWalker : MonoBehaviour
             return;
 
         _animator.applyRootMotion = false;
-        if (_animator.runtimeAnimatorController == null || string.IsNullOrWhiteSpace(_walkingParameter))
+        if (_animator.runtimeAnimatorController == null)
             return;
 
-        _walkingParameterHash = Animator.StringToHash(_walkingParameter);
+        _walkingParameterHash = string.IsNullOrWhiteSpace(_walkingParameter) ? 0 : Animator.StringToHash(_walkingParameter);
         foreach (AnimatorControllerParameter parameter in _animator.parameters)
         {
+            if (parameter.nameHash == AnimationOffsetHash && parameter.type == AnimatorControllerParameterType.Float)
+            {
+                float minimum = Mathf.Clamp01(AnimationOffsetRange.x);
+                float maximum = Mathf.Clamp(AnimationOffsetRange.y, minimum, 1f);
+                _animator.SetFloat(AnimationOffsetHash, Random.Range(minimum, maximum));
+            }
+
             if (parameter.nameHash == _walkingParameterHash && parameter.type == AnimatorControllerParameterType.Bool)
             {
                 _canSetWalkingParameter = true;
-                return;
             }
         }
+
+        if (_canSetWalkingParameter || string.IsNullOrWhiteSpace(_walkingParameter))
+            return;
 
         Debug.LogWarning($"AmbientWalker : ajouter un parametre bool '{_walkingParameter}' a l'Animator, ou vider Walking Parameter.", this);
     }
