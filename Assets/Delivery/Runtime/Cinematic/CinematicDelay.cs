@@ -7,6 +7,7 @@ public sealed class CinematicDelay : MonoBehaviour
 {
     [SerializeField, Min(0f)] private float _seconds = 1f;
     [SerializeField] private UnityEvent<int> _onCompleted = new UnityEvent<int>();
+    
     private Coroutine _routine;
 
     public void Wait(int token)
