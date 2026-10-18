@@ -12,6 +12,7 @@ public class PigeonController : MonoBehaviour
     [SerializeField] float _turnSpeed = 90f;
     [SerializeField] float _pitchSpeed = 60f;
     [SerializeField] float _visualRollAmount = 20f;
+    [SerializeField] float _rollSpeed = 10f;
     [SerializeField] Transform _visualRoot;
 
     [Header("Flight")]
@@ -107,8 +108,11 @@ public class PigeonController : MonoBehaviour
         float dt = Time.deltaTime;
         _velocity = Vector3.zero;
 
-        if (_controller.isGrounded && _controller.velocity.y <= 0f)
+        if (_controller.isGrounded && _controller.velocity.y <= 0.001f)
+        {
             GroundMovement();
+            ResetVisualRotation(dt);
+        }
         else
         {
             CalculateFlightPhysics(dt);
@@ -242,6 +246,17 @@ public class PigeonController : MonoBehaviour
         ComputeDrag(targetSpeed, dragAtMaxSpeed, dt);
     }
 
+    void ResetVisualRotation(float dt)
+    {
+        Quaternion targetRotation = Quaternion.Euler(0f, 0f, 0.0f);
+
+        _visualRoot.localRotation = Quaternion.Slerp(
+            _visualRoot.localRotation,
+            targetRotation,
+            10f * dt
+        );
+    }
+
     void UpdateVisualRotation(float dt)
     {
         float targetRoll = -_controls.RelativeMovement.x * _visualRollAmount;
@@ -250,7 +265,7 @@ public class PigeonController : MonoBehaviour
         _visualRoot.localRotation = Quaternion.Slerp(
             _visualRoot.localRotation,
             targetRotation,
-            10f * dt
+            _rollSpeed * dt
         );
     }
 }

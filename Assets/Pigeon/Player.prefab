@@ -394,7 +394,8 @@ MonoBehaviour:
   _groundSpeed: 1
   _turnSpeed: 90
   _pitchSpeed: 60
-  _visualRollAmount: 60
+  _visualRollAmount: 90
+  _rollSpeed: 3
   _visualRoot: {fileID: 7541785080196244376}
   _maxSpeed: 25
   _dragAtMaxSpeed: 3
@@ -423,7 +424,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PigeonBoostFeedback
   _rollPivot: {fileID: 992670146320973476}
-  _rollDuration: 0.45
+  _rollDuration: 3
   _rollCount: 1
   _rollEase: 9
   _stretchScale: {x: 0.8, y: 0.8, z: 1.3}
