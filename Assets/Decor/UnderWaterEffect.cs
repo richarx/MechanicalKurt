@@ -1,0 +1,24 @@
+using UnityEngine;
+using UnityEngine.Rendering;
+
+public class UnderWaterEffect : MonoBehaviour
+{
+    [SerializeField] private Transform waterPlane;
+    [SerializeField] private Volume globalVolume;
+    [SerializeField] private VolumeProfile cityProfile;
+    [SerializeField] private VolumeProfile waterProfile;
+
+    private bool isUnderWaterEffectActivated;
+
+    private void Update()
+    {
+        bool isUnderWater = transform.position.y < waterPlane.position.y;
+
+        if (isUnderWater != isUnderWaterEffectActivated)
+        {
+            isUnderWaterEffectActivated = isUnderWater;
+            globalVolume.profile = isUnderWaterEffectActivated ? waterProfile : cityProfile;
+            RenderSettings.fog = isUnderWaterEffectActivated;
+        }
+    }
+}
