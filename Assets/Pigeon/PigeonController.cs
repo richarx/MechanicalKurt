@@ -40,6 +40,8 @@ public class PigeonController : MonoBehaviour
     CharacterController _controller;
     IPigeonControls _controls;
 
+    public float Speed => _controller != null ? _controller.velocity.magnitude : 0f;
+
     void Awake()
     {
         _controller = GetComponent<CharacterController>();
