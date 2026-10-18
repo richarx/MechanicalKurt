@@ -188,7 +188,7 @@ public class PigeonController : MonoBehaviour
         }
         else
         {
-            if (speed < _flapMinSpeed * 1.5f && forward.y > 0.2f)
+            if (!_controls.Flap && speed < _flapMinSpeed * 1.5f && forward.y > 0.2f)
             {
                 _velocity += Vector3.down * 12f * dt;
 
