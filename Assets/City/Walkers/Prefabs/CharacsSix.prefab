@@ -537,7 +537,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4ad38208b6304fe8ac47ab11a636db27, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PigeonProximityHit
-  <Radius>k__BackingField: 2
+  <Radius>k__BackingField: 3
   <MinimumSpeed>k__BackingField: 2
   <Pigeon>k__BackingField: {fileID: 0}
   <HitStateName>k__BackingField: Hit
