@@ -400,9 +400,11 @@ MonoBehaviour:
   _maxSpeed: 25
   _dragAtMaxSpeed: 3
   _liftFactor: 0.85
+  _stallSpeed: 1.5
   _maxPitch: 45
-  _brakeMaxSpeed: 2
-  _brakeDragAtMaxSpeed: 0.5
+  _brakeMaxSpeed: 1
+  _brakeDragAtMaxSpeed: 0.1
+  _minHoverPitch: 30
   _takeoffSpeed: 3
   _flapAccel: 12
   _flapMinSpeed: 1.5
@@ -410,9 +412,11 @@ MonoBehaviour:
   _flapMaxSpeed: 15
   _flapDragAtMaxSpeed: 3
   _divePitchSpeed: 120
-  _diveMaxPitch: 70
+  _diveMaxPitch: 80
   _diveMaxSpeed: 40
   _diveDragAtMaxSpeed: 1.5
+  _minBarrelRollSpeed: 20
+  _rollDuration: 1.5
 --- !u!114 &7788707282503470594
 MonoBehaviour:
   m_ObjectHideFlags: 0

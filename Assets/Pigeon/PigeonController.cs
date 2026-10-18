@@ -6,29 +6,31 @@ using UnityEngine.InputSystem;
 public class PigeonController : MonoBehaviour
 {
     [Header("Ground Movement")]
-    [SerializeField] float _groundSpeed = 2f;
+    [SerializeField] float _groundSpeed = 1f;
 
     [Header("Rotation")]
     [SerializeField] float _turnSpeed = 90f;
     [SerializeField] float _pitchSpeed = 60f;
-    [SerializeField] float _visualRollAmount = 20f;
-    [SerializeField] float _rollSpeed = 10f;
+    [SerializeField] float _visualRollAmount = 90f;
+    [SerializeField] float _rollSpeed = 3f;
     [SerializeField] Transform _visualRoot;
 
     [Header("Flight")]
     [SerializeField] float _maxSpeed = 25f;
     [SerializeField] float _dragAtMaxSpeed = 3f;
     [SerializeField] float _liftFactor = 0.85f;
+    [SerializeField] float _stallSpeed = 1f;
 
     [Header("Gliding")]
     [SerializeField] float _maxPitch = 45f;
 
     [Header("Brake")]
-    [SerializeField] float _brakeMaxSpeed = 2f;
-    [SerializeField] float _brakeDragAtMaxSpeed = 0.5f;
+    [SerializeField] float _brakeMaxSpeed = 1f;
+    [SerializeField] float _brakeDragAtMaxSpeed = 0.1f;
+    [SerializeField] float _minHoverPitch = 30f;
 
     [Header("Flapping")]
-    [SerializeField] float _takeoffSpeed = 6f;
+    [SerializeField] float _takeoffSpeed = 3f;
     [SerializeField] float _flapAccel = 12f;
     [SerializeField] float _flapMinSpeed = 1.5f;
     [SerializeField] float _flapSpeedPenalty = 0.5f;
@@ -152,6 +154,7 @@ public class PigeonController : MonoBehaviour
         transform.rotation = Quaternion.Euler(0f, _yaw, 0f);
         if (_controls.Flap)
         {
+            _currentPitch = _maxPitch;
             _velocity = transform.forward * _flapMinSpeed;
             _velocity.y = _takeoffSpeed;
         }
@@ -162,7 +165,7 @@ public class PigeonController : MonoBehaviour
         }
     }
 
-    void ComputeRotation(float pitchSpeed, float maxPitch, float dt)
+    void ComputePitch(float pitchSpeed, float maxPitch, float dt)
     {
         float targetPitch = Mathf.Clamp(
                 _currentPitch - _controls.RelativeMovement.y * pitchSpeed * dt,
@@ -171,7 +174,10 @@ public class PigeonController : MonoBehaviour
             );
         float deltaPitch = Mathf.Abs(Mathf.DeltaAngle(targetPitch, _currentPitch));
         _currentPitch = Mathf.MoveTowardsAngle(_currentPitch, targetPitch, Mathf.Max(pitchSpeed * dt, deltaPitch * 0.1f * dt));
+    }
 
+    void ComputeRotation(float dt)
+    {
         _yaw += _controls.RelativeMovement.x * _turnSpeed * dt;
         transform.rotation = Quaternion.Euler(-_currentPitch, _yaw, 0f);
     }
@@ -195,8 +201,18 @@ public class PigeonController : MonoBehaviour
         float speed = _velocity.magnitude;
         Vector3 forward = transform.forward;
 
-        float speedRatio = Mathf.Clamp01(speed / _maxSpeed);
+        float forwardSpeed = Vector3.Dot(_velocity, forward);
+        float speedRatio = Mathf.Clamp01(forwardSpeed / _maxSpeed);
         float effectiveLift = speedRatio * _liftFactor;
+
+        if (forward.y > 0f)
+        {
+            float pitchUpIntensity = forward.y;
+            float dynamicStallSpeed = _stallSpeed * (1f + pitchUpIntensity * 2f);
+
+            float stallProgress = Mathf.Clamp01(forwardSpeed / dynamicStallSpeed);
+            effectiveLift *= stallProgress;
+        }
 
         Vector3 liftForce = Vector3.up * (-Physics.gravity.y) * effectiveLift;
         _velocity += liftForce * dt;
@@ -205,15 +221,6 @@ public class PigeonController : MonoBehaviour
         {
             float diveAcceleration = -forward.y * Physics.gravity.magnitude * 1.5f;
             _velocity += forward * diveAcceleration * dt;
-        }
-        else
-        {
-            if (!_controls.Flap && speed < _flapMinSpeed * 1.5f && forward.y > 0.2f)
-            {
-                _velocity += Vector3.down * 12f * dt;
-
-                _velocity *= (1f - 2f * dt);
-            }
         }
     }
 
@@ -224,11 +231,27 @@ public class PigeonController : MonoBehaviour
 
         _velocity = _controller.velocity + Physics.gravity * dt + _pendingImpulse;
         _pendingImpulse = Vector3.zero;
+
+        float hoverFactor = 0f;
+        if (_controls.Flap && _controls.Brake)
+        {
+            float pitchRange = _maxPitch - _minHoverPitch;
+            if (pitchRange > 0.01f)
+            {
+                hoverFactor = Mathf.Clamp01((_currentPitch - _minHoverPitch) / pitchRange);
+            }
+            else if (_currentPitch >= _minHoverPitch)
+            {
+                hoverFactor = 1f;
+            }
+        }
+
         if (_controls.Flap)
         {
             targetSpeed = _flapMaxSpeed;
             dragAtMaxSpeed = _flapDragAtMaxSpeed;
-            ComputeRotation(_pitchSpeed, _maxPitch, dt);
+            ComputePitch(_pitchSpeed, _maxPitch, dt);
+            ComputeRotation(dt);
 
             _velocity += Vector3.up * _flapAccel * dt;
         }
@@ -236,27 +259,43 @@ public class PigeonController : MonoBehaviour
         {
             targetSpeed = _diveMaxSpeed;
             dragAtMaxSpeed = _diveDragAtMaxSpeed;
-            ComputeRotation(_divePitchSpeed, _diveMaxPitch, dt);
+            float targetPitch = -_diveMaxPitch;
+            float deltaPitch = Mathf.Abs(Mathf.DeltaAngle(targetPitch, _currentPitch));
+            _currentPitch = Mathf.MoveTowardsAngle(_currentPitch, targetPitch, Mathf.Max(_divePitchSpeed * dt, deltaPitch * 0.1f * dt));
+            ComputeRotation(dt);
         }
         else
         {
             targetSpeed = _maxSpeed;
             dragAtMaxSpeed = _dragAtMaxSpeed;
-            ComputeRotation(_pitchSpeed, _maxPitch, dt);
+            ComputePitch(_pitchSpeed, _maxPitch, dt);
+            ComputeRotation(dt);
             ApplyFlightForces(dt);
         }
+
         if (!_controls.Dive && _controls.Brake)
         {
             targetSpeed = _brakeMaxSpeed;
             dragAtMaxSpeed = _brakeDragAtMaxSpeed;
         }
 
+        if (hoverFactor > 0f)
+        {
+            _velocity -= Physics.gravity * dt;
+
+            _velocity.y = Mathf.MoveTowards(_velocity.y, 0f, 15f * dt);
+
+            _velocity = Vector3.Lerp(_velocity, Vector3.zero, hoverFactor * 10f * dt);
+        }
+
         float speed = _velocity.magnitude;
-        if (speed > 0.1f)
+        float forwardSpeed = Vector3.Dot(_velocity, transform.forward);
+
+        if (!_controls.Dive && speed > 0.1f)
         {
             float steeringFactor = 4f;
 
-            if (!_controls.Flap && transform.forward.y > 0.15f && speed < _flapMinSpeed * 2f)
+            if (!_controls.Flap && transform.forward.y > 0.1f && forwardSpeed < _stallSpeed * 1.3f)
             {
                 steeringFactor = 0f;
             }
@@ -280,8 +319,8 @@ public class PigeonController : MonoBehaviour
 
     void UpdateVisualRotation(float dt)
     {
-        float targetRoll = -_controls.RelativeMovement.x * _visualRollAmount;
-        Quaternion targetRotation = Quaternion.Euler(0f, 0f, targetRoll);
+        float targetRootRoll = -_controls.RelativeMovement.x * _visualRollAmount;
+        Quaternion targetRotation = Quaternion.Euler(0f, 0f, targetRootRoll);
 
         _visualRoot.localRotation = Quaternion.Slerp(
             _visualRoot.localRotation,
