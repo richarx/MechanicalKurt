@@ -134,6 +134,7 @@ public class PigeonController : MonoBehaviour
             UpdateVisualRotation(dt);
         }
 
+        _velocity = PigeonFan.ApplyUpdrafts(transform.position, _velocity, dt, _controller.isGrounded);
         _controller.Move(_velocity * dt);
     }
 
