@@ -23,6 +23,10 @@ public class PigeonController : MonoBehaviour
     [Header("Gliding")]
     [SerializeField] float _maxPitch = 45f;
 
+    [Header("Brake")]
+    [SerializeField] float _brakeMaxSpeed = 2f;
+    [SerializeField] float _brakeDragAtMaxSpeed = 0.5f;
+
     [Header("Flapping")]
     [SerializeField] float _takeoffSpeed = 6f;
     [SerializeField] float _flapAccel = 12f;
@@ -33,7 +37,7 @@ public class PigeonController : MonoBehaviour
 
     [Header("Diving")]
     [SerializeField] float _divePitchSpeed = 120f;
-    [SerializeField] float _diveMaxPitch = 70f;
+    [SerializeField] float _diveMaxPitch = 80f;
     [SerializeField] float _diveMaxSpeed = 40f;
     [SerializeField] float _diveDragAtMaxSpeed = 1.5f;
 
@@ -239,6 +243,11 @@ public class PigeonController : MonoBehaviour
             dragAtMaxSpeed = _dragAtMaxSpeed;
             ComputeRotation(_pitchSpeed, _maxPitch, dt);
             ApplyFlightForces(dt);
+        }
+        if (!_controls.Dive && _controls.Brake)
+        {
+            targetSpeed = _brakeMaxSpeed;
+            dragAtMaxSpeed = _brakeDragAtMaxSpeed;
         }
 
         float speed = _velocity.magnitude;

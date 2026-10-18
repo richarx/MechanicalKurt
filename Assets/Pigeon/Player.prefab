@@ -401,6 +401,8 @@ MonoBehaviour:
   _dragAtMaxSpeed: 3
   _liftFactor: 0.85
   _maxPitch: 45
+  _brakeMaxSpeed: 2
+  _brakeDragAtMaxSpeed: 0.5
   _takeoffSpeed: 3
   _flapAccel: 12
   _flapMinSpeed: 1.5

@@ -19044,6 +19044,14 @@ PrefabInstance:
       propertyPath: m_IsActive
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 2514600447504455624, guid: 013420fdddab85a48be5b875e08e2729, type: 3}
+      propertyPath: _brakeMaxSpeed
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 2514600447504455624, guid: 013420fdddab85a48be5b875e08e2729, type: 3}
+      propertyPath: _brakeDragAtMaxSpeed
+      value: 0.5
+      objectReference: {fileID: 0}
     - target: {fileID: 7718967718942241121, guid: 013420fdddab85a48be5b875e08e2729, type: 3}
       propertyPath: m_LocalPosition.x
       value: 16.09
