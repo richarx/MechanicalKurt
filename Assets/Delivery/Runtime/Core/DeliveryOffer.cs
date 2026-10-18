@@ -8,6 +8,7 @@ public sealed class DeliveryOffer : MonoBehaviour
     [SerializeField, Required] private DeliveryData _data;
     [SerializeField, Required] private DeliveryPoint _departure;
     [SerializeField, Required] private DeliveryPoint _destination;
+    [field:SerializeField] public int Reward {get; private set;} = 100;
 
     public DeliveryData Data => _data;
     public DeliveryPoint Departure => _departure;
