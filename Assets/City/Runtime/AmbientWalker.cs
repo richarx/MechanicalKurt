@@ -32,6 +32,15 @@ public class AmbientWalker : MonoBehaviour
 
     public void SetPaused(bool paused)
     {
+        if (IsPaused && !paused && _path != null && _path.PointCount >= 2)
+        {
+            // The hit may have moved the character to the other side of its next waypoint.
+            Vector3 heading = _path.GetPosition(_targetIndex % _path.PointCount) - transform.position;
+            heading.y = 0f;
+            if (heading.sqrMagnitude > 0.0001f)
+                transform.rotation = Quaternion.LookRotation(heading, Vector3.up);
+        }
+
         IsPaused = paused;
         if (paused)
             SetWalking(false);

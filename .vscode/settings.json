@@ -67,6 +67,6 @@
         "*.sln": "*.csproj",
         "*.slnx": "*.csproj"
     },
-    "dotnet.defaultSolution": "MechanicalKurt.slnx",
+    "dotnet.defaultSolution": "LD59Kurt.slnx",
     "dotnet.enableWorkspaceBasedDevelopment": false
 }

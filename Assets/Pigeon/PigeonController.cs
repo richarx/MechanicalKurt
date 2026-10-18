@@ -1,4 +1,6 @@
 using UnityEngine;
+using UnityEngine.EventSystems;
+using UnityEngine.InputSystem;
 
 [RequireComponent(typeof(CharacterController))]
 public class PigeonController : MonoBehaviour
@@ -50,6 +52,41 @@ public class PigeonController : MonoBehaviour
         _yaw = transform.eulerAngles.y;
     }
 
+    void OnEnable()
+    {
+        SetCursorCaptured(true);
+    }
+
+    void OnDisable()
+    {
+        SetCursorCaptured(false);
+    }
+
+    void OnApplicationFocus(bool hasFocus)
+    {
+        if (!hasFocus)
+            SetCursorCaptured(false);
+    }
+
+    void UpdateCursorCapture()
+    {
+        if (!Application.isFocused)
+            return;
+
+        if (Keyboard.current != null && Keyboard.current.escapeKey.wasPressedThisFrame)
+            SetCursorCaptured(false);
+        else if (Cursor.lockState != CursorLockMode.Locked && Time.timeScale > 0f
+            && Mouse.current != null && Mouse.current.leftButton.wasPressedThisFrame
+            && (EventSystem.current == null || !EventSystem.current.IsPointerOverGameObject()))
+            SetCursorCaptured(true);
+    }
+
+    void SetCursorCaptured(bool captured)
+    {
+        Cursor.lockState = captured ? CursorLockMode.Locked : CursorLockMode.None;
+        Cursor.visible = !captured;
+    }
+
     void OnGUI()
     {
         GUI.Label(new Rect(10, 50, 300, 20), $"Pitch: {_currentPitch:F1}");
@@ -60,6 +97,8 @@ public class PigeonController : MonoBehaviour
 
     void Update()
     {
+        UpdateCursorCapture();
+
         float dt = Time.deltaTime;
         _velocity = Vector3.zero;
 

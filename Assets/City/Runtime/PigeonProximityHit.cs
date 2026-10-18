@@ -2,7 +2,6 @@ using System.Collections;
 using Sirenix.OdinInspector;
 using UnityEngine;
 
-[DisallowMultipleComponent]
 [RequireComponent(typeof(Animator))]
 public class PigeonProximityHit : MonoBehaviour
 {
@@ -24,17 +23,33 @@ public class PigeonProximityHit : MonoBehaviour
     [field: SerializeField, MinValue(0)]
     public int AnimationLayer { get; private set; }
 
+    [field: SerializeField, Tooltip("Bassin animé dont le déplacement horizontal est transféré au personnage. Détecté automatiquement pour les personnages du projet.")]
+    public Transform MotionRoot { get; private set; }
+
     private Animator _animator;
     private AmbientWalker _walker;
     private Coroutine _hitRoutine;
     private bool _wasInside;
     private bool _ownsWalkerPause;
     private float _nextPigeonSearch;
+    private bool _trackingHitMotion;
+    private bool _hitMotionEntered;
+    private bool _hitMotionExiting;
+    private Vector3 _motionReferencePosition;
+    private Vector3 _previousMotionOffset;
+    private float _lastMotionTime;
+    private float _lastTransitionTime;
 
     private void Awake()
     {
         _animator = GetComponent<Animator>();
         _walker = GetComponentInParent<AmbientWalker>();
+        if (MotionRoot == null)
+        {
+            MotionRoot = _animator.isHuman
+                ? _animator.GetBoneTransform(HumanBodyBones.Hips)
+                : transform.Find("Armature/mixamorig:Hips");
+        }
     }
 
     private void Start()
@@ -56,6 +71,8 @@ public class PigeonProximityHit : MonoBehaviour
 
     private void LateUpdate()
     {
+        ApplyHitMotion();
+
         if (Pigeon == null && Time.time >= _nextPigeonSearch)
         {
             Pigeon = FindAnyObjectByType<PigeonController>();
@@ -81,6 +98,7 @@ public class PigeonProximityHit : MonoBehaviour
             _walker.SetPaused(true);
         }
 
+        BeginHitMotion();
         _animator.SetTrigger(HitTrigger);
         yield return null;
 
@@ -97,6 +115,7 @@ public class PigeonProximityHit : MonoBehaviour
         if (_animator.isActiveAndEnabled &&
             !_animator.GetCurrentAnimatorStateInfo(AnimationLayer).IsName(HitStateName))
         {
+            _trackingHitMotion = false;
             _animator.ResetTrigger(HitTrigger);
             Debug.LogWarning($"PigeonProximityHit : l'état '{HitStateName}' n'a pas démarré. Vérifier son nom et la transition avec le trigger 'Hit'.", this);
         }
@@ -115,8 +134,69 @@ public class PigeonProximityHit : MonoBehaviour
         _hitRoutine = null;
     }
 
+    private void BeginHitMotion()
+    {
+        if (MotionRoot == null || MotionRoot == transform || !MotionRoot.IsChildOf(transform))
+        {
+            Debug.LogWarning("PigeonProximityHit : assigner le bassin animé dans Motion Root pour conserver le recul du hit.", this);
+            return;
+        }
+
+        _motionReferencePosition = transform.InverseTransformPoint(MotionRoot.position);
+        _previousMotionOffset = Vector3.zero;
+        _lastMotionTime = float.NaN;
+        _lastTransitionTime = float.NaN;
+        _hitMotionEntered = false;
+        _hitMotionExiting = false;
+        _trackingHitMotion = true;
+    }
+
+    private void ApplyHitMotion()
+    {
+        if (!_trackingHitMotion || MotionRoot == null || !_animator.isActiveAndEnabled)
+            return;
+
+        AnimatorStateInfo state = _animator.GetCurrentAnimatorStateInfo(AnimationLayer);
+        bool transitioning = _animator.IsInTransition(AnimationLayer);
+        bool currentIsHit = state.IsName(HitStateName);
+        bool nextIsHit = transitioning && _animator.GetNextAnimatorStateInfo(AnimationLayer).IsName(HitStateName);
+        if (!currentIsHit && !nextIsHit)
+        {
+            if (_hitMotionEntered)
+                _trackingHitMotion = false;
+            return;
+        }
+
+        _hitMotionEntered = true;
+        float transitionTime = transitioning ? _animator.GetAnimatorTransitionInfo(AnimationLayer).normalizedTime : -1f;
+        // An unevaluated Animator still has the compensated pose from the last frame.
+        if (state.normalizedTime == _lastMotionTime && transitionTime == _lastTransitionTime)
+            return;
+
+        _lastMotionTime = state.normalizedTime;
+        _lastTransitionTime = transitionTime;
+
+        if (currentIsHit && ((transitioning && !nextIsHit) || (!transitioning && state.normalizedTime >= 1f)))
+            _hitMotionExiting = true;
+
+        Vector3 localOffset = transform.InverseTransformPoint(MotionRoot.position) - _motionReferencePosition;
+        Vector3 offset = Vector3.ProjectOnPlane(transform.TransformVector(localOffset), Vector3.up);
+
+        // Preserve the recoil on the gameplay object, keeping its original ground height.
+        // During the exit blend, discard the animated return to the walking pose.
+        if (!_hitMotionExiting)
+        {
+            Transform character = _walker != null ? _walker.transform : transform;
+            character.position += offset - _previousMotionOffset;
+        }
+
+        _previousMotionOffset = offset;
+        MotionRoot.position -= offset;
+    }
+
     private void OnDisable()
     {
+        _trackingHitMotion = false;
         if (_hitRoutine != null)
         {
             StopCoroutine(_hitRoutine);
