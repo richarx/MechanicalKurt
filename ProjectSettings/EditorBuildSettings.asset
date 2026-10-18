@@ -8,8 +8,11 @@ EditorBuildSettings:
   - enabled: 0
     path: Assets/Scenes/City.unity
     guid: 4718209e27ab7b149a35cd69bae108f5
-  - enabled: 1
+  - enabled: 0
     path: Assets/Scenes/TataCityScene.unity
     guid: 57100035948f1514abdc262b0fd4627b
+  - enabled: 1
+    path: Assets/Scenes/MainCityScene.unity
+    guid: bd2e479931a869d4fa780284a53d2613
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
