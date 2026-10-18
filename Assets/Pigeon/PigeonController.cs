@@ -37,6 +37,11 @@ public class PigeonController : MonoBehaviour
     [SerializeField] float _diveMaxSpeed = 40f;
     [SerializeField] float _diveDragAtMaxSpeed = 1.5f;
 
+    [Header("Barrel Roll")]
+    [Tooltip("Minimum speed to barrel roll. Keep above ~4 or the pigeon can roll while walking or taking off.")]
+    [SerializeField] float _minBarrelRollSpeed = 20f;
+    [SerializeField] float _rollDuration = 1.5f;
+
     Vector3 _velocity;
     Vector3 _pendingImpulse;
     float _currentPitch;
@@ -44,6 +49,7 @@ public class PigeonController : MonoBehaviour
 
     CharacterController _controller;
     IPigeonControls _controls;
+    PigeonBoostFeedback _boostFeedback;
 
     public float Speed => _controller != null ? _controller.velocity.magnitude : 0f;
     public Vector3 Velocity => _controller != null ? _controller.velocity : Vector3.zero;
@@ -55,6 +61,7 @@ public class PigeonController : MonoBehaviour
     {
         _controller = GetComponent<CharacterController>();
         _controls = GetComponent<IPigeonControls>();
+        _boostFeedback = GetComponent<PigeonBoostFeedback>();
         _yaw = transform.eulerAngles.y;
     }
 
@@ -104,6 +111,10 @@ public class PigeonController : MonoBehaviour
     void Update()
     {
         UpdateCursorCapture();
+
+        // Consume every frame so a press made while too slow doesn't fire later.
+        if (_controls.ConsumeLeftFlex)
+            BarrelRoll();
 
         float dt = Time.deltaTime;
         _velocity = Vector3.zero;
@@ -267,5 +278,14 @@ public class PigeonController : MonoBehaviour
             targetRotation,
             _rollSpeed * dt
         );
+    }
+
+    // Purely visual; ignored while too slow or while a roll is already playing.
+    public void BarrelRoll()
+    {
+        if (_boostFeedback == null || Speed < _minBarrelRollSpeed)
+            return;
+
+        _boostFeedback.Play(restart: false, _rollDuration);
     }
 }

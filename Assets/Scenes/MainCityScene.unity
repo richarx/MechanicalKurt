@@ -26364,6 +26364,14 @@ PrefabInstance:
       propertyPath: HorizontalAxis.Center
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 2514600447504455624, guid: 013420fdddab85a48be5b875e08e2729, type: 3}
+      propertyPath: _rollDuration
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2514600447504455624, guid: 013420fdddab85a48be5b875e08e2729, type: 3}
+      propertyPath: _minBarrelRollSpeed
+      value: 15
+      objectReference: {fileID: 0}
     - target: {fileID: 3115296685156824235, guid: 013420fdddab85a48be5b875e08e2729, type: 3}
       propertyPath: m_MinMoveDistance
       value: 0
