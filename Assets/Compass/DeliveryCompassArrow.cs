@@ -36,12 +36,28 @@ public sealed class DeliveryCompassArrow : MonoBehaviour
     [SerializeField] private AnimationCurve _popCurve = new AnimationCurve(
         new Keyframe(0f, 0f), new Keyframe(0.6f, 1.15f), new Keyframe(1f, 1f));
 
+    [Header("Pulse")]
+    [SerializeField, Min(0f), Tooltip("Extra scale at the peak of a pulse when far (0.1 = +10%). Always active.")]
+    private float _pulseBaseAmplitude = 0.1f;
+    [SerializeField, Min(0f), Tooltip("Pulses per second when far. Always active.")]
+    private float _pulseBaseFrequency = 1f;
+    [SerializeField, Min(0f), Tooltip("Pulse starts ramping up below this distance to the destination (meters).")]
+    private float _pulseRampStartDistance = 30f;
+    [SerializeField, Min(0f), Tooltip("Pulse reaches max intensity below this distance (meters).")]
+    private float _pulseRampFullDistance = 10f;
+    [SerializeField, Min(0f), Tooltip("Extra scale at the peak of a pulse when close (0.3 = +30%).")]
+    private float _pulseMaxAmplitude = 0.3f;
+    [SerializeField, Min(0f), Tooltip("Pulses per second when close. Set equal to Base Frequency to only ramp the size.")]
+    private float _pulseMaxFrequency = 3f;
+
     private Transform _target;
     private bool _allowedVisible = true;
     private bool _snapNextFrame;
     private bool _subscribed;
     private float _popElapsed;
     private Vector3 _visualBaseScale = Vector3.one;
+    private Vector3 _pivotBaseScale = Vector3.one;
+    private float _pulsePhase;
 
     public bool HasTarget => _target != null;
 
@@ -61,6 +77,7 @@ public sealed class DeliveryCompassArrow : MonoBehaviour
         if (_camera == null) _camera = GetComponentInParent<Camera>();
         if (_camera == null) _camera = Camera.main;
         if (_visual != null) _visualBaseScale = _visual.transform.localScale;
+        if (_arrowPivot != null) _pivotBaseScale = _arrowPivot.localScale;
         if (_visual == gameObject)
         {
             Debug.LogError("Compass arrow: Visual must be a child, not the controller's own GameObject.", this);
@@ -123,7 +140,12 @@ public sealed class DeliveryCompassArrow : MonoBehaviour
         if (show && pop && !_visual.activeSelf) _popElapsed = 0f;
         else if (!show) _popElapsed = _popDuration;
         if (_visual.activeSelf != show) _visual.SetActive(show);
-        if (!show) _visual.transform.localScale = _visualBaseScale;
+        if (!show)
+        {
+            _visual.transform.localScale = _visualBaseScale;
+            if (_arrowPivot != null) _arrowPivot.localScale = _pivotBaseScale;
+            _pulsePhase = 0f;
+        }
     }
 
     private void HandleBeginCameraRendering(ScriptableRenderContext context, Camera renderingCamera)
@@ -133,6 +155,7 @@ public sealed class DeliveryCompassArrow : MonoBehaviour
         float deltaTime = Time.unscaledDeltaTime;
         UpdatePlacement();
         UpdatePop(deltaTime);
+        UpdatePulse(deltaTime);
         UpdateRotation(deltaTime);
     }
 
@@ -156,6 +179,21 @@ public sealed class DeliveryCompassArrow : MonoBehaviour
         _popElapsed += deltaTime;
         float t = _popDuration > 0f ? Mathf.Clamp01(_popElapsed / _popDuration) : 1f;
         _visual.transform.localScale = _visualBaseScale * _popCurve.Evaluate(t);
+    }
+
+    // Scales ArrowPivot (the pop scales Visual), so both animations stack.
+    private void UpdatePulse(float deltaTime)
+    {
+        if (_arrowPivot == null || _target == null || _manager == null || _manager.Player == null) return;
+        float distance = Vector3.Distance(_target.position, _manager.Player.position);
+        // 0 at Ramp Start Distance and beyond, 1 at Ramp Full Distance and closer.
+        float closeness = 1f - Mathf.InverseLerp(_pulseRampFullDistance, _pulseRampStartDistance, distance);
+        float amplitude = Mathf.Lerp(_pulseBaseAmplitude, _pulseMaxAmplitude, closeness);
+        float frequency = Mathf.Lerp(_pulseBaseFrequency, _pulseMaxFrequency, closeness);
+        // Accumulate the phase so changing the frequency never makes the pulse jump.
+        _pulsePhase = Mathf.Repeat(_pulsePhase + frequency * deltaTime, 1f);
+        float wave = 0.5f - 0.5f * Mathf.Cos(_pulsePhase * 2f * Mathf.PI); // 0 → 1 → 0, only grows
+        _arrowPivot.localScale = _pivotBaseScale * (1f + amplitude * wave);
     }
 
     private void UpdateRotation(float deltaTime)
