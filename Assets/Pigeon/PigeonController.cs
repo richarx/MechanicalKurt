@@ -13,30 +13,29 @@ public class PigeonController : MonoBehaviour
     [SerializeField] Transform _visualRoot;
 
     [Header("Flight")]
-    [SerializeField] float _maxSpeed = 20f;
-    [SerializeField] float _airDrag = 0.03f;
-    [SerializeField] float _verticalDrag = 0.02f;
+    [SerializeField] float _maxSpeed = 12f;
+    [SerializeField] float _dragAtMaxSpeed = 3f;
+    [SerializeField] float _liftFactor = 0.85f;
 
     [Header("Gliding")]
-    [SerializeField] float _glideSpeed = 8f;
     [SerializeField] float _maxPitch = 45f;
-    [SerializeField] float _convertionRate = 1.5f;
-    [SerializeField] float _stallSpeed = 3f;
 
     [Header("Flapping")]
+    [SerializeField] float _flapMaxCooldown = 0.5f;
     [SerializeField] float _flapForce = 6f;
-    [SerializeField, Range(0f, 1f)] float _flapForwardPenalty = 0.5f;
+    [SerializeField] float _flapMinSpeed = 1.5f;
+    [SerializeField] float _flapSpeedPenalty = 0.5f;
 
     [Header("Diving")]
-    [SerializeField] float _diveAccel = 12f;
     [SerializeField] float _divePitchSpeed = 120f;
-    [SerializeField] float _diveTargetPitch = 70f;
-    [SerializeField] float _maxDiveSpeed = 20f;
+    [SerializeField] float _diveMaxPitch = 70f;
+    [SerializeField] float _diveMaxSpeed = 40f;
+    [SerializeField] float _diveDragAtMaxSpeed = 1.5f;
 
     Vector3 _velocity;
-    float _currentForwardSpeed;
     float _currentPitch;
     float _yaw;
+    float _flapCooldown;
 
     CharacterController _controller;
     IPigeonControls _controls;
@@ -50,205 +49,168 @@ public class PigeonController : MonoBehaviour
 
     void OnGUI()
     {
-        GUI.Label(new Rect(10, 10, 400, 20), $"Velocity: {_velocity}");
-        GUI.Label(new Rect(10, 30, 300, 20), $"Speed: {_velocity.magnitude:F2}");
         GUI.Label(new Rect(10, 50, 300, 20), $"Pitch: {_currentPitch:F1}");
-        GUI.Label(new Rect(10, 70, 300, 20), $"Forward speed: {_currentForwardSpeed:F2}");
+        GUI.Label(new Rect(10, 80, 300, 20), $"Speed: {_controller.velocity.magnitude:F1}");
+        GUI.Label(new Rect(10, 110, 300, 20), $"HorizontalSpeed: {Vector3.ProjectOnPlane(_controller.velocity, Vector3.up).magnitude:F1}");
+        GUI.Label(new Rect(10, 140, 300, 20), $"VerticalSpeed: {_controller.velocity.y:F1}");
     }
 
     void Update()
     {
         float dt = Time.deltaTime;
+        _velocity = Vector3.zero;
 
-        HandleRotation(dt);
-
-        if (_controller.isGrounded && _velocity.y <= 0f)
-            GroundMovement(dt);
+        if (_controller.isGrounded && _controller.velocity.y <= 0f)
+            GroundMovement();
         else
+        {
             CalculateFlightPhysics(dt);
+            UpdateVisualRotation(dt);
+        }
 
         _controller.Move(_velocity * dt);
-
-        if (_controller.isGrounded && _velocity.y < 0f)
-            _velocity.y = -1f;
     }
 
-    void GroundMovement(float dt)
+    void GroundMovement()
     {
+        _currentPitch = 0f;
         Vector2 input = Vector2.ClampMagnitude(_controls.Movement, 1f);
         Vector3 direction = new Vector3(input.x, 0f, input.y);
+        float directionMagnitude = direction.magnitude;
 
-        if (direction.sqrMagnitude > 0.01f)
+        if (directionMagnitude > 0.01f)
             _yaw = Mathf.Atan2(direction.x, direction.z) * Mathf.Rad2Deg;
 
         transform.rotation = Quaternion.Euler(0f, _yaw, 0f);
-
-        _velocity.x = direction.x * _groundSpeed;
-        _velocity.z = direction.z * _groundSpeed;
-        _velocity.y = -1f;
-
-        _currentPitch = 0f;
-        _currentForwardSpeed = 0f;
-
         if (_controls.ConsumeFlap)
         {
-            Vector3 forward = Quaternion.Euler(0f, _yaw, 0f) * Vector3.forward;
-
-            _velocity.x = forward.x * _glideSpeed;
-            _velocity.z = forward.z * _glideSpeed;
+            _velocity = transform.forward * _flapMinSpeed;
             _velocity.y = _flapForce;
-
-            _currentForwardSpeed = _glideSpeed;
+            _flapCooldown = _flapMaxCooldown;
         }
+        else
+        {
+            _velocity = transform.forward * directionMagnitude * _groundSpeed;
+            _velocity.y = -1f;
+        }
+    }
 
-        UpdateVisualRotation(dt);
+    void ComputeRotation(float pitchSpeed, float maxPitch, float dt)
+    {
+        float targetPitch = Mathf.Clamp(
+                _currentPitch - _controls.RelativeMovement.y * pitchSpeed * dt,
+                -maxPitch,
+                maxPitch
+            );
+        float deltaPitch = Mathf.Abs(Mathf.DeltaAngle(targetPitch, _currentPitch));
+        _currentPitch = Mathf.MoveTowardsAngle(_currentPitch, targetPitch, Mathf.Max(pitchSpeed * dt, deltaPitch * 0.1f * dt));
+
+        _yaw += _controls.RelativeMovement.x * _turnSpeed * dt;
+        transform.rotation = Quaternion.Euler(-_currentPitch, _yaw, 0f);
+    }
+
+    void ComputeDrag(float dt)
+    {
+        float targetSpeed = _controls.Dive ? _diveMaxSpeed : _maxSpeed;
+        float dragAtMaxSpeed = _controls.Dive
+            ? _diveDragAtMaxSpeed
+            : _dragAtMaxSpeed;
+
+        float speed = _velocity.magnitude;
+
+        if (speed > 0.001f)
+        {
+            float dragAcceleration =
+                dragAtMaxSpeed * speed * speed
+                / (targetSpeed * targetSpeed);
+
+            _velocity -= _velocity.normalized * dragAcceleration * dt;
+        }
+    }
+
+    void ApplyFlightForces(float dt)
+    {
+        float speed = _velocity.magnitude;
+        Vector3 forward = transform.forward;
+
+        float speedRatio = Mathf.Clamp01(speed / _maxSpeed);
+        float effectiveLift = speedRatio * _liftFactor;
+
+        Vector3 liftForce = Vector3.up * (-Physics.gravity.y) * effectiveLift;
+        _velocity += liftForce * dt;
+
+        if (forward.y < 0f)
+        {
+            float diveAcceleration = -forward.y * Physics.gravity.magnitude * 1.5f;
+            _velocity += forward * diveAcceleration * dt;
+        }
+        else
+        {
+            if (speed < _flapMinSpeed * 1.5f && forward.y > 0.2f)
+            {
+                _velocity += Vector3.down * 12f * dt;
+
+                _velocity *= (1f - 2f * dt);
+            }
+        }
     }
 
     void CalculateFlightPhysics(float dt)
     {
-        bool diving = _controls.Dive;
-        bool flapping = _controls.ConsumeFlap;
+        bool flapping = false;
+        if (_flapCooldown > 0)
+            _flapCooldown -= dt;
+        else
+            flapping = _controls.ConsumeFlap;
 
+        _velocity = _controller.velocity + Physics.gravity * dt;
         if (flapping)
         {
-            _velocity.y += _flapForce;
+            ComputeRotation(_pitchSpeed, _maxPitch, dt);
+            _flapCooldown = _flapMaxCooldown;
 
-            Vector3 horizontalVelocity = new Vector3(
-                _velocity.x,
-                0f,
-                _velocity.z
-            );
+            Vector3 flapImpression = (transform.forward * _flapMinSpeed) + (transform.up * _flapForce);
+            _velocity += flapImpression;
 
-            horizontalVelocity *= 1f - _flapForwardPenalty;
-
-            _velocity.x = horizontalVelocity.x;
-            _velocity.z = horizontalVelocity.z;
+            float currentSpeed = _velocity.magnitude;
+            float speedLimit = _diveMaxSpeed * 0.8f;
+            if (currentSpeed > speedLimit)
+            {
+                _velocity = _velocity.normalized * speedLimit;
+            }
+        }
+        else if (_controls.Dive)
+        {
+            ComputeRotation(_divePitchSpeed, _diveMaxPitch, dt);
         }
         else
         {
-            if (diving)
-            {
-                _currentPitch = Mathf.MoveTowards(
-                    _currentPitch,
-                    -_diveTargetPitch,
-                    _divePitchSpeed * dt
-                );
-            }
-            else
-            {
-                _currentPitch = Mathf.Clamp(
-                    _currentPitch - _controls.RelativeMovement.y * _pitchSpeed * dt,
-                    -_maxPitch,
-                    _maxPitch
-                );
-            }
-
-            Vector3 forward = Quaternion.Euler(
-                -_currentPitch,
-                _yaw,
-                0f
-            ) * Vector3.forward;
-
-            Vector3 horizontalForward = Quaternion.Euler(
-                0f,
-                _yaw,
-                0f
-            ) * Vector3.forward;
-
-            _velocity += Physics.gravity * dt;
-
-            float forwardSpeed = Vector3.Dot(_velocity, horizontalForward);
-
-            if (diving)
-                _velocity += forward * _diveAccel * dt;
-            else if (forwardSpeed > 0f && forwardSpeed < _glideSpeed)
-                _velocity += horizontalForward * (_glideSpeed - forwardSpeed) * dt;
-
-            float speed = _velocity.magnitude;
-            float forwardAirSpeed = Vector3.Dot(_velocity, forward);
-            float stallFactor = Mathf.InverseLerp(
-                _stallSpeed,
-                _stallSpeed * 2f,
-                Mathf.Max(0f, forwardAirSpeed)
-            );
-
-            if (speed > 0.01f && stallFactor > 0f)
-            {
-                float pitchFactor = Mathf.Clamp01(
-                    Mathf.Abs(_currentPitch) / _maxPitch
-                );
-
-                float turnRate = _convertionRate * pitchFactor * stallFactor;
-
-                _velocity = Vector3.RotateTowards(
-                    _velocity,
-                    forward * speed,
-                    turnRate * dt,
-                    0f
-                );
-            }
-
-            _velocity -= _velocity * _airDrag * dt;
-            _velocity.y -= _verticalDrag * _velocity.y * dt;
-
-            Vector3 horizontalVelocity = new Vector3(
-                _velocity.x,
-                0f,
-                _velocity.z
-            );
-
-            float horizontalSpeed = horizontalVelocity.magnitude;
-
-            if (horizontalSpeed > 0.01f)
-            {
-                horizontalVelocity = Vector3.RotateTowards(
-                    horizontalVelocity,
-                    horizontalForward * horizontalSpeed,
-                    _turnSpeed * Mathf.Deg2Rad * dt,
-                    0f
-                );
-
-                _velocity.x = horizontalVelocity.x;
-                _velocity.z = horizontalVelocity.z;
-            }
+            ComputeRotation(_pitchSpeed, _maxPitch, dt);
+            ApplyFlightForces(dt);
         }
 
-        float maxSpeed = diving ? _maxDiveSpeed : _maxSpeed;
+        float speed = _velocity.magnitude;
+        if (speed > 0.1f)
+        {
+            float steeringFactor = 4f;
 
-        if (_velocity.magnitude > maxSpeed)
-            _velocity = _velocity.normalized * maxSpeed;
+            if (transform.forward.y > 0.15f && speed < _flapMinSpeed * 2f)
+            {
+                steeringFactor = 0f;
+            }
 
-        _currentForwardSpeed = new Vector3(
-            _velocity.x,
-            0f,
-            _velocity.z
-        ).magnitude;
+            _velocity = Vector3.Slerp(_velocity.normalized, transform.forward, steeringFactor * dt) * speed;
+        }
 
-        UpdateVisualRotation(dt);
-    }
+        ComputeDrag(dt);
 
-    void HandleRotation(float dt)
-    {
-        if (_controller.isGrounded && _velocity.y <= 0f)
-            return;
-
-        _yaw += _controls.RelativeMovement.x * _turnSpeed * dt;
-        transform.rotation = Quaternion.Euler(0f, _yaw, 0f);
+        ComputeDrag(dt);
     }
 
     void UpdateVisualRotation(float dt)
     {
-        if (_visualRoot == null)
-            return;
-
-        float targetRoll =
-            -_controls.RelativeMovement.x * _visualRollAmount;
-
-        Quaternion targetRotation = Quaternion.Euler(
-            -_currentPitch,
-            0f,
-            targetRoll
-        );
+        float targetRoll = -_controls.RelativeMovement.x * _visualRollAmount;
+        Quaternion targetRotation = Quaternion.Euler(0f, 0f, targetRoll);
 
         _visualRoot.localRotation = Quaternion.Slerp(
             _visualRoot.localRotation,

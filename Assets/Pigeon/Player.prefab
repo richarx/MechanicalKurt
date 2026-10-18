@@ -362,17 +362,18 @@ MonoBehaviour:
   _pitchSpeed: 60
   _visualRollAmount: 20
   _visualRoot: {fileID: 7541785080196244376}
-  _maxSpeed: 20
-  _glideFall: 1.5
-  _glideSpeed: 3
+  _maxSpeed: 12
+  _dragAtMaxSpeed: 3
+  _liftFactor: 0.85
   _maxPitch: 45
-  _convertionRate: 0.8
+  _flapMaxCooldown: 0.5
   _flapForce: 6
-  _flapForwardPenalty: 0.5
-  _diveAccel: 12
+  _flapMinSpeed: 1.5
+  _flapSpeedPenalty: 0.5
   _divePitchSpeed: 120
-  _diveTargetPitch: 70
-  _maxDiveSpeed: 20
+  _diveMaxPitch: 70
+  _diveMaxSpeed: 40
+  _diveDragAtMaxSpeed: 1.5
 --- !u!1001 &8068947269522700808
 PrefabInstance:
   m_ObjectHideFlags: 0
