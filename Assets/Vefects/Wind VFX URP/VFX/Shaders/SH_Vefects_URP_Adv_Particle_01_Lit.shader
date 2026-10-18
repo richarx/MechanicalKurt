@@ -97,7 +97,7 @@ Shader "Vefects/SH_Vefects_URP_Adv_Particle_01_Lit"
 		
 
 		HLSLINCLUDE
-		#pragma target 3.5
+		#pragma target 4.5
 		#pragma prefer_hlslcc gles
 		// ensure rendering platforms toggle list is visible
 
