@@ -225,7 +225,14 @@ public class ManagerCinematic : MonoBehaviour
 
     private void RestoreCamera()
     {
-        if (_pointCamera != null) _pointCamera.Priority = _previousPriority;
+        if (_pointCamera == null) return;
+        _pointCamera.Priority = _previousPriority;
+        // Refresh the point's queue entry first so its next Update cannot steal
+        // the shot back when it notices the restored priority.
+        _pointCamera.Prioritize();
+        // At equal priority Cinemachine picks the most recently activated camera.
+        if (_returnCamera != null && _returnCamera.isActiveAndEnabled)
+            _returnCamera.Prioritize();
     }
 
     private void RestoreScene()
