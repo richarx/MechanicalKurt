@@ -13,7 +13,7 @@ public class PigeonController : MonoBehaviour
     [SerializeField] Transform _visualRoot;
 
     [Header("Flight")]
-    [SerializeField] float _maxSpeed = 12f;
+    [SerializeField] float _maxSpeed = 25f;
     [SerializeField] float _dragAtMaxSpeed = 3f;
     [SerializeField] float _liftFactor = 0.85f;
 
@@ -21,10 +21,12 @@ public class PigeonController : MonoBehaviour
     [SerializeField] float _maxPitch = 45f;
 
     [Header("Flapping")]
-    [SerializeField] float _flapMaxCooldown = 0.5f;
-    [SerializeField] float _flapForce = 6f;
+    [SerializeField] float _takeoffSpeed = 6f;
+    [SerializeField] float _flapAccel = 12f;
     [SerializeField] float _flapMinSpeed = 1.5f;
     [SerializeField] float _flapSpeedPenalty = 0.5f;
+    [SerializeField] float _flapMaxSpeed = 15f;
+    [SerializeField] float _flapDragAtMaxSpeed = 3f;
 
     [Header("Diving")]
     [SerializeField] float _divePitchSpeed = 120f;
@@ -35,7 +37,6 @@ public class PigeonController : MonoBehaviour
     Vector3 _velocity;
     float _currentPitch;
     float _yaw;
-    float _flapCooldown;
 
     CharacterController _controller;
     IPigeonControls _controls;
@@ -82,11 +83,10 @@ public class PigeonController : MonoBehaviour
             _yaw = Mathf.Atan2(direction.x, direction.z) * Mathf.Rad2Deg;
 
         transform.rotation = Quaternion.Euler(0f, _yaw, 0f);
-        if (_controls.ConsumeFlap)
+        if (_controls.Flap)
         {
             _velocity = transform.forward * _flapMinSpeed;
-            _velocity.y = _flapForce;
-            _flapCooldown = _flapMaxCooldown;
+            _velocity.y = _takeoffSpeed;
         }
         else
         {
@@ -109,13 +109,8 @@ public class PigeonController : MonoBehaviour
         transform.rotation = Quaternion.Euler(-_currentPitch, _yaw, 0f);
     }
 
-    void ComputeDrag(float dt)
+    void ComputeDrag(float targetSpeed, float dragAtMaxSpeed, float dt)
     {
-        float targetSpeed = _controls.Dive ? _diveMaxSpeed : _maxSpeed;
-        float dragAtMaxSpeed = _controls.Dive
-            ? _diveDragAtMaxSpeed
-            : _dragAtMaxSpeed;
-
         float speed = _velocity.magnitude;
 
         if (speed > 0.001f)
@@ -157,34 +152,28 @@ public class PigeonController : MonoBehaviour
 
     void CalculateFlightPhysics(float dt)
     {
-        bool flapping = false;
-        if (_flapCooldown > 0)
-            _flapCooldown -= dt;
-        else
-            flapping = _controls.ConsumeFlap;
+        float targetSpeed;
+        float dragAtMaxSpeed;
 
         _velocity = _controller.velocity + Physics.gravity * dt;
-        if (flapping)
+        if (_controls.Flap)
         {
+            targetSpeed = _flapMaxSpeed;
+            dragAtMaxSpeed = _flapDragAtMaxSpeed;
             ComputeRotation(_pitchSpeed, _maxPitch, dt);
-            _flapCooldown = _flapMaxCooldown;
 
-            Vector3 flapImpression = (transform.forward * _flapMinSpeed) + (transform.up * _flapForce);
-            _velocity += flapImpression;
-
-            float currentSpeed = _velocity.magnitude;
-            float speedLimit = _diveMaxSpeed * 0.8f;
-            if (currentSpeed > speedLimit)
-            {
-                _velocity = _velocity.normalized * speedLimit;
-            }
+            _velocity += Vector3.up * _flapAccel * dt;
         }
         else if (_controls.Dive)
         {
+            targetSpeed = _diveMaxSpeed;
+            dragAtMaxSpeed = _diveDragAtMaxSpeed;
             ComputeRotation(_divePitchSpeed, _diveMaxPitch, dt);
         }
         else
         {
+            targetSpeed = _maxSpeed;
+            dragAtMaxSpeed = _dragAtMaxSpeed;
             ComputeRotation(_pitchSpeed, _maxPitch, dt);
             ApplyFlightForces(dt);
         }
@@ -202,9 +191,7 @@ public class PigeonController : MonoBehaviour
             _velocity = Vector3.Slerp(_velocity.normalized, transform.forward, steeringFactor * dt) * speed;
         }
 
-        ComputeDrag(dt);
-
-        ComputeDrag(dt);
+        ComputeDrag(targetSpeed, dragAtMaxSpeed, dt);
     }
 
     void UpdateVisualRotation(float dt)

@@ -6,8 +6,6 @@ public class PlayerControls : MonoBehaviour, IPigeonControls
     Controls _controls;
     CinemachineOrbitalFollow _camera;
 
-    bool _flap;
-
     void Awake()
     {
         _controls = new Controls();
@@ -29,11 +27,6 @@ public class PlayerControls : MonoBehaviour, IPigeonControls
         _controls?.Dispose();
     }
 
-    void Update()
-    {
-        _flap |= _controls.Player.Flap.WasPressedThisFrame();
-    }
-
     Vector2 IPigeonControls.RelativeMovement => _controls.Player.Move.ReadValue<Vector2>();
     Vector2 IPigeonControls.Movement
     {
@@ -49,18 +42,7 @@ public class PlayerControls : MonoBehaviour, IPigeonControls
             return new Vector2(rotatedX, rotatedY);
         }
     }
-    bool IPigeonControls.ConsumeFlap
-    {
-        get
-        {
-            if (_flap)
-            {
-                _flap = false;
-                return true;
-            }
-            return false;
-        }
-    }
+    bool IPigeonControls.Flap => _controls.Player.Flap.IsPressed();
     bool IPigeonControls.Dive => _controls.Player.Dive.IsPressed();
 
 }
