@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1b0317d929739a34e839d08c8427854a, type: 3}
+  m_Name: Billboards_MissionBrief
+  m_EditorClassIdentifier: Assembly-CSharp::DialogSequence
+  speaker: MASTER
+  lines:
+  - text: 'Hey little pidgey '
+  - text: Today nobody talks to each other anymore, everybody is busy watching advertisment
+  - text: What's the next step ? Cellphones ? Again ? Ew.
+  - text: 'Can you help us prevent the return of advertisement technology ? '
+  - text: 'Here is your mission : go shit on those huge billboards !!'
