@@ -6,7 +6,15 @@ using UnityEngine;
 [RequireComponent(typeof(Animator))]
 public class PigeonProximityHit : MonoBehaviour
 {
+    public static event System.Action<PigeonProximityHit> HitPerformed;
+
     private static readonly int HitTrigger = Animator.StringToHash("Hit");
+
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+    private static void ResetHitEvent()
+    {
+        HitPerformed = null;
+    }
 
     [field: SerializeField, MinValue(0.01f), SuffixLabel("unités", true)]
     public float Radius { get; private set; } = 2f;
@@ -123,6 +131,11 @@ public class PigeonProximityHit : MonoBehaviour
             _trackingHitMotion = false;
             _animator.ResetTrigger(HitTrigger);
             Debug.LogWarning($"PigeonProximityHit : l'état '{HitStateName}' n'a pas démarré. Vérifier son nom et la transition avec le trigger 'Hit'.", this);
+        }
+        else if (_animator.isActiveAndEnabled)
+        {
+            // Count once, only after the Animator actually enters the hit state.
+            HitPerformed?.Invoke(this);
         }
 
         while (_animator.isActiveAndEnabled)
