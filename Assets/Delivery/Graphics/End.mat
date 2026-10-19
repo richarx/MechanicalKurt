@@ -38,8 +38,8 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
-    - _HeightStart: -0.09
-    - _HeightTotal: 0.38
+    - _HeightStart: 0.069
+    - _HeightTotal: 0.67
     - _QueueControl: 0
     - _QueueOffset: 0
     m_Colors:
