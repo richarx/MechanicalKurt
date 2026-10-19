@@ -39980,6 +39980,7 @@ GameObject:
   - component: {fileID: 771039945}
   - component: {fileID: 771039944}
   - component: {fileID: 771039946}
+  - component: {fileID: 771039947}
   m_Layer: 0
   m_Name: __AchievementManager
   m_TagString: Untagged
@@ -40012,6 +40013,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 5e70c332e17f99b478fff8c97a999d59, type: 2}
   - {fileID: 11400000, guid: eb004cdad8375ca4f857faaef15cbcd7, type: 2}
   - {fileID: 11400000, guid: 7d66870f072495b44a066b4d72c1f5df, type: 2}
+  - {fileID: 11400000, guid: 7fe39a371e3248e08c935c2bfb23e9ec, type: 2}
 --- !u!4 &771039945
 Transform:
   m_ObjectHideFlags: 0
@@ -40042,6 +40044,20 @@ MonoBehaviour:
   _pigeon: {fileID: 1769670844}
   _achievement: {fileID: 11400000, guid: 76b223c4bf63c1b40b7bc2b4e7b819b0, type: 2}
   _speedThreshold: 40
+--- !u!114 &771039947
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 771039943}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9f065152db99472296a84db020a2473c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ProximityHitAchievementCheck
+  _achievement: {fileID: 11400000, guid: 7fe39a371e3248e08c935c2bfb23e9ec, type: 2}
+  _requiredHits: 10
 --- !u!1 &772638077
 GameObject:
   m_ObjectHideFlags: 0
@@ -65915,7 +65931,7 @@ MonoBehaviour:
   _slideSeconds: 0.5
   _holdSeconds: 4
   _unlockClip: {fileID: 8300000, guid: 26601268cdf496e40baf8b11212472d0, type: 3}
-  defaultSprite: {fileID: 21300000, guid: 375149c491b14f34eb1be774c0ea7c9f, type: 3}
+  defaultSprite: {fileID: 0}
 --- !u!1001 &1246409646
 PrefabInstance:
   m_ObjectHideFlags: 0
