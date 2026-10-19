@@ -13,7 +13,7 @@ public class ScoreManager : MonoBehaviour
     public RectTransform ScoreIcon => scoreIcon;
 
     private int displayTarget;
-    private float displayedScore; 
+    private float displayedScore = 0.0f;
     private int lastShownScore = -1;
     private float countFrom;
     private float countTimer;
