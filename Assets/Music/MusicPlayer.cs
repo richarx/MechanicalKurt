@@ -4,34 +4,65 @@ using UnityEngine;
 
 public class MusicPlayer : MonoBehaviour
 {
-    [SerializeField] private AudioSource audioSource;
+    [SerializeField]
+    private AudioSource audioSource;
 
-    [Space]
-    [SerializeField] private AudioClip nightDelivery;
+    [SerializeField]
+    private AudioClip nightDelivery;
+
+    [SerializeField]
+    private AudioClip wrongWay;
+
+    [SerializeField]
+    private float switchInterval = 120f;
+
+    [SerializeField]
+    private float fadeDuration = 3f;
 
     public static MusicPlayer instance;
 
     private Sequence currentSequence;
+    private Sequence playbackSequence;
+    private Songs currentSong;
+    private float elapsed;
+    private float fadeVolume = 1f;
+    private float musicVolume = maxVolume;
+    private bool musicStarted;
 
     private const float maxVolume = 0.1f;
     private const float minVolume = 0.03f;
 
     public enum Songs
     {
-        NightDelivery
+        NightDelivery,
+        WrongWay
     }
 
     private void Awake()
     {
         instance = this;
+        if (audioSource == null)
+            audioSource = gameObject.AddComponent<AudioSource>();
+
+        audioSource.loop = true;
     }
 
     private IEnumerator Start()
     {
         yield return new WaitForSeconds(120.0f);
 
-        if (!audioSource.isPlaying)
+        if (!musicStarted && !audioSource.isPlaying)
             PlayMusic(Songs.NightDelivery);
+    }
+
+    private void Update()
+    {
+        if (!musicStarted || nightDelivery == null || wrongWay == null)
+            return;
+
+        elapsed += Time.deltaTime;
+        if (elapsed >= switchInterval && !playbackSequence.IsActive())
+            PlayMusic(currentSong == Songs.NightDelivery ? Songs.WrongWay : Songs.NightDelivery);
     }
 
     [ContextMenu("Play Music")]
@@ -48,21 +79,35 @@ public class MusicPlayer : MonoBehaviour
 
     public void PlayMusic(Songs song, float delay = 0.0f)
     {
-        Debug.Log("Play Music");
+        AudioClip clip = GetClip(song);
 
-        Sequence sequence = DOTween.Sequence();
+        if (clip == null)
+            return;
+
+        playbackSequence?.Kill();
+        playbackSequence = DOTween.Sequence();
 
         if (delay > 0.0f)
-            sequence.AppendInterval(delay);
+            playbackSequence.AppendInterval(delay);
 
         if (audioSource.isPlaying)
-            sequence.Append(audioSource.DOFade(0.0f, 1.0f));
+            playbackSequence.Append(DOTween.To(() => fadeVolume, value => fadeVolume = value, 0f, fadeDuration)
+                .SetEase(Ease.Linear).OnUpdate(ApplyVolume));
 
-        audioSource.Stop();
-        audioSource.clip = GetClip(song);
-        audioSource.Play();
+        playbackSequence.AppendCallback(() =>
+        {
+            audioSource.Stop();
+            audioSource.clip = clip;
+            fadeVolume = 0f;
+            ApplyVolume();
+            audioSource.Play();
 
-        sequence.Append(audioSource.DOFade(maxVolume, 3.0f));
+            currentSong = song;
+            elapsed = 0f;
+            musicStarted = true;
+        });
+        playbackSequence.Append(DOTween.To(() => fadeVolume, value => fadeVolume = value, 1f, fadeDuration)
+            .SetEase(Ease.Linear).OnUpdate(ApplyVolume));
     }
 
     public void LowerMusicVolume(float duration = -1.0f)
@@ -74,13 +119,14 @@ public class MusicPlayer : MonoBehaviour
 
         currentSequence = DOTween.Sequence();
 
-        if (audioSource.isPlaying)
-            currentSequence.Append(audioSource.DOFade(minVolume, 1.0f));
+        currentSequence.Append(DOTween.To(() => musicVolume, value => musicVolume = value, minVolume, 1f)
+            .OnUpdate(ApplyVolume));
 
         if (duration > 0.0f)
         {
             currentSequence.AppendInterval(duration);
-            RaiseBackMusicVolume();
+            currentSequence.Append(DOTween.To(() => musicVolume, value => musicVolume = value, maxVolume, 1f)
+                .OnUpdate(ApplyVolume));
         }
     }
 
@@ -94,8 +140,19 @@ public class MusicPlayer : MonoBehaviour
 
         currentSequence = DOTween.Sequence();
 
-        if (audioSource.isPlaying)
-            currentSequence.Append(audioSource.DOFade(maxVolume, 1.0f));
+        currentSequence.Append(DOTween.To(() => musicVolume, value => musicVolume = value, maxVolume, 1f)
+            .OnUpdate(ApplyVolume));
+    }
+
+    private void ApplyVolume()
+    {
+        audioSource.volume = fadeVolume * musicVolume;
+    }
+
+    private void OnDestroy()
+    {
+        playbackSequence?.Kill();
+        currentSequence?.Kill();
     }
 
     private AudioClip GetClip(Songs song)
@@ -104,6 +161,8 @@ public class MusicPlayer : MonoBehaviour
         {
             case Songs.NightDelivery:
                 return nightDelivery;
+            case Songs.WrongWay:
+                return wrongWay;
             default:
                 return nightDelivery;
         }
