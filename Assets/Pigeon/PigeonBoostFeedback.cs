@@ -29,7 +29,7 @@ public class PigeonBoostFeedback : MonoBehaviour
     public bool IsPlaying => _sequence != null && _sequence.IsActive() && _sequence.IsPlaying();
 
     // restart: false ignores the call while a roll is already playing.
-    public void Play(bool restart = true, float duration = -1f)
+    public void Play(bool restart = true, float duration = -1f, bool isLeft = true)
     {
         if (!restart && IsPlaying)
             return;
@@ -44,7 +44,7 @@ public class PigeonBoostFeedback : MonoBehaviour
         float stretchOut = _stretchDuration - stretchIn;
 
         _sequence = DOTween.Sequence()
-            .Insert(0f, _rollPivot.DOLocalRotate(new Vector3(0f, 0f, 360f * _rollCount), duration, RotateMode.LocalAxisAdd).SetEase(_rollEase))
+            .Insert(0f, _rollPivot.DOLocalRotate(new Vector3(0f, 0f, 360f * _rollCount * (isLeft ? 1.0f : -1.0f)), duration, RotateMode.LocalAxisAdd).SetEase(_rollEase))
             .Insert(0f, _rollPivot.DOScale(Vector3.Scale(_baseScale, _stretchScale), stretchIn).SetEase(Ease.OutQuad))
             .Insert(stretchIn, _rollPivot.DOScale(_baseScale, stretchOut).SetEase(Ease.OutBack))
             .OnComplete(ResetPivot);

@@ -135,7 +135,10 @@ public class PigeonController : MonoBehaviour
 
         // Consume every frame so a press made while too slow doesn't fire later.
         if (_controls.ConsumeLeftFlex)
-            BarrelRoll();
+            BarrelRoll(true);
+        if (_controls.ConsumeRightFlex)
+            BarrelRoll(false);
+
 
         float dt = Time.deltaTime;
         _velocity = Vector3.zero;
@@ -350,11 +353,11 @@ public class PigeonController : MonoBehaviour
     }
 
     // Purely visual; ignored while too slow or while a roll is already playing.
-    public void BarrelRoll()
+    public void BarrelRoll(bool isLeft)
     {
-        if (_boostFeedback == null || Speed < _minBarrelRollSpeed)
+        if (_boostFeedback == null || _controls.Flap || _controls.Dive || Speed < _minBarrelRollSpeed)
             return;
 
-        _boostFeedback.Play(restart: false, _rollDuration);
+        _boostFeedback.Play(restart: true, _rollDuration, isLeft);
     }
 }
