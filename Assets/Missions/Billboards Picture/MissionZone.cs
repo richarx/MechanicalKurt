@@ -1,4 +1,6 @@
+using System.Collections;
 using Sirenix.OdinInspector;
+using Unity.Cinemachine;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -21,6 +23,10 @@ public class MissionZone : MonoBehaviour
     [field: SerializeField]
     public UnityEvent OnValidated { get; private set; } = new UnityEvent();
 
+    [field: SerializeField]
+    public UnityEvent OnStartValidation { get; private set; } = new UnityEvent();
+
+
     private PigeonController _pigeon;
     private PlayerControls _controls;
     private float _nextPigeonSearch;
@@ -28,6 +34,8 @@ public class MissionZone : MonoBehaviour
 
     [SerializeField] private AudioClip pictureBillboardSFX;
     [SerializeField] private AudioClip successBillboardSFX;
+    [SerializeField] private CinemachineCamera camera;
+    [SerializeField] private float cameraSwapDuration = 3f;
 
 
     private void LateUpdate()
@@ -58,13 +66,19 @@ public class MissionZone : MonoBehaviour
         }
 
         if (_isInside && _controls.ConsumeInteract)
-            Validate();
+            StartCoroutine(Validate());
     }
 
-    private void Validate()
+    private IEnumerator Validate()
     {
         HidePrompt();
         Mission.ReportZoneCompleted(this);
+        OnStartValidation.Invoke();
+
+        _controls.SetControlsBlocked(true);
+        yield return new WaitForSeconds(cameraSwapDuration);
+        _controls.SetControlsBlocked(false);
+        
         OnValidated.Invoke();
         gameObject.SetActive(false);
     }
