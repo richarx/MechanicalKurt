@@ -640,8 +640,6 @@ MonoBehaviour:
   _pigeonController: {fileID: 2514600447504455624}
   _hipsBone: {fileID: 8660264594570947058}
   _visualRoot: {fileID: 7541785080196244376}
-  _smoothPop: 0
-  _smoothDuration: 0.3
   _groundLayer:
     serializedVersion: 2
     m_Bits: 255
@@ -669,9 +667,9 @@ Rigidbody:
   m_ImplicitTensor: 1
   m_UseGravity: 1
   m_IsKinematic: 1
-  m_Interpolate: 1
+  m_Interpolate: 0
   m_Constraints: 0
-  m_CollisionDetection: 1
+  m_CollisionDetection: 3
 --- !u!135 &5405790448048564387
 SphereCollider:
   m_ObjectHideFlags: 0
