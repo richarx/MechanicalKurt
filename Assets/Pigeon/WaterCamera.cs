@@ -14,9 +14,9 @@ public class WaterCamera : MonoBehaviour
         _orbitalFollow = GetComponent<CinemachineOrbitalFollow>();
     }
 
-    void Update()
+    void LateUpdate()
     {
-        if (_water != null && transform.position.y < _water.transform.position.y)
+        if (_water != null && _pigeon.transform.position.y < _water.transform.position.y)
         {
             _orbitalFollow.VerticalAxis.Value = _orbitalFollow.VerticalAxis.Range.x;
         }
