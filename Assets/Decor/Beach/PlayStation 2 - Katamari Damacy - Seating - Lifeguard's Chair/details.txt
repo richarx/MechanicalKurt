@@ -1,0 +1,5 @@
+Name: Lifeguard's Chair
+ID: 1175
+Category: Seating
+Variant: Standard
+Description: Always on the lookout for drowning people, but the guy who sits here wants to have some fun, too.
