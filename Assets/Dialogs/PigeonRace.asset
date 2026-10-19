@@ -1,0 +1,19 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1b0317d929739a34e839d08c8427854a, type: 3}
+  m_Name: PigeonRace
+  m_EditorClassIdentifier: Assembly-CSharp::DialogSequence
+  speaker: Arthropod-Man
+  lines:
+  - text: 'Hey, little Pidgey! Got a minute? Please say yes. '
+  - text: "I lost the pizzas I\u2019m supposed to deliver. Turns out the extra cheese doesn\u2019t make them stick."
+  - text: "Could you grab them for me? You\u2019d be my hero. And yes, I know how weird that sounds coming from me."

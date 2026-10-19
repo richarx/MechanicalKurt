@@ -36,6 +36,10 @@ public class RoarCinematic : MonoBehaviour
     [field: Tooltip("Secondes reelles laissees aux animations Die avant de revenir a la camera precedente.")]
     public float DieToRestoreDelay { get; private set; } = 1f;
 
+    [field: SerializeField]
+    [field: Tooltip("Achievement debloque a la fin normale de la sequence, apres le delai et le retour camera. L'ajouter aussi a la liste de l'AchievementManager.")]
+    public AchievementData CompletionAchievement { get; private set; }
+
     [ShowInInspector, ReadOnly] public bool IsPlaying { get; private set; }
 
     private Coroutine _routine;
@@ -131,6 +135,14 @@ public class RoarCinematic : MonoBehaviour
 
         IsPlaying = false;
         _routine = null;
+
+        if (CompletionAchievement != null)
+        {
+            if (AchievementManager.Instance != null)
+                AchievementManager.Instance.Unlock(CompletionAchievement);
+            else
+                Debug.LogWarning("RoarCinematic : sequence terminee, mais aucun AchievementManager dans la scene pour debloquer l'achievement.", this);
+        }
     }
 
     public void CancelCinematic()

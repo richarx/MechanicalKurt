@@ -78,6 +78,28 @@ public class PlayerControls : MonoBehaviour, IPigeonControls
         _forceFlex = isForcing;
     }
 
+    public void SnapCameraBehind()
+    {
+        if (_camera == null)
+            _camera = GetComponentInChildren<CinemachineOrbitalFollow>();
+        if (_camera == null || _camera.VirtualCamera == null || _camera.FollowTarget == null)
+            return;
+
+        CinemachineVirtualCameraBase virtualCamera = _camera.VirtualCamera;
+        // Initialiser l'orbite et annuler les anciennes vitesses d'entrée.
+        virtualCamera.PreviousStateIsValid = false;
+        virtualCamera.InternalUpdateCameraState(Vector3.up, -1f);
+        Vector3 targetPosition = _camera.FollowTargetPosition
+            + _camera.FollowTargetRotation * _camera.TargetOffset;
+        float distance = Mathf.Max(0.1f, Vector3.Distance(virtualCamera.State.GetFinalPosition(), targetPosition));
+        virtualCamera.ForceCameraPosition(targetPosition - transform.forward * distance, transform.rotation);
+        _camera.HorizontalAxis.CancelRecentering();
+        _camera.VerticalAxis.CancelRecentering();
+        // Replacer la caméra immédiatement, sans amortissement depuis l'ancien emplacement.
+        virtualCamera.PreviousStateIsValid = false;
+        virtualCamera.InternalUpdateCameraState(Vector3.up, 0f);
+    }
+
     private void ClearPendingActions()
     {
         _interact = _cooing = _shit = _leftFlex = _rightFlex = false;
