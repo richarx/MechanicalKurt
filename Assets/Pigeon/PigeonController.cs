@@ -52,6 +52,9 @@ public class PigeonController : MonoBehaviour
     [SerializeField] float _waterLevelModifier = 0.1f;
     [SerializeField] float _buoyancyForce = 10f;
 
+    [Header("Debug")]
+    [SerializeField] bool _activeDebug = false;
+
     Vector3 _velocity;
     Vector3 _pendingImpulse;
     float _currentPitch;
@@ -95,6 +98,9 @@ public class PigeonController : MonoBehaviour
 
     void UpdateCursorCapture()
     {
+        if (_controls is PlayerControls playerControls && playerControls.AreControlsBlocked)
+            return;
+
         if (!Application.isFocused)
             return;
 
@@ -114,10 +120,13 @@ public class PigeonController : MonoBehaviour
 
     void OnGUI()
     {
-        GUI.Label(new Rect(10, 50, 300, 20), $"Pitch: {_currentPitch:F1}");
-        GUI.Label(new Rect(10, 80, 300, 20), $"Speed: {_controller.velocity.magnitude:F1}");
-        GUI.Label(new Rect(10, 110, 300, 20), $"HorizontalSpeed: {Vector3.ProjectOnPlane(_controller.velocity, Vector3.up).magnitude:F1}");
-        GUI.Label(new Rect(10, 140, 300, 20), $"VerticalSpeed: {_controller.velocity.y:F1}");
+        if (_activeDebug)
+        {
+            GUI.Label(new Rect(10, 50, 300, 20), $"Pitch: {_currentPitch:F1}");
+            GUI.Label(new Rect(10, 80, 300, 20), $"Speed: {_controller.velocity.magnitude:F1}");
+            GUI.Label(new Rect(10, 110, 300, 20), $"HorizontalSpeed: {Vector3.ProjectOnPlane(_controller.velocity, Vector3.up).magnitude:F1}");
+            GUI.Label(new Rect(10, 140, 300, 20), $"VerticalSpeed: {_controller.velocity.y:F1}");
+        }
     }
 
     void Update()

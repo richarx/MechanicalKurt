@@ -28,12 +28,19 @@ public class DialogManager : MonoBehaviour
     //Testing
     [SerializeField] private DialogSequence testSequence;
 
-    [HideInInspector] public UnityEvent OnDialogStarted;
-    [HideInInspector] public UnityEvent OnDialogEnded;
+    [HideInInspector] public UnityEvent OnDialogStarted = new UnityEvent();
+    [HideInInspector] public UnityEvent OnDialogEnded = new UnityEvent();
+
+    [field: SerializeField, HideInInspector]
+    public UnityEvent<int> OnLineStarted { get; private set; } = new UnityEvent<int>();
+
+    public bool IsPlaying => isOpen || isClosing;
+    public DialogSequence CurrentSequence => currentSequence;
 
     private DialogSequence currentSequence;
     private int lineIndex;
     private bool isOpen;
+    private bool isClosing;
 
     private bool isTyping;
     private int totalCharacters;
@@ -55,7 +62,7 @@ public class DialogManager : MonoBehaviour
 
     private void Update()
     {
-        if (Keyboard.current.pKey.wasPressedThisFrame)
+        if (Keyboard.current != null && Keyboard.current.pKey.wasPressedThisFrame)
             StartDialog(testSequence);
 
         if (!isOpen)
@@ -122,7 +129,19 @@ public class DialogManager : MonoBehaviour
         SetPromptVisible(false);
 
         PlaySound(closeClip);
-        canvasGroup.DOFade(0f, fadeDuration).OnComplete(() => OnDialogEnded.Invoke());
+        isClosing = true;
+        canvasGroup.DOFade(0f, fadeDuration).OnComplete(() =>
+        {
+            isClosing = false;
+            OnDialogEnded.Invoke();
+        });
+    }
+
+    // Only close the requested sequence, leaving any replacement dialog alone.
+    public void CancelDialog(DialogSequence sequence)
+    {
+        if (isOpen && currentSequence == sequence)
+            EndDialog();
     }
 
     private void SetSpeaker(string speaker)
@@ -141,6 +160,7 @@ public class DialogManager : MonoBehaviour
         revealProgress = 0f;
         isTyping = true;
         SetPromptVisible(false);
+        OnLineStarted.Invoke(lineIndex);
     }
 
     private void SetPromptVisible(bool visible)
@@ -209,7 +229,8 @@ public class DialogManager : MonoBehaviour
     // Temporary input, to be replaced once the Input Actions are decided.
     private bool ConfirmPressed()
     {
-        return Keyboard.current.spaceKey.wasPressedThisFrame;
+        return (Keyboard.current != null && Keyboard.current.spaceKey.wasPressedThisFrame)
+            || (Gamepad.current != null && Gamepad.current.buttonSouth.wasPressedThisFrame);
     }
 
     // Show/hide only through the CanvasGroup, the alpha is faded by the caller.

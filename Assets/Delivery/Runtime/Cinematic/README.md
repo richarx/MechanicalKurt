@@ -33,8 +33,23 @@ cinematicManager.CancelCinematic(
 - `IsPlaying` reste vrai pendant l'entrée, l'attente et le retour. `IsReady` est vrai
   seulement pendant l'attente, avant la demande d'annulation.
 
-Le manager ne met pas le gameplay en pause et ne change pas `Time.timeScale`.
-Les transitions et les bandes utilisent le temps réel. L'appelant gère la pause.
+Le manager bloque les commandes du pigeon dès qu'une cinématique est acceptée,
+jusqu'à la fin du retour caméra et du fondu des bandes. Affecter `Player Controls`
+pour choisir le pigeon ; si vide, le manager recherche un `PlayerControls` dans la scène.
+Le blocage couvre les déplacements, les battements d'ailes, le piqué, le freinage et
+les actions ponctuelles. Ces dernières sont vidées pour éviter une action différée
+après la cinématique. Le pigeon ne peut pas recapturer le curseur pendant le blocage.
+La validation du dialogue avec Espace reste disponible. La physique continue et
+`Time.timeScale` reste inchangé ; les transitions et les bandes utilisent le temps réel.
+Le manager restaure le blocage précédent avant les callbacks de fin, y compris après
+une annulation, un timeout ou sa désactivation. Un pigeon déjà bloqué le reste.
+L'appelant gère toujours la pause éventuelle de la session de livraison.
+Vérifications du blocage : scripts de jeu compilés et dix scénarios validés en
+simulation (entrées neutralisées, actions en attente vidées, retour normal,
+annulation à l'entrée, désactivation, refus, timeout, blocage initial conservé,
+composant de commandes désactivé et cinématiques consécutives). À vérifier en Play :
+maintenir les touches pendant le dialogue, le geste final et le retour caméra ;
+Espace doit faire avancer le dialogue sans faire décoller le pigeon.
 Le premier callback d'entrée est toujours différé, même sans caméra et sans fondu.
 Ne pas laisser un ancien callback annuler une nouvelle cinématique : l'appelant doit
 nettoyer ses abonnements lorsqu'il reçoit `onEnded`.
@@ -87,6 +102,37 @@ DeliveryPickupCinematic.ContinuePickup(token) à sa fermeture. Nettoyer ce compo
 via On Cinematic Ended. Ne pas relire CurrentToken depuis un ancien callback.
 On Cinematic Ended est aussi appelé après une interruption : ce n'est pas un événement
 de réussite de livraison.
+
+## DialogCinematic : dialogue de personnage depuis un arrêt
+
+1. Ajouter `DialogCinematic` à un objet qui reste actif pendant la séquence.
+2. Affecter `Cinematic Manager`, `Character Animator`, l'asset `Dialogue` et la
+   caméra Cinemachine dans `Cinematic Camera` (facultative : vide, la vue reste la même).
+   `Dialog Manager` peut rester vide pour utiliser le singleton de la scène.
+3. Dans l'Animator du personnage, créer deux paramètres de type Trigger nommés
+   exactement `Talk` et `SendOff`, avec leurs transitions vers les animations.
+   Autoriser la réentrée de l'état Talk si chaque réplique doit relancer l'animation.
+4. Brancher `PigeonStopZone.OnPlayerStopped` sur `DialogCinematic.PlayCinematic()`.
+5. Régler `Send Off Seconds` pour laisser jouer le geste final avant le retour caméra.
+
+Le dialogue démarre après le blend d'entrée. `Talk` est déclenché au début de chaque
+réplique, première comprise ; révéler instantanément le texte ne le redéclenche pas.
+Après la validation de la dernière réplique et le fondu de fermeture, `SendOff` est
+déclenché, puis le composant attend le délai avant de rendre la caméra au gameplay.
+Les appels répétés pendant la séquence ou quand un autre dialogue est actif sont ignorés.
+`CancelCinematic()` ou la désactivation ferme le dialogue et rend la caméra sans SendOff.
+`OnCinematicEnded` arrive après le retour, y compris en cas d'annulation.
+Les commandes du pigeon sont bloquées et rétablies par `ManagerCinematic`.
+Le composant ne modifie pas `Time.timeScale`.
+
+À vérifier en Play : dialogue de plusieurs répliques (`Talk` une fois par réplique),
+dernière validation (`SendOff`, délai, retour), double appel pendant la lecture,
+annulation pendant l'entrée ou le dialogue, désactivation puis nouvelle lecture.
+
+Vérifications réalisées pour ce composant : compilation des scripts de jeu et sept
+scénarios en simulation (enchaînement, appels répétés et relecture, annulation à
+l'entrée, désactivation, interruption du manager, managers occupés, remplacement
+du dialogue). Les animations et les blends réels restent à vérifier dans Unity.
 
 ## Vérification dans Unity
 

@@ -20,6 +20,10 @@ public class ManagerCinematic : MonoBehaviour
     [field: Tooltip("Prototype only: copy the noclip view into the separate gameplay Cinemachine camera. Leave empty for a normal rig.")]
     public Camera PrototypeViewSource { get; private set; }
 
+    [field: SerializeField]
+    [field: Tooltip("Commandes du pigeon à bloquer pendant la cinématique. Recherche automatique dans la scène si vide.")]
+    public PlayerControls PlayerControls { get; private set; }
+
     [field: SerializeField, FormerlySerializedAs("_cinematicPriority"), MinValue(1)]
     public int CinematicPriority { get; private set; } = 100;
 
@@ -51,6 +55,8 @@ public class ManagerCinematic : MonoBehaviour
     private bool _cancelRequested;
     private bool _usesCamera;
     private bool _cursorChanged;
+    private PlayerControls _blockedControls;
+    private bool _wereControlsBlocked;
     private float _previousBarAlpha;
     private CursorLockMode _previousCursorLock;
     private bool _previousCursorVisible;
@@ -88,6 +94,13 @@ public class ManagerCinematic : MonoBehaviour
         _onCancelFinished = null;
         _cancelRequested = false;
         _phase = Phase.Entering;
+
+        _blockedControls = PlayerControls != null ? PlayerControls : FindAnyObjectByType<PlayerControls>();
+        if (_blockedControls != null)
+        {
+            _wereControlsBlocked = _blockedControls.AreControlsBlocked;
+            _blockedControls.SetControlsBlocked(true);
+        }
 
         if (_cursorChanged) { Cursor.lockState = CursorLockMode.None; Cursor.visible = true; }
         if (_usesCamera)
@@ -231,6 +244,8 @@ public class ManagerCinematic : MonoBehaviour
     {
         RestoreCamera();
         if (Letterbox != null) Letterbox.alpha = _previousBarAlpha;
+        if (_blockedControls != null) _blockedControls.SetControlsBlocked(_wereControlsBlocked);
+        _blockedControls = null;
         if (_cursorChanged) { Cursor.lockState = _previousCursorLock; Cursor.visible = _previousCursorVisible; }
         Action ended = _onEnded;
         Action cancelled = _onCancelFinished;

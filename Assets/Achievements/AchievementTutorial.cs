@@ -4,6 +4,7 @@ using Sirenix.OdinInspector;
 using TMPro;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.InputSystem.LowLevel;
 
 [Serializable]
 public class AchievementTutorialStep
@@ -49,6 +50,14 @@ public class AchievementTutorial : MonoBehaviour
     [field: SerializeField, MinValue(0f), SuffixLabel("seconds", true)]
     public float CompletionSeconds { get; private set; } = 4f;
 
+    [field: SerializeField, MinValue(0f), SuffixLabel("seconds", true),
+        Tooltip("Hide the last tutorial step after this delay, even if its achievement is still locked. Set to 0 to keep it visible.")]
+    public float LastStepDisplaySeconds { get; private set; } = 10f;
+
+    [field: SerializeField, Range(0.1f, 1f),
+        Tooltip("Minimum gamepad input magnitude before showing gamepad instructions. Filters small stick drift.")]
+    public float GamepadActivityThreshold { get; private set; } = 0.25f;
+
     [ShowInInspector, ReadOnly]
     public int CurrentStepIndex { get; private set; } = -1;
 
@@ -59,10 +68,14 @@ public class AchievementTutorial : MonoBehaviour
     private float _completionRemaining;
     private bool _configurationWarningLogged;
     private bool _usingGamepad;
+    private float _lastStepElapsed;
+    private bool _lastStepTimedOut;
 
     private void OnEnable()
     {
+        ResetLastStepTimer();
         _usingGamepad = Gamepad.current != null;
+        InputSystem.onEvent += HandleInputEvent;
         BindManager();
         RefreshProgress();
     }
@@ -76,6 +89,7 @@ public class AchievementTutorial : MonoBehaviour
 
     private void OnDisable()
     {
+        InputSystem.onEvent -= HandleInputEvent;
         UnbindManager();
         SetVisible(false);
     }
@@ -83,15 +97,39 @@ public class AchievementTutorial : MonoBehaviour
     private void Update()
     {
         if (BindManager()) RefreshProgress();
-        bool usingGamepad = Gamepad.current != null;
-        if (usingGamepad != _usingGamepad)
+        if (_usingGamepad && Gamepad.current == null) SetUsingGamepad(false);
+        if (!IsComplete && Steps != null && Steps.Count > 0 && CurrentStepIndex == Steps.Count - 1
+            && !_lastStepTimedOut && LastStepDisplaySeconds > 0f)
         {
-            _usingGamepad = usingGamepad;
-            RefreshCommands();
+            _lastStepElapsed += Time.deltaTime;
+            if (_lastStepElapsed >= LastStepDisplaySeconds)
+            {
+                _lastStepTimedOut = true;
+                SetVisible(false);
+            }
         }
         if (_completionRemaining <= 0f) return;
         _completionRemaining -= Time.unscaledDeltaTime;
         if (_completionRemaining <= 0f) SetVisible(false);
+    }
+
+    private void HandleInputEvent(InputEventPtr eventPtr, InputDevice device)
+    {
+        if (!(device is Gamepad) && !(device is Keyboard)) return;
+
+        bool usingGamepad = device is Gamepad;
+        float threshold = usingGamepad ? GamepadActivityThreshold : InputSystem.settings.defaultButtonPressPoint;
+        // Read changed controls from the event: a held key or an idle gamepad must not steal focus.
+        // Include analog controls so moving a stick also switches the instructions.
+        if (eventPtr.HasButtonPress(magnitude: threshold, buttonControlsOnly: false))
+            SetUsingGamepad(usingGamepad);
+    }
+
+    private void SetUsingGamepad(bool usingGamepad)
+    {
+        if (_usingGamepad == usingGamepad) return;
+        _usingGamepad = usingGamepad;
+        RefreshCommands();
     }
 
     private bool BindManager()
@@ -103,7 +141,7 @@ public class AchievementTutorial : MonoBehaviour
         if (_subscribedManager != null)
         {
             _subscribedManager.OnUnlocked += HandleUnlocked;
-            _subscribedManager.OnReset += RefreshProgress;
+            _subscribedManager.OnReset += HandleReset;
         }
         return true;
     }
@@ -113,7 +151,7 @@ public class AchievementTutorial : MonoBehaviour
         if (_subscribedManager != null)
         {
             _subscribedManager.OnUnlocked -= HandleUnlocked;
-            _subscribedManager.OnReset -= RefreshProgress;
+            _subscribedManager.OnReset -= HandleReset;
         }
         _subscribedManager = null;
     }
@@ -129,8 +167,21 @@ public class AchievementTutorial : MonoBehaviour
         Refresh(true);
     }
 
+    private void HandleReset()
+    {
+        ResetLastStepTimer();
+        RefreshProgress();
+    }
+
+    private void ResetLastStepTimer()
+    {
+        _lastStepElapsed = 0f;
+        _lastStepTimedOut = false;
+    }
+
     private void Refresh(bool showCompletion)
     {
+        int previousStepIndex = CurrentStepIndex;
         bool hadActiveStep = CurrentStepIndex >= 0 && !IsComplete;
         CurrentStepIndex = -1;
         IsComplete = false;
@@ -156,18 +207,19 @@ public class AchievementTutorial : MonoBehaviour
             AchievementTutorialStep step = Steps[i];
             if (_subscribedManager.IsUnlocked(step.Achievement)) continue;
             CurrentStepIndex = i;
+            if (previousStepIndex != i) ResetLastStepTimer();
             if (ObjectiveText != null)
                 ObjectiveText.text = string.IsNullOrWhiteSpace(step.Objective)
                     ? step.Achievement.Description : step.Objective;
             RefreshCommands();
             if (ProgressText != null) ProgressText.text = $"Tutorial · {i + 1} / {Steps.Count}";
-            SetVisible(true);
+            SetVisible(!_lastStepTimedOut);
             return;
         }
 
         IsComplete = true;
         // Already completed on loading: keep the HUD hidden.
-        if (!showCompletion || !hadActiveStep || !(CompletionSeconds > 0f)) return;
+        if (!showCompletion || !hadActiveStep || _lastStepTimedOut || !(CompletionSeconds > 0f)) return;
         _completionRemaining = CompletionSeconds;
         if (ObjectiveText != null) ObjectiveText.text = CompletionMessage;
         if (CommandsText != null) CommandsText.text = string.Empty;

@@ -1,3 +1,4 @@
+using Sirenix.OdinInspector;
 using Unity.Cinemachine;
 using UnityEngine;
 
@@ -16,6 +17,11 @@ public class PlayerControls : MonoBehaviour, IPigeonControls
 
     bool _rightFlex;
 
+    [ShowInInspector, ReadOnly]
+    public bool AreControlsBlocked { get; private set; }
+
+    private bool CanReadControls => isActiveAndEnabled && !AreControlsBlocked;
+
     void Awake()
     {
         _controls = new Controls();
@@ -25,11 +31,14 @@ public class PlayerControls : MonoBehaviour, IPigeonControls
     void OnEnable()
     {
         _controls.Enable();
+        if (AreControlsBlocked)
+            _controls.Player.Disable();
     }
 
     void OnDisable()
     {
         _controls.Disable();
+        ClearPendingActions();
     }
 
     void OnDestroy()
@@ -39,6 +48,9 @@ public class PlayerControls : MonoBehaviour, IPigeonControls
 
     void Update()
     {
+        if (!CanReadControls)
+            return;
+
         _interact |= _controls.Player.Interact.WasPressedThisFrame();
         _cooing |= _controls.Player.Cooing.WasPressedThisFrame();
         _shit |= _controls.Player.Shit.WasPressedThisFrame();
@@ -46,11 +58,32 @@ public class PlayerControls : MonoBehaviour, IPigeonControls
         _rightFlex |= _controls.Player.RightFlex.WasPressedThisFrame();
     }
 
-    Vector2 IPigeonControls.RelativeMovement => _controls.Player.Move.ReadValue<Vector2>();
+    public void SetControlsBlocked(bool blocked)
+    {
+        AreControlsBlocked = blocked;
+        ClearPendingActions();
+        if (_controls == null)
+            return;
+
+        if (blocked || !isActiveAndEnabled)
+            _controls.Player.Disable();
+        else
+            _controls.Player.Enable();
+    }
+
+    private void ClearPendingActions()
+    {
+        _interact = _cooing = _shit = _leftFlex = _rightFlex = false;
+    }
+
+    Vector2 IPigeonControls.RelativeMovement => CanReadControls ? _controls.Player.Move.ReadValue<Vector2>() : Vector2.zero;
     Vector2 IPigeonControls.Movement
     {
         get
         {
+            if (!CanReadControls)
+                return Vector2.zero;
+
             Vector2 movement = _controls.Player.Move.ReadValue<Vector2>();
             float angle = _camera.HorizontalAxis.Value;
             float rad = angle * Mathf.Deg2Rad;
@@ -61,18 +94,18 @@ public class PlayerControls : MonoBehaviour, IPigeonControls
             return new Vector2(rotatedX, rotatedY);
         }
     }
-    bool IPigeonControls.Flap => _controls.Player.Flap.IsPressed();
-    bool IPigeonControls.Dive => _controls.Player.Dive.IsPressed();
+    bool IPigeonControls.Flap => CanReadControls && _controls.Player.Flap.IsPressed();
+    bool IPigeonControls.Dive => CanReadControls && _controls.Player.Dive.IsPressed();
 
-    public bool Brake => _controls.Player.Brake.IsPressed();
+    public bool Brake => CanReadControls && _controls.Player.Brake.IsPressed();
 
-    public bool Flex => _controls.Player.LeftFlex.IsPressed() || _controls.Player.RightFlex.IsPressed();
+    public bool Flex => CanReadControls && (_controls.Player.LeftFlex.IsPressed() || _controls.Player.RightFlex.IsPressed());
 
     public bool ConsumeInteract
     {
         get
         {
-            bool value = _interact;
+            bool value = CanReadControls && _interact;
             _interact = false;
             return value;
         }
@@ -82,7 +115,7 @@ public class PlayerControls : MonoBehaviour, IPigeonControls
     {
         get
         {
-            bool value = _cooing;
+            bool value = CanReadControls && _cooing;
             _cooing = false;
             return value;
         }
@@ -92,7 +125,7 @@ public class PlayerControls : MonoBehaviour, IPigeonControls
     {
         get
         {
-            bool value = _shit;
+            bool value = CanReadControls && _shit;
             _shit = false;
             return value;
         }
@@ -102,7 +135,7 @@ public class PlayerControls : MonoBehaviour, IPigeonControls
     {
         get
         {
-            bool value = _leftFlex;
+            bool value = CanReadControls && _leftFlex;
             _leftFlex = false;
             return value;
         }
@@ -112,7 +145,7 @@ public class PlayerControls : MonoBehaviour, IPigeonControls
     {
         get
         {
-            bool value = _rightFlex;
+            bool value = CanReadControls && _rightFlex;
             _rightFlex = false;
             return value;
         }
