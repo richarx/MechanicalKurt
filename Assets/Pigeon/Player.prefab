@@ -333,6 +333,7 @@ GameObject:
   - component: {fileID: 7788707282503470594}
   - component: {fileID: 5917408735170155768}
   - component: {fileID: 7595259944597442791}
+  - component: {fileID: 8858055023861483610}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -434,6 +435,7 @@ MonoBehaviour:
   _rollDuration: 1
   _waterLevelModifier: 0.1
   _buoyancyForce: 20
+  _activeDebug: 0
 --- !u!114 &7788707282503470594
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -483,6 +485,21 @@ MonoBehaviour:
   windParticles: {fileID: 3792138837400240535}
   wingTrailRendererLeft: {fileID: 8287067714026424246}
   wingTrailRendererRight: {fileID: 7628107183944301609}
+--- !u!114 &8858055023861483610
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8893443228925278897}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2106a3349b650764989c946ebb4b758a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ButtHoleManager
+  _buttHole: {fileID: 8761204759105641240}
+  _poopPrefab: {fileID: 6825427995295685755, guid: 0091c71e5debd7c4683a552575c1c8fd, type: 3}
+  _cooldownMax: 0.5
 --- !u!1001 &902121178248826382
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2500,6 +2517,11 @@ Transform:
 --- !u!4 &6488621094645375876 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 3888469376381458828, guid: 0065f115667c06940a51b2747e6108a2, type: 3}
+  m_PrefabInstance: {fileID: 8068947269522700808}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &8761204759105641240 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 1615848358607724816, guid: 0065f115667c06940a51b2747e6108a2, type: 3}
   m_PrefabInstance: {fileID: 8068947269522700808}
   m_PrefabAsset: {fileID: 0}
 --- !u!4 &8843926802890355952 stripped
