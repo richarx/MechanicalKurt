@@ -5088,7 +5088,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4936109411098377884, guid: ec45962f05ef93242b6384064c979844, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 9.09
+      value: 10.5
       objectReference: {fileID: 0}
     - target: {fileID: 4936109411098377884, guid: ec45962f05ef93242b6384064c979844, type: 3}
       propertyPath: m_LocalPosition.y
@@ -5096,7 +5096,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4936109411098377884, guid: ec45962f05ef93242b6384064c979844, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -13.36329
+      value: -18.3
       objectReference: {fileID: 0}
     - target: {fileID: 4936109411098377884, guid: ec45962f05ef93242b6384064c979844, type: 3}
       propertyPath: m_LocalRotation.w
@@ -5127,6 +5127,14 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6310373061646992575, guid: ec45962f05ef93242b6384064c979844, type: 3}
+      propertyPath: pictureBillboardSFX
+      value: 
+      objectReference: {fileID: 8300000, guid: 1af00d435cd423740ae9d018754e9817, type: 3}
+    - target: {fileID: 6310373061646992575, guid: ec45962f05ef93242b6384064c979844, type: 3}
+      propertyPath: successBillboardSFX
+      value: 
+      objectReference: {fileID: 8300000, guid: d09cc3cabf20bf04f8544705f53f8c82, type: 3}
+    - target: {fileID: 6310373061646992575, guid: ec45962f05ef93242b6384064c979844, type: 3}
       propertyPath: <Prompt>k__BackingField
       value: 
       objectReference: {fileID: 60255020}
@@ -5137,6 +5145,34 @@ PrefabInstance:
     - target: {fileID: 6310373061646992575, guid: ec45962f05ef93242b6384064c979844, type: 3}
       propertyPath: <StopSpeedThreshold>k__BackingField
       value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 6310373061646992575, guid: ec45962f05ef93242b6384064c979844, type: 3}
+      propertyPath: <OnValidated>k__BackingField.m_PersistentCalls.m_Calls.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6310373061646992575, guid: ec45962f05ef93242b6384064c979844, type: 3}
+      propertyPath: <OnValidated>k__BackingField.m_PersistentCalls.m_Calls.Array.data[0].m_Mode
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6310373061646992575, guid: ec45962f05ef93242b6384064c979844, type: 3}
+      propertyPath: <OnValidated>k__BackingField.m_PersistentCalls.m_Calls.Array.data[0].m_Target
+      value: 
+      objectReference: {fileID: 1718627237}
+    - target: {fileID: 6310373061646992575, guid: ec45962f05ef93242b6384064c979844, type: 3}
+      propertyPath: <OnValidated>k__BackingField.m_PersistentCalls.m_Calls.Array.data[0].m_CallState
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 6310373061646992575, guid: ec45962f05ef93242b6384064c979844, type: 3}
+      propertyPath: <OnValidated>k__BackingField.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
+      value: PlayValidatedBillboardSFX
+      objectReference: {fileID: 0}
+    - target: {fileID: 6310373061646992575, guid: ec45962f05ef93242b6384064c979844, type: 3}
+      propertyPath: <OnValidated>k__BackingField.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
+      value: MissionZone, Assembly-CSharp
+      objectReference: {fileID: 0}
+    - target: {fileID: 6310373061646992575, guid: ec45962f05ef93242b6384064c979844, type: 3}
+      propertyPath: <OnValidated>k__BackingField.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_ObjectArgumentAssemblyTypeName
+      value: UnityEngine.Object, UnityEngine
       objectReference: {fileID: 0}
     - target: {fileID: 7902013897761636512, guid: ec45962f05ef93242b6384064c979844, type: 3}
       propertyPath: m_Name
@@ -11649,6 +11685,115 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 5325464658236889047, guid: 41e72c62f7cd1ee4e8d457e9a394d71f, type: 3}
   m_PrefabInstance: {fileID: 450144094369711961}
   m_PrefabAsset: {fileID: 0}
+--- !u!1001 &280220090
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 4936109411098377884, guid: ec45962f05ef93242b6384064c979844, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 4936109411098377884, guid: ec45962f05ef93242b6384064c979844, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -73.81485
+      objectReference: {fileID: 0}
+    - target: {fileID: 4936109411098377884, guid: ec45962f05ef93242b6384064c979844, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 17.96
+      objectReference: {fileID: 0}
+    - target: {fileID: 4936109411098377884, guid: ec45962f05ef93242b6384064c979844, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -82.67
+      objectReference: {fileID: 0}
+    - target: {fileID: 4936109411098377884, guid: ec45962f05ef93242b6384064c979844, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4936109411098377884, guid: ec45962f05ef93242b6384064c979844, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4936109411098377884, guid: ec45962f05ef93242b6384064c979844, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4936109411098377884, guid: ec45962f05ef93242b6384064c979844, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4936109411098377884, guid: ec45962f05ef93242b6384064c979844, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4936109411098377884, guid: ec45962f05ef93242b6384064c979844, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4936109411098377884, guid: ec45962f05ef93242b6384064c979844, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6310373061646992575, guid: ec45962f05ef93242b6384064c979844, type: 3}
+      propertyPath: pictureBillboardSFX
+      value: 
+      objectReference: {fileID: 8300000, guid: 1af00d435cd423740ae9d018754e9817, type: 3}
+    - target: {fileID: 6310373061646992575, guid: ec45962f05ef93242b6384064c979844, type: 3}
+      propertyPath: successBillboardSFX
+      value: 
+      objectReference: {fileID: 8300000, guid: d09cc3cabf20bf04f8544705f53f8c82, type: 3}
+    - target: {fileID: 6310373061646992575, guid: ec45962f05ef93242b6384064c979844, type: 3}
+      propertyPath: <Prompt>k__BackingField
+      value: 
+      objectReference: {fileID: 60255020}
+    - target: {fileID: 6310373061646992575, guid: ec45962f05ef93242b6384064c979844, type: 3}
+      propertyPath: <Mission>k__BackingField
+      value: 
+      objectReference: {fileID: 871323909}
+    - target: {fileID: 6310373061646992575, guid: ec45962f05ef93242b6384064c979844, type: 3}
+      propertyPath: <StopSpeedThreshold>k__BackingField
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 6310373061646992575, guid: ec45962f05ef93242b6384064c979844, type: 3}
+      propertyPath: <OnValidated>k__BackingField.m_PersistentCalls.m_Calls.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6310373061646992575, guid: ec45962f05ef93242b6384064c979844, type: 3}
+      propertyPath: <OnValidated>k__BackingField.m_PersistentCalls.m_Calls.Array.data[0].m_Mode
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6310373061646992575, guid: ec45962f05ef93242b6384064c979844, type: 3}
+      propertyPath: <OnValidated>k__BackingField.m_PersistentCalls.m_Calls.Array.data[0].m_Target
+      value: 
+      objectReference: {fileID: 1718627237}
+    - target: {fileID: 6310373061646992575, guid: ec45962f05ef93242b6384064c979844, type: 3}
+      propertyPath: <OnValidated>k__BackingField.m_PersistentCalls.m_Calls.Array.data[0].m_CallState
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 6310373061646992575, guid: ec45962f05ef93242b6384064c979844, type: 3}
+      propertyPath: <OnValidated>k__BackingField.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
+      value: PlayValidatedBillboardSFX
+      objectReference: {fileID: 0}
+    - target: {fileID: 6310373061646992575, guid: ec45962f05ef93242b6384064c979844, type: 3}
+      propertyPath: <OnValidated>k__BackingField.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
+      value: MissionZone, Assembly-CSharp
+      objectReference: {fileID: 0}
+    - target: {fileID: 6310373061646992575, guid: ec45962f05ef93242b6384064c979844, type: 3}
+      propertyPath: <OnValidated>k__BackingField.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_ObjectArgumentAssemblyTypeName
+      value: UnityEngine.Object, UnityEngine
+      objectReference: {fileID: 0}
+    - target: {fileID: 7902013897761636512, guid: ec45962f05ef93242b6384064c979844, type: 3}
+      propertyPath: m_Name
+      value: MissionCheckpoint (4)
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: ec45962f05ef93242b6384064c979844, type: 3}
 --- !u!1 &280751341
 GameObject:
   m_ObjectHideFlags: 0
@@ -20620,6 +20765,17 @@ Transform:
   m_Children: []
   m_Father: {fileID: 424482567}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &493140343 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 6310373061646992575, guid: ec45962f05ef93242b6384064c979844, type: 3}
+  m_PrefabInstance: {fileID: 280220090}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cc81f9ea2f01b4947bf654575f882f64, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MissionZone
 --- !u!1 &495801315
 GameObject:
   m_ObjectHideFlags: 0
@@ -31872,6 +32028,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 6741217f46454adab4e776a0f0eb0184, type: 2}
   - {fileID: 11400000, guid: 8036ff34f92a7ca4ab8173be100d7af6, type: 2}
   - {fileID: 11400000, guid: 848b0456e7729614eafa28215cdc94ca, type: 2}
+  - {fileID: 11400000, guid: 518bbe0937f46b14c994e6853c265d03, type: 2}
 --- !u!4 &771039945
 Transform:
   m_ObjectHideFlags: 0
@@ -36024,12 +36181,15 @@ MonoBehaviour:
   - {fileID: 1718627237}
   - {fileID: 139267180}
   - {fileID: 1003291974}
+  - {fileID: 493140343}
   <OnProgress>k__BackingField:
     m_PersistentCalls:
       m_Calls: []
   <OnCompleted>k__BackingField:
     m_PersistentCalls:
       m_Calls: []
+  achievement: {fileID: 11400000, guid: 518bbe0937f46b14c994e6853c265d03, type: 2}
+  missionSuccess: {fileID: 8300000, guid: 46321160c9615a2478a816e5dfa70d89, type: 3}
 --- !u!1001 &872015117
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -53637,15 +53797,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b7be3d7bcc2a4d7ba19e22efbd683ef8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PigeonStopZone
-  _pigeon: {fileID: 0}
+  _pigeon: {fileID: 1769670844}
   <Radius>k__BackingField: 2
   <StopSpeedThreshold>k__BackingField: 0.15
   <StopDuration>k__BackingField: 0.5
   <OnPlayerStopped>k__BackingField:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
-        m_TargetAssemblyTypeName: PigeonStopDialogCinematic, Assembly-CSharp
+      - m_Target: {fileID: 1279947176}
+        m_TargetAssemblyTypeName: DialogCinematic, Assembly-CSharp
         m_MethodName: PlayCinematic
         m_Mode: 1
         m_Arguments:
@@ -54973,7 +55133,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4936109411098377884, guid: ec45962f05ef93242b6384064c979844, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -172.23
+      value: -170.75
       objectReference: {fileID: 0}
     - target: {fileID: 4936109411098377884, guid: ec45962f05ef93242b6384064c979844, type: 3}
       propertyPath: m_LocalPosition.y
@@ -54981,7 +55141,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4936109411098377884, guid: ec45962f05ef93242b6384064c979844, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 62.34
+      value: 69.42
       objectReference: {fileID: 0}
     - target: {fileID: 4936109411098377884, guid: ec45962f05ef93242b6384064c979844, type: 3}
       propertyPath: m_LocalRotation.w
@@ -55012,6 +55172,14 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6310373061646992575, guid: ec45962f05ef93242b6384064c979844, type: 3}
+      propertyPath: pictureBillboardSFX
+      value: 
+      objectReference: {fileID: 8300000, guid: 1af00d435cd423740ae9d018754e9817, type: 3}
+    - target: {fileID: 6310373061646992575, guid: ec45962f05ef93242b6384064c979844, type: 3}
+      propertyPath: successBillboardSFX
+      value: 
+      objectReference: {fileID: 8300000, guid: d09cc3cabf20bf04f8544705f53f8c82, type: 3}
+    - target: {fileID: 6310373061646992575, guid: ec45962f05ef93242b6384064c979844, type: 3}
       propertyPath: <Prompt>k__BackingField
       value: 
       objectReference: {fileID: 60255020}
@@ -55022,6 +55190,34 @@ PrefabInstance:
     - target: {fileID: 6310373061646992575, guid: ec45962f05ef93242b6384064c979844, type: 3}
       propertyPath: <StopSpeedThreshold>k__BackingField
       value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 6310373061646992575, guid: ec45962f05ef93242b6384064c979844, type: 3}
+      propertyPath: <OnValidated>k__BackingField.m_PersistentCalls.m_Calls.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6310373061646992575, guid: ec45962f05ef93242b6384064c979844, type: 3}
+      propertyPath: <OnValidated>k__BackingField.m_PersistentCalls.m_Calls.Array.data[0].m_Mode
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6310373061646992575, guid: ec45962f05ef93242b6384064c979844, type: 3}
+      propertyPath: <OnValidated>k__BackingField.m_PersistentCalls.m_Calls.Array.data[0].m_Target
+      value: 
+      objectReference: {fileID: 1080869239}
+    - target: {fileID: 6310373061646992575, guid: ec45962f05ef93242b6384064c979844, type: 3}
+      propertyPath: <OnValidated>k__BackingField.m_PersistentCalls.m_Calls.Array.data[0].m_CallState
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 6310373061646992575, guid: ec45962f05ef93242b6384064c979844, type: 3}
+      propertyPath: <OnValidated>k__BackingField.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
+      value: PlayValidatedBillboardSFX
+      objectReference: {fileID: 0}
+    - target: {fileID: 6310373061646992575, guid: ec45962f05ef93242b6384064c979844, type: 3}
+      propertyPath: <OnValidated>k__BackingField.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
+      value: MissionZone, Assembly-CSharp
+      objectReference: {fileID: 0}
+    - target: {fileID: 6310373061646992575, guid: ec45962f05ef93242b6384064c979844, type: 3}
+      propertyPath: <OnValidated>k__BackingField.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_ObjectArgumentAssemblyTypeName
+      value: UnityEngine.Object, UnityEngine
       objectReference: {fileID: 0}
     - target: {fileID: 7902013897761636512, guid: ec45962f05ef93242b6384064c979844, type: 3}
       propertyPath: m_Name
@@ -64867,15 +65063,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4936109411098377884, guid: ec45962f05ef93242b6384064c979844, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -73.81485
+      value: 13.07
       objectReference: {fileID: 0}
     - target: {fileID: 4936109411098377884, guid: ec45962f05ef93242b6384064c979844, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 17.91
+      value: 58.71
       objectReference: {fileID: 0}
     - target: {fileID: 4936109411098377884, guid: ec45962f05ef93242b6384064c979844, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -90.747025
+      value: -104.08
       objectReference: {fileID: 0}
     - target: {fileID: 4936109411098377884, guid: ec45962f05ef93242b6384064c979844, type: 3}
       propertyPath: m_LocalRotation.w
@@ -64906,6 +65102,14 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6310373061646992575, guid: ec45962f05ef93242b6384064c979844, type: 3}
+      propertyPath: pictureBillboardSFX
+      value: 
+      objectReference: {fileID: 8300000, guid: 1af00d435cd423740ae9d018754e9817, type: 3}
+    - target: {fileID: 6310373061646992575, guid: ec45962f05ef93242b6384064c979844, type: 3}
+      propertyPath: successBillboardSFX
+      value: 
+      objectReference: {fileID: 8300000, guid: d09cc3cabf20bf04f8544705f53f8c82, type: 3}
+    - target: {fileID: 6310373061646992575, guid: ec45962f05ef93242b6384064c979844, type: 3}
       propertyPath: <Prompt>k__BackingField
       value: 
       objectReference: {fileID: 60255020}
@@ -64916,6 +65120,34 @@ PrefabInstance:
     - target: {fileID: 6310373061646992575, guid: ec45962f05ef93242b6384064c979844, type: 3}
       propertyPath: <StopSpeedThreshold>k__BackingField
       value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 6310373061646992575, guid: ec45962f05ef93242b6384064c979844, type: 3}
+      propertyPath: <OnValidated>k__BackingField.m_PersistentCalls.m_Calls.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6310373061646992575, guid: ec45962f05ef93242b6384064c979844, type: 3}
+      propertyPath: <OnValidated>k__BackingField.m_PersistentCalls.m_Calls.Array.data[0].m_Mode
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6310373061646992575, guid: ec45962f05ef93242b6384064c979844, type: 3}
+      propertyPath: <OnValidated>k__BackingField.m_PersistentCalls.m_Calls.Array.data[0].m_Target
+      value: 
+      objectReference: {fileID: 1718627237}
+    - target: {fileID: 6310373061646992575, guid: ec45962f05ef93242b6384064c979844, type: 3}
+      propertyPath: <OnValidated>k__BackingField.m_PersistentCalls.m_Calls.Array.data[0].m_CallState
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 6310373061646992575, guid: ec45962f05ef93242b6384064c979844, type: 3}
+      propertyPath: <OnValidated>k__BackingField.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
+      value: PlayValidatedBillboardSFX
+      objectReference: {fileID: 0}
+    - target: {fileID: 6310373061646992575, guid: ec45962f05ef93242b6384064c979844, type: 3}
+      propertyPath: <OnValidated>k__BackingField.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
+      value: MissionZone, Assembly-CSharp
+      objectReference: {fileID: 0}
+    - target: {fileID: 6310373061646992575, guid: ec45962f05ef93242b6384064c979844, type: 3}
+      propertyPath: <OnValidated>k__BackingField.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_ObjectArgumentAssemblyTypeName
+      value: UnityEngine.Object, UnityEngine
       objectReference: {fileID: 0}
     - target: {fileID: 7902013897761636512, guid: ec45962f05ef93242b6384064c979844, type: 3}
       propertyPath: m_Name
@@ -66968,15 +67200,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4936109411098377884, guid: ec45962f05ef93242b6384064c979844, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 21.717134
+      value: -11.44
       objectReference: {fileID: 0}
     - target: {fileID: 4936109411098377884, guid: ec45962f05ef93242b6384064c979844, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 13.91
+      value: 17.8
       objectReference: {fileID: 0}
     - target: {fileID: 4936109411098377884, guid: ec45962f05ef93242b6384064c979844, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -208.37369
+      value: -215.3
       objectReference: {fileID: 0}
     - target: {fileID: 4936109411098377884, guid: ec45962f05ef93242b6384064c979844, type: 3}
       propertyPath: m_LocalRotation.w
@@ -67007,6 +67239,14 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6310373061646992575, guid: ec45962f05ef93242b6384064c979844, type: 3}
+      propertyPath: pictureBillboardSFX
+      value: 
+      objectReference: {fileID: 8300000, guid: 1af00d435cd423740ae9d018754e9817, type: 3}
+    - target: {fileID: 6310373061646992575, guid: ec45962f05ef93242b6384064c979844, type: 3}
+      propertyPath: successBillboardSFX
+      value: 
+      objectReference: {fileID: 8300000, guid: d09cc3cabf20bf04f8544705f53f8c82, type: 3}
+    - target: {fileID: 6310373061646992575, guid: ec45962f05ef93242b6384064c979844, type: 3}
       propertyPath: <Prompt>k__BackingField
       value: 
       objectReference: {fileID: 60255020}
@@ -67017,6 +67257,34 @@ PrefabInstance:
     - target: {fileID: 6310373061646992575, guid: ec45962f05ef93242b6384064c979844, type: 3}
       propertyPath: <StopSpeedThreshold>k__BackingField
       value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 6310373061646992575, guid: ec45962f05ef93242b6384064c979844, type: 3}
+      propertyPath: <OnValidated>k__BackingField.m_PersistentCalls.m_Calls.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6310373061646992575, guid: ec45962f05ef93242b6384064c979844, type: 3}
+      propertyPath: <OnValidated>k__BackingField.m_PersistentCalls.m_Calls.Array.data[0].m_Mode
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6310373061646992575, guid: ec45962f05ef93242b6384064c979844, type: 3}
+      propertyPath: <OnValidated>k__BackingField.m_PersistentCalls.m_Calls.Array.data[0].m_Target
+      value: 
+      objectReference: {fileID: 1718627237}
+    - target: {fileID: 6310373061646992575, guid: ec45962f05ef93242b6384064c979844, type: 3}
+      propertyPath: <OnValidated>k__BackingField.m_PersistentCalls.m_Calls.Array.data[0].m_CallState
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 6310373061646992575, guid: ec45962f05ef93242b6384064c979844, type: 3}
+      propertyPath: <OnValidated>k__BackingField.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
+      value: PlayValidatedBillboardSFX
+      objectReference: {fileID: 0}
+    - target: {fileID: 6310373061646992575, guid: ec45962f05ef93242b6384064c979844, type: 3}
+      propertyPath: <OnValidated>k__BackingField.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
+      value: MissionZone, Assembly-CSharp
+      objectReference: {fileID: 0}
+    - target: {fileID: 6310373061646992575, guid: ec45962f05ef93242b6384064c979844, type: 3}
+      propertyPath: <OnValidated>k__BackingField.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_ObjectArgumentAssemblyTypeName
+      value: UnityEngine.Object, UnityEngine
       objectReference: {fileID: 0}
     - target: {fileID: 7902013897761636512, guid: ec45962f05ef93242b6384064c979844, type: 3}
       propertyPath: m_Name
@@ -92551,4 +92819,5 @@ SceneRoots:
   - {fileID: 123200667}
   - {fileID: 1607332973}
   - {fileID: 1557821151}
+  - {fileID: 280220090}
   - {fileID: 477230057}

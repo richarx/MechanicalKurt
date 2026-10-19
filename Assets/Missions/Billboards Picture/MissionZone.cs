@@ -26,6 +26,10 @@ public class MissionZone : MonoBehaviour
     private float _nextPigeonSearch;
     private bool _isInside;
 
+    [SerializeField] private AudioClip pictureBillboardSFX;
+    [SerializeField] private AudioClip successBillboardSFX;
+
+
     private void LateUpdate()
     {
         if (_pigeon == null && Time.time >= _nextPigeonSearch)
@@ -84,5 +88,12 @@ public class MissionZone : MonoBehaviour
         Gizmos.color = Color.green;
         Gizmos.DrawWireSphere(transform.position, Radius);
         Gizmos.color = previousColor;
+    }
+
+    public void PlayValidatedBillboardSFX()
+    {
+        SFXManager.Instance.PlaySFX(pictureBillboardSFX);
+        float newPitch = 0.95f + Mission.CompletedCount * -0.05f;
+        SFXManager.Instance.PlaySFX(successBillboardSFX, delay: 0.2f, pitch: newPitch);
     }
 }

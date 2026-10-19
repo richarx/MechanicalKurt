@@ -15,7 +15,8 @@ MonoBehaviour:
   speaker: MASTER
   lines:
   - text: 'Hey little pidgey '
-  - text: Today nobody talks to each other anymore, everybody is busy watching advertisment
-  - text: What's the next step ? Cellphones ? Again ? Ew.
-  - text: 'Can you help us prevent the return of advertisement technology ? '
-  - text: 'Here is your mission : go shit on those huge billboards !!'
+  - text: You're doing god's work you know ? We were so hung up in our phones, now we have you !
+  - text: I love your city, but my holidays here are over now.
+  - text: 'I noticed there''s 5 awesome billboards, but I didn''t get time to take proper pictures.
+
+      Can you do it for me ?'

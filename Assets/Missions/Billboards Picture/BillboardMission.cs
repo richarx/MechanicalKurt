@@ -27,6 +27,9 @@ public class BillboardMission : MonoBehaviour
 
     public int TotalCount => Zones.Count;
 
+    [SerializeField] AchievementData achievement;
+    [SerializeField] AudioClip missionSuccess;
+
     private void Awake()
     {
         SetZonesActive(false);
@@ -59,6 +62,8 @@ public class BillboardMission : MonoBehaviour
         {
             IsRunning = false;
             OnCompleted.Invoke();
+            AchievementManager.Instance.Unlock(achievement);
+            SFXManager.Instance.PlaySFX(missionSuccess, delay:0.2f);
         }
     }
 
