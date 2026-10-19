@@ -102,7 +102,7 @@ public class PostTutorialPopup : MonoBehaviour
     {
         while (Tutorial != null && (!Tutorial.IsComplete || !CanAdvance)) yield return null;
         if (Tutorial == null) yield break;
-
+        RefreshCommands();
         yield return WaitForGameplaySeconds(DelaySeconds);
         if (Panel == null || _visibility == null) yield break;
         HasShown = true;
