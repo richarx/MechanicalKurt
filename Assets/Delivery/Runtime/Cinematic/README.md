@@ -1,87 +1,110 @@
-# Cinématique de récupération
+# Cinématiques et récupération de livraison
 
-Ces composants se branchent sur le mode External de DeliveryManager. Aucun changement
-du core n'est nécessaire. Le déclenchement se fait après l'arrêt validé dans le cercle,
-pas au premier franchissement de la zone.
+## ManagerCinematic : gestion indépendante du cadrage
 
-## Montage dans la scène
+Le manager ne connaît ni DeliveryManager, ni les sessions, ni les dialogues, ni les
+animations des PNJ. L'appelant lui fournit une caméra Cinemachine et décide quand finir.
 
-Si le Brain a été mis sur l'objet du manager ou si Main Camera porte aussi le composant
-CinemachineCamera de gameplay : hors Play, sélectionner ManagerCinematic, puis lancer
-**Tools > Delivery > Repair Cinematic Camera Setup**. La commande déplace le Brain sur
-la caméra de rendu et sépare la caméra Cinemachine de gameplay. Elle préserve le regard
-souris du contrôleur noclip via Prototype View Source, avec Undo, sans sauvegarder la scène.
-Pour un rig Cinemachine normal, laisser Prototype View Source vide.
+```csharp
+bool started = cinematicManager.BeginCinematic(cameraDuPnj,
+    onReady: () => dialogManager.StartDialog(sequence),
+    onEnded: () => Debug.Log("Cinématique terminée, y compris après une interruption"));
+
+// Plus tard, par exemple lorsque le dialogue se termine :
+cinematicManager.CancelCinematic(
+    onFinished: () => Debug.Log("Retour caméra et restauration terminés"));
+```
+
+- `BeginCinematic(camera, onReady, onEnded)` retourne `false` si le manager est occupé,
+  désactivé ou si les caméras sont mal configurées. Aucun callback de cette demande
+  refusée n'est appelé. L'appelant gère ce cas.
+- `onReady` est appelé une fois, après l'apparition des bandes et la fin du blend vers
+  la caméra demandée. Le manager conserve ensuite le plan sans limite de durée.
+- `CancelCinematic(onFinished)` demande le retour vers la caméra précédente, puis le
+  retrait des bandes et la restauration du curseur. Le callback est appelé après ces
+  étapes. Plusieurs demandes d'annulation reçoivent chacune leur callback de fin.
+- Une annulation pendant l'entrée empêche `onReady` et revient à la vue précédente.
+- Si le manager est déjà au repos, le callback d'annulation est appelé immédiatement.
+- `onEnded` est facultatif et informe aussi l'appelant initial d'une interruption forcée,
+  même si `onReady` n'a pas eu lieu. Une désactivation restaure immédiatement les réglages
+  et appelle les callbacks de fin ; le manager ne peut plus animer le retour.
+- Un timeout d'entrée provoque un retour sans annoncer la caméra comme prête.
+- Une caméra `null` conserve la vue actuelle, avec les bandes et les mêmes callbacks.
+- `IsPlaying` reste vrai pendant l'entrée, l'attente et le retour. `IsReady` est vrai
+  seulement pendant l'attente, avant la demande d'annulation.
+
+Le manager ne met pas le gameplay en pause et ne change pas `Time.timeScale`.
+Les transitions et les bandes utilisent le temps réel. L'appelant gère la pause.
+Le premier callback d'entrée est toujours différé, même sans caméra et sans fondu.
+Ne pas laisser un ancien callback annuler une nouvelle cinématique : l'appelant doit
+nettoyer ses abonnements lorsqu'il reçoit `onEnded`.
+
+## Configuration des caméras
 
 1. Garder une seule caméra Unity de rendu avec un CinemachineBrain. Créer une caméra
-   Cinemachine de gameplay, priorité 10, et une caméra Cinemachine par point, priorité 0.
-   Garder les caméras Cinemachine actives, sur un canal accepté par le Brain. Dans le
-   Brain, régler Default Blend sur Ease In Out / 0,5 seconde (ou la durée souhaitée).
-2. Sur chaque DeliveryPoint, affecter Camera Cinematic à sa caméra, ou laisser vide
-   pour conserver la vue actuelle pendant toute la séquence. Garder le PNJ et
-   cette caméra à côté du visuel de sélection, qui se désactive dès l'acceptation.
-3. Ajouter DeliveryPointCinematic sur le même objet que DeliveryPoint. Affecter Animator,
-   Send Off Trigger (SendOff par défaut), et Send Off Seconds à la durée du geste avec
-   sa transition. Dans l'Animator : Trigger SendOff, transition vers le geste sans Exit
-   Time, clip sans Loop Time, puis retour vers l'idle avec Exit Time. Retirer l'ancien
-   déclenchement SendOff depuis On Picked Up pour éviter un deuxième geste.
-4. Sur un objet actif indépendant, ajouter ManagerCinematic et CinematicDelay.
-   Affecter Delivery Manager, Brain et Gameplay Camera au manager. Laisser Letterbox
-   vide pour créer automatiquement les bandes. Si un CanvasGroup existant est utilisé,
-   il doit rester actif avec alpha 0, sans bloquer les clics. Bar Height est la fraction
-   de hauteur d'écran par bande (0,1 = 10 %).
-5. Sur DeliveryManager : Pickup Mode = External. Dans On Pickup Started, ajouter
-   ManagerCinematic.BeginPickUp depuis la section **Dynamic int**.
-6. Sur ManagerCinematic : On Cinematic Ready -> CinematicDelay.Wait (**Dynamic int**).
-7. Sur CinematicDelay : Seconds = 1 ; On Completed -> ManagerCinematic.ContinuePickup
-   (**Dynamic int**). Ne pas utiliser une valeur int statique : il faut transférer le
-   token reçu, qui identifie cette récupération.
-8. Sur ManagerCinematic : On Cinematic Ended -> CinematicDelay.CancelWait (sans argument).
+   Cinemachine de gameplay séparée, priorité 10, et des caméras de cinématique, priorité 0.
+   Les garder actives sur un canal accepté par le Brain. Le blend est réglé sur le Brain.
+2. Sur ManagerCinematic, affecter Brain et Gameplay Camera. Letterbox peut rester vide
+   pour créer automatiquement les bandes. Bar Height = 0,1 correspond à 10 % par bande.
+3. Prototype View Source est réservé au contrôleur noclip qui écrit directement sur
+   Main Camera. Le laisser vide pour un rig Cinemachine normal.
 
-Le contrôleur de vol de test respecte déjà la pause de session. Unlock Cursor libère la souris pour un dialogue et
-restaure son état à la fin. La cinématique ne change pas Time.timeScale.
+Pour réparer un ancien montage, sélectionner ManagerCinematic puis utiliser
+**Tools > Delivery > Repair Cinematic Camera Setup** hors Play. La commande sépare
+la caméra de gameplay et place le Brain sur la caméra de rendu, avec Undo.
 
-## Remplacer l'attente par un dialogue
+## DeliveryPickupCinematic : orchestration propre aux livraisons
 
-Retirer le lien On Cinematic Ready -> CinematicDelay.Wait et appeler à la place le
-composant de dialogue. Celui-ci reçoit et conserve le token, puis appelle
-`ContinuePickup(token)` lorsque le dialogue est terminé. Ne pas relire CurrentToken
-dans un ancien callback. Nettoyer le dialogue depuis On Cinematic Ended.
+Ce composant conserve le fonctionnement des récupérations existantes. Il choisit la
+caméra du départ, met la session en pause, demande le cadrage à ManagerCinematic,
+attend le dialogue ou le délai, déclenche SendOff, puis demande le retour caméra.
+La récupération est validée et la pause rétablie après le retour.
 
-Après cette attente, le manager déclenche le SendOff du PNJ concerné et attend la durée
-configurée sur DeliveryPointCinematic, puis rend la caméra, retire les bandes, demande
-la validation au core et reprend le timer. Sans composant DeliveryPointCinematic, le
-manager attend Default Send Off Seconds sans déclencher d'Animator.
+Les scènes existantes ont été migrées en conservant les réglages et UnityEvents :
 
-Pour piloter la fin exacte du geste depuis un autre composant : cocher Wait For Send Off
-Signal ; recevoir le token via On Send Off Started, et appeler `FinishSendOff(token)`
-quand l'animation est finie. Le composant doit conserver ce token pendant ce geste.
-Sans ce signal, la séquence reste volontairement en attente.
+1. DeliveryManager : Pickup Mode = External ; On Pickup Started ->
+   **DeliveryPickupCinematic.BeginPickUp (Dynamic int)**.
+2. DeliveryPickupCinematic : affecter Cinematic Manager et Delivery Manager.
+3. On Cinematic Ready -> CinematicDelay.Wait (Dynamic int).
+4. CinematicDelay : Seconds = 1 ; On Completed ->
+   **DeliveryPickupCinematic.ContinuePickup (Dynamic int)**.
+5. On Cinematic Ended -> CinematicDelay.CancelWait.
+
+Les événements et méthodes de livraison sont désormais sur DeliveryPickupCinematic.
+Le token appartient à la récupération ; ManagerCinematic ne reçoit aucun token.
+
+Sur chaque DeliveryPoint, Camera Cinematic reste la caméra à utiliser. Le composant
+DeliveryPointCinematic, sur ce même objet, conserve l'Animator, le trigger SendOff et
+sa durée. Garder le PNJ et la caméra en dehors du visuel de sélection qui se désactive.
+Sans DeliveryPointCinematic, Default Send Off Seconds est utilisé sans animation.
+Pour une fin d'animation explicite, cocher Wait For Send Off Signal sur
+DeliveryPickupCinematic et appeler FinishSendOff(token) avec le token reçu via
+On Send Off Started. Sans signal, le composant attend.
+
+Pour remplacer le délai par un dialogue, remplacer le lien vers CinematicDelay.Wait
+par un composant qui conserve le token, lance le dialogue et appelle
+DeliveryPickupCinematic.ContinuePickup(token) à sa fermeture. Nettoyer ce composant
+via On Cinematic Ended. Ne pas relire CurrentToken depuis un ancien callback.
+On Cinematic Ended est aussi appelé après une interruption : ce n'est pas un événement
+de réussite de livraison.
 
 ## Vérification dans Unity
 
-- Démarrer une session, s'arrêter dans un départ : le timer se fige, la caméra rejoint
-  le PNJ, les bandes apparaissent. Le PNJ doit rester visible après disparition du cercle.
-- Après l'arrivée caméra, attendre une seconde : un seul SendOff sur ce PNJ, puis retour
-  caméra, disparition des bandes et reprise du timer. L'état devient Carrying.
-- Essayer un autre point : cadrage et PNJ propres à ce point.
-- Mettre les caméras de gameplay et du point à la même priorité (par exemple 0) :
-  après SendOff, la vue revient au gameplay sans attendre le timeout. Vérifier aussi
-  ce retour en désactivant ManagerCinematic pendant la séquence.
-- Mettre Seconds à 3 pour vérifier que le geste attend bien cette durée.
-- Reset/restart pendant l'attente : caméra, bandes et commandes sont restaurées ;
-  un ancien token ne doit pas terminer la récupération suivante.
-- Désactiver ManagerCinematic pendant une séquence valide : la cinématique est sautée
-  et la récupération peut terminer, sans laisser la session en pause.
-- Un point sans caméra conserve la vue actuelle : pause, attente, SendOff et bandes
-  fonctionnent normalement, même sans Brain assigné au manager.
-- Avec une caméra de point assignée, une configuration de Brain invalide produit un
-  avertissement et saute la cinématique pour ne pas bloquer le mode External.
+- Tester un appel direct à BeginCinematic avec une caméra : `onReady` arrive après
+  le cadrage ; attendre plusieurs secondes ne termine pas la cinématique.
+- Appeler CancelCinematic avec un callback : celui-ci arrive après le retour caméra,
+  le retrait des bandes et la restauration du curseur.
+- Annuler pendant l'entrée : aucun `onReady`, puis une seule fin par callback.
+- Désactiver le manager : restauration immédiate et notification de fin.
+- Tester une caméra null, un appel refusé pendant une cinématique et deux demandes
+  d'annulation. Vérifier les notifications et l'absence d'effets sur une demande refusée.
+- Dans MainCityScene, démarrer une session et valider un départ : pause, cadrage,
+  attente d'une seconde, geste SendOff, retour, puis état Carrying et reprise du timer.
+- Tester un autre départ, puis un reset pendant l'attente et pendant le retour.
+  Aucun ancien token ne doit terminer une nouvelle récupération ou la bloquer.
+- Tester deux caméras de même priorité : le retour doit rétablir la caméra précédente.
 
-Les blends Cinemachine utilisent les réglages du Brain. Camera Timeout Seconds limite
-l'attente d'une caméra qui ne prendrait pas la main (canal, priorité ou Brain mal réglé).
-Au retour, la caméra précédente repasse devant les caméras de même priorité ; les
-priorités configurées sont conservées.
-La fin du timer, un reset, une offre invalidée ou une désactivation interrompent la
-séquence et restaurent les réglages sauvegardés. On Cinematic Ended s'exécute aussi à
-l'interruption ; ce n'est pas un événement de réussite de livraison.
+Vérifications automatiques réalisées : compilation des scripts de jeu et d'éditeur,
+12 vérifications du cycle de vie et de l'adaptateur dans une simulation des coroutines,
+contrôle des références et de la migration des huit scènes. La simulation ne remplace
+pas Unity : le rendu, les blends réels et les animations restent à vérifier en Play.

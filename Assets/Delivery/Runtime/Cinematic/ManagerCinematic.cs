@@ -1,278 +1,271 @@
+using System;
 using System.Collections;
+using Sirenix.OdinInspector;
 using Unity.Cinemachine;
 using UnityEngine;
-using UnityEngine.Events;
+using UnityEngine.Serialization;
 using UnityEngine.UI;
 
 [DisallowMultipleComponent]
 [DefaultExecutionOrder(-10)]
 public class ManagerCinematic : MonoBehaviour
 {
-    [SerializeField] private DeliveryManager _deliveryManager;
-    [SerializeField] private CinemachineBrain _brain;
-    [SerializeField] private CinemachineVirtualCameraBase _gameplayCamera;
-    [SerializeField, Tooltip("Prototype only: copy the view driven by the noclip controller into the separate gameplay Cinemachine camera. Leave empty for a normal Cinemachine rig.")]
-    private Camera _prototypeViewSource;
-    [SerializeField, Min(1)] private int _cinematicPriority = 100;
-    [SerializeField, Min(0.1f)] private float _cameraTimeoutSeconds = 10f;
-    [SerializeField] private bool _unlockCursor = true;
+    [field: SerializeField, FormerlySerializedAs("_brain"), Required]
+    public CinemachineBrain Brain { get; private set; }
 
-    [SerializeField, Tooltip("Optional existing black-bar group. If empty, an overlay is created automatically.")]
-    private CanvasGroup _letterbox;
-    [SerializeField, Range(0.01f, 0.4f)] private float _barHeight = 0.1f;
-    [SerializeField, Min(0f)] private float _fadeSeconds = 0.2f;
-    [SerializeField, Min(0f)] private float _defaultSendOffSeconds = 1f;
-    [SerializeField, Tooltip("When enabled, FinishSendOff(token) must be called instead of using the configured animation duration.")]
-    private bool _waitForSendOffSignal;
+    [field: SerializeField, FormerlySerializedAs("_gameplayCamera"), Required]
+    public CinemachineVirtualCameraBase GameplayCamera { get; private set; }
 
-    [SerializeField, Tooltip("Connect to CinematicDelay.Wait(int), or to a dialogue that later calls ContinuePickup with the same token.")]
-    private UnityEvent<int> _onCinematicReady = new UnityEvent<int>();
-    [SerializeField] private UnityEvent<int> _onSendOffStarted = new UnityEvent<int>();
-    [SerializeField, Tooltip("Fires after completion or interruption. Can cancel a pending delay/dialogue.")]
-    private UnityEvent<int> _onCinematicEnded = new UnityEvent<int>();
+    [field: SerializeField, FormerlySerializedAs("_prototypeViewSource")]
+    [field: Tooltip("Prototype only: copy the noclip view into the separate gameplay Cinemachine camera. Leave empty for a normal rig.")]
+    public Camera PrototypeViewSource { get; private set; }
 
-    private enum Phase { Idle, Entering, Waiting, SendOff, Returning }
+    [field: SerializeField, FormerlySerializedAs("_cinematicPriority"), MinValue(1)]
+    public int CinematicPriority { get; private set; } = 100;
+
+    [field: SerializeField, FormerlySerializedAs("_cameraTimeoutSeconds"), MinValue(0.1f), SuffixLabel("s", true)]
+    public float CameraTimeoutSeconds { get; private set; } = 10f;
+
+    [field: SerializeField, FormerlySerializedAs("_unlockCursor")]
+    public bool UnlockCursor { get; private set; } = true;
+
+    [field: SerializeField, FormerlySerializedAs("_letterbox")]
+    [field: Tooltip("Optional black-bar group. If empty, an overlay is created automatically.")]
+    public CanvasGroup Letterbox { get; private set; }
+
+    [field: SerializeField, FormerlySerializedAs("_barHeight"), MinValue(0.01f), MaxValue(0.4f)]
+    public float BarHeight { get; private set; } = 0.1f;
+
+    [field: SerializeField, FormerlySerializedAs("_fadeSeconds"), MinValue(0f), SuffixLabel("s", true)]
+    public float FadeSeconds { get; private set; } = 0.2f;
+
+    private enum Phase { Idle, Entering, Waiting, Returning }
     private Phase _phase;
     private Coroutine _routine;
-    private DeliverySession _session;
-    private DeliveryOffer _offer;
-    private CinemachineCamera _pointCamera;
+    private CinemachineVirtualCameraBase _cinematicCamera;
     private CinemachineVirtualCameraBase _returnCamera;
     private PrioritySettings _previousPriority;
-    private DeliveryPointCinematic _actor;
-    private int _token;
-    private bool _continueRequested;
-    private bool _sendOffFinished;
-    private bool _wasPaused;
+    private Action _onReady;
+    private Action _onEnded;
+    private Action _onCancelFinished;
+    private bool _cancelRequested;
+    private bool _usesCamera;
+    private bool _cursorChanged;
     private float _previousBarAlpha;
     private CursorLockMode _previousCursorLock;
     private bool _previousCursorVisible;
-    private bool _restoring;
-    private bool _usesPointCamera;
 
-    public bool IsPlaying => _phase != Phase.Idle;
-    public int CurrentToken => IsPlaying ? _token : 0;
+    [ShowInInspector, ReadOnly] public bool IsPlaying => _phase != Phase.Idle;
+    [ShowInInspector, ReadOnly] public bool IsReady => _phase == Phase.Waiting && !_cancelRequested;
 
-    // Wire DeliveryManager.OnPickupStarted using the dynamic int entry.
-    public void BeginPickUp(int token)
+    /// <summary>
+    /// Returns false if the request cannot start. onReady runs after the camera blend and
+    /// letterbox fade. The shot then stays active until CancelCinematic is called.
+    /// Optional onEnded also reports forced interruption, even if onReady never ran.
+    /// A null camera keeps the current view.
+    /// </summary>
+    public bool BeginCinematic(CinemachineVirtualCameraBase camera, Action onReady = null, Action onEnded = null)
     {
-        if (!isActiveAndEnabled || IsPlaying || _restoring) return;
-        if (_deliveryManager == null) _deliveryManager = DeliveryManager.instance;
-        if (_deliveryManager == null || _deliveryManager.State != DeliveryState.PickingUp
-            || token == 0 || token != _deliveryManager.CurrentInteractionToken) return;
-
-        DeliveryOffer offer = _deliveryManager.CurrentOffer;
-        if (offer == null || !offer.IsAvailable || _deliveryManager.Session == null
-            || !_deliveryManager.Session.IsRunning) return;
-        CinemachineCamera camera = offer.Departure.CameraCinematic;
-        if (camera != null && _brain != null && (_brain.OutputCamera == null
-            || (_gameplayCamera != null && _gameplayCamera.gameObject == _brain.OutputCamera.gameObject)))
+        if (!isActiveAndEnabled || IsPlaying) return false;
+        if (camera != null && !HasValidCameraSetup(camera))
         {
-            Debug.LogWarning("Cinematic camera setup: the Brain must be on the rendering Main Camera, and the gameplay Cinemachine camera must be a separate object. Use Tools > Delivery > Repair Cinematic Camera Setup outside Play mode.", this);
-            _deliveryManager.CompleteInteraction(token);
-            return;
-        }
-        if (camera != null && (_brain == null || !_brain.isActiveAndEnabled || _gameplayCamera == null
-            || !_gameplayCamera.isActiveAndEnabled || !camera.isActiveAndEnabled
-            || camera == _gameplayCamera || !_brain.IsValidChannel(camera)
-            || !_brain.IsValidChannel(_gameplayCamera)))
-        {
-            Debug.LogWarning("Pickup cinematic skipped: assign an active Brain, gameplay camera and a different Camera Cinematic on the departure (same output channel).", this);
-            _deliveryManager.CompleteInteraction(token);
-            return;
+            Debug.LogWarning("Cinematic refused: assign an active Brain on the rendering Camera, a separate gameplay camera and an active cinematic camera on the same output channel.", this);
+            return false;
         }
 
-        _session = _deliveryManager.Session;
-        _offer = offer;
-        _token = token;
-        _pointCamera = camera;
-        _usesPointCamera = camera != null;
-        _returnCamera = _usesPointCamera ? _brain.ActiveVirtualCamera as CinemachineVirtualCameraBase : null;
-        if (_usesPointCamera && (_returnCamera == null || _returnCamera == camera)) _returnCamera = _gameplayCamera;
-        _actor = offer.Departure.GetComponent<DeliveryPointCinematic>();
-        _wasPaused = _session.IsPaused;
-        _previousPriority = camera != null ? camera.Priority : default;
+        _cinematicCamera = camera;
+        _usesCamera = camera != null;
+        _returnCamera = _usesCamera ? Brain.ActiveVirtualCamera as CinemachineVirtualCameraBase : null;
+        if (_usesCamera && (_returnCamera == null || _returnCamera == camera)) _returnCamera = GameplayCamera;
+        _previousPriority = _usesCamera ? camera.Priority : default;
         _previousCursorLock = Cursor.lockState;
         _previousCursorVisible = Cursor.visible;
+        _cursorChanged = UnlockCursor;
         EnsureLetterbox();
-        _previousBarAlpha = _letterbox.alpha;
-        _continueRequested = _sendOffFinished = false;
+        _previousBarAlpha = Letterbox.alpha;
+        _onReady = onReady;
+        _onEnded = onEnded;
+        _onCancelFinished = null;
+        _cancelRequested = false;
         _phase = Phase.Entering;
-        _session.OnReset.AddListener(CancelCinematic);
-        _session.OnEnded.AddListener(CancelCinematic);
-        _deliveryManager.OnCancelled.AddListener(HandleCancelled);
-        _session.SetPaused(true);
-        if (_unlockCursor) { Cursor.lockState = CursorLockMode.None; Cursor.visible = true; }
-        if (_usesPointCamera)
+
+        if (_cursorChanged) { Cursor.lockState = CursorLockMode.None; Cursor.visible = true; }
+        if (_usesCamera)
         {
-            int previousLivePriority = _returnCamera.Priority.Value;
-            int raisedPriority = previousLivePriority < int.MaxValue ? previousLivePriority + 1 : int.MaxValue;
-            camera.Priority = Mathf.Max(_cinematicPriority, raisedPriority);
+            int livePriority = _returnCamera.Priority.Value;
+            int raisedPriority = livePriority < int.MaxValue ? livePriority + 1 : int.MaxValue;
+            camera.Priority = Mathf.Max(CinematicPriority, raisedPriority);
         }
-        _routine = StartCoroutine(PlayPickup(token));
+        _routine = StartCoroutine(PlayCinematic());
+        return true;
     }
 
-    public void ContinuePickup(int token)
+    public void CancelCinematic() => CancelCinematic(null);
+
+    /// <summary>
+    /// Returns to the previous shot. onFinished runs only after the return blend,
+    /// letterbox fade and cursor restoration. It runs immediately if already idle.
+    /// Multiple cancellation requests each receive their own completion callback.
+    /// </summary>
+    public void CancelCinematic(Action onFinished)
     {
-        if (_phase == Phase.Waiting && token == _token && HasValidInteraction())
-            _continueRequested = true;
+        if (!IsPlaying)
+        {
+            InvokeCallbacks(onFinished);
+            return;
+        }
+        _onCancelFinished += onFinished;
+        _cancelRequested = true;
     }
 
-    public void FinishSendOff(int token)
+    private IEnumerator PlayCinematic()
     {
-        if (_phase == Phase.SendOff && token == _token && HasValidInteraction())
-            _sendOffFinished = true;
-    }
-
-    private IEnumerator PlayPickup(int token)
-    {
-        yield return FadeBars(1f);
-        yield return WaitForCamera(_pointCamera);
-        _phase = Phase.Waiting;
-        _onCinematicReady.Invoke(_token);
-        if (!IsPlaying || _token != token) yield break;
-        while (!_continueRequested) yield return null;
-
-        _phase = Phase.SendOff;
-        if (_actor != null) _actor.PlaySendOff();
-        _onSendOffStarted.Invoke(_token);
-        if (!IsPlaying || _token != token) yield break;
-        if (_waitForSendOffSignal)
-            while (!_sendOffFinished) yield return null;
-        else
-            yield return new WaitForSecondsRealtime(_actor != null ? _actor.SendOffSeconds : _defaultSendOffSeconds);
+        // Keep callbacks asynchronous, including a shot without a camera or a fade.
+        yield return null;
+        yield return FadeBars(1f, true);
+        if (!_cancelRequested) yield return WaitForCamera(_cinematicCamera, true);
+        if (!_cancelRequested)
+        {
+            _phase = Phase.Waiting;
+            Action ready = _onReady;
+            _onReady = null;
+            InvokeCallbacks(ready);
+        }
+        while (!_cancelRequested) yield return null;
 
         _phase = Phase.Returning;
         RestoreCamera();
-        yield return WaitForCamera(_returnCamera);
-        yield return FadeBars(_previousBarAlpha);
-        if (HasValidInteraction()) _deliveryManager.CompleteInteraction(_token);
+        yield return WaitForCamera(_returnCamera, false);
+        yield return FadeBars(_previousBarAlpha, false);
         _routine = null;
         RestoreScene();
     }
 
-    private IEnumerator WaitForCamera(CinemachineVirtualCameraBase target)
+    private bool HasValidCameraSetup(CinemachineVirtualCameraBase camera)
     {
-        if (target == null || _brain == null) yield break;
-        // Let the Brain evaluate the changed priority in LateUpdate before checking a cut/blend.
+        return Brain != null && Brain.isActiveAndEnabled && Brain.OutputCamera != null
+            && GameplayCamera != null && GameplayCamera.isActiveAndEnabled
+            && GameplayCamera.gameObject != Brain.OutputCamera.gameObject
+            && camera != null && camera.isActiveAndEnabled && camera != GameplayCamera
+            && Brain.IsValidChannel(camera) && Brain.IsValidChannel(GameplayCamera);
+    }
+
+    private IEnumerator WaitForCamera(CinemachineVirtualCameraBase target, bool entering)
+    {
+        if (!_usesCamera) yield break;
+        // Let the Brain evaluate the changed priority in LateUpdate first.
         yield return null;
         float elapsed = 0f;
-        while (_brain != null && target != null
-            && (!ReferenceEquals(_brain.ActiveVirtualCamera, target) || _brain.IsBlending))
+        while (!entering || !_cancelRequested)
         {
+            if (Brain == null || !Brain.isActiveAndEnabled || target == null || !target.isActiveAndEnabled)
+            {
+                if (entering) _cancelRequested = true;
+                yield break;
+            }
+            if (ReferenceEquals(Brain.ActiveVirtualCamera, target) && !Brain.IsBlending) yield break;
             elapsed += Time.unscaledDeltaTime;
-            if (elapsed >= _cameraTimeoutSeconds)
+            if (elapsed >= CameraTimeoutSeconds)
             {
                 Debug.LogWarning("Cinematic camera transition timed out. Check priorities, output channels and Brain settings.", this);
+                // Never announce a shot as ready if the camera did not reach it.
+                if (entering) _cancelRequested = true;
                 yield break;
             }
             yield return null;
         }
     }
 
-    private IEnumerator FadeBars(float target)
+    private IEnumerator FadeBars(float target, bool entering)
     {
-        if (_letterbox == null) yield break;
-        float from = _letterbox.alpha;
+        if (Letterbox == null) yield break;
+        float from = Letterbox.alpha;
         float elapsed = 0f;
-        while (elapsed < _fadeSeconds && _letterbox != null)
+        while (elapsed < FadeSeconds && Letterbox != null)
         {
+            if (entering && _cancelRequested) yield break;
             elapsed += Time.unscaledDeltaTime;
-            _letterbox.alpha = Mathf.Lerp(from, target, Mathf.Clamp01(elapsed / _fadeSeconds));
+            Letterbox.alpha = Mathf.Lerp(from, target, Mathf.Clamp01(elapsed / FadeSeconds));
             yield return null;
         }
-        if (_letterbox != null) _letterbox.alpha = target;
-    }
-
-    private bool HasValidInteraction()
-    {
-        return _deliveryManager != null && _deliveryManager.isActiveAndEnabled
-            && _deliveryManager.Selector != null && _deliveryManager.Selector.isActiveAndEnabled
-            && _session != null && _session.IsRunning && _offer != null && _offer.IsAvailable
-            && _deliveryManager.State == DeliveryState.PickingUp
-            && _deliveryManager.CurrentOffer == _offer && _deliveryManager.CurrentInteractionToken == _token;
+        if (Letterbox != null && (!entering || !_cancelRequested)) Letterbox.alpha = target;
     }
 
     private void Update()
     {
-        if (IsPlaying && (!HasValidInteraction() || (_usesPointCamera
-            && (_brain == null || !_brain.isActiveAndEnabled || _pointCamera == null || !_pointCamera.isActiveAndEnabled))))
+        if (IsPlaying && _usesCamera && !HasValidCameraSetup(_cinematicCamera))
             CancelCinematic();
     }
 
     private void LateUpdate()
     {
-        // The prototype controller writes to Main Camera in Update. Copy that view before
-        // the Brain runs, and keep this gameplay shot still throughout the cutscene.
-        if (!IsPlaying && _prototypeViewSource != null && _gameplayCamera != null
-            && _prototypeViewSource.transform != _gameplayCamera.transform)
-            _gameplayCamera.transform.SetPositionAndRotation(
-                _prototypeViewSource.transform.position, _prototypeViewSource.transform.rotation);
+        // The prototype controller writes to Main Camera in Update. Keep the saved
+        // gameplay shot still during the cinematic, before the Brain evaluates it.
+        if (!IsPlaying && PrototypeViewSource != null && GameplayCamera != null
+            && PrototypeViewSource.transform != GameplayCamera.transform)
+            GameplayCamera.transform.SetPositionAndRotation(
+                PrototypeViewSource.transform.position, PrototypeViewSource.transform.rotation);
     }
 
-    private void OnDisable() => CancelCinematic();
-    private void HandleCancelled(DeliveryOffer offer) { if (offer == _offer) CancelCinematic(); }
-
-    public void CancelCinematic()
+    private void OnDisable()
     {
         if (!IsPlaying) return;
         if (_routine != null) StopCoroutine(_routine);
         _routine = null;
-        // Skipping an otherwise valid cutscene must not leave External pickup locked.
-        if (HasValidInteraction()) _deliveryManager.CompleteInteraction(_token);
+        // A disabled component cannot animate the return: restore and notify now.
         RestoreScene();
     }
 
     private void RestoreCamera()
     {
-        if (_pointCamera == null) return;
-        _pointCamera.Priority = _previousPriority;
-        // Refresh the point's queue entry first so its next Update cannot steal
-        // the shot back when it notices the restored priority.
-        _pointCamera.Prioritize();
-        // At equal priority Cinemachine picks the most recently activated camera.
+        if (_cinematicCamera != null)
+        {
+            _cinematicCamera.Priority = _previousPriority;
+            _cinematicCamera.Prioritize();
+        }
         if (_returnCamera != null && _returnCamera.isActiveAndEnabled)
             _returnCamera.Prioritize();
     }
 
     private void RestoreScene()
     {
-        _restoring = true;
-        int finishedToken = _token;
-        _phase = Phase.Idle;
         RestoreCamera();
-        if (_letterbox != null) _letterbox.alpha = _previousBarAlpha;
-        if (_session != null)
+        if (Letterbox != null) Letterbox.alpha = _previousBarAlpha;
+        if (_cursorChanged) { Cursor.lockState = _previousCursorLock; Cursor.visible = _previousCursorVisible; }
+        Action ended = _onEnded;
+        Action cancelled = _onCancelFinished;
+        _onReady = _onEnded = _onCancelFinished = null;
+        _cinematicCamera = _returnCamera = null;
+        _usesCamera = _cancelRequested = _cursorChanged = false;
+        _phase = Phase.Idle;
+        InvokeCallbacks(ended);
+        InvokeCallbacks(cancelled);
+    }
+
+    private void InvokeCallbacks(Action callbacks)
+    {
+        if (callbacks == null) return;
+        foreach (Action callback in callbacks.GetInvocationList())
         {
-            _session.OnReset.RemoveListener(CancelCinematic);
-            _session.OnEnded.RemoveListener(CancelCinematic);
-            _session.SetPaused(_wasPaused);
+            try { callback(); }
+            catch (Exception exception) { Debug.LogException(exception, this); }
         }
-        if (_deliveryManager != null) _deliveryManager.OnCancelled.RemoveListener(HandleCancelled);
-        if (_unlockCursor) { Cursor.lockState = _previousCursorLock; Cursor.visible = _previousCursorVisible; }
-        _token = 0;
-        _offer = null;
-        _session = null;
-        _pointCamera = null;
-        _usesPointCamera = false;
-        try { _onCinematicEnded.Invoke(finishedToken); }
-        finally { _restoring = false; }
     }
 
     private void EnsureLetterbox()
     {
-        if (_letterbox != null) return;
+        if (Letterbox != null) return;
         GameObject overlay = new GameObject("Cinematic Letterbox", typeof(RectTransform), typeof(Canvas), typeof(CanvasGroup));
         overlay.transform.SetParent(transform, false);
         Canvas canvas = overlay.GetComponent<Canvas>();
         canvas.renderMode = RenderMode.ScreenSpaceOverlay;
         canvas.sortingOrder = 100;
-        _letterbox = overlay.GetComponent<CanvasGroup>();
-        _letterbox.alpha = 0f;
-        _letterbox.interactable = false;
-        _letterbox.blocksRaycasts = false;
-        CreateBar(overlay.transform, "Top Bar", 1f - _barHeight, 1f);
-        CreateBar(overlay.transform, "Bottom Bar", 0f, _barHeight);
+        Letterbox = overlay.GetComponent<CanvasGroup>();
+        Letterbox.alpha = 0f;
+        Letterbox.interactable = false;
+        Letterbox.blocksRaycasts = false;
+        CreateBar(overlay.transform, "Top Bar", 1f - BarHeight, 1f);
+        CreateBar(overlay.transform, "Bottom Bar", 0f, BarHeight);
     }
 
     private static void CreateBar(Transform parent, string name, float bottom, float top)

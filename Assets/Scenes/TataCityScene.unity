@@ -9989,8 +9989,8 @@ MonoBehaviour:
   _onPickupStarted:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 2058445152}
-        m_TargetAssemblyTypeName: ManagerCinematic, Assembly-CSharp
+      - m_Target: {fileID: 900000001}
+        m_TargetAssemblyTypeName: DeliveryPickupCinematic, Assembly-CSharp
         m_MethodName: BeginPickUp
         m_Mode: 0
         m_Arguments:
@@ -30967,6 +30967,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2058445153}
   - component: {fileID: 2058445152}
+  - component: {fileID: 900000001}
   - component: {fileID: 2058445151}
   m_Layer: 0
   m_Name: Cinematique
@@ -30991,8 +30992,8 @@ MonoBehaviour:
   _onCompleted:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 2058445152}
-        m_TargetAssemblyTypeName: ManagerCinematic, Assembly-CSharp
+      - m_Target: {fileID: 900000001}
+        m_TargetAssemblyTypeName: DeliveryPickupCinematic, Assembly-CSharp
         m_MethodName: ContinuePickup
         m_Mode: 0
         m_Arguments:
@@ -31015,7 +31016,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 022918d0e3346694689b26b6ba4a111a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ManagerCinematic
-  _deliveryManager: {fileID: 668773666}
   _brain: {fileID: 330585548}
   _gameplayCamera: {fileID: 864983517}
   _prototypeViewSource: {fileID: 330585545}
@@ -31025,6 +31025,20 @@ MonoBehaviour:
   _letterbox: {fileID: 0}
   _barHeight: 0.1
   _fadeSeconds: 0.2
+--- !u!114 &900000001
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2058445150}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4c78c5e377e946dd8b37a22bd93ac960, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::DeliveryPickupCinematic
+  <CinematicManager>k__BackingField: {fileID: 2058445152}
+  _deliveryManager: {fileID: 668773666}
   _defaultSendOffSeconds: 1
   _waitForSendOffSignal: 0
   _onCinematicReady:

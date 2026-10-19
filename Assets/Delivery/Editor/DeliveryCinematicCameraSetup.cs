@@ -24,10 +24,10 @@ public static class DeliveryCinematicCameraSetup
         }
 
         SerializedObject settings = new SerializedObject(manager);
-        CinemachineBrain oldBrain = settings.FindProperty("_brain").objectReferenceValue as CinemachineBrain;
+        CinemachineBrain oldBrain = manager.Brain;
         Camera renderCamera = oldBrain != null ? oldBrain.GetComponent<Camera>() : null;
         if (renderCamera == null) renderCamera = Camera.main;
-        CinemachineVirtualCameraBase gameplay = settings.FindProperty("_gameplayCamera").objectReferenceValue as CinemachineVirtualCameraBase;
+        CinemachineVirtualCameraBase gameplay = manager.GameplayCamera;
         if (renderCamera == null || renderCamera.gameObject.scene != manager.gameObject.scene)
         {
             Debug.LogWarning("A MainCamera-tagged rendering Camera is required in the manager's scene.", manager);
@@ -69,10 +69,10 @@ public static class DeliveryCinematicCameraSetup
             brain.enabled = true;
 
             settings.Update();
-            settings.FindProperty("_brain").objectReferenceValue = brain;
-            settings.FindProperty("_gameplayCamera").objectReferenceValue = gameplay;
+            settings.FindProperty("<Brain>k__BackingField").objectReferenceValue = brain;
+            settings.FindProperty("<GameplayCamera>k__BackingField").objectReferenceValue = gameplay;
             if (splitGameplay)
-                settings.FindProperty("_prototypeViewSource").objectReferenceValue = renderCamera;
+                settings.FindProperty("<PrototypeViewSource>k__BackingField").objectReferenceValue = renderCamera;
             settings.ApplyModifiedProperties();
             EditorSceneManager.MarkSceneDirty(manager.gameObject.scene);
             Selection.activeGameObject = manager.gameObject;

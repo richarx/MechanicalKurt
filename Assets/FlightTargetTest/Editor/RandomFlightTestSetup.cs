@@ -175,7 +175,7 @@ public static class RandomFlightTestSetup
                 }
             }
             if (hud || behaviour is DeliverySession || behaviour is DeliveryOfferSelector
-                || behaviour is DeliveryManager || behaviour is ManagerCinematic
+                || behaviour is DeliveryManager || behaviour is ManagerCinematic || behaviour is DeliveryPickupCinematic
                 || behaviour is DeliveryNoclipFlightController)
             {
                 behaviour.enabled = false;
