@@ -413,6 +413,7 @@ GameObject:
   - component: {fileID: 5724445451644833352}
   - component: {fileID: 248335099495966708}
   - component: {fileID: 5405790448048564387}
+  - component: {fileID: 7640124386893371793}
   m_Layer: 3
   m_Name: Player
   m_TagString: Untagged
@@ -489,7 +490,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PigeonController
   _pushPower: 5
   _weight: 1.5
-  _maxImpact: 10
+  _stunMinImpact: 10
+  _stunMinHorizontalSpeed: 3
   _stunMinDuration: 0.5
   _stunImmuneDuration: 0.5
   _groundSpeed: 1
@@ -691,6 +693,20 @@ SphereCollider:
   serializedVersion: 3
   m_Radius: 0.1
   m_Center: {x: 0, y: 0.09, z: 0}
+--- !u!114 &7640124386893371793
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8893443228925278897}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 269bbccbccad295478544ebd1bb75e5d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PositionFailSafe
+  _minDeep: -10
+  _maxLinearDist: 450
 --- !u!1001 &902121178248826382
 PrefabInstance:
   m_ObjectHideFlags: 0
