@@ -10,6 +10,22 @@ using UnityEngine.UI;
 public static class AchievementTutorialSetup
 {
     private const string Menu = "Tools/Tutorial/Create Achievement Tutorial";
+    private static readonly string[] Objectives = {
+        "Take off and gain some height.",
+        "Steer to change direction in flight.",
+        "Land in a mission circle and stay still to activate it."
+    };
+    private static readonly string[] KeyboardHints = {
+        "Hold Space to flap your wings.",
+        "Left / Right arrows: turn\nUp / Down arrows: pitch",
+        "Ctrl: brake · Space: gain height\nStay still in the circle to activate it."
+    };
+    private static readonly string[] GamepadHints = {
+        "Hold <sprite name=\"xbox_a\" tint=0> to flap your wings.",
+        "<sprite name=\"xbox_left_stick\" tint=0> Left / right: turn\n<sprite name=\"xbox_left_stick\" tint=0> Up / down: pitch",
+        "Hold <sprite name=\"xbox_b\" tint=0> to brake and land.\nStay still in the circle to activate it."
+    };
+    private const string Completion = "The city is yours! Explore and pick your next mission.";
 
     [MenuItem(Menu)]
     public static void Create()
@@ -28,10 +44,18 @@ public static class AchievementTutorialSetup
             Debug.LogError("Tutorial: open a scene with an active AchievementManager, pigeon and DeliveryOfferSelector. Check tutorial assets and TMP font.");
             return;
         }
-        if (Find<AchievementTutorial>(scene) != null)
+        TMP_SpriteAsset glyphs = TutorialGlyphAsset.GetOrCreate();
+        AchievementTutorial existing = Find<AchievementTutorial>(scene);
+        if (existing != null)
         {
-            Selection.activeGameObject = Find<AchievementTutorial>(scene).gameObject;
-            Debug.Log("A tutorial already exists in this scene.");
+            Undo.IncrementCurrentGroup();
+            int updateGroup = Undo.GetCurrentGroup();
+            Undo.SetCurrentGroupName("Update Tutorial Text and Glyphs");
+            ApplyEnglishTextAndGlyphs(existing, glyphs);
+            Undo.CollapseUndoOperations(updateGroup);
+            EditorSceneManager.MarkSceneDirty(scene);
+            Selection.activeGameObject = existing.gameObject;
+            Debug.Log("Tutorial updated with English text and Xbox glyphs. Save the scene.", existing);
             return;
         }
 
@@ -67,7 +91,7 @@ public static class AchievementTutorialSetup
             RectTransform rect = (RectTransform)panel.transform;
             rect.anchorMin = rect.anchorMax = rect.pivot = new Vector2(0f, 1f);
             rect.anchoredPosition = new Vector2(28f, -200f);
-            rect.sizeDelta = new Vector2(560f, 270f);
+            rect.sizeDelta = new Vector2(560f, 294f);
             Image background = Undo.AddComponent<Image>(panel);
             background.color = new Color(0.04f, 0.06f, 0.09f, 0.9f);
             background.raycastTarget = false;
@@ -75,7 +99,7 @@ public static class AchievementTutorialSetup
             visibility.interactable = visibility.blocksRaycasts = false;
             TMP_Text progress = CreateText(panel.transform, font, "Progress", 22f, 16f, 32f);
             TMP_Text objective = CreateText(panel.transform, font, "Objective", 28f, 56f, 100f);
-            TMP_Text commands = CreateText(panel.transform, font, "Commands", 22f, 170f, 80f);
+            TMP_Text commands = CreateText(panel.transform, font, "Commands", 22f, 170f, 100f);
 
             AchievementTutorial tutorial = Undo.AddComponent<AchievementTutorial>(root);
             SerializedObject settings = new SerializedObject(tutorial);
@@ -86,27 +110,13 @@ public static class AchievementTutorialSetup
             Property(settings, "ProgressText").objectReferenceValue = progress;
             SerializedProperty steps = Property(settings, "Steps");
             steps.arraySize = achievements.Length;
-            string[] objectives = {
-                "Décolle et prends de la hauteur.",
-                "Oriente ton vol pour changer de direction.",
-                "Pose-toi dans un cercle de mission et reste immobile pour l’activer."
-            };
-            string[] hints = {
-                "Maintiens Espace pour battre des ailes.",
-                "Flèches gauche / droite : tourner\nFlèches haut / bas : incliner le vol",
-                "Ctrl : freiner · Espace : reprendre de la hauteur\nL’activation du cercle est automatique à l’arrêt."
-            };
             for (int i = 0; i < achievements.Length; i++)
             {
                 SerializedProperty step = steps.GetArrayElementAtIndex(i);
                 step.FindPropertyRelative("<Achievement>k__BackingField").objectReferenceValue = achievements[i];
-                step.FindPropertyRelative("<Objective>k__BackingField").stringValue = objectives[i];
-                step.FindPropertyRelative("<Commands>k__BackingField").stringValue = hints[i];
             }
             settings.ApplyModifiedProperties();
-            progress.text = "Tuto · 1 / 3";
-            objective.text = objectives[0];
-            commands.text = hints[0];
+            ApplyEnglishTextAndGlyphs(tutorial, glyphs);
 
             PigeonTutorialAchievements detector = Undo.AddComponent<PigeonTutorialAchievements>(root);
             SerializedObject detection = new SerializedObject(detector);
@@ -135,6 +145,47 @@ public static class AchievementTutorialSetup
 
     private static AchievementData Load(string step) => AssetDatabase.LoadAssetAtPath<AchievementData>(
         "Assets/Achievements/Data/Tutorial" + step + "_Achievement.asset");
+
+    private static void ApplyEnglishTextAndGlyphs(AchievementTutorial tutorial, TMP_SpriteAsset glyphs)
+    {
+        string[] ids = { "tutorial_takeoff", "tutorial_steering", "tutorial_interaction" };
+        SerializedObject settings = new SerializedObject(tutorial);
+        Property(settings, "CompletionMessage").stringValue = Completion;
+        SerializedProperty steps = Property(settings, "Steps");
+        for (int i = 0; i < steps.arraySize; i++)
+        {
+            SerializedProperty step = steps.GetArrayElementAtIndex(i);
+            AchievementData achievement = step.FindPropertyRelative("<Achievement>k__BackingField").objectReferenceValue as AchievementData;
+            int index = achievement == null ? -1 : Array.IndexOf(ids, achievement.Id);
+            if (index < 0) continue;
+            step.FindPropertyRelative("<Objective>k__BackingField").stringValue = Objectives[index];
+            step.FindPropertyRelative("<Commands>k__BackingField").stringValue = KeyboardHints[index];
+            step.FindPropertyRelative("<GamepadCommands>k__BackingField").stringValue = GamepadHints[index];
+        }
+        settings.ApplyModifiedProperties();
+        if (tutorial.CommandsText != null)
+        {
+            Undo.RecordObject(tutorial.CommandsText, "Set tutorial glyphs");
+            tutorial.CommandsText.spriteAsset = glyphs;
+            tutorial.CommandsText.richText = true;
+            tutorial.CommandsText.tintAllSprites = false;
+            if (tutorial.Steps.Count > 0) tutorial.CommandsText.text = tutorial.Steps[0].GamepadCommands;
+            PrefabUtility.RecordPrefabInstancePropertyModifications(tutorial.CommandsText);
+        }
+        if (tutorial.ObjectiveText != null && tutorial.Steps.Count > 0)
+        {
+            Undo.RecordObject(tutorial.ObjectiveText, "Translate tutorial objective");
+            tutorial.ObjectiveText.text = tutorial.Steps[0].Objective;
+            PrefabUtility.RecordPrefabInstancePropertyModifications(tutorial.ObjectiveText);
+        }
+        if (tutorial.ProgressText != null)
+        {
+            Undo.RecordObject(tutorial.ProgressText, "Translate tutorial progress");
+            tutorial.ProgressText.text = $"Tutorial · 1 / {tutorial.Steps.Count}";
+            PrefabUtility.RecordPrefabInstancePropertyModifications(tutorial.ProgressText);
+        }
+        PrefabUtility.RecordPrefabInstancePropertyModifications(tutorial);
+    }
 
     private static T Find<T>(Scene scene) where T : Behaviour => scene.GetRootGameObjects()
         .SelectMany(root => root.GetComponentsInChildren<T>(true)).FirstOrDefault(c => c.isActiveAndEnabled);

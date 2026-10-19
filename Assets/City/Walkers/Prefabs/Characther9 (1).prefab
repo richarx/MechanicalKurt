@@ -638,7 +638,7 @@ MonoBehaviour:
   _speedRange: {x: 1, y: 1.5}
   _turnSpeed: 360
   _pauseRange: {x: 0, y: 0}
-  _animator: {fileID: 7905282952583581724, guid: e7bc1a9cdd117f149862d34eac0dfc05, type: 3}
+  _animator: {fileID: 8232130057612166687}
   _walkingParameter: IsWalking
   <AnimationOffsetRange>k__BackingField: {x: 0, y: 1}
 --- !u!1 &5697018007682104614

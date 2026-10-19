@@ -13,6 +13,6 @@ MonoBehaviour:
   m_Name: TutorialSteering_Achievement
   m_EditorClassIdentifier: Assembly-CSharp::AchievementData
   _id: tutorial_steering
-  _title: Ça tourne !
-  _description: Change de direction en vol.
+  _title: Getting the Hang of It
+  _description: Change direction in flight.
   _icon: {fileID: 0}

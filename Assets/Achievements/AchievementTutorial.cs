@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Sirenix.OdinInspector;
 using TMPro;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 [Serializable]
 public class AchievementTutorialStep
@@ -15,6 +16,9 @@ public class AchievementTutorialStep
 
     [field: SerializeField, TextArea(2, 4)]
     public string Commands { get; private set; }
+
+    [field: SerializeField, TextArea(2, 4), Tooltip("Gamepad instructions with TMP sprite tags for Xbox glyphs.")]
+    public string GamepadCommands { get; private set; }
 }
 
 /// <summary>Displays the first tutorial objective whose achievement is still locked.</summary>
@@ -40,7 +44,7 @@ public class AchievementTutorial : MonoBehaviour
     public TMP_Text ProgressText { get; private set; }
 
     [field: SerializeField, TextArea(2, 4)]
-    public string CompletionMessage { get; private set; } = "La ville est à toi ! Explore et prends les missions qui te plaisent.";
+    public string CompletionMessage { get; private set; } = "The city is yours!";
 
     [field: SerializeField, MinValue(0f), SuffixLabel("seconds", true)]
     public float CompletionSeconds { get; private set; } = 4f;
@@ -54,9 +58,11 @@ public class AchievementTutorial : MonoBehaviour
     private AchievementManager _subscribedManager;
     private float _completionRemaining;
     private bool _configurationWarningLogged;
+    private bool _usingGamepad;
 
     private void OnEnable()
     {
+        _usingGamepad = Gamepad.current != null;
         BindManager();
         RefreshProgress();
     }
@@ -77,6 +83,12 @@ public class AchievementTutorial : MonoBehaviour
     private void Update()
     {
         if (BindManager()) RefreshProgress();
+        bool usingGamepad = Gamepad.current != null;
+        if (usingGamepad != _usingGamepad)
+        {
+            _usingGamepad = usingGamepad;
+            RefreshCommands();
+        }
         if (_completionRemaining <= 0f) return;
         _completionRemaining -= Time.unscaledDeltaTime;
         if (_completionRemaining <= 0f) SetVisible(false);
@@ -147,8 +159,8 @@ public class AchievementTutorial : MonoBehaviour
             if (ObjectiveText != null)
                 ObjectiveText.text = string.IsNullOrWhiteSpace(step.Objective)
                     ? step.Achievement.Description : step.Objective;
-            if (CommandsText != null) CommandsText.text = step.Commands;
-            if (ProgressText != null) ProgressText.text = $"Tuto · {i + 1} / {Steps.Count}";
+            RefreshCommands();
+            if (ProgressText != null) ProgressText.text = $"Tutorial · {i + 1} / {Steps.Count}";
             SetVisible(true);
             return;
         }
@@ -159,7 +171,7 @@ public class AchievementTutorial : MonoBehaviour
         _completionRemaining = CompletionSeconds;
         if (ObjectiveText != null) ObjectiveText.text = CompletionMessage;
         if (CommandsText != null) CommandsText.text = string.Empty;
-        if (ProgressText != null) ProgressText.text = "Tuto terminé !";
+        if (ProgressText != null) ProgressText.text = "Tutorial complete!";
         SetVisible(true);
     }
 
@@ -169,6 +181,14 @@ public class AchievementTutorial : MonoBehaviour
         foreach (AchievementData registered in _subscribedManager.Achievements)
             if (registered != null && registered.Id == achievement.Id) return true;
         return false;
+    }
+
+    private void RefreshCommands()
+    {
+        if (CommandsText == null || Steps == null || CurrentStepIndex < 0 || CurrentStepIndex >= Steps.Count) return;
+        AchievementTutorialStep step = Steps[CurrentStepIndex];
+        CommandsText.text = _usingGamepad && CommandsText.spriteAsset != null
+            && !string.IsNullOrWhiteSpace(step.GamepadCommands) ? step.GamepadCommands : step.Commands;
     }
 
     private void SetVisible(bool visible)

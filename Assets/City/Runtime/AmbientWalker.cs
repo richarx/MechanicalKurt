@@ -84,8 +84,10 @@ public class AmbientWalker : MonoBehaviour
 
     private void OnEnable()
     {
-        if (_animator == null)
-            _animator = GetComponentInChildren<Animator>();
+        // A copied prefab can still reference another prefab's Animator asset.
+        // Only drive an Animator belonging to this character instance.
+        if (_animator == null || !_animator.transform.IsChildOf(transform))
+            _animator = GetComponentInChildren<Animator>(true);
 
         ConfigureAnimation();
         SetWalking(false);
@@ -214,7 +216,13 @@ public class AmbientWalker : MonoBehaviour
     private void SetWalking(bool walking)
     {
         IsWalking = walking;
-        if (!_canSetWalkingParameter || _animator == null || _lastAnimationValue == walking)
+        if (_animator == null || !_animator.isActiveAndEnabled || _animator.runtimeAnimatorController == null)
+        {
+            _lastAnimationValue = null;
+            return;
+        }
+
+        if (!_canSetWalkingParameter || _lastAnimationValue == walking)
             return;
 
         _animator.SetBool(_walkingParameterHash, walking);

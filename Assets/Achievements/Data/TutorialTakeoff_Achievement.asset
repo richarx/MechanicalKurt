@@ -13,6 +13,6 @@ MonoBehaviour:
   m_Name: TutorialTakeoff_Achievement
   m_EditorClassIdentifier: Assembly-CSharp::AchievementData
   _id: tutorial_takeoff
-  _title: Premier envol
-  _description: Décolle et prends de la hauteur.
+  _title: First flight
+  _description: Fly, little pidgey
   _icon: {fileID: 0}

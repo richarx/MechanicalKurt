@@ -13,6 +13,6 @@ MonoBehaviour:
   m_Name: TutorialInteraction_Achievement
   m_EditorClassIdentifier: Assembly-CSharp::AchievementData
   _id: tutorial_interaction
-  _title: Prêt pour les missions
-  _description: Pose-toi dans une zone de mission et active-la.
+  _title: Ready for Business
+  _description: Land in a mission circle and activate it.
   _icon: {fileID: 0}
