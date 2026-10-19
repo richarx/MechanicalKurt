@@ -1,0 +1,5 @@
+Name: Radio Tower
+ID: 166
+Category: Electronics
+Variant: Standard
+Description: Emits some type of electrical wave. They say it's safe...

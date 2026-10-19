@@ -319,6 +319,7 @@ GameObject:
   - component: {fileID: 2514600447504455624}
   - component: {fileID: 7788707282503470594}
   - component: {fileID: 5917408735170155768}
+  - component: {fileID: 7595259944597442791}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -454,6 +455,21 @@ MonoBehaviour:
   hat: {fileID: 1702739677385353713}
   shoeLeft: {fileID: 4272765584430875725}
   shoeRight: {fileID: 1807582397665596861}
+--- !u!114 &7595259944597442791
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8893443228925278897}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9148d4f1393a73040ad0160cc1b82dd4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PidgeonVfx
+  windParticles: {fileID: 3792138837400240535}
+  wingTrailRendererLeft: {fileID: 8287067714026424246}
+  wingTrailRendererRight: {fileID: 7628107183944301609}
 --- !u!1001 &902121178248826382
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -770,6 +786,14 @@ PrefabInstance:
       propertyPath: m_Name
       value: VFX_Wind_Flows_Trails_01 Variant
       objectReference: {fileID: 0}
+    - target: {fileID: 5942389718605913151, guid: 8c0ea7f0b792b2b479ea06ad9a11df1e, type: 3}
+      propertyPath: playOnAwake
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6685011679081748420, guid: 8c0ea7f0b792b2b479ea06ad9a11df1e, type: 3}
+      propertyPath: playOnAwake
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 8453362570619455354, guid: 8c0ea7f0b792b2b479ea06ad9a11df1e, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0.014389124
@@ -820,6 +844,11 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 8453362570619455354, guid: 8c0ea7f0b792b2b479ea06ad9a11df1e, type: 3}
   m_PrefabInstance: {fileID: 7522573346806240851}
   m_PrefabAsset: {fileID: 0}
+--- !u!198 &3792138837400240535 stripped
+ParticleSystem:
+  m_CorrespondingSourceObject: {fileID: 6685011679081748420, guid: 8c0ea7f0b792b2b479ea06ad9a11df1e, type: 3}
+  m_PrefabInstance: {fileID: 7522573346806240851}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &7983126294383227000
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -868,6 +897,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 2146061140368406478, guid: 1f0c30ff225a0034aab1fa7e4ea73202, type: 3}
+      propertyPath: m_Emitting
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 6935589476706611761, guid: 1f0c30ff225a0034aab1fa7e4ea73202, type: 3}
       propertyPath: m_Name
       value: Wing Tip Line Maker
@@ -880,6 +913,11 @@ PrefabInstance:
 --- !u!4 &7540122536951715328 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 462224169877530232, guid: 1f0c30ff225a0034aab1fa7e4ea73202, type: 3}
+  m_PrefabInstance: {fileID: 7983126294383227000}
+  m_PrefabAsset: {fileID: 0}
+--- !u!96 &8287067714026424246 stripped
+TrailRenderer:
+  m_CorrespondingSourceObject: {fileID: 2146061140368406478, guid: 1f0c30ff225a0034aab1fa7e4ea73202, type: 3}
   m_PrefabInstance: {fileID: 7983126294383227000}
   m_PrefabAsset: {fileID: 0}
 --- !u!1001 &8068947269522700808
@@ -2504,6 +2542,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 2146061140368406478, guid: 1f0c30ff225a0034aab1fa7e4ea73202, type: 3}
+      propertyPath: m_Emitting
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 6935589476706611761, guid: 1f0c30ff225a0034aab1fa7e4ea73202, type: 3}
       propertyPath: m_Name
       value: Wing Tip Line Maker
@@ -2513,6 +2555,11 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 1f0c30ff225a0034aab1fa7e4ea73202, type: 3}
+--- !u!96 &7628107183944301609 stripped
+TrailRenderer:
+  m_CorrespondingSourceObject: {fileID: 2146061140368406478, guid: 1f0c30ff225a0034aab1fa7e4ea73202, type: 3}
+  m_PrefabInstance: {fileID: 8364358983451364327}
+  m_PrefabAsset: {fileID: 0}
 --- !u!4 &8250042850844159391 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 462224169877530232, guid: 1f0c30ff225a0034aab1fa7e4ea73202, type: 3}
