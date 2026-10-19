@@ -40,6 +40,9 @@ public class PigeonDeliveryRace : MonoBehaviour
     [field: SerializeField, BoxGroup("Course"), Required]
     public AchievementData CompletionAchievement { get; private set; }
 
+    [field: SerializeField, BoxGroup("Échec"), Tooltip("Message facultatif affiché uniquement quand le chrono expire. Le texte se règle sur son objet UI.")]
+    public FadingMessage FailureMessage { get; private set; }
+
     [ShowInInspector, ReadOnly]
     public DeliveryPhase Phase { get; private set; }
 
@@ -60,40 +63,39 @@ public class PigeonDeliveryRace : MonoBehaviour
             TimerText.gameObject.SetActive(false);
 
         if (DepartureCinematic != null)
-            DepartureCinematic.OnCinematicEnded.AddListener(HandleDepartureEnded);
+            DepartureCinematic.OnCinematicStarted.AddListener(HandleDepartureStarted);
         if (ArrivalCinematic != null)
             ArrivalCinematic.OnCinematicEnded.AddListener(HandleArrivalEnded);
     }
 
-    // Brancher sur le OnPlayerStopped de la zone de départ.
-    public void StartDelivery()
+    // La zone de départ lance directement DialogCinematic.PlayCinematic.
+    private void HandleDepartureStarted()
     {
         if (!isActiveAndEnabled || Phase != DeliveryPhase.Ready || _activeDelivery != null)
+        {
+            DepartureCinematic.CancelCinematic();
             return;
+        }
         if (!HasValidSetup())
         {
             Debug.LogWarning("PigeonDeliveryRace : assigner deux zones et deux cinématiques distinctes, le joueur, le chrono TMP, la flèche et l'achievement ; durée finie et positive requise. Garder les objets des zones et cinématiques actifs.", this);
+            DepartureCinematic.CancelCinematic();
             return;
         }
-        if (!DepartureStop.isActiveAndEnabled || DepartureCinematic.IsPlaying || ArrivalCinematic.IsPlaying)
-            return;
 
         _activeDelivery = this;
         Phase = DeliveryPhase.DepartureCinematic;
         _remainingSeconds = DurationSeconds;
-        DepartureCinematic.PlayCinematic();
-        if (!DepartureCinematic.IsPlaying)
-        {
-            FailDelivery();
-            return;
-        }
-
+        if (FailureMessage != null)
+            FailureMessage.Hide();
         SetStopActive(DepartureStop, DepartureMarker, false);
     }
 
-    private void HandleDepartureEnded()
+    // Brancher sur DialogCinematic.OnCinematicEnded de la cinématique de départ.
+    public void StartDelivery()
     {
-        if (Phase != DeliveryPhase.DepartureCinematic)
+        if (!isActiveAndEnabled || Phase != DeliveryPhase.DepartureCinematic || _activeDelivery != this
+            || DepartureCinematic.IsPlaying)
             return;
         if (!DepartureCinematic.CompletedNormally)
         {
@@ -117,7 +119,7 @@ public class PigeonDeliveryRace : MonoBehaviour
             return;
         if (RemainingSeconds <= 0f)
         {
-            FailDelivery();
+            FailDelivery(true);
             return;
         }
         RefreshTimer();
@@ -132,7 +134,7 @@ public class PigeonDeliveryRace : MonoBehaviour
         // Vérifier aussi ici : une arrivée à la limite ne doit pas gagner selon l'ordre des scripts.
         if (RemainingSeconds <= 0f)
         {
-            FailDelivery();
+            FailDelivery(true);
             return;
         }
 
@@ -162,7 +164,7 @@ public class PigeonDeliveryRace : MonoBehaviour
             Debug.LogWarning("PigeonDeliveryRace : course terminée, mais aucun AchievementManager actif dans la scène.", this);
     }
 
-    private void FailDelivery()
+    private void FailDelivery(bool timedOut = false)
     {
         _remainingSeconds = 0f;
         Phase = DeliveryPhase.Ready;
@@ -170,6 +172,8 @@ public class PigeonDeliveryRace : MonoBehaviour
         if (_activeDelivery == this)
             _activeDelivery = null;
         SetStopActive(DepartureStop, DepartureMarker, true);
+        if (timedOut && FailureMessage != null)
+            FailureMessage.Show();
     }
 
     private void HideRaceDisplay()
@@ -212,7 +216,7 @@ public class PigeonDeliveryRace : MonoBehaviour
     private void OnDisable()
     {
         if (DepartureCinematic != null)
-            DepartureCinematic.OnCinematicEnded.RemoveListener(HandleDepartureEnded);
+            DepartureCinematic.OnCinematicStarted.RemoveListener(HandleDepartureStarted);
         if (ArrivalCinematic != null)
             ArrivalCinematic.OnCinematicEnded.RemoveListener(HandleArrivalEnded);
 
