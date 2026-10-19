@@ -15242,7 +15242,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MusicPlayer
   audioSource: {fileID: 299374311}
-  nightDelivery: {fileID: 8300000, guid: 7a6ca4e9640eadc4b95dff8969564385, type: 3}
+  nightDelivery: {fileID: 8300000, guid: d55abd7b184f7664c8911a3d93fdb4b7, type: 3}
+  wrongWay: {fileID: 8300000, guid: a6bef914e582cd6409e5a3e42385c709, type: 3}
+  switchInterval: 240
+  fadeDuration: 10
 --- !u!82 &299374311
 AudioSource:
   m_ObjectHideFlags: 0
@@ -40544,7 +40547,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &778610151
 Transform:
   m_ObjectHideFlags: 0
