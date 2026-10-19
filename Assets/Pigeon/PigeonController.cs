@@ -48,10 +48,15 @@ public class PigeonController : MonoBehaviour
     [SerializeField] float _minBarrelRollSpeed = 20f;
     [SerializeField] float _rollDuration = 1.5f;
 
+    [Header("Buoyancy")]
+    [SerializeField] float _waterLevelModifier = 0.1f;
+    [SerializeField] float _buoyancyForce = 10f;
+
     Vector3 _velocity;
     Vector3 _pendingImpulse;
     float _currentPitch;
     float _yaw;
+    Water _water;
 
     CharacterController _controller;
     IPigeonControls _controls;
@@ -65,6 +70,7 @@ public class PigeonController : MonoBehaviour
 
     void Awake()
     {
+        _water = FindAnyObjectByType<Water>();
         _controller = GetComponent<CharacterController>();
         _controls = GetComponent<IPigeonControls>();
         _boostFeedback = GetComponent<PigeonBoostFeedback>();
@@ -137,6 +143,11 @@ public class PigeonController : MonoBehaviour
         }
 
         _velocity = PigeonFan.ApplyUpdrafts(transform.position, _velocity, dt, _controller.isGrounded);
+        if (_water != null && transform.position.y < _water.transform.position.y - _waterLevelModifier)
+        {
+            float deep = _water.transform.position.y - _waterLevelModifier - transform.position.y;
+            _velocity += Vector3.up * _buoyancyForce * deep * deep * dt;
+        }
         _controller.Move(_velocity * dt);
     }
 
