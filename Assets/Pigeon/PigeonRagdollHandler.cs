@@ -25,8 +25,8 @@ public class PigeonRagdollHandler : MonoBehaviour
     void Awake()
     {
 
-        _ragdollRigidbodies = _hipsBone.GetComponentsInChildren<Rigidbody>();
-        _ragdollColliders = _hipsBone.GetComponentsInChildren<Collider>();
+        _ragdollRigidbodies = GetComponentsInChildren<Rigidbody>();
+        _ragdollColliders = GetComponentsInChildren<Collider>();
 
 
         SetRagdollState(false);

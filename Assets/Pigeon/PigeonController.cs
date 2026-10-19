@@ -90,6 +90,7 @@ public class PigeonController : MonoBehaviour
 
     public float Speed => _lastVelocity.magnitude;
     public Vector3 Velocity => _lastVelocity;
+    public bool IsUndeWater => _water != null && transform.position.y < _water.transform.position.y - _waterLevelModifier;
 
     public bool IsMovementFrozen { get; private set; }
 
@@ -207,15 +208,17 @@ public class PigeonController : MonoBehaviour
         return impactDir * impactIntensity;
     }
 
-    void Stun()
+    void Stun(Vector3 hitnormal)
     {
         Debug.Log("STUN");
+        _lastHitNormal = hitnormal;
         _stunned = true;
         _controller.enabled = false;
         _rigidbody.isKinematic = false;
         _pigeonRagdollHandler.SetRagdollState(true);
         _rigidbody.linearVelocity = _lastVelocity;
         _stunRemaining = _stunMinDuration;
+        _rigidbody.AddForce(_lastHitNormal * 10f);
     }
 
     void WakeUp()
@@ -225,12 +228,27 @@ public class PigeonController : MonoBehaviour
         _pigeonRagdollHandler.AlignAndGetUp();
         _stunImmuneRemaining = _stunImmuneDuration;
         _currentPitch = 0f;
-        transform.forward = _lastHitNormal;
+
+        Vector3 horizontalVelocityBeforeStun = new Vector3(_lastVelocity.x, 0f, _lastVelocity.z);
+
+        Vector3 recoveryDir = (horizontalVelocityBeforeStun.normalized * 0.7f) + (_lastHitNormal * 0.3f);
+
+        if (recoveryDir.sqrMagnitude < 0.01f)
+        {
+            recoveryDir = _lastHitNormal;
+        }
+
+        transform.forward = recoveryDir.normalized;
         _yaw = transform.eulerAngles.y;
-        _lastVelocity = transform.forward * _flapMinSpeed;
+
+        float retainedSpeed = _flapMinSpeed;
+
+        _lastVelocity = transform.forward * retainedSpeed;
         _lastVelocity.y = _takeoffSpeed;
+
         _controller.enabled = true;
     }
+
 
 
     void OnControllerColliderHit(ControllerColliderHit hit)
@@ -239,10 +257,9 @@ public class PigeonController : MonoBehaviour
         if (body == null || body.isKinematic)
         {
             Debug.Log($"Impact: {CalculateImpactForce(hit).magnitude:F1}");
-            if (_stunImmuneRemaining < 0 && CalculateImpactForce(hit).magnitude > _maxImpact)
+            if (!IsUndeWater && _stunImmuneRemaining < 0 && CalculateImpactForce(hit).magnitude > _maxImpact)
             {
-                _lastHitNormal = hit.normal;
-                Stun();
+                Stun(hit.normal);
             }
             return;
         }
@@ -274,12 +291,11 @@ public class PigeonController : MonoBehaviour
         if (_stunned)
         {
             _stunRemaining -= dt;
-            _lastVelocity = _rigidbody.linearVelocity;
             if (_stunRemaining > 0 || !_controls.Flap)
                 return;
             WakeUp();
         }
-        if (!_lastFramePaused && !_skipVelocityRead)
+        else if (!_lastFramePaused && !_skipVelocityRead)
         {
             _lastVelocity = _controller.velocity;
         }
@@ -308,7 +324,7 @@ public class PigeonController : MonoBehaviour
         }
 
         _velocity = PigeonFan.ApplyUpdrafts(transform.position, _velocity, dt, _controller.isGrounded);
-        if (_water != null && transform.position.y < _water.transform.position.y - _waterLevelModifier)
+        if (IsUndeWater)
         {
             float deep = _water.transform.position.y - _waterLevelModifier - transform.position.y;
             _velocity += Vector3.up * _buoyancyForce * deep * deep * dt;
