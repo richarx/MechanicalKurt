@@ -62,8 +62,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4635222171588909783}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.29135072, y: 0.096097015, z: -0.02943055, w: 0.95132226}
-  m_LocalPosition: {x: -0.32573086, y: 1.2008991, z: -1.5958514}
+  m_LocalRotation: {x: 0.39930934, y: -0.0000001636248, z: 0.00000007249959, w: 0.91681623}
+  m_LocalPosition: {x: 0.0000007748604, y: 2.25, z: -2.000001}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -159,8 +159,8 @@ MonoBehaviour:
     SplineCurvature: 0.5
   RecenteringTarget: 2
   HorizontalAxis:
-    Value: 134.2284
-    Center: 122.69216
+    Value: 122.69217
+    Center: 122.69217
     Range: {x: -180, y: 180}
     Wrap: 1
     Recentering:
@@ -169,7 +169,7 @@ MonoBehaviour:
       Time: 2
     Restrictions: 0
   VerticalAxis:
-    Value: 3.329458
+    Value: 17.5
     Center: 17.5
     Range: {x: -10, y: 45}
     Wrap: 0
@@ -334,6 +334,7 @@ GameObject:
   - component: {fileID: 5917408735170155768}
   - component: {fileID: 7595259944597442791}
   - component: {fileID: 8858055023861483610}
+  - component: {fileID: 612529284508758725}
   m_Layer: 3
   m_Name: Player
   m_TagString: Untagged
@@ -407,6 +408,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 220a88b6c93f5b24e898fee231663b01, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PigeonController
+  _pushPower: 5
+  _weight: 1.5
   _groundSpeed: 1
   _turnSpeed: 90
   _pitchSpeed: 60
@@ -431,11 +434,17 @@ MonoBehaviour:
   _diveMaxPitch: 80
   _diveMaxSpeed: 40
   _diveDragAtMaxSpeed: 1.5
-  _minBarrelRollSpeed: 15
+  _minBarrelRollSpeed: 3
   _rollDuration: 1
   _waterLevelModifier: 0.1
   _buoyancyForce: 20
   _activeDebug: 0
+  OnTakeoff:
+    m_PersistentCalls:
+      m_Calls: []
+  OnRoll:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!114 &7788707282503470594
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -500,6 +509,35 @@ MonoBehaviour:
   _buttHole: {fileID: 8761204759105641240}
   _poopPrefab: {fileID: 6825427995295685755, guid: 0091c71e5debd7c4683a552575c1c8fd, type: 3}
   _cooldownMax: 0.5
+  OnShit:
+    m_PersistentCalls:
+      m_Calls: []
+--- !u!114 &612529284508758725
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8893443228925278897}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1737bba54d0415b4cbee35e0c4466df4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PigeonSFX
+  coohClips:
+  - {fileID: 8300000, guid: bb498a4061db41b418e6d3aaf5923934, type: 3}
+  - {fileID: 8300000, guid: 2026e7cad613a98408a2deff574e46d5, type: 3}
+  - {fileID: 8300000, guid: e955d2e0f7a5d1943b17695d530c872b, type: 3}
+  takeOffClip: {fileID: 8300000, guid: b240de1d43422fc4685f0c9f555af126, type: 3}
+  flyLoopClip: {fileID: 8300000, guid: c08db5ccbfe102348a47b0ad7a43c981, type: 3}
+  poopClip: {fileID: 8300000, guid: acb1fc60a977e6b46bf1e40495b83415, type: 3}
+  rollClips:
+  - {fileID: 8300000, guid: 33ec72da27e336446b91a3d7ad4f3e32, type: 3}
+  - {fileID: 8300000, guid: 8b902c0fa7c9a974d8089d569cec9e6d, type: 3}
+  - {fileID: 8300000, guid: 3418b1fa006b0b845b90a66e1cbdc08e, type: 3}
+  waterPlane: {fileID: 0}
+  enterWater: {fileID: 8300000, guid: 2466f5e40cdf95841987426ab3fd8a8a, type: 3}
+  exitWater: {fileID: 8300000, guid: 57d0a0e2f565fee49b46984530c9d3da, type: 3}
 --- !u!1001 &902121178248826382
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2471,6 +2509,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 8128668236925612103, guid: 0065f115667c06940a51b2747e6108a2, type: 3}
       insertIndex: -1
       addedObject: {fileID: 4297972850498651588}
+    - targetCorrespondingSourceObject: {fileID: 8128668236925612103, guid: 0065f115667c06940a51b2747e6108a2, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 833030345869374276}
   m_SourcePrefab: {fileID: -5645937942226959685, guid: 0065f115667c06940a51b2747e6108a2, type: 3}
 --- !u!4 &588796590496971626 stripped
 Transform:
@@ -2499,6 +2540,25 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 116eef9bd859fd143ae2479b299487e3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PigeonAnimationControl
+--- !u!114 &833030345869374276
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2248558985876703823}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9f0bb5cbad160b740b8149600be25272, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PigeonAnimationSFX
+  flapSound: {fileID: 8300000, guid: 1d74edaa48b5ca74bbba6f115f097473, type: 3}
+  footstepSounds:
+  - {fileID: 8300000, guid: 6e01ea5ded815d74abd59940c4ae5e2c, type: 3}
+  landingSounds:
+  - {fileID: 8300000, guid: fa39fb00d116f39499702b8c200854ad, type: 3}
+  - {fileID: 8300000, guid: 6bff36cac8f077540970b26d7d244357, type: 3}
+  landingSound: {fileID: 8300000, guid: a1d94eafb4d38534aaa1b9a1bc533aa4, type: 3}
 --- !u!4 &2701029632086126185 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -3854706443746929567, guid: 0065f115667c06940a51b2747e6108a2, type: 3}

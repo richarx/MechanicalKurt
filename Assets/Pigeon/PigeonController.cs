@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
 
@@ -58,6 +59,9 @@ public class PigeonController : MonoBehaviour
     [Header("Debug")]
     [SerializeField] bool _activeDebug = false;
 
+    [HideInInspector] public UnityEvent OnTakeoff = new UnityEvent();
+    [HideInInspector] public UnityEvent OnRoll = new UnityEvent();
+
     Vector3 _velocity;
     Vector3 _lastVelocity;
     Vector3 _pendingImpulse;
@@ -72,6 +76,8 @@ public class PigeonController : MonoBehaviour
 
     public float Speed => _lastVelocity.magnitude;
     public Vector3 Velocity => _lastVelocity;
+
+    public bool IsGrounded => _controller.isGrounded;
 
     // Applied once on the next flight physics step (cleared while grounded).
     public void AddImpulse(Vector3 impulse) => _pendingImpulse += impulse;
@@ -214,6 +220,7 @@ public class PigeonController : MonoBehaviour
             _currentPitch = _maxPitch;
             _velocity = transform.forward * _flapMinSpeed;
             _velocity.y = _takeoffSpeed;
+            OnTakeoff?.Invoke();
         }
         else
         {
@@ -393,5 +400,6 @@ public class PigeonController : MonoBehaviour
             return;
 
         _boostFeedback.Play(restart: true, _rollDuration, isLeft);
+        OnRoll?.Invoke();
     }
 }

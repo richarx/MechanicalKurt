@@ -1,3 +1,4 @@
+using System.Linq;
 using DG.Tweening;
 using UnityEngine;
 
@@ -61,7 +62,7 @@ public class BoostRing : MonoBehaviour
         }
 
         if (_sfx != null && _sfx.Length > 0 && SFXManager.Instance != null)
-            SFXManager.Instance.PlayRandomSFXAtLocation(_sfx, transform, _sfxVolume);
+            SFXManager.Instance.PlayRandomSFXAtLocation(_sfx.ToList(), transform, _sfxVolume);
     }
 
     void OnDestroy()

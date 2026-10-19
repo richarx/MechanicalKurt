@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
@@ -13,14 +14,19 @@ public class SFXManager : MonoBehaviour
             Instance = this;
     }
 
-    public AudioSource PlayRandomSFXAtLocation(AudioClip[] clips, Transform target, float volume = 0.1f, float delay = 0.0f, bool loop = false, float pitch = 1f)
+    public AudioSource PlayRandomSFX(List<AudioClip> clips, float volume = 0.3f, float delay = 0.0f, bool loop = false, float pitch = 1f)
     {
-        int index = Random.Range(0, clips.Length);
+        return PlayRandomSFXAtLocation(clips, null, volume, delay, loop, pitch);
+    }
+
+    public AudioSource PlayRandomSFXAtLocation(List<AudioClip> clips, Transform target, float volume = 0.3f, float delay = 0.0f, bool loop = false, float pitch = 1f)
+    {
+        int index = Random.Range(0, clips.Count);
 
         return PlaySFXAtLocation(clips[index], target, volume, delay, loop, pitch);
     }
 
-    public AudioSource PlaySFXAtLocation(AudioClip clip, Transform target, float volume = 0.1f, float delay = 0.0f, bool loop = false, float pitch = 1f)
+    public AudioSource PlaySFXAtLocation(AudioClip clip, Transform target, float volume = 0.3f, float delay = 0.0f, bool loop = false, float pitch = 1f)
     {
         Transform parent = target != null ? target : transform;
 
@@ -41,11 +47,11 @@ public class SFXManager : MonoBehaviour
         return source;
     }
 
-    public AudioSource PlaySFX(AudioClip clip, float volume = 0.1f, float delay = 0.0f, bool loop = false, float pitch = 1f)
+    public AudioSource PlaySFX(AudioClip clip, float volume = 0.3f, float delay = 0.0f, bool loop = false, float pitch = 1f)
     {
         return PlaySFXAtLocation(clip, null, volume, delay, loop, pitch);
     }
-    public AudioSource PlaySFXAtLocationNoPitchModifier(AudioClip clip, Transform target, float volume = 0.1f, float delay = 0.0f, bool loop = false)
+    public AudioSource PlaySFXAtLocationNoPitchModifier(AudioClip clip, Transform target, float volume = 0.3f, float delay = 0.0f, bool loop = false)
     {
         Transform parent = target != null ? target : transform;
 
@@ -64,7 +70,7 @@ public class SFXManager : MonoBehaviour
 
         return source;
     }
-    public AudioSource PlaySFXNoPitchModifier(AudioClip clip, float volume = 0.1f, float delay = 0.0f, bool loop = false)
+    public AudioSource PlaySFXNoPitchModifier(AudioClip clip, float volume = 0.3f, float delay = 0.0f, bool loop = false)
     {
         return PlaySFXAtLocationNoPitchModifier(clip, null, volume, delay, loop);
     }
