@@ -32,10 +32,10 @@ Material:
     - _CellSize: 2
     - _Rotation: 0
     - _Speed: 0.98
-    - _UnscaledTime: 60.316166
+    - _UnscaledTime: 27.48866
     - _Zoom: 1
     m_Colors:
     - _Pan: {r: 0, g: 0, b: 0, a: 0}
-    - _Tint: {r: 0, g: 0, b: 0, a: 0}
+    - _Tint: {r: 1, g: 1, b: 1, a: 1}
   m_BuildTextureStacks: []
   m_AllowLocking: 1
