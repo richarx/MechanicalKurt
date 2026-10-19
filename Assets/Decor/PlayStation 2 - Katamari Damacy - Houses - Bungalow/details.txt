@@ -1,0 +1,5 @@
+Name: Bungalow
+ID: 1113
+Category: Houses
+Variant: Standard
+Description: In much demand during vacation seasons. Some find love here, some don't.
