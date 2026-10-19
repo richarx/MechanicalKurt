@@ -5,6 +5,9 @@ using UnityEngine.InputSystem;
 [RequireComponent(typeof(CharacterController))]
 public class PigeonController : MonoBehaviour
 {
+    [Header("Interactions / Physics")]
+    [SerializeField] float _pushPower = 5f;
+    [SerializeField] float _weight = 1.5f;
     [Header("Ground Movement")]
     [SerializeField] float _groundSpeed = 1f;
 
@@ -127,6 +130,25 @@ public class PigeonController : MonoBehaviour
             GUI.Label(new Rect(10, 110, 300, 20), $"HorizontalSpeed: {Vector3.ProjectOnPlane(_controller.velocity, Vector3.up).magnitude:F1}");
             GUI.Label(new Rect(10, 140, 300, 20), $"VerticalSpeed: {_controller.velocity.y:F1}");
         }
+    }
+
+    void OnControllerColliderHit(ControllerColliderHit hit)
+    {
+        Rigidbody body = hit.collider.attachedRigidbody;
+        if (body == null || body.isKinematic)
+        {
+            return;
+        }
+
+        Vector3 pushDir = new Vector3(hit.moveDirection.x, 0, hit.moveDirection.z).normalized;
+
+        Vector3 pigeonHorizontalVelocity = new Vector3(_controller.velocity.x, 0f, _controller.velocity.z);
+
+        float forwardVelocityComponent = Mathf.Max(0f, Vector3.Dot(pigeonHorizontalVelocity, pushDir));
+
+        float finalPushPower = _pushPower + (forwardVelocityComponent * _weight);
+
+        body.AddForce(pushDir * finalPushPower, ForceMode.Force);
     }
 
     void Update()
