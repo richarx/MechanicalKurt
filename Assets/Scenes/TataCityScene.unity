@@ -23023,7 +23023,7 @@ MonoBehaviour:
   _pigeon: {fileID: 0}
   <Radius>k__BackingField: 0.59
   <StopSpeedThreshold>k__BackingField: 0.15
-  <StopDuration>k__BackingField: 0.25
+  <StopDuration>k__BackingField: 1
   <OnPlayerStopped>k__BackingField:
     m_PersistentCalls:
       m_Calls:
@@ -49968,6 +49968,7 @@ MonoBehaviour:
   <CameraPriority>k__BackingField: 100
   <CameraToRoarDelay>k__BackingField: 1
   <RoarToDieDelay>k__BackingField: 0.1
+  <DieToRestoreDelay>k__BackingField: 5
 --- !u!1 &1247531140
 GameObject:
   m_ObjectHideFlags: 0
@@ -69618,11 +69619,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4807081451739982482, guid: 013420fdddab85a48be5b875e08e2729, type: 3}
       propertyPath: m_LocalRotation.y
-      value: -0.00000013747233
+      value: -0.00000016362482
       objectReference: {fileID: 0}
     - target: {fileID: 4807081451739982482, guid: 013420fdddab85a48be5b875e08e2729, type: 3}
       propertyPath: m_LocalRotation.z
-      value: 0.000000046347093
+      value: 0.0000000737141
       objectReference: {fileID: 0}
     - target: {fileID: 7718967718942241121, guid: 013420fdddab85a48be5b875e08e2729, type: 3}
       propertyPath: m_LocalPosition.x

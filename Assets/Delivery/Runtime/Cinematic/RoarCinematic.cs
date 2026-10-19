@@ -33,12 +33,13 @@ public class RoarCinematic : MonoBehaviour
     public float RoarToDieDelay { get; private set; } = 1f;
 
     [field: SerializeField, MinValue(0f), SuffixLabel("s", true)]
-    [field: Tooltip("Temps laisse aux animations Die avant de revenir a la camera precedente.")]
+    [field: Tooltip("Secondes reelles laissees aux animations Die avant de revenir a la camera precedente.")]
     public float DieToRestoreDelay { get; private set; } = 1f;
 
     [ShowInInspector, ReadOnly] public bool IsPlaying { get; private set; }
 
     private Coroutine _routine;
+    private Coroutine _restoreRoutine;
     private CinemachineCamera _overriddenCamera;
     private CinemachineVirtualCameraBase _returnCamera;
     private PrioritySettings _previousPriority;
@@ -74,9 +75,14 @@ public class RoarCinematic : MonoBehaviour
         }
 
         IsPlaying = true;
+        if (_restoreRoutine != null)
+        {
+            StopCoroutine(_restoreRoutine);
+            _restoreRoutine = null;
+        }
         if (_overriddenCamera != CinematicCamera)
         {
-            RestoreCamera();
+            RestoreCameraImmediately();
             _overriddenCamera = CinematicCamera;
             _previousPriority = CinematicCamera.Priority;
             _returnCamera = brain.ActiveVirtualCamera as CinemachineVirtualCameraBase;
@@ -121,8 +127,7 @@ public class RoarCinematic : MonoBehaviour
             }
         }
 
-        yield return new WaitForSeconds(Mathf.Max(0f, DieToRestoreDelay));
-        RestoreCamera();
+        yield return RestoreCameraAfterDelay();
 
         IsPlaying = false;
         _routine = null;
@@ -132,13 +137,30 @@ public class RoarCinematic : MonoBehaviour
     {
         if (_routine != null)
             StopCoroutine(_routine);
+        if (_restoreRoutine != null)
+            StopCoroutine(_restoreRoutine);
         _routine = null;
+        _restoreRoutine = null;
         IsPlaying = false;
-        RestoreCamera();
+        RestoreCameraImmediately();
     }
 
-    // Selectionnable dans un UnityEvent pour terminer le plan quand souhaite.
+    // Un appel externe ne doit pas court-circuiter l'attente apres Die.
     public void RestoreCamera()
+    {
+        if (!isActiveAndEnabled || IsPlaying || _restoreRoutine != null || _overriddenCamera == null)
+            return;
+        _restoreRoutine = StartCoroutine(RestoreCameraAfterDelay());
+    }
+
+    private IEnumerator RestoreCameraAfterDelay()
+    {
+        yield return new WaitForSecondsRealtime(Mathf.Max(0f, DieToRestoreDelay));
+        RestoreCameraImmediately();
+        _restoreRoutine = null;
+    }
+
+    private void RestoreCameraImmediately()
     {
         if (_overriddenCamera != null)
         {
