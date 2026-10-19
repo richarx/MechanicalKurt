@@ -1,3 +1,4 @@
+using System.Collections;
 using DG.Tweening;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -26,6 +27,14 @@ public class MusicPlayer : MonoBehaviour
         instance = this;
     }
 
+    private IEnumerator Start()
+    {
+        yield return new WaitForSeconds(120.0f);
+
+        if (!audioSource.isPlaying)
+            PlayMusic(Songs.NightDelivery);
+    }
+
     [ContextMenu("Play Music")]
     public void PlayMusicTest()
     {
@@ -38,11 +47,14 @@ public class MusicPlayer : MonoBehaviour
         LowerMusicVolume();
     }
 
-    public void PlayMusic(Songs song)
+    public void PlayMusic(Songs song, float delay = 0.0f)
     {
         Debug.Log("Play Music");
 
         Sequence sequence = DOTween.Sequence();
+
+        if (delay > 0.0f)
+            sequence.AppendInterval(delay);
 
         if (audioSource.isPlaying)
             sequence.Append(audioSource.DOFade(0.0f, 1.0f));

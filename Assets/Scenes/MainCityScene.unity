@@ -12440,8 +12440,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 84c00e621abbfbe40a5f252e11d325c4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MusicPlayer
-  audioSource: {fileID: 0}
-  nightDelivery: {fileID: 0}
+  audioSource: {fileID: 299374311}
+  nightDelivery: {fileID: 8300000, guid: 7a6ca4e9640eadc4b95dff8969564385, type: 3}
 --- !u!82 &299374311
 AudioSource:
   m_ObjectHideFlags: 0
@@ -26470,7 +26470,19 @@ MonoBehaviour:
       m_Calls: []
   <OnCinematicEnded>k__BackingField:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 1769670848}
+        m_TargetAssemblyTypeName: PigeonEquipment, Assembly-CSharp
+        m_MethodName: ToggleBackPack
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &630067718
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -74244,6 +74256,10 @@ PrefabInstance:
       propertyPath: HorizontalAxis.Center
       value: 122.69217
       objectReference: {fileID: 0}
+    - target: {fileID: 5917408735170155768, guid: 013420fdddab85a48be5b875e08e2729, type: 3}
+      propertyPath: equipVFX
+      value: 
+      objectReference: {fileID: 1575721338728490, guid: 4171bb92c5c591848b14be1db6f3efe2, type: 3}
     - target: {fileID: 7718967718942241121, guid: 013420fdddab85a48be5b875e08e2729, type: 3}
       propertyPath: m_LocalPosition.x
       value: 25.18
@@ -74309,6 +74325,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 220a88b6c93f5b24e898fee231663b01, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PigeonController
+--- !u!114 &1769670848 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 5917408735170155768, guid: 013420fdddab85a48be5b875e08e2729, type: 3}
+  m_PrefabInstance: {fileID: 1769670839}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8f7305da3f13b6d48b104f2618e72a20, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PigeonEquipment
 --- !u!1 &1770822444
 GameObject:
   m_ObjectHideFlags: 0

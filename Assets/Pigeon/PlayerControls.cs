@@ -17,6 +17,8 @@ public class PlayerControls : MonoBehaviour, IPigeonControls
 
     bool _rightFlex;
 
+    bool _forceFlex;
+
     [ShowInInspector, ReadOnly]
     public bool AreControlsBlocked { get; private set; }
 
@@ -71,6 +73,11 @@ public class PlayerControls : MonoBehaviour, IPigeonControls
             _controls.Player.Enable();
     }
 
+    public void SetForceFlex(bool isForcing)
+    {
+        _forceFlex = isForcing;
+    }
+
     private void ClearPendingActions()
     {
         _interact = _cooing = _shit = _leftFlex = _rightFlex = false;
@@ -99,7 +106,7 @@ public class PlayerControls : MonoBehaviour, IPigeonControls
 
     public bool Brake => CanReadControls && _controls.Player.Brake.IsPressed();
 
-    public bool Flex => CanReadControls && (_controls.Player.LeftFlex.IsPressed() || _controls.Player.RightFlex.IsPressed());
+    public bool Flex => (CanReadControls && (_controls.Player.LeftFlex.IsPressed() || _controls.Player.RightFlex.IsPressed())) || _forceFlex;
 
     public bool ConsumeInteract
     {

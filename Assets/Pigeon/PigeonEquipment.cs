@@ -1,3 +1,5 @@
+using DG.Tweening;
+using Unity.Cinemachine;
 using UnityEngine;
 
 public class PigeonEquipment : MonoBehaviour
@@ -7,22 +9,111 @@ public class PigeonEquipment : MonoBehaviour
     [SerializeField] private GameObject shoeLeft;
     [SerializeField] private GameObject shoeRight;
 
+    [Space]
+    [SerializeField] private CinemachineCamera equipmentCamera;
+
+    [Space]
+    [SerializeField] private AudioClip equipClip;
+    [SerializeField] private GameObject equipVFX;
+
+    public enum Equipment
+    {
+        Backpack,
+        Hat,
+        Shoes
+    }
+
+    PlayerControls playerControls;
+
+    private void Start()
+    {
+        playerControls = GetComponent<PlayerControls>();
+    }
+
     [ContextMenu("Toggle BackPack")]
     public void ToggleBackPack()
     {
-        backpack.SetActive(!backpack.activeSelf);
+        UnlockItem(Equipment.Backpack);
     }
 
     [ContextMenu("Toggle Hat")]
     public void ToggleHat()
     {
-        hat.SetActive(!hat.activeSelf);
+        UnlockItem(Equipment.Hat);
     }
 
     [ContextMenu("Toggle Shoes")]
     public void ToggleShoes()
     {
-        shoeLeft.SetActive(!shoeLeft.activeSelf);
-        shoeRight.SetActive(!shoeRight.activeSelf);
+        UnlockItem(Equipment.Shoes);
+    }
+
+    public void UnlockItem(Equipment equipment)
+    {
+        playerControls.SetControlsBlocked(true);
+        equipmentCamera.Priority = 100;
+
+        Sequence sequence = DOTween.Sequence();
+
+        (GameObject equipment1, GameObject equipment2) = GetEquipmentObjects(equipment);
+
+        sequence.AppendInterval(1.5f);
+        sequence.AppendCallback(() => ActivateEquipmentObject(equipment));
+
+        if (equipment1 != null)
+        {
+            sequence.Append(equipment1.transform.DOPunchScale(Vector3.one * 0.5f, 0.5f));
+            sequence.JoinCallback(() => Destroy(Instantiate(equipVFX, equipment1.transform.position, Quaternion.identity), 3.0f));
+        }
+
+        if (equipment2 != null)
+        {
+            sequence.Join(equipment2.transform.DOPunchScale(Vector3.one * 0.5f, 0.5f));
+            sequence.JoinCallback(() => Destroy(Instantiate(equipVFX, equipment2.transform.position, Quaternion.identity), 3.0f));
+        }
+
+        sequence.JoinCallback(() => SFXManager.Instance.PlaySFX(equipClip, 0.5f));
+
+
+        sequence.AppendCallback(() => playerControls.SetForceFlex(true));
+        sequence.AppendInterval(3.0f);
+        sequence.AppendCallback(() => playerControls.SetForceFlex(false));
+
+        sequence.AppendCallback(() => equipmentCamera.Priority = 0);
+        sequence.AppendCallback(() => playerControls.SetControlsBlocked(false));
+
+        sequence.AppendCallback(() => MusicPlayer.instance.PlayMusic(MusicPlayer.Songs.NightDelivery, 5.0f));
+    }
+
+    private (GameObject, GameObject) GetEquipmentObjects(Equipment equipment)
+    {
+        switch (equipment)
+        {
+            case Equipment.Backpack:
+                return (backpack, null);
+            case Equipment.Hat:
+                return (hat, null);
+            case Equipment.Shoes:
+                return (shoeLeft, shoeRight);
+            default:
+                return (null, null);
+        }
+    }
+
+    private void ActivateEquipmentObject(Equipment equipment)
+    {
+        switch (equipment)
+        {
+            case Equipment.Backpack:
+                backpack.SetActive(!backpack.activeSelf);
+                break;
+            case Equipment.Hat:
+                hat.SetActive(!hat.activeSelf);
+                break;
+            case Equipment.Shoes:
+                shoeLeft.SetActive(!shoeLeft.activeSelf);
+                shoeRight.SetActive(!shoeRight.activeSelf);
+                break;
+        }
     }
 }
