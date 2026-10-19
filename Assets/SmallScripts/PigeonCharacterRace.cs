@@ -1,6 +1,7 @@
 using Sirenix.OdinInspector;
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.Serialization;
 
 [DisallowMultipleComponent]
 public class PigeonCharacterRace : MonoBehaviour
@@ -16,15 +17,29 @@ public class PigeonCharacterRace : MonoBehaviour
     [field: SerializeField, BoxGroup("Départ"), Tooltip("Visuel facultatif, séparé des cinématiques et du contrôleur de course.")]
     public GameObject DepartureMarker { get; private set; }
 
+    [field: SerializeField, BoxGroup("Départ")]
+    [field: FormerlySerializedAs("<CharacterDeparturePose>k__BackingField")]
+    [field: Tooltip("Repère facultatif : le pigeon est placé ici, orienté selon son forward (axe bleu), avec sa caméra derrière lui. Incliner le repère vers l'eau pour préparer le plongeon. Appliqué après la cinématique de départ.")]
+    public Transform PlayerDeparturePose { get; private set; }
+
     [field: SerializeField, BoxGroup("Course"), Required]
     public PigeonController Player { get; private set; }
 
     [field: SerializeField, BoxGroup("Course"), Required]
     public Transform Character { get; private set; }
 
-    [field: SerializeField, BoxGroup("Course"), Required, ListDrawerSettings(ShowIndexLabels = true)]
-    [field: Tooltip("Points à rejoindre dans l'ordre, depuis la position du personnage à la fin du dialogue. Le dernier est la fin du trajet. Garder ces points indépendants du personnage.")]
+    [field: SerializeField, BoxGroup("Course"), Required]
+    [field: Tooltip("Trajet éditable comme les autres CityPath : ajout de points dans la Scene avec Ctrl gauche. Le personnage le parcourt une seule fois, sans boucle ni arrêts.")]
+    public CharacterRacePath Path { get; private set; }
+
+    // Conserver le nom et le type sérialisés pour les courses déjà configurées.
+    // Ces références restent utilisables jusqu'à leur conversion en CharacterRacePath.
+    [field: SerializeField, HideInInspector]
     public Transform[] Waypoints { get; private set; } = new Transform[0];
+
+    [field: SerializeField, BoxGroup("Course"), ListDrawerSettings(ShowIndexLabels = true)]
+    [field: Tooltip("Objets affichés uniquement pendant la course, après le dialogue de départ. Masqués à la victoire, à l'échec et à l'annulation. Ne pas inclure le contrôleur, le départ, les cinématiques, le joueur, le personnage ou le message, ni leurs parents.")]
+    public GameObject[] RaceObjects { get; private set; } = new GameObject[0];
 
     [field: SerializeField, BoxGroup("Course"), MinValue(0.01f), SuffixLabel("s", true)]
     public float DurationSeconds { get; private set; } = 30f;
@@ -45,6 +60,10 @@ public class PigeonCharacterRace : MonoBehaviour
 
     [field: SerializeField, BoxGroup("Arrivée"), Required]
     public DialogCinematic ArrivalCinematic { get; private set; }
+
+    [field: SerializeField, BoxGroup("Arrivée")]
+    [field: Tooltip("Achievement attribué après la fin normale de la cinématique de victoire. L'ajouter aussi à la liste de l'AchievementManager.")]
+    public AchievementData CompletionAchievement { get; private set; }
 
     [field: SerializeField, BoxGroup("Échec"), SuffixLabel("Y monde", true)]
     [field: Tooltip("Altitude absolue maximale du pigeon pendant la course.")]
@@ -75,6 +94,7 @@ public class PigeonCharacterRace : MonoBehaviour
     {
         SetDepartureActive(Phase == RacePhase.Ready);
         SetDestinationActive(false);
+        SetRaceObjectsActive(false);
         if (DepartureCinematic != null)
             DepartureCinematic.OnCinematicStarted.AddListener(HandleDepartureStarted);
         if (ArrivalCinematic != null)
@@ -87,7 +107,7 @@ public class PigeonCharacterRace : MonoBehaviour
             return;
         if (!HasValidSetup())
         {
-            Debug.LogWarning("PigeonCharacterRace : assigner le pigeon, le personnage, les points du trajet, deux PigeonStop et deux cinématiques distincts, l'objet d'arrivée, la pose finale et le FadingMessage actif avec CanvasGroup et texte TMP. Vérifier la durée positive, la hauteur finie et les hiérarchies (voir le guide de montage).", this);
+            Debug.LogWarning("PigeonCharacterRace : assigner le pigeon, le personnage, un CharacterRacePath avec des points, deux PigeonStop et deux cinématiques distincts, l'objet d'arrivée, la pose finale et le FadingMessage actif avec CanvasGroup et texte TMP. Vérifier la durée positive, la hauteur finie et les hiérarchies des Race Objects (voir le guide de montage).", this);
             DepartureCinematic.CancelCinematic();
             return;
         }
@@ -105,7 +125,7 @@ public class PigeonCharacterRace : MonoBehaviour
     {
         if (!isActiveAndEnabled || Phase != RacePhase.DepartureCinematic || DepartureCinematic.IsPlaying)
             return;
-        if (!DepartureCinematic.CompletedNormally || !HasValidSetup() || !BuildPath())
+        if (!DepartureCinematic.CompletedNormally || !HasValidSetup())
         {
             ResetAttempt();
             return;
@@ -118,10 +138,18 @@ public class PigeonCharacterRace : MonoBehaviour
             _ownsRootMotion = true;
             _characterAnimator.applyRootMotion = false;
         }
+        if (!BuildPath())
+        {
+            ResetAttempt();
+            return;
+        }
+        if (PlayerDeparturePose != null)
+            Player.Teleport(PlayerDeparturePose.position, PlayerDeparturePose.rotation);
         _duration = DurationSeconds;
         _startedAt = Time.timeAsDouble;
         Phase = RacePhase.Racing;
         SetDestinationActive(true);
+        SetRaceObjectsActive(true);
     }
 
     private void LateUpdate()
@@ -151,6 +179,7 @@ public class PigeonCharacterRace : MonoBehaviour
 
         Phase = RacePhase.ArrivalCinematic;
         SetDestinationActive(false);
+        SetRaceObjectsActive(false);
         RestoreRootMotion();
         Character.SetPositionAndRotation(CharacterArrivalPose.position, CharacterArrivalPose.rotation);
         ArrivalCinematic.PlayCinematic();
@@ -187,18 +216,26 @@ public class PigeonCharacterRace : MonoBehaviour
 
         Phase = RacePhase.Completed;
         _hasCharacterPose = false;
+        if (CompletionAchievement != null)
+        {
+            if (AchievementManager.Instance != null)
+                AchievementManager.Instance.Unlock(CompletionAchievement);
+            else
+                Debug.LogWarning("PigeonCharacterRace : course gagnée, mais aucun AchievementManager actif dans la scène.", this);
+        }
         OnCompleted.Invoke();
     }
 
     private bool BuildPath()
     {
-        _path = new Vector3[Waypoints.Length + 1];
+        int pointCount = Path != null ? Path.PointCount : Waypoints.Length;
+        _path = new Vector3[pointCount + 1];
         _distances = new float[_path.Length];
         _path[0] = Character.position;
         _pathLength = 0f;
-        for (int i = 0; i < Waypoints.Length; i++)
+        for (int i = 0; i < pointCount; i++)
         {
-            _path[i + 1] = Waypoints[i].position;
+            _path[i + 1] = Path != null ? Path.GetPointPosition(i) : Waypoints[i].position;
             _pathLength += Vector3.Distance(_path[i], _path[i + 1]);
             _distances[i + 1] = _pathLength;
         }
@@ -234,6 +271,7 @@ public class PigeonCharacterRace : MonoBehaviour
             Character.SetPositionAndRotation(_characterStartPosition, _characterStartRotation);
         _hasCharacterPose = false;
         SetDestinationActive(false);
+        SetRaceObjectsActive(false);
         SetDepartureActive(true);
     }
 
@@ -260,6 +298,27 @@ public class PigeonCharacterRace : MonoBehaviour
             DestinationObject.SetActive(active);
     }
 
+    private void SetRaceObjectsActive(bool active)
+    {
+        if (RaceObjects == null)
+            return;
+        foreach (GameObject raceObject in RaceObjects)
+            if (raceObject != null && CanToggleRaceObject(raceObject))
+                raceObject.SetActive(active);
+    }
+
+    private bool CanToggleRaceObject(GameObject raceObject)
+    {
+        Transform root = raceObject.transform;
+        return !transform.IsChildOf(root)
+            && (DepartureStop == null || !DepartureStop.transform.IsChildOf(root))
+            && (Player == null || !Player.transform.IsChildOf(root))
+            && (Character == null || !Character.IsChildOf(root))
+            && (DepartureCinematic == null || !DepartureCinematic.transform.IsChildOf(root))
+            && (ArrivalCinematic == null || !ArrivalCinematic.transform.IsChildOf(root))
+            && (FailureMessage == null || !FailureMessage.transform.IsChildOf(root));
+    }
+
     private bool HasValidSetup()
     {
         if (DepartureStop == null || DestinationStop == null || DepartureStop == DestinationStop
@@ -271,14 +330,56 @@ public class PigeonCharacterRace : MonoBehaviour
             || !DestinationStop.transform.IsChildOf(DestinationObject.transform)
             || FailureMessage == null || !FailureMessage.isActiveAndEnabled || FailureMessage.Group == null
             || FailureMessage.GetComponent<TMPro.TMP_Text>() == null
-            || !IsFinite(DurationSeconds) || DurationSeconds <= 0f || !IsFinite(MaximumHeight)
-            || Waypoints == null || Waypoints.Length == 0)
+            || !IsFinite(DurationSeconds) || DurationSeconds <= 0f || !IsFinite(MaximumHeight))
             return false;
-        foreach (Transform waypoint in Waypoints)
-            if (waypoint == null || waypoint.IsChildOf(Character))
+
+        if (Path != null)
+        {
+            if (Path.PointCount == 0 || Path.transform.IsChildOf(Character))
                 return false;
+            for (int i = 0; i < Path.PointCount; i++)
+                if (Path.GetPoint(i) == null)
+                    return false;
+        }
+        else
+        {
+            if (Waypoints == null || Waypoints.Length == 0)
+                return false;
+            foreach (Transform waypoint in Waypoints)
+                if (waypoint == null || waypoint.IsChildOf(Character))
+                    return false;
+        }
+        if (RaceObjects != null)
+            foreach (GameObject raceObject in RaceObjects)
+                if (raceObject != null && !CanToggleRaceObject(raceObject))
+                    return false;
         return true;
     }
+
+#if UNITY_EDITOR
+    [Button("Créer le trajet (reprendre les anciens points)"), BoxGroup("Course")]
+    [HideInPlayMode, ShowIf("@Path == null")]
+    public void CreatePath()
+    {
+        if (Application.isPlaying || Path != null)
+            return;
+
+        UnityEditor.Undo.RecordObject(this, "Créer le trajet de course");
+        GameObject pathObject = new GameObject(name + " Path");
+        UnityEditor.Undo.RegisterCreatedObjectUndo(pathObject, "Créer le trajet de course");
+        pathObject.transform.SetParent(transform.parent, false);
+        pathObject.transform.position = transform.position;
+        Path = UnityEditor.Undo.AddComponent<CharacterRacePath>(pathObject);
+        if (Waypoints != null)
+            foreach (Transform waypoint in Waypoints)
+                if (waypoint != null)
+                    Path.AddPoint(waypoint.position);
+        UnityEditor.EditorUtility.SetDirty(Path);
+        UnityEditor.PrefabUtility.RecordPrefabInstancePropertyModifications(this);
+        UnityEditor.EditorUtility.SetDirty(this);
+        UnityEditor.Selection.activeGameObject = pathObject;
+    }
+#endif
 
     private static bool IsFinite(float value) => !float.IsNaN(value) && !float.IsInfinity(value);
 
@@ -292,6 +393,8 @@ public class PigeonCharacterRace : MonoBehaviour
         RacePhase previousPhase = Phase;
         if (Phase != RacePhase.Completed)
             ResetAttempt();
+        else
+            SetRaceObjectsActive(false);
         if (previousPhase == RacePhase.DepartureCinematic)
             DepartureCinematic.CancelCinematic();
         else if (previousPhase == RacePhase.ArrivalCinematic)
@@ -300,18 +403,20 @@ public class PigeonCharacterRace : MonoBehaviour
 
     private void OnDrawGizmosSelected()
     {
-        if (Character == null || Waypoints == null)
+        if (Character == null || (Path == null && Waypoints == null))
             return;
         Color previousColor = Gizmos.color;
         Gizmos.color = Color.cyan;
         Vector3 previous = Character.position;
-        foreach (Transform point in Waypoints)
+        int pointCount = Path != null ? Path.PointCount : Waypoints.Length;
+        for (int i = 0; i < pointCount; i++)
         {
-            if (point == null)
+            if ((Path != null && Path.GetPoint(i) == null) || (Path == null && Waypoints[i] == null))
                 continue;
-            Gizmos.DrawLine(previous, point.position);
-            Gizmos.DrawWireSphere(point.position, 0.25f);
-            previous = point.position;
+            Vector3 position = Path != null ? Path.GetPointPosition(i) : Waypoints[i].position;
+            Gizmos.DrawLine(previous, position);
+            Gizmos.DrawWireSphere(position, 0.25f);
+            previous = position;
         }
         Gizmos.color = previousColor;
     }

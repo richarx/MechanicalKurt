@@ -49,6 +49,9 @@ public class PigeonCollectionRace : MonoBehaviour
     [field: SerializeField, BoxGroup("Arrivée"), Tooltip("Facultatif, distinct de Destination Stop : s'il est actif quand la flèche apparaît, désactive ce PigeonStop jusqu'à la fin de la mission.")]
     public PigeonStopZone StopToDisableDuringReturn { get; private set; }
 
+    [field: SerializeField, BoxGroup("Arrivée"), Tooltip("Cylindre ou repère visuel facultatif à masquer pendant le retour. Assigner uniquement le visuel, sans la course ni les cinématiques. Son état est restauré à la fin de la mission.")]
+    public GameObject MarkerToDisableDuringReturn { get; private set; }
+
     [field: SerializeField, BoxGroup("Arrivée"), Tooltip("Facultative : jouée automatiquement à l'arrivée.")]
     public DialogCinematic ArrivalCinematic { get; private set; }
 
@@ -66,6 +69,7 @@ public class PigeonCollectionRace : MonoBehaviour
 
     private Vector3 _previousPosition;
     private PigeonStopZone _suspendedStop;
+    private GameObject _suspendedMarker;
 
     private void OnEnable()
     {
@@ -130,6 +134,11 @@ public class PigeonCollectionRace : MonoBehaviour
             _suspendedStop = StopToDisableDuringReturn;
             _suspendedStop.enabled = false;
         }
+        if (_suspendedMarker == null && MarkerToDisableDuringReturn != null && MarkerToDisableDuringReturn.activeSelf)
+        {
+            _suspendedMarker = MarkerToDisableDuringReturn;
+            _suspendedMarker.SetActive(false);
+        }
         SetStopActive(DestinationStop, DestinationMarker, true);
         Arrow.SetTarget(DestinationStop.transform, Player.transform);
         Arrow.SetArrowVisible(true);
@@ -174,7 +183,7 @@ public class PigeonCollectionRace : MonoBehaviour
     private void FinishCollection()
     {
         Phase = CollectionPhase.Completed;
-        RestoreSuspendedStop();
+        RestoreSuspendedObjects();
         if (CompletionAchievement != null)
         {
             if (AchievementManager.Instance != null)
@@ -185,11 +194,14 @@ public class PigeonCollectionRace : MonoBehaviour
         OnCompleted.Invoke();
     }
 
-    private void RestoreSuspendedStop()
+    private void RestoreSuspendedObjects()
     {
         if (_suspendedStop != null)
             _suspendedStop.enabled = true;
         _suspendedStop = null;
+        if (_suspendedMarker != null)
+            _suspendedMarker.SetActive(true);
+        _suspendedMarker = null;
     }
 
     private void RefreshCounter() => CounterText.SetText("{0}/{1}", (float)CollectedCount, (float)CollectionZones.Length);
@@ -243,7 +255,7 @@ public class PigeonCollectionRace : MonoBehaviour
         }
         HideCollection();
         SetStopActive(DepartureStop, DepartureMarker, Phase == CollectionPhase.Ready);
-        RestoreSuspendedStop();
+        RestoreSuspendedObjects();
         if (cancelArrival && ArrivalCinematic != null)
             ArrivalCinematic.CancelCinematic();
     }

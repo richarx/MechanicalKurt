@@ -20,6 +20,8 @@ public abstract class CityPath : MonoBehaviour
 
     public int PointCount => Waypoints.Count;
 
+    protected virtual bool IsLooping => true;
+
     public CityPathPoint GetPoint(int index)
     {
         return Waypoints[index];
@@ -93,7 +95,7 @@ public abstract class CityPath : MonoBehaviour
             Vector3 position = transform.TransformPoint(point.Position);
             Gizmos.color = GizmoColor;
             Gizmos.DrawWireSphere(position, 0.2f);
-            if (PointCount > 1)
+            if (PointCount > 1 && (IsLooping || i + 1 < PointCount))
             {
                 Vector3 next = GetPointPosition((i + 1) % PointCount);
                 Gizmos.DrawLine(position, next);

@@ -42,7 +42,7 @@ Material:
     - _DistanceMin: 0.1
     - _HeightStart: 0.439
     - _HeightTotal: 1
-    - _HeightTotalMax: 0.64
+    - _HeightTotalMax: 0.48
     - _HeightTotalMin: 0.44
     - _QueueControl: 0
     - _QueueOffset: 0

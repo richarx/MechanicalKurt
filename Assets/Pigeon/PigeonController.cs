@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
+using Unity.Cinemachine;
 
 [RequireComponent(typeof(CharacterController))]
 public class PigeonController : MonoBehaviour
@@ -65,6 +66,8 @@ public class PigeonController : MonoBehaviour
     float _yaw;
     Water _water;
     bool _lastFramePaused;
+    bool _skipVelocityRead;
+    bool _preserveTeleportPitch;
 
     CharacterController _controller;
     IPigeonControls _controls;
@@ -75,6 +78,35 @@ public class PigeonController : MonoBehaviour
 
     // Applied once on the next flight physics step (cleared while grounded).
     public void AddImpulse(Vector3 impulse) => _pendingImpulse += impulse;
+
+    public void Teleport(Vector3 position, Quaternion rotation)
+    {
+        if (_controller == null)
+            _controller = GetComponent<CharacterController>();
+        bool wasEnabled = _controller.enabled;
+        Vector3 previousPosition = transform.position;
+        _controller.enabled = false;
+        transform.SetPositionAndRotation(position, rotation);
+        _controller.enabled = wasEnabled;
+
+        _velocity = Vector3.zero;
+        _lastVelocity = Vector3.zero;
+        _pendingImpulse = Vector3.zero;
+        Vector3 forward = rotation * Vector3.forward;
+        Vector3 horizontalForward = Vector3.ProjectOnPlane(forward, Vector3.up);
+        _yaw = horizontalForward.sqrMagnitude > 0.000001f
+            ? Mathf.Atan2(forward.x, forward.z) * Mathf.Rad2Deg : rotation.eulerAngles.y;
+        _currentPitch = Mathf.Asin(Mathf.Clamp(forward.y, -1f, 1f)) * Mathf.Rad2Deg;
+        _preserveTeleportPitch = true;
+        if (_visualRoot != null)
+            _visualRoot.localRotation = Quaternion.identity;
+        // Ignorer l'ancienne vitesse du CharacterController jusqu'au prochain Move.
+        _skipVelocityRead = true;
+
+        CinemachineCore.OnTargetObjectWarped(transform, position - previousPosition);
+        if (_controls is PlayerControls playerControls)
+            playerControls.SnapCameraBehind();
+    }
 
     void Awake()
     {
@@ -161,11 +193,12 @@ public class PigeonController : MonoBehaviour
             _lastFramePaused = true;
             return;
         }
-        if (!_lastFramePaused)
+        if (!_lastFramePaused && !_skipVelocityRead)
         {
             _lastVelocity = _controller.velocity;
         }
         _lastFramePaused = false;
+        _skipVelocityRead = false;
 
         // Consume every frame so a press made while too slow doesn't fire later.
         if (_controls.ConsumeLeftFlex)
@@ -199,6 +232,7 @@ public class PigeonController : MonoBehaviour
 
     void GroundMovement()
     {
+        _preserveTeleportPitch = false;
         _currentPitch = 0f;
         _pendingImpulse = Vector3.zero;
         Vector2 input = Vector2.ClampMagnitude(_controls.Movement, 1f);
@@ -224,6 +258,10 @@ public class PigeonController : MonoBehaviour
 
     void ComputePitch(float pitchSpeed, float maxPitch, float dt)
     {
+        // Un départ incliné vers l'eau reste orienté jusqu'à une commande de tangage.
+        if (_preserveTeleportPitch && Mathf.Abs(_controls.RelativeMovement.y) < 0.001f)
+            return;
+        _preserveTeleportPitch = false;
         float targetPitch = Mathf.Clamp(
                 _currentPitch - _controls.RelativeMovement.y * pitchSpeed * dt,
                 -maxPitch,
@@ -314,6 +352,7 @@ public class PigeonController : MonoBehaviour
         }
         else if (_controls.Dive)
         {
+            _preserveTeleportPitch = false;
             targetSpeed = _diveMaxSpeed;
             dragAtMaxSpeed = _diveDragAtMaxSpeed;
             float targetPitch = -_diveMaxPitch;
