@@ -19,6 +19,6 @@ public class AchievementSlot : MonoBehaviour
         lockedBorder.gameObject.SetActive(!isCompleted);
         lockedForeground.gameObject.SetActive(!isCompleted);
         title.text = data.Title;
-        description.text = data.Description;
+        description.text = isCompleted ? data.Description : "Locked";
     }
 }

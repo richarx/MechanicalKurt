@@ -28,7 +28,7 @@ public class PauseMenu : MonoBehaviour
 
     private void Start()
     {
-
+        pauseAction.action.Enable();
     }
 
     private void Update()
