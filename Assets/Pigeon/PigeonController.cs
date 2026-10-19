@@ -59,17 +59,19 @@ public class PigeonController : MonoBehaviour
     [SerializeField] bool _activeDebug = false;
 
     Vector3 _velocity;
+    Vector3 _lastVelocity;
     Vector3 _pendingImpulse;
     float _currentPitch;
     float _yaw;
     Water _water;
+    bool _lastFramePaused;
 
     CharacterController _controller;
     IPigeonControls _controls;
     PigeonBoostFeedback _boostFeedback;
 
-    public float Speed => _controller != null ? _controller.velocity.magnitude : 0f;
-    public Vector3 Velocity => _controller != null ? _controller.velocity : Vector3.zero;
+    public float Speed => _lastVelocity.magnitude;
+    public Vector3 Velocity => _lastVelocity;
 
     // Applied once on the next flight physics step (cleared while grounded).
     public void AddImpulse(Vector3 impulse) => _pendingImpulse += impulse;
@@ -126,9 +128,9 @@ public class PigeonController : MonoBehaviour
         if (_activeDebug)
         {
             GUI.Label(new Rect(10, 50, 300, 20), $"Pitch: {_currentPitch:F1}");
-            GUI.Label(new Rect(10, 80, 300, 20), $"Speed: {_controller.velocity.magnitude:F1}");
-            GUI.Label(new Rect(10, 110, 300, 20), $"HorizontalSpeed: {Vector3.ProjectOnPlane(_controller.velocity, Vector3.up).magnitude:F1}");
-            GUI.Label(new Rect(10, 140, 300, 20), $"VerticalSpeed: {_controller.velocity.y:F1}");
+            GUI.Label(new Rect(10, 80, 300, 20), $"Speed: {_lastVelocity.magnitude:F1}");
+            GUI.Label(new Rect(10, 110, 300, 20), $"HorizontalSpeed: {Vector3.ProjectOnPlane(_lastVelocity, Vector3.up).magnitude:F1}");
+            GUI.Label(new Rect(10, 140, 300, 20), $"VerticalSpeed: {_lastVelocity.y:F1}");
         }
     }
 
@@ -142,7 +144,7 @@ public class PigeonController : MonoBehaviour
 
         Vector3 pushDir = new Vector3(hit.moveDirection.x, 0, hit.moveDirection.z).normalized;
 
-        Vector3 pigeonHorizontalVelocity = new Vector3(_controller.velocity.x, 0f, _controller.velocity.z);
+        Vector3 pigeonHorizontalVelocity = new Vector3(_lastVelocity.x, 0f, _lastVelocity.z);
 
         float forwardVelocityComponent = Mathf.Max(0f, Vector3.Dot(pigeonHorizontalVelocity, pushDir));
 
@@ -154,6 +156,16 @@ public class PigeonController : MonoBehaviour
     void Update()
     {
         UpdateCursorCapture();
+        if (Time.timeScale == 0f)
+        {
+            _lastFramePaused = true;
+            return;
+        }
+        if (!_lastFramePaused)
+        {
+            _lastVelocity = _controller.velocity;
+        }
+        _lastFramePaused = false;
 
         // Consume every frame so a press made while too slow doesn't fire later.
         if (_controls.ConsumeLeftFlex)
@@ -165,7 +177,7 @@ public class PigeonController : MonoBehaviour
         float dt = Time.deltaTime;
         _velocity = Vector3.zero;
 
-        if (_controller.isGrounded && _controller.velocity.y <= 0.001f)
+        if (_controller.isGrounded && _lastVelocity.y <= 0.001f)
         {
             GroundMovement();
             ResetVisualRotation(dt);
@@ -274,7 +286,7 @@ public class PigeonController : MonoBehaviour
         float targetSpeed;
         float dragAtMaxSpeed;
 
-        _velocity = _controller.velocity + Physics.gravity * dt + _pendingImpulse;
+        _velocity = _lastVelocity + Physics.gravity * dt + _pendingImpulse;
         _pendingImpulse = Vector3.zero;
 
         float hoverFactor = 0f;
