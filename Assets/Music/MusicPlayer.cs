@@ -13,6 +13,9 @@ public class MusicPlayer : MonoBehaviour
 
     private Sequence currentSequence;
 
+    private const float maxVolume = 0.1f;
+    private const float minVolume = 0.03f;
+
     public enum Songs
     {
         NightDelivery
@@ -48,7 +51,7 @@ public class MusicPlayer : MonoBehaviour
         audioSource.clip = GetClip(song);
         audioSource.Play();
 
-        sequence.Append(audioSource.DOFade(1.0f, 3.0f));
+        sequence.Append(audioSource.DOFade(maxVolume, 3.0f));
     }
 
     public void LowerMusicVolume(float duration = -1.0f)
@@ -61,7 +64,7 @@ public class MusicPlayer : MonoBehaviour
         currentSequence = DOTween.Sequence();
 
         if (audioSource.isPlaying)
-            currentSequence.Append(audioSource.DOFade(0.2f, 1.0f));
+            currentSequence.Append(audioSource.DOFade(minVolume, 1.0f));
 
         if (duration > 0.0f)
         {
@@ -81,7 +84,7 @@ public class MusicPlayer : MonoBehaviour
         currentSequence = DOTween.Sequence();
 
         if (audioSource.isPlaying)
-            currentSequence.Append(audioSource.DOFade(1.0f, 1.0f));
+            currentSequence.Append(audioSource.DOFade(maxVolume, 1.0f));
     }
 
     private AudioClip GetClip(Songs song)
