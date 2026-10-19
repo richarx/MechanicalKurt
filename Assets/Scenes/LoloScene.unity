@@ -2976,6 +2976,7 @@ MonoBehaviour:
   <HitStateName>k__BackingField: Hit
   <AnimationLayer>k__BackingField: 0
   <MotionRoot>k__BackingField: {fileID: 74018934}
+  hitAudioClips: []
 --- !u!4 &74018934
 Transform:
   m_ObjectHideFlags: 0
@@ -3396,6 +3397,7 @@ MonoBehaviour:
   <HitStateName>k__BackingField: Hit
   <AnimationLayer>k__BackingField: 0
   <MotionRoot>k__BackingField: {fileID: 83695912}
+  hitAudioClips: []
 --- !u!95 &83695914
 Animator:
   serializedVersion: 7
@@ -6768,6 +6770,7 @@ MonoBehaviour:
   <HitStateName>k__BackingField: Hit
   <AnimationLayer>k__BackingField: 0
   <MotionRoot>k__BackingField: {fileID: 164441586}
+  hitAudioClips: []
 --- !u!95 &164441588
 Animator:
   serializedVersion: 7
@@ -7995,6 +7998,7 @@ MonoBehaviour:
   <HitStateName>k__BackingField: Hit
   <AnimationLayer>k__BackingField: 0
   <MotionRoot>k__BackingField: {fileID: 197501044}
+  hitAudioClips: []
 --- !u!95 &197501046
 Animator:
   serializedVersion: 7
@@ -12442,6 +12446,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::MusicPlayer
   audioSource: {fileID: 299374311}
   nightDelivery: {fileID: 8300000, guid: 7a6ca4e9640eadc4b95dff8969564385, type: 3}
+  wrongWay: {fileID: 0}
+  switchInterval: 120
+  fadeDuration: 3
 --- !u!82 &299374311
 AudioSource:
   m_ObjectHideFlags: 0
@@ -21400,6 +21407,7 @@ MonoBehaviour:
   <HitStateName>k__BackingField: Hit
   <AnimationLayer>k__BackingField: 0
   <MotionRoot>k__BackingField: {fileID: 516753987}
+  hitAudioClips: []
 --- !u!95 &516753989
 Animator:
   serializedVersion: 7
@@ -25907,6 +25915,7 @@ MonoBehaviour:
   <HitStateName>k__BackingField: Hit
   <AnimationLayer>k__BackingField: 0
   <MotionRoot>k__BackingField: {fileID: 615788536}
+  hitAudioClips: []
 --- !u!95 &615788538
 Animator:
   serializedVersion: 7
@@ -26817,6 +26826,7 @@ MonoBehaviour:
   <CameraToRoarDelay>k__BackingField: 1
   <RoarToDieDelay>k__BackingField: 0.1
   <DieToRestoreDelay>k__BackingField: 5
+  <CompletionAchievement>k__BackingField: {fileID: 0}
 --- !u!1 &642159986
 GameObject:
   m_ObjectHideFlags: 0
@@ -30203,6 +30213,7 @@ MonoBehaviour:
   <HitStateName>k__BackingField: Hit
   <AnimationLayer>k__BackingField: 0
   <MotionRoot>k__BackingField: {fileID: 735321161}
+  hitAudioClips: []
 --- !u!4 &735321161
 Transform:
   m_ObjectHideFlags: 0
@@ -43792,6 +43803,7 @@ MonoBehaviour:
   <HitStateName>k__BackingField: Hit
   <AnimationLayer>k__BackingField: 0
   <MotionRoot>k__BackingField: {fileID: 1022602357}
+  hitAudioClips: []
 --- !u!95 &1022602359
 Animator:
   serializedVersion: 7
@@ -45679,6 +45691,7 @@ MonoBehaviour:
   <HitStateName>k__BackingField: Hit
   <AnimationLayer>k__BackingField: 0
   <MotionRoot>k__BackingField: {fileID: 1066593385}
+  hitAudioClips: []
 --- !u!4 &1066593385
 Transform:
   m_ObjectHideFlags: 0
@@ -48313,6 +48326,7 @@ MonoBehaviour:
   <HitStateName>k__BackingField: Hit
   <AnimationLayer>k__BackingField: 0
   <MotionRoot>k__BackingField: {fileID: 1127666031}
+  hitAudioClips: []
 --- !u!4 &1127666031
 Transform:
   m_ObjectHideFlags: 0
@@ -51974,6 +51988,7 @@ MonoBehaviour:
   <HitStateName>k__BackingField: Hit
   <AnimationLayer>k__BackingField: 0
   <MotionRoot>k__BackingField: {fileID: 1226882124}
+  hitAudioClips: []
 --- !u!95 &1226882126
 Animator:
   serializedVersion: 7
@@ -52678,6 +52693,7 @@ MonoBehaviour:
   _slideSeconds: 0.5
   _holdSeconds: 4
   _unlockClip: {fileID: 0}
+  defaultSprite: {fileID: 0}
 --- !u!1001 &1246409646
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -53479,6 +53495,7 @@ MonoBehaviour:
   <HitStateName>k__BackingField: Hit
   <AnimationLayer>k__BackingField: 0
   <MotionRoot>k__BackingField: {fileID: 1276385396}
+  hitAudioClips: []
 --- !u!95 &1276385398
 Animator:
   serializedVersion: 7
@@ -54752,6 +54769,7 @@ MonoBehaviour:
   <HitStateName>k__BackingField: Hit
   <AnimationLayer>k__BackingField: 0
   <MotionRoot>k__BackingField: {fileID: 1300704394}
+  hitAudioClips: []
 --- !u!95 &1300704396
 Animator:
   serializedVersion: 7
@@ -59148,6 +59166,7 @@ MonoBehaviour:
   <HitStateName>k__BackingField: Hit
   <AnimationLayer>k__BackingField: 0
   <MotionRoot>k__BackingField: {fileID: 1389718368}
+  hitAudioClips: []
 --- !u!95 &1389718370
 Animator:
   serializedVersion: 7
@@ -68665,6 +68684,7 @@ MonoBehaviour:
   <HitStateName>k__BackingField: Hit
   <AnimationLayer>k__BackingField: 0
   <MotionRoot>k__BackingField: {fileID: 1634690270}
+  hitAudioClips: []
 --- !u!95 &1634690272
 Animator:
   serializedVersion: 7
@@ -69188,6 +69208,7 @@ MonoBehaviour:
   <HitStateName>k__BackingField: Hit
   <AnimationLayer>k__BackingField: 0
   <MotionRoot>k__BackingField: {fileID: 1644838854}
+  hitAudioClips: []
 --- !u!95 &1644838856
 Animator:
   serializedVersion: 7
@@ -74252,14 +74273,6 @@ PrefabInstance:
       propertyPath: waterPlane
       value: 
       objectReference: {fileID: 572717186}
-    - target: {fileID: 896265278413080483, guid: 013420fdddab85a48be5b875e08e2729, type: 3}
-      propertyPath: HorizontalAxis.Center
-      value: 122.69217
-      objectReference: {fileID: 0}
-    - target: {fileID: 5917408735170155768, guid: 013420fdddab85a48be5b875e08e2729, type: 3}
-      propertyPath: equipVFX
-      value: 
-      objectReference: {fileID: 1575721338728490, guid: 4171bb92c5c591848b14be1db6f3efe2, type: 3}
     - target: {fileID: 7718967718942241121, guid: 013420fdddab85a48be5b875e08e2729, type: 3}
       propertyPath: m_LocalPosition.x
       value: 25.18
@@ -76549,6 +76562,7 @@ MonoBehaviour:
   <HitStateName>k__BackingField: Hit
   <AnimationLayer>k__BackingField: 0
   <MotionRoot>k__BackingField: {fileID: 1821729198}
+  hitAudioClips: []
 --- !u!4 &1821729198
 Transform:
   m_ObjectHideFlags: 0
@@ -88340,6 +88354,7 @@ MonoBehaviour:
   <HitStateName>k__BackingField: Hit
   <AnimationLayer>k__BackingField: 0
   <MotionRoot>k__BackingField: {fileID: 2125645590}
+  hitAudioClips: []
 --- !u!4 &2125645590
 Transform:
   m_ObjectHideFlags: 0

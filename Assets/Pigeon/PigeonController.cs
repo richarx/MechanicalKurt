@@ -1,3 +1,4 @@
+using System.Xml;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.EventSystems;
@@ -10,6 +11,10 @@ public class PigeonController : MonoBehaviour
     [Header("Interactions / Physics")]
     [SerializeField] float _pushPower = 5f;
     [SerializeField] float _weight = 1.5f;
+    [SerializeField] float _maxImpact = 10f;
+    [SerializeField] float _stunMinDuration = 0.5f;
+    [SerializeField] float _stunImmuneDuration = 0.5f;
+
     [Header("Ground Movement")]
     [SerializeField] float _groundSpeed = 1f;
 
@@ -72,10 +77,16 @@ public class PigeonController : MonoBehaviour
     bool _lastFramePaused;
     bool _skipVelocityRead;
     bool _preserveTeleportPitch;
+    bool _stunned;
+    float _stunRemaining;
+    float _stunImmuneRemaining;
 
+    Rigidbody _rigidbody;
     CharacterController _controller;
     IPigeonControls _controls;
     PigeonBoostFeedback _boostFeedback;
+    PigeonRagdollHandler _pigeonRagdollHandler;
+    Vector3 _lastHitNormal;
 
     public float Speed => _lastVelocity.magnitude;
     public Vector3 Velocity => _lastVelocity;
@@ -130,9 +141,11 @@ public class PigeonController : MonoBehaviour
     void Awake()
     {
         _water = FindAnyObjectByType<Water>();
+        _rigidbody = GetComponent<Rigidbody>();
         _controller = GetComponent<CharacterController>();
         _controls = GetComponent<IPigeonControls>();
         _boostFeedback = GetComponent<PigeonBoostFeedback>();
+        _pigeonRagdollHandler = GetComponent<PigeonRagdollHandler>();
         _yaw = transform.eulerAngles.y;
     }
 
@@ -185,11 +198,52 @@ public class PigeonController : MonoBehaviour
         }
     }
 
+    public Vector3 CalculateImpactForce(ControllerColliderHit hit)
+    {
+        Vector3 impactDir = -hit.normal;
+        float speedMagnitude = _lastVelocity.magnitude;
+        float velocityAlignment = Mathf.Max(0f, Vector3.Dot(_lastVelocity.normalized, impactDir));
+        float impactIntensity = speedMagnitude * velocityAlignment * _weight;
+        return impactDir * impactIntensity;
+    }
+
+    void Stun()
+    {
+        Debug.Log("STUN");
+        _stunned = true;
+        _controller.enabled = false;
+        _rigidbody.isKinematic = false;
+        _pigeonRagdollHandler.SetRagdollState(true);
+        _rigidbody.linearVelocity = _lastVelocity;
+        _stunRemaining = _stunMinDuration;
+    }
+
+    void WakeUp()
+    {
+        _stunned = false;
+        _rigidbody.isKinematic = true;
+        _pigeonRagdollHandler.AlignAndGetUp();
+        _stunImmuneRemaining = _stunImmuneDuration;
+        _currentPitch = 0f;
+        transform.forward = _lastHitNormal;
+        _yaw = transform.eulerAngles.y;
+        _lastVelocity = transform.forward * _flapMinSpeed;
+        _lastVelocity.y = _takeoffSpeed;
+        _controller.enabled = true;
+    }
+
+
     void OnControllerColliderHit(ControllerColliderHit hit)
     {
         Rigidbody body = hit.collider.attachedRigidbody;
         if (body == null || body.isKinematic)
         {
+            Debug.Log($"Impact: {CalculateImpactForce(hit).magnitude:F1}");
+            if (_stunImmuneRemaining < 0 && CalculateImpactForce(hit).magnitude > _maxImpact)
+            {
+                _lastHitNormal = hit.normal;
+                Stun();
+            }
             return;
         }
 
@@ -206,6 +260,8 @@ public class PigeonController : MonoBehaviour
 
     void Update()
     {
+        float dt = Time.deltaTime;
+
         UpdateCursorCapture();
         if (IsMovementFrozen)
             return;
@@ -214,12 +270,22 @@ public class PigeonController : MonoBehaviour
             _lastFramePaused = true;
             return;
         }
+        _stunImmuneRemaining -= dt;
+        if (_stunned)
+        {
+            _stunRemaining -= dt;
+            _lastVelocity = _rigidbody.linearVelocity;
+            if (_stunRemaining > 0 || !_controls.Flap)
+                return;
+            WakeUp();
+        }
         if (!_lastFramePaused && !_skipVelocityRead)
         {
             _lastVelocity = _controller.velocity;
         }
         _lastFramePaused = false;
         _skipVelocityRead = false;
+
 
         // Consume every frame so a press made while too slow doesn't fire later.
         if (_controls.ConsumeLeftFlex)
@@ -228,7 +294,6 @@ public class PigeonController : MonoBehaviour
             BarrelRoll(false);
 
 
-        float dt = Time.deltaTime;
         _velocity = Vector3.zero;
 
         if (_controller.isGrounded && _lastVelocity.y <= 0.001f)
@@ -365,6 +430,11 @@ public class PigeonController : MonoBehaviour
 
         if (_controls.Flap)
         {
+            if (_stunned) // TODO
+            {
+                WakeUp();
+            }
+
             targetSpeed = _flapMaxSpeed;
             dragAtMaxSpeed = _flapDragAtMaxSpeed;
             ComputePitch(_pitchSpeed, _maxPitch, dt);
