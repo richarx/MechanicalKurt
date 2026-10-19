@@ -21038,7 +21038,6 @@ MonoBehaviour:
   <Takeoff>k__BackingField: {fileID: 11400000, guid: c79e9f2382a1467d929bd55a27c0177c, type: 2}
   <Steering>k__BackingField: {fileID: 11400000, guid: 9785a068b06f45fcb6c51b066bc3b881, type: 2}
   <Interaction>k__BackingField: {fileID: 11400000, guid: 6741217f46454adab4e776a0f0eb0184, type: 2}
-  <TakeoffHeight>k__BackingField: 2
   <SteeringAngle>k__BackingField: 45
 --- !u!114 &558652314
 MonoBehaviour:

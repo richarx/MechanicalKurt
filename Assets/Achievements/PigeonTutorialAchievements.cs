@@ -23,15 +23,12 @@ public class PigeonTutorialAchievements : MonoBehaviour
     [field: SerializeField, Required]
     public AchievementData Interaction { get; private set; }
 
-    [field: SerializeField, MinValue(0.1f), SuffixLabel("m", true)]
-    public float TakeoffHeight { get; private set; } = 2f;
-
     [field: SerializeField, MinValue(1f), MaxValue(180f), SuffixLabel("degrees", true)]
     public float SteeringAngle { get; private set; } = 45f;
 
     private CharacterController _body;
     private IPigeonControls _controls;
-    private float _groundHeight;
+    private bool _takeoffRequested;
     private float _previousYaw;
     private float _steeredAngle;
 
@@ -63,15 +60,16 @@ public class PigeonTutorialAchievements : MonoBehaviour
         _previousYaw = yaw;
         if (_body.isGrounded)
         {
-            _groundHeight = Player.transform.position.y;
+            _takeoffRequested = _controls.Flap;
             _steeredAngle = 0f;
             return;
         }
 
         if (!Manager.IsUnlocked(Takeoff))
         {
-            if (_controls.Flap && Player.Velocity.y > 0f
-                && Player.transform.position.y - _groundHeight >= TakeoffHeight)
+            // Remember flapping until actual ascent, including a short tap followed by release.
+            _takeoffRequested |= _controls.Flap;
+            if (_takeoffRequested && Player.Velocity.y > 0.01f)
                 Manager.Unlock(Takeoff);
             return;
         }
@@ -94,9 +92,9 @@ public class PigeonTutorialAchievements : MonoBehaviour
 
     private void ResetFlightProgress()
     {
+        _takeoffRequested = false;
         _steeredAngle = 0f;
         if (Player == null) return;
-        _groundHeight = Player.transform.position.y;
         _previousYaw = Player.transform.eulerAngles.y;
     }
 }
