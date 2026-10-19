@@ -11,7 +11,8 @@ public class PigeonController : MonoBehaviour
     [Header("Interactions / Physics")]
     [SerializeField] float _pushPower = 5f;
     [SerializeField] float _weight = 1.5f;
-    [SerializeField] float _maxImpact = 10f;
+    [SerializeField] float _stunMinImpact = 10f;
+    [SerializeField] float _stunMinHorizontalSpeed = 3;
     [SerializeField] float _stunMinDuration = 0.5f;
     [SerializeField] float _stunImmuneDuration = 0.5f;
 
@@ -89,6 +90,7 @@ public class PigeonController : MonoBehaviour
     Vector3 _lastHitNormal;
 
     public float Speed => _lastVelocity.magnitude;
+    public float HorizontalSpeed => new Vector3(_lastVelocity.x, 0f, _lastVelocity.z).magnitude;
     public Vector3 Velocity => _lastVelocity;
     public bool IsUndeWater => _water != null && transform.position.y < _water.transform.position.y - _waterLevelModifier;
 
@@ -210,7 +212,6 @@ public class PigeonController : MonoBehaviour
 
     void Stun(Vector3 hitnormal)
     {
-        Debug.Log("STUN");
         _lastHitNormal = hitnormal;
         _stunned = true;
         _controller.enabled = false;
@@ -256,8 +257,7 @@ public class PigeonController : MonoBehaviour
         Rigidbody body = hit.collider.attachedRigidbody;
         if (body == null || body.isKinematic)
         {
-            Debug.Log($"Impact: {CalculateImpactForce(hit).magnitude:F1}");
-            if (!IsUndeWater && _stunImmuneRemaining < 0 && CalculateImpactForce(hit).magnitude > _maxImpact)
+            if (!IsUndeWater && _stunImmuneRemaining < 0 && HorizontalSpeed > _stunMinHorizontalSpeed && CalculateImpactForce(hit).magnitude > _stunMinImpact)
             {
                 Stun(hit.normal);
             }
