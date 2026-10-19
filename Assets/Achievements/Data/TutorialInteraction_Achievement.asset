@@ -15,4 +15,4 @@ MonoBehaviour:
   _id: tutorial_interaction
   _title: Ready for Business
   _description: Land in a mission circle and activate it.
-  _icon: {fileID: 0}
+  _icon: {fileID: -7418447159763491392, guid: 5e3794004d4413b44a219e2c5498baea, type: 3}

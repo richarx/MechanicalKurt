@@ -15,7 +15,9 @@ public sealed class AchievementPopup : MonoBehaviour
     [SerializeField] private Vector2 _hiddenOffset = new Vector2(0f, 200f);
     [SerializeField, Min(0f)] private float _slideSeconds = 0.35f;
     [SerializeField, Min(0f)] private float _holdSeconds = 2.5f;
+
     [SerializeField] private AudioClip _unlockClip;
+    [SerializeField] private Sprite defaultSprite;
 
     private readonly Queue<AchievementData> _queue = new Queue<AchievementData>();
     private Vector2 _shownPosition;
@@ -74,13 +76,14 @@ public sealed class AchievementPopup : MonoBehaviour
         }
 
         AchievementData achievement = _queue.Dequeue();
-        if (_titleText != null) _titleText.text = achievement.Title;
-        if (_descriptionText != null) _descriptionText.text = achievement.Description;
+        if (_titleText != null)
+            _titleText.text = achievement.Title;
+
+        if (_descriptionText != null)
+            _descriptionText.text = achievement.Description;
+
         if (_iconImage != null)
-        {
-            _iconImage.sprite = achievement.Icon;
-            _iconImage.enabled = achievement.Icon != null;
-        }
+            _iconImage.sprite = achievement.Icon != null ? achievement.Icon : defaultSprite;
 
         _panel.gameObject.SetActive(true);
         _panel.anchoredPosition = _shownPosition + _hiddenOffset;

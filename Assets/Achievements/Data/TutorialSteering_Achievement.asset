@@ -15,4 +15,4 @@ MonoBehaviour:
   _id: tutorial_steering
   _title: Getting the Hang of It
   _description: Change direction in flight.
-  _icon: {fileID: 0}
+  _icon: {fileID: 5817928758060508996, guid: 87a3f6198db8c22448da47c4e7b8315b, type: 3}

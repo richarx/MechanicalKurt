@@ -15,4 +15,4 @@ MonoBehaviour:
   _id: tutorial_takeoff
   _title: First flight
   _description: Fly, little pidgey
-  _icon: {fileID: 0}
+  _icon: {fileID: -2443878373310389836, guid: ed0ad38b617c8544b9237d05b466eb2f, type: 3}
