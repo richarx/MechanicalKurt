@@ -1,5 +1,6 @@
 using DG.Tweening;
 using Sirenix.OdinInspector;
+using TMPro;
 using UnityEngine;
 
 [DisallowMultipleComponent]
@@ -28,7 +29,7 @@ public class FadingMessage : MonoBehaviour
         Hide();
     }
 
-    public void Show()
+    public void Show(string message = "WASTED")
     {
         if (!isActiveAndEnabled)
             return;
@@ -42,6 +43,7 @@ public class FadingMessage : MonoBehaviour
         Group.gameObject.SetActive(true);
         Group.interactable = false;
         Group.blocksRaycasts = false;
+        GetComponent<TMP_Text>().text = message;
         // Temps réel : le message finit son animation même si le jeu est en pause.
         _sequence = DOTween.Sequence()
             .Append(Group.DOFade(1f, Mathf.Max(0f, FadeInSeconds)))

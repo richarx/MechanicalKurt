@@ -32,6 +32,9 @@ public class PigeonDeliveryRace : MonoBehaviour
     public float DurationSeconds { get; private set; } = 60f;
 
     [field: SerializeField, BoxGroup("Course"), Required]
+    public GameObject TimerParent { get; private set; }
+
+    [field: SerializeField, BoxGroup("Course"), Required]
     public TMP_Text TimerText { get; private set; }
 
     [field: SerializeField, BoxGroup("Course"), Required]
@@ -109,6 +112,7 @@ public class PigeonDeliveryRace : MonoBehaviour
         SetStopActive(DestinationStop, DestinationMarker, true);
         Arrow.SetTarget(DestinationStop.transform, Player);
         Arrow.SetArrowVisible(true);
+        TimerParent.SetActive(true);
         RefreshTimer();
         TimerText.gameObject.SetActive(true);
     }
@@ -131,15 +135,11 @@ public class PigeonDeliveryRace : MonoBehaviour
         if (!isActiveAndEnabled || Phase != DeliveryPhase.Racing || !DestinationStop.isActiveAndEnabled
             || Time.timeScale <= 0f)
             return;
-        // Vérifier aussi ici : une arrivée à la limite ne doit pas gagner selon l'ordre des scripts.
-        if (RemainingSeconds <= 0f)
-        {
-            FailDelivery(true);
-            return;
-        }
+
 
         _remainingSeconds = RemainingSeconds;
         Phase = DeliveryPhase.ArrivalCinematic;
+        TimerParent.SetActive(false);
         HideRaceDisplay();
         ArrivalCinematic.PlayCinematic();
         if (!ArrivalCinematic.IsPlaying)
@@ -179,6 +179,7 @@ public class PigeonDeliveryRace : MonoBehaviour
     private void HideRaceDisplay()
     {
         SetStopActive(DestinationStop, DestinationMarker, false);
+        TimerParent.SetActive(false);
         if (TimerText != null)
             TimerText.gameObject.SetActive(false);
         if (Arrow != null && DestinationStop != null)
