@@ -19818,7 +19818,7 @@ GameObject:
   m_Component:
   - component: {fileID: 477230057}
   m_Layer: 0
-  m_Name: Tata
+  m_Name: Race
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
