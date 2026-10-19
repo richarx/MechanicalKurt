@@ -1,0 +1,19 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1b0317d929739a34e839d08c8427854a, type: 3}
+  m_Name: RaceEnd
+  m_EditorClassIdentifier: Assembly-CSharp::DialogSequence
+  speaker: Turk
+  lines:
+  - text: 'WHAT?! Beaten by a miserable duckling?! '
+  - text: Fine! You win.
+  - text: Enjoy your victory, featherweight. I won't go so easy on you next time.
