@@ -5,7 +5,7 @@ using UnityEngine.Rendering;
 // pointing from the player toward the active delivery's destination.
 // Never deactivate this GameObject: toggle visibility with SetArrowVisible instead.
 [DisallowMultipleComponent]
-public sealed class DeliveryCompassArrow : MonoBehaviour
+public class DeliveryCompassArrow : MonoBehaviour
 {
     [Header("References")]
     [SerializeField, Tooltip("Falls back to DeliveryManager.instance when empty.")]
@@ -51,6 +51,8 @@ public sealed class DeliveryCompassArrow : MonoBehaviour
     private float _pulseMaxFrequency = 3f;
 
     private Transform _target;
+    private Transform _manualTarget;
+    private Transform _manualPlayer;
     private bool _allowedVisible = true;
     private bool _snapNextFrame;
     private bool _subscribed;
@@ -59,11 +61,31 @@ public sealed class DeliveryCompassArrow : MonoBehaviour
     private Vector3 _pivotBaseScale = Vector3.one;
     private float _pulsePhase;
 
-    public bool HasTarget => _target != null;
+    private Transform Target => _manualTarget != null ? _manualTarget : _target;
+    private Transform Player => _manualTarget != null ? _manualPlayer : _manager != null ? _manager.Player : null;
+
+    public bool HasTarget => Target != null;
+
+    // Permet aux courses PigeonStop d'utiliser la flèche sans DeliveryManager.
+    public void SetTarget(Transform target, Transform player)
+    {
+        _manualTarget = target;
+        _manualPlayer = player;
+        _snapNextFrame = true;
+        RefreshVisual(true);
+    }
+
+    public void ClearTarget(Transform target)
+    {
+        if (_manualTarget != target) return;
+        _manualTarget = null;
+        _manualPlayer = null;
+        RefreshVisual(false);
+    }
 
     /// <summary>
     /// false hides the arrow even during a delivery. true allows it again;
-    /// it only actually shows while a delivery is being carried.
+    /// it only actually shows while a delivery or a manual destination is active.
     /// </summary>
     public void SetArrowVisible(bool visible)
     {
@@ -91,11 +113,7 @@ public sealed class DeliveryCompassArrow : MonoBehaviour
     private void Start()
     {
         if (_manager == null) _manager = DeliveryManager.instance;
-        if (_manager == null)
-        {
-            Debug.LogError("Compass arrow: no DeliveryManager assigned or found.", this);
-            return;
-        }
+        if (_manager == null) return;
         _manager.OnPickedUp.AddListener(HandlePickedUp);
         _manager.OnDelivered.AddListener(HandleEnded);
         _manager.OnCancelled.AddListener(HandleEnded);
@@ -136,7 +154,7 @@ public sealed class DeliveryCompassArrow : MonoBehaviour
     private void RefreshVisual(bool pop)
     {
         if (_visual == null) return;
-        bool show = _allowedVisible && _target != null;
+        bool show = _allowedVisible && Target != null;
         if (show && pop && !_visual.activeSelf) _popElapsed = 0f;
         else if (!show) _popElapsed = _popDuration;
         if (_visual.activeSelf != show) _visual.SetActive(show);
@@ -184,8 +202,8 @@ public sealed class DeliveryCompassArrow : MonoBehaviour
     // Scales ArrowPivot (the pop scales Visual), so both animations stack.
     private void UpdatePulse(float deltaTime)
     {
-        if (_arrowPivot == null || _target == null || _manager == null || _manager.Player == null) return;
-        float distance = Vector3.Distance(_target.position, _manager.Player.position);
+        if (_arrowPivot == null || Target == null || Player == null) return;
+        float distance = Vector3.Distance(Target.position, Player.position);
         // 0 at Ramp Start Distance and beyond, 1 at Ramp Full Distance and closer.
         float closeness = 1f - Mathf.InverseLerp(_pulseRampFullDistance, _pulseRampStartDistance, distance);
         float amplitude = Mathf.Lerp(_pulseBaseAmplitude, _pulseMaxAmplitude, closeness);
@@ -198,8 +216,8 @@ public sealed class DeliveryCompassArrow : MonoBehaviour
 
     private void UpdateRotation(float deltaTime)
     {
-        if (_arrowPivot == null || _target == null || _manager == null || _manager.Player == null) return;
-        Vector3 direction = _target.position - _manager.Player.position;
+        if (_arrowPivot == null || Target == null || Player == null) return;
+        Vector3 direction = Target.position - Player.position;
         if (direction.sqrMagnitude < 0.0001f) return;
 
         // Yaw from the horizontal direction; if the target is straight above / below, keep the last yaw.

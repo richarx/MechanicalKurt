@@ -6,15 +6,30 @@ using UnityEditor;
 using UnityEngine;
 using UnityEngine.TextCore;
 
-/// <summary>Packs the three supplied Kenney glyphs into a persistent TMP sprite asset.</summary>
+/// <summary>Packs the flight glyphs and links the Start glyph into a persistent TMP sprite asset.</summary>
 public static class TutorialGlyphAsset
 {
     public const string AssetPath = "Assets/Achievements/Glyphs/TutorialXboxGlyphs.asset";
+    private const string StartAssetPath = "Assets/Achievements/Glyphs/TutorialXboxStartGlyph.asset";
+    private const string StartTexturePath = "Assets/Achievements/Glyphs/xbox_button_start.png";
+
+    [MenuItem("Tools/Tutorial/Repair Xbox Glyphs")]
+    public static void Repair()
+    {
+        TMP_SpriteAsset asset = GetOrCreate();
+        TMPro_EventManager.ON_SPRITE_ASSET_PROPERTY_CHANGED(true, asset);
+        Selection.activeObject = asset;
+        Debug.Log("Xbox glyph textures repaired.", asset);
+    }
 
     public static TMP_SpriteAsset GetOrCreate()
     {
         TMP_SpriteAsset existing = AssetDatabase.LoadAssetAtPath<TMP_SpriteAsset>(AssetPath);
-        if (existing != null) return existing;
+        if (existing != null)
+        {
+            LinkStartGlyph(existing);
+            return existing;
+        }
 
         string[] files = { "xbox_button_color_a", "xbox_button_color_b", "xbox_stick_l" };
         string[] names = { "xbox_a", "xbox_b", "xbox_left_stick" };
@@ -69,6 +84,7 @@ public static class TutorialGlyphAsset
                 asset.spriteCharacterTable.Add(new TMP_SpriteCharacter(0xFFFE, asset, glyph) { name = names[i] });
             }
             asset.UpdateLookupTables();
+            LinkStartGlyph(asset);
             AssetDatabase.CreateAsset(asset, AssetPath);
             AssetDatabase.AddObjectToAsset(atlas, asset);
             AssetDatabase.AddObjectToAsset(material, asset);
@@ -87,5 +103,32 @@ public static class TutorialGlyphAsset
                 if (asset != null && !EditorUtility.IsPersistent(asset)) UnityEngine.Object.DestroyImmediate(asset);
             }
         }
+    }
+
+    private static void LinkStartGlyph(TMP_SpriteAsset asset)
+    {
+        AssetDatabase.ImportAsset(StartTexturePath, ImportAssetOptions.ForceSynchronousImport | ImportAssetOptions.ForceUpdate);
+        Texture2D texture = AssetDatabase.LoadAssetAtPath<Texture2D>(StartTexturePath);
+        if (texture == null) throw new InvalidOperationException("Tutorial: the Xbox Start image did not import as a Texture2D.");
+        TMP_SpriteAsset start = AssetDatabase.LoadAssetAtPath<TMP_SpriteAsset>(StartAssetPath);
+        if (start == null) throw new InvalidOperationException("Tutorial: the Xbox Start glyph asset is missing.");
+        start.spriteSheet = texture;
+        if (start.material == null)
+        {
+            Shader shader = Shader.Find("TextMeshPro/Sprite");
+            if (shader == null) throw new InvalidOperationException("Tutorial: the TextMeshPro/Sprite shader is missing.");
+            start.material = new Material(shader) { name = "Tutorial Xbox Start Glyph Material" };
+            AssetDatabase.AddObjectToAsset(start.material, start);
+        }
+        start.material.mainTexture = texture;
+        EditorUtility.SetDirty(start.material);
+        EditorUtility.SetDirty(start);
+        AssetDatabase.SaveAssetIfDirty(start);
+        TMPro_EventManager.ON_SPRITE_ASSET_PROPERTY_CHANGED(true, start);
+        if (asset.fallbackSpriteAssets == null) asset.fallbackSpriteAssets = new List<TMP_SpriteAsset>();
+        if (asset.fallbackSpriteAssets.Contains(start)) return;
+        asset.fallbackSpriteAssets.Add(start);
+        EditorUtility.SetDirty(asset);
+        if (EditorUtility.IsPersistent(asset)) AssetDatabase.SaveAssetIfDirty(asset);
     }
 }

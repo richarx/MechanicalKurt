@@ -44,6 +44,9 @@ public class DialogCinematic : MonoBehaviour
     [ShowInInspector, ReadOnly]
     public bool IsPlaying => _phase != Phase.Idle;
 
+    [ShowInInspector, ReadOnly]
+    public bool CompletedNormally { get; private set; }
+
     // Brancher cette méthode sur PigeonStopZone.OnPlayerStopped.
     public void PlayCinematic()
     {
@@ -62,6 +65,7 @@ public class DialogCinematic : MonoBehaviour
         if (_dialogs.IsPlaying)
             return;
 
+        CompletedNormally = false;
         _phase = Phase.Entering;
         if (!CinematicManager.BeginCinematic(CinematicCamera, BeginDialog, HandleCinematicEnded))
         {
@@ -121,6 +125,7 @@ public class DialogCinematic : MonoBehaviour
     {
         yield return new WaitForSecondsRealtime(Mathf.Max(0f, SendOffSeconds));
         _routine = null;
+        CompletedNormally = true;
         CancelCinematic();
     }
 
