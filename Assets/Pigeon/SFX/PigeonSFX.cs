@@ -54,17 +54,17 @@ public class PigeonSFX : MonoBehaviour
         if (!pigeonController.IsGrounded && !controls.Flap)
         {
             if (flySource == null)
-                flySource = SFXManager.Instance.PlaySFX(flyLoopClip, 0.35f, loop: true);
+                flySource = SFXManager.Instance.PlaySFX(flyLoopClip, 0.5f, loop: true);
 
             if (flySequence != null && flySequence.IsPlaying())
                 flySequence.Kill();
 
-            if (flySource.volume < 0.35f)
+            if (flySource.volume < 0.5f)
             {
                 flySequence = DOTween.Sequence();
 
                 if (flySource.isPlaying)
-                    flySequence.Append(flySource.DOFade(0.35f, 0.5f));
+                    flySequence.Append(flySource.DOFade(0.5f, 0.5f));
             }
 
             flySource.pitch = Tools.NormalizeValue(pigeonController.Speed, 5.0f, 25.0f);
