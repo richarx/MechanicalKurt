@@ -10805,11 +10805,6 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 4936109411098377884, guid: f4d4020bc7f26ce4d82ac1bf0313d383, type: 3}
   m_PrefabInstance: {fileID: 270924030}
   m_PrefabAsset: {fileID: 0}
---- !u!1 &270924032 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 7902013897761636512, guid: f4d4020bc7f26ce4d82ac1bf0313d383, type: 3}
-  m_PrefabInstance: {fileID: 270924030}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1 &273091631
 GameObject:
   m_ObjectHideFlags: 0
@@ -32633,6 +32628,37 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 5623855421056503330, guid: ca295417f3806b645ba5ded85b9f8166, type: 3}
   m_PrefabInstance: {fileID: 844843801}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &845120911
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 845120912}
+  m_Layer: 0
+  m_Name: DeliverySimple
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &845120912
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 845120911}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 858452128}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &847927500
 GameObject:
   m_ObjectHideFlags: 0
@@ -32961,6 +32987,39 @@ Transform:
   m_Children:
   - {fileID: 926998850}
   m_Father: {fileID: 626871919}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &858452127
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 858452128}
+  m_Layer: 0
+  m_Name: Tata
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &858452128
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 858452127}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -172.68329, y: -2.28794, z: -37.11228}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 1998525015}
+  - {fileID: 845120912}
+  m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &859970364
 GameObject:
@@ -33926,7 +33985,6 @@ Transform:
   - {fileID: 558652312}
   - {fileID: 1675697842}
   - {fileID: 630067715}
-  - {fileID: 1998525015}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &876006177
@@ -67935,11 +67993,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4807081451739982482, guid: 013420fdddab85a48be5b875e08e2729, type: 3}
       propertyPath: m_LocalRotation.y
-      value: -0.00000016362482
+      value: -0.00000013747233
       objectReference: {fileID: 0}
     - target: {fileID: 4807081451739982482, guid: 013420fdddab85a48be5b875e08e2729, type: 3}
       propertyPath: m_LocalRotation.z
-      value: 0.0000000737141
+      value: 0.000000046347093
       objectReference: {fileID: 0}
     - target: {fileID: 7718967718942241121, guid: 013420fdddab85a48be5b875e08e2729, type: 3}
       propertyPath: m_LocalPosition.x
@@ -74125,7 +74183,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1909673041
 RectTransform:
   m_ObjectHideFlags: 0
@@ -77764,7 +77822,6 @@ GameObject:
   - component: {fileID: 1998525015}
   - component: {fileID: 1998525018}
   - component: {fileID: 1998525017}
-  - component: {fileID: 1998525016}
   m_Layer: 0
   m_Name: Post Office (1)
   m_TagString: Untagged
@@ -77781,31 +77838,15 @@ Transform:
   m_GameObject: {fileID: 1998525014}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0.9611783, z: -0, w: 0.27592808}
-  m_LocalPosition: {x: 7.66, y: 0.16, z: -114.07}
+  m_LocalPosition: {x: 196.78151, y: 14.5067005, z: -170.8229}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1725853639}
   - {fileID: 1687139302}
   - {fileID: 270924031}
-  m_Father: {fileID: 875956603}
+  m_Father: {fileID: 858452128}
   m_LocalEulerAnglesHint: {x: 0, y: -147.965, z: 0}
---- !u!114 &1998525016
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1998525014}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 60d1c7bd9c164bb5ae848de998137a09, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::PigeonStopDialogCinematic
-  <StopZone>k__BackingField: {fileID: 1998525018}
-  <Cinematic>k__BackingField: {fileID: 1998525017}
-  <CompletionAchievement>k__BackingField: {fileID: 11400000, guid: 6741217f46454adab4e776a0f0eb0184, type: 2}
-  _cylinder: {fileID: 270924032}
 --- !u!114 &1998525017
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -77849,7 +77890,7 @@ MonoBehaviour:
   <OnPlayerStopped>k__BackingField:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1998525016}
+      - m_Target: {fileID: 0}
         m_TargetAssemblyTypeName: PigeonStopDialogCinematic, Assembly-CSharp
         m_MethodName: PlayCinematic
         m_Mode: 1
@@ -87632,3 +87673,4 @@ SceneRoots:
   - {fileID: 1094115699}
   - {fileID: 875956603}
   - {fileID: 788777198}
+  - {fileID: 858452128}
