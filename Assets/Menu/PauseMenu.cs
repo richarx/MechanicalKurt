@@ -42,6 +42,9 @@ public class PauseMenu : MonoBehaviour
             else
                 CloseMenu();
         }
+
+        if (isPaused)
+            backgroundMaterial.SetFloat("_UnscaledTime", Time.unscaledTime);
     }
 
     private void OpenMenu()

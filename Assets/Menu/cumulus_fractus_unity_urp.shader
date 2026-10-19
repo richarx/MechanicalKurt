@@ -6,6 +6,7 @@ Shader "Kaleidos/cumulus fractus 2D URP" {
         _Tint ("Tint", Color) = (1,1,1,1)
         _Speed ("Speed", Float) = 1
         _CellSize ("Pixel Size", Float) = 2.0
+        _UnscaledTime ("Unscaled Time", Float) = 0
         [MainTexture] _BaseMap ("Base Map", 2D) = "white" {}
     }
     SubShader {
@@ -24,8 +25,9 @@ Shader "Kaleidos/cumulus fractus 2D URP" {
             float4 _Tint;
             float _Speed;
             float _CellSize;
+            float _UnscaledTime;
 
-            #define uTime (_Time.y * _Speed)
+            #define uTime (_UnscaledTime * _Speed)
             #define uResolution float2(640.0, 360.0)
             #define cellSize _CellSize
 
@@ -336,7 +338,7 @@ float4 shade(float2 screen_coords) {
     float2  p;
     float angN = 0.0;
     {
-        p = uv * noiseScale + time * scrollSpeed;
+        p = uv * noiseScale + _UnscaledTime * scrollSpeed;
     }
     p.y *= 1.1547;
 
