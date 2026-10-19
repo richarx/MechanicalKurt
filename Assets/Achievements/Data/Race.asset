@@ -15,4 +15,4 @@ MonoBehaviour:
   _id: delivery_race
   _title: Pod racer
   _description: Win the race
-  _icon: {fileID: 0}
+  _icon: {fileID: 2775643618418983938, guid: bbacd8ffae833b04699a7369b127031e, type: 3}
