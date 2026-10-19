@@ -1275,6 +1275,62 @@ MonoBehaviour:
   <HitStateName>k__BackingField: Hit
   <AnimationLayer>k__BackingField: 0
   <MotionRoot>k__BackingField: {fileID: 0}
+  hitAudioClips:
+  - {fileID: 8300000, guid: 9575d745eb83ed04aa05363d7cfcf409, type: 3}
+  - {fileID: 8300000, guid: 178fba8b338d7bf4a8980777d86acfb7, type: 3}
+  - {fileID: 8300000, guid: 35f8ae7b5e0187c4fa556b33e095d20a, type: 3}
+  - {fileID: 8300000, guid: 8a38dfe398e3afa47ae84b50ba56d282, type: 3}
+  - {fileID: 8300000, guid: 929575a465811064e81aa9c5792cae59, type: 3}
+  - {fileID: 8300000, guid: 12ca163099ad71b4e9d4d4afc3848f65, type: 3}
+  - {fileID: 8300000, guid: 5bdece55d9371a542ad893b8ab9cd9ec, type: 3}
+  - {fileID: 8300000, guid: 2706c745f836da84bab790fc0c9d96fd, type: 3}
+  - {fileID: 8300000, guid: 52e80c9ad30481f4790020a01ffbb7c6, type: 3}
+  - {fileID: 8300000, guid: 3daa839bad5040b4da65606cb2f46e05, type: 3}
+  - {fileID: 8300000, guid: a13ce78b041ba9e42a49d740e2576131, type: 3}
+  - {fileID: 8300000, guid: 653b31164bc99144d84d3642db5f72a3, type: 3}
+  - {fileID: 8300000, guid: 8e24242356934484e8ae7e0ee3806856, type: 3}
+  - {fileID: 8300000, guid: 5dd3ac62889b69a42a035acfcf82e06a, type: 3}
+  - {fileID: 8300000, guid: 56a142578e9c0fa488b15ca9087da5c1, type: 3}
+  - {fileID: 8300000, guid: bba631366e9964b4b90efbe74029633e, type: 3}
+  - {fileID: 8300000, guid: 1c5e263b61c45464994f41eff2d47087, type: 3}
+  - {fileID: 8300000, guid: b40c60b7b2ad8db49adf6dc846c217e2, type: 3}
+  - {fileID: 8300000, guid: 41b9e001e36c0a241a8aac6505bdb0af, type: 3}
+  - {fileID: 8300000, guid: 19bbcf4794c440042be22744c534d0c3, type: 3}
+  - {fileID: 8300000, guid: 6fa04241486cbfc4ba027cbc884a7501, type: 3}
+  - {fileID: 8300000, guid: 49baca35b375cd04c8a73fd0e0f0e7ef, type: 3}
+  - {fileID: 8300000, guid: 394ad7bbab82a7c4b95fe2736f9e17c5, type: 3}
+  - {fileID: 8300000, guid: 5f98369aa31ed634b8654a0ba51d009d, type: 3}
+  - {fileID: 8300000, guid: 6c9288877452c7044854976d8b6f5e47, type: 3}
+  - {fileID: 8300000, guid: fab85e77119306248a627c771e075b7d, type: 3}
+  - {fileID: 8300000, guid: 9b3893de606d1c64382f43e83bf8f051, type: 3}
+  - {fileID: 8300000, guid: a5f04a5e90674b74e9b9e897a9520228, type: 3}
+  - {fileID: 8300000, guid: fc9bc17d6030b504f8dce2950fb62276, type: 3}
+  - {fileID: 8300000, guid: bf245fc8478b3db43b42f6b95e7275fb, type: 3}
+  - {fileID: 8300000, guid: 82f27eb7b53b9424098f5c2ab5fe5274, type: 3}
+  - {fileID: 8300000, guid: 2e13521de52d3d34bb16cfd785778f3b, type: 3}
+  - {fileID: 8300000, guid: bb431543978ff8844ab3532723abad0b, type: 3}
+  - {fileID: 8300000, guid: 9c53572357655b84abae4e28b68aa2b8, type: 3}
+  - {fileID: 8300000, guid: 516563196298e6b448955076655361f1, type: 3}
+  - {fileID: 8300000, guid: a0a5fff2f6127ef4eb31ff7b235ab879, type: 3}
+  - {fileID: 8300000, guid: a3edc92802517194a8e0c22b8900bf35, type: 3}
+  - {fileID: 8300000, guid: 3be6a392cfd2a6e40b91b2674bb584b1, type: 3}
+  - {fileID: 8300000, guid: 25e99fd798f78f342851e38d421a5ec0, type: 3}
+  - {fileID: 8300000, guid: 710e7aa7c5c52894e853c7c2c09e888a, type: 3}
+  - {fileID: 8300000, guid: e374701c4f9d5ad4ca2057a712884a97, type: 3}
+  - {fileID: 8300000, guid: 539f8f89ae34b64439c924d11f35cafa, type: 3}
+  - {fileID: 8300000, guid: 19c93c8f30d9c664e8c0bd6200f9e071, type: 3}
+  - {fileID: 8300000, guid: d797517c8eb361a4fad8716a0765b5de, type: 3}
+  - {fileID: 8300000, guid: 08b0662a501b94b498b8b37c9e1e1f57, type: 3}
+  - {fileID: 8300000, guid: cc0c4e418b1e2694ca035a4b255da7ce, type: 3}
+  - {fileID: 8300000, guid: 8f5f96e0d642b8f41a46e9dd6a1ee5c4, type: 3}
+  - {fileID: 8300000, guid: 5eb5729b62f02f3478068460a6ffc642, type: 3}
+  - {fileID: 8300000, guid: d37e98de8840fd34baaf2910c403c082, type: 3}
+  - {fileID: 8300000, guid: 9d87df90243fdb749ad442f94e87238d, type: 3}
+  - {fileID: 8300000, guid: 4f4cbeb1d701a404d9f59b2a1795f162, type: 3}
+  - {fileID: 8300000, guid: a8cf9b01323b2464eb3f27226ca10533, type: 3}
+  - {fileID: 8300000, guid: 7ef22ab783310984d8eb9ce8b8b98b36, type: 3}
+  - {fileID: 8300000, guid: a921b4115a3ddd549969781584e94770, type: 3}
+  - {fileID: 8300000, guid: 1b477c93c6c8da94aa4b74b71dedabac, type: 3}
 --- !u!1 &8654086949341558362
 GameObject:
   m_ObjectHideFlags: 0

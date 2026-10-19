@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Collections.Generic;
 using Sirenix.OdinInspector;
 using UnityEngine;
 
@@ -39,6 +40,8 @@ public class PigeonProximityHit : MonoBehaviour
     private Vector3 _previousMotionOffset;
     private float _lastMotionTime;
     private float _lastTransitionTime;
+
+    [SerializeField] private List<AudioClip> hitAudioClips;
 
     private void Awake()
     {
@@ -99,6 +102,8 @@ public class PigeonProximityHit : MonoBehaviour
         }
 
         BeginHitMotion();
+        PlayHitSound();
+
         _animator.SetTrigger(HitTrigger);
         yield return null;
 
@@ -221,5 +226,13 @@ public class PigeonProximityHit : MonoBehaviour
     {
         Gizmos.color = Color.yellow;
         Gizmos.DrawWireSphere(transform.position, Radius);
+    }
+
+    private void PlayHitSound()
+    {
+        if (hitAudioClips == null || hitAudioClips.Count == 0) return;
+
+        AudioClip clip = hitAudioClips[Random.Range(0, hitAudioClips.Count)];
+        SFXManager.Instance.PlaySFX(clip);    
     }
 }
