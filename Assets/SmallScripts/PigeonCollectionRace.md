@@ -28,6 +28,10 @@ apparaissent, et la flèche pointe vers elle. Cette course n'utilise pas de chro
 8. Renseigner **Departure Stop** et éventuellement **Departure Marker** pour
    masquer le départ pendant la course. **Departure Cinematic** est facultative :
    si elle est renseignée, une cinématique interrompue ne lance pas la collecte.
+9. **Stop To Disable During Return** : PigeonStop facultatif, distinct de l'arrivée.
+   S'il est actif quand la flèche apparaît, son composant est désactivé jusqu'à la
+   réussite (cinématique finale comprise), puis réactivé. S'il était déjà inactif,
+   il reste inchangé. L'annulation de la course restaure aussi le composant suspendu.
 
 Le contrôleur **CourseCollecte** doit rester actif. Ne pas le placer sous le panneau,
 une zone de collecte ou un repère que la course masque. Les zones de collecte
