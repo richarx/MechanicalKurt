@@ -28587,9 +28587,7 @@ MonoBehaviour:
       <sprite name="xbox_left_stick" tint=0> Up / down: pitch'
   - <Achievement>k__BackingField: {fileID: 11400000, guid: 6741217f46454adab4e776a0f0eb0184, type: 2}
     <Objective>k__BackingField: Land in a mission circle and stay still to activate it.
-    <Commands>k__BackingField: '<color=#F2FA00>Ctrl</color>: brake <color=#F2FA00>Space</color>: gain height
-
-      Stay still in the circle to activate it.'
+    <Commands>k__BackingField: "<color=#F2FA00>V</color>: brake \nStay still in the circle to activate it."
     <GamepadCommands>k__BackingField: 'Hold <sprite name="xbox_b" tint=0> to brake and land.
 
       Stay still in the circle to activate it.'
@@ -34815,9 +34813,49 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 1910158452305398794, guid: 875cc51fa82608246adf1939064e2d77, type: 3}
+      propertyPath: m_AnchorMax.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1910158452305398794, guid: 875cc51fa82608246adf1939064e2d77, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1910158452305398794, guid: 875cc51fa82608246adf1939064e2d77, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1915238618514536405, guid: 875cc51fa82608246adf1939064e2d77, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2984549290012065798, guid: 875cc51fa82608246adf1939064e2d77, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3534983856399631356, guid: 875cc51fa82608246adf1939064e2d77, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4535320658798239581, guid: 875cc51fa82608246adf1939064e2d77, type: 3}
+      propertyPath: m_AnchorMax.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4535320658798239581, guid: 875cc51fa82608246adf1939064e2d77, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5023588193384658032, guid: 875cc51fa82608246adf1939064e2d77, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 8420993087813655591, guid: 875cc51fa82608246adf1939064e2d77, type: 3}
       propertyPath: m_Name
       value: Menu Canvas
+      objectReference: {fileID: 0}
+    - target: {fileID: 8950681516317616905, guid: 875cc51fa82608246adf1939064e2d77, type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
