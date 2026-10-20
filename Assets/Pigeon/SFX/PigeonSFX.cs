@@ -7,6 +7,7 @@ public class PigeonSFX : MonoBehaviour
     [SerializeField] private List<AudioClip> coohClips;
     [SerializeField] private AudioClip takeOffClip;
     [SerializeField] private AudioClip flyLoopClip;
+    [SerializeField] private AudioClip lowPassFlyLoopClip;
     [SerializeField] private AudioClip poopClip;
     [SerializeField] private AudioClip hurtClip;
     [SerializeField] private List<AudioClip> rollClips;
@@ -22,7 +23,14 @@ public class PigeonSFX : MonoBehaviour
 
     private bool isCurrentlyUnderWater;
 
-    private AudioSource flySource;
+    private AudioSource clearFlySource;
+    private AudioSource lowPassFlySource;
+
+    private bool isLowPassActive;
+
+    private AudioSource currentAudioSource => isLowPassActive ? lowPassFlySource : clearFlySource;
+    private AudioSource otherAudioSource => isLowPassActive ? clearFlySource : lowPassFlySource;
+
     private Sequence flySequence;
 
     private void Start()
@@ -53,36 +61,49 @@ public class PigeonSFX : MonoBehaviour
                 SFXManager.Instance.PlaySFX(exitWater);
         }
 
-        if (!pigeonController.IsGrounded && !controls.Flap)
+        if (!pigeonController.IsGrounded && !controls.Flap && !pigeonController.IsStun)
         {
-            if (flySource == null)
-                flySource = SFXManager.Instance.PlaySFX(flyLoopClip, 0.5f, loop: true);
+            if (currentAudioSource == null)
+            {
+                clearFlySource = SFXManager.Instance.PlaySFX(flyLoopClip, 0.5f, loop: true);
+                lowPassFlySource = SFXManager.Instance.PlaySFX(lowPassFlyLoopClip, 0.0f, loop: true);
+            }
 
             if (flySequence != null && flySequence.IsPlaying())
                 flySequence.Kill();
 
-            if (flySource.volume < 0.5f)
+            if (currentAudioSource.volume < 0.5f)
             {
                 flySequence = DOTween.Sequence();
 
-                if (flySource.isPlaying)
-                    flySequence.Append(flySource.DOFade(0.5f, 0.5f));
+                if (currentAudioSource.isPlaying)
+                    flySequence.Append(currentAudioSource.DOFade(0.5f, 0.5f));
             }
 
-            flySource.pitch = Tools.NormalizeValue(pigeonController.Speed, 5.0f, 25.0f);
+            currentAudioSource.pitch = Tools.NormalizeValue(pigeonController.Speed, 5.0f, 25.0f);
         }
         else
         {
-            if (flySource)
+            if (currentAudioSource != null)
             {
                 if (flySequence != null && flySequence.IsPlaying())
                     flySequence.Kill();
 
                 flySequence = DOTween.Sequence();
 
-                if (flySource.isPlaying)
-                    flySequence.Append(flySource.DOFade(0.0f, 0.5f));
+                if (currentAudioSource.isPlaying)
+                    flySequence.Append(currentAudioSource.DOFade(0.0f, 0.5f));
             }
         }
+    }
+
+    public void SetLowPassMode(bool isLowPass)
+    {
+        isLowPassActive = isLowPass;
+
+        currentAudioSource.volume = otherAudioSource.volume;
+        currentAudioSource.pitch = otherAudioSource.pitch;
+
+        otherAudioSource.volume = 0.0f;
     }
 }

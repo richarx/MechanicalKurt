@@ -4,14 +4,15 @@ using UnityEngine;
 
 public class MusicPlayer : MonoBehaviour
 {
-    [SerializeField]
-    private AudioSource audioSource;
+    [SerializeField] private AudioSource clearAudioSource;
 
-    [SerializeField]
-    private AudioClip nightDelivery;
+    [SerializeField] private AudioSource lowPassAudioSource;
 
-    [SerializeField]
-    private AudioClip wrongWay;
+    [SerializeField] private AudioClip nightDelivery;
+    [SerializeField] private AudioClip nightDeliveryLowPass;
+
+    [SerializeField] private AudioClip wrongWay;
+    [SerializeField] private AudioClip wrongWayLowPass;
 
     [SerializeField]
     private float switchInterval = 120f;
@@ -32,6 +33,11 @@ public class MusicPlayer : MonoBehaviour
     private const float maxVolume = 0.1f;
     private const float minVolume = 0.03f;
 
+    private bool isLowPassActive;
+
+    private AudioSource currentAudioSource => isLowPassActive ? lowPassAudioSource : clearAudioSource;
+    private AudioSource otherAudioSource => isLowPassActive ? clearAudioSource : lowPassAudioSource;
+
     public enum Songs
     {
         NightDelivery,
@@ -41,17 +47,16 @@ public class MusicPlayer : MonoBehaviour
     private void Awake()
     {
         instance = this;
-        if (audioSource == null)
-            audioSource = gameObject.AddComponent<AudioSource>();
 
-        audioSource.loop = true;
+        clearAudioSource.loop = true;
+        lowPassAudioSource.loop = true;
     }
 
     private IEnumerator Start()
     {
         yield return new WaitForSeconds(120.0f);
 
-        if (!musicStarted && !audioSource.isPlaying)
+        if (!musicStarted && !currentAudioSource.isPlaying)
             PlayMusic(Songs.NightDelivery);
     }
 
@@ -79,28 +84,29 @@ public class MusicPlayer : MonoBehaviour
 
     public void PlayMusic(Songs song, float delay = 0.0f)
     {
-        AudioClip clip = GetClip(song);
-
-        if (clip == null)
-            return;
-
         playbackSequence?.Kill();
         playbackSequence = DOTween.Sequence();
 
         if (delay > 0.0f)
             playbackSequence.AppendInterval(delay);
 
-        if (audioSource.isPlaying)
+        if (currentAudioSource.isPlaying)
             playbackSequence.Append(DOTween.To(() => fadeVolume, value => fadeVolume = value, 0f, fadeDuration)
                 .SetEase(Ease.Linear).OnUpdate(ApplyVolume));
 
         playbackSequence.AppendCallback(() =>
         {
-            audioSource.Stop();
-            audioSource.clip = clip;
+            clearAudioSource.Stop();
+            lowPassAudioSource.Stop();
+
+            clearAudioSource.clip = GetClearClip(song);
+            lowPassAudioSource.clip = GetLowPassClip(song);
+
             fadeVolume = 0f;
             ApplyVolume();
-            audioSource.Play();
+
+            clearAudioSource.Play();
+            lowPassAudioSource.Play();
 
             currentSong = song;
             elapsed = 0f;
@@ -146,7 +152,14 @@ public class MusicPlayer : MonoBehaviour
 
     private void ApplyVolume()
     {
-        audioSource.volume = fadeVolume * musicVolume;
+        currentAudioSource.volume = fadeVolume * musicVolume;
+        otherAudioSource.volume = 0.0f;
+    }
+
+    public void SetLowPassMode(bool isLowPass)
+    {
+        isLowPassActive = isLowPass;
+        ApplyVolume();
     }
 
     private void OnDestroy()
@@ -155,7 +168,7 @@ public class MusicPlayer : MonoBehaviour
         currentSequence?.Kill();
     }
 
-    private AudioClip GetClip(Songs song)
+    private AudioClip GetClearClip(Songs song)
     {
         switch (song)
         {
@@ -165,6 +178,19 @@ public class MusicPlayer : MonoBehaviour
                 return wrongWay;
             default:
                 return nightDelivery;
+        }
+    }
+
+    private AudioClip GetLowPassClip(Songs song)
+    {
+        switch (song)
+        {
+            case Songs.NightDelivery:
+                return nightDeliveryLowPass;
+            case Songs.WrongWay:
+                return wrongWayLowPass;
+            default:
+                return nightDeliveryLowPass;
         }
     }
 }

@@ -98,6 +98,7 @@ public class PigeonController : MonoBehaviour
     public float HorizontalSpeed => new Vector3(_lastVelocity.x, 0f, _lastVelocity.z).magnitude;
     public Vector3 Velocity => _lastVelocity;
     public bool IsUndeWater => _water != null && transform.position.y < _water.transform.position.y - _waterLevelModifier;
+    public bool IsStun => _stunned;
 
     public bool IsMovementFrozen { get; private set; }
 

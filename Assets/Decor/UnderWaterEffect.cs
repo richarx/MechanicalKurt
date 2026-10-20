@@ -8,8 +8,8 @@ public class UnderWaterEffect : MonoBehaviour
     [SerializeField] private Volume globalVolume;
     [SerializeField] private VolumeProfile cityProfile;
     [SerializeField] private VolumeProfile waterProfile;
-    [SerializeField] private AudioMixer musicMixer;
-    [SerializeField] private AudioMixer sfxMixer;
+    [SerializeField] private MusicPlayer musicPlayer;
+    [SerializeField] private PigeonSFX pigeonSFX;
 
     private bool isUnderWaterEffectActivated;
 
@@ -22,8 +22,8 @@ public class UnderWaterEffect : MonoBehaviour
             isUnderWaterEffectActivated = isUnderWater;
             globalVolume.profile = isUnderWaterEffectActivated ? waterProfile : cityProfile;
             RenderSettings.fog = isUnderWaterEffectActivated;
-            musicMixer.SetFloat("LowPass", isUnderWaterEffectActivated ? 600.0f : 22000.0f);
-            sfxMixer.SetFloat("LowPass", isUnderWaterEffectActivated ? 600.0f : 22000.0f);
+            musicPlayer.SetLowPassMode(isUnderWaterEffectActivated);
+            pigeonSFX.SetLowPassMode(isUnderWaterEffectActivated);
         }
     }
 }
