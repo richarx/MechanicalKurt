@@ -494,6 +494,9 @@ MonoBehaviour:
   _stunMinHorizontalSpeed: 3
   _stunMinDuration: 0.5
   _stunImmuneDuration: 0.5
+  _groundLayer:
+    serializedVersion: 2
+    m_Bits: 1
   _groundSpeed: 1
   _turnSpeed: 90
   _pitchSpeed: 60
@@ -620,6 +623,7 @@ MonoBehaviour:
   - {fileID: 8300000, guid: e955d2e0f7a5d1943b17695d530c872b, type: 3}
   takeOffClip: {fileID: 8300000, guid: b240de1d43422fc4685f0c9f555af126, type: 3}
   flyLoopClip: {fileID: 8300000, guid: c08db5ccbfe102348a47b0ad7a43c981, type: 3}
+  lowPassFlyLoopClip: {fileID: 0}
   poopClip: {fileID: 8300000, guid: acb1fc60a977e6b46bf1e40495b83415, type: 3}
   hurtClip: {fileID: 8300000, guid: 467d247cd19a6d1498766f3a6c234804, type: 3}
   rollClips:

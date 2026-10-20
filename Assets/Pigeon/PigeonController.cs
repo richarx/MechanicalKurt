@@ -15,6 +15,8 @@ public class PigeonController : MonoBehaviour
     [SerializeField] float _stunMinHorizontalSpeed = 3;
     [SerializeField] float _stunMinDuration = 0.5f;
     [SerializeField] float _stunImmuneDuration = 0.5f;
+    [SerializeField] private LayerMask _groundLayer;
+
 
     [Header("Ground Movement")]
     [SerializeField] float _groundSpeed = 1f;
@@ -248,15 +250,31 @@ public class PigeonController : MonoBehaviour
 
         transform.forward = recoveryDir.normalized;
         _yaw = transform.eulerAngles.y;
-
-        float retainedSpeed = _flapMinSpeed;
-
-        _lastVelocity = transform.forward * retainedSpeed;
-        _lastVelocity.y = _takeoffSpeed;
-
+        _lastVelocity = Vector3.zero;
         _controller.enabled = true;
     }
 
+    public bool IsGroundedWithSphereCast()
+    {
+
+        float halfHeight = _controller.height * 0.5f;
+        Vector3 localSphereCenter = _controller.center + Vector3.down * (halfHeight - _controller.radius);
+        Vector3 worldSphereCenter = transform.TransformPoint(localSphereCenter);
+
+        float sphereRadius = _controller.radius * 0.95f;
+
+        float castDistance = _controller.skinWidth + 0.1f;
+
+        return Physics.SphereCast(
+            worldSphereCenter,
+            sphereRadius,
+            Vector3.down,
+            out RaycastHit hit,
+            castDistance,
+            _groundLayer,
+            QueryTriggerInteraction.Ignore
+        );
+    }
 
 
     void OnControllerColliderHit(ControllerColliderHit hit)
@@ -298,9 +316,16 @@ public class PigeonController : MonoBehaviour
         if (_stunned)
         {
             _stunRemaining -= dt;
-            if (_stunRemaining > 0 || !_controls.Flap)
+            if (_stunRemaining > 0 || (!_controls.Flap && _controls.RelativeMovement.magnitude < 0.1f))
                 return;
+            bool isGrounded = IsGroundedWithSphereCast();
             WakeUp();
+            if (!isGrounded || _controls.Flap)
+            {
+                float retainedSpeed = _flapMinSpeed;
+                _lastVelocity = transform.forward * retainedSpeed;
+                _lastVelocity.y = _takeoffSpeed;
+            }
         }
         else if (!_lastFramePaused && !_skipVelocityRead)
         {
