@@ -66,8 +66,13 @@ public class PigeonController : MonoBehaviour
     [Header("Debug")]
     [SerializeField] bool _activeDebug = false;
 
-    [HideInInspector] public UnityEvent OnTakeoff = new UnityEvent();
-    [HideInInspector] public UnityEvent OnRoll = new UnityEvent();
+    [Header("Events")]
+    [field: SerializeField]
+    public UnityEvent OnTakeoff { get; private set; } = new UnityEvent();
+    [field: SerializeField]
+    public UnityEvent OnRoll { get; private set; } = new UnityEvent();
+    [field: SerializeField]
+    public UnityEvent OnStunned { get; private set; } = new UnityEvent();
 
     Vector3 _velocity;
     Vector3 _lastVelocity;
@@ -212,6 +217,7 @@ public class PigeonController : MonoBehaviour
 
     void Stun(Vector3 hitnormal)
     {
+        OnStunned.Invoke();
         _lastHitNormal = hitnormal;
         _stunned = true;
         _controller.enabled = false;

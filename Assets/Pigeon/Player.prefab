@@ -523,10 +523,13 @@ MonoBehaviour:
   _waterLevelModifier: 0.1
   _buoyancyForce: 20
   _activeDebug: 0
-  OnTakeoff:
+  <OnTakeoff>k__BackingField:
     m_PersistentCalls:
       m_Calls: []
-  OnRoll:
+  <OnRoll>k__BackingField:
+    m_PersistentCalls:
+      m_Calls: []
+  <OnStunned>k__BackingField:
     m_PersistentCalls:
       m_Calls: []
 --- !u!114 &7788707282503470594
@@ -618,6 +621,7 @@ MonoBehaviour:
   takeOffClip: {fileID: 8300000, guid: b240de1d43422fc4685f0c9f555af126, type: 3}
   flyLoopClip: {fileID: 8300000, guid: c08db5ccbfe102348a47b0ad7a43c981, type: 3}
   poopClip: {fileID: 8300000, guid: acb1fc60a977e6b46bf1e40495b83415, type: 3}
+  hurtClip: {fileID: 8300000, guid: 467d247cd19a6d1498766f3a6c234804, type: 3}
   rollClips:
   - {fileID: 8300000, guid: 33ec72da27e336446b91a3d7ad4f3e32, type: 3}
   - {fileID: 8300000, guid: 8b902c0fa7c9a974d8089d569cec9e6d, type: 3}

@@ -8,6 +8,7 @@ public class PigeonSFX : MonoBehaviour
     [SerializeField] private AudioClip takeOffClip;
     [SerializeField] private AudioClip flyLoopClip;
     [SerializeField] private AudioClip poopClip;
+    [SerializeField] private AudioClip hurtClip;
     [SerializeField] private List<AudioClip> rollClips;
 
     [Space]
@@ -32,6 +33,7 @@ public class PigeonSFX : MonoBehaviour
 
         pigeonController.OnTakeoff.AddListener(() => SFXManager.Instance.PlaySFX(takeOffClip));
         pigeonController.OnRoll.AddListener(() => SFXManager.Instance.PlayRandomSFX(rollClips));
+        pigeonController.OnStunned.AddListener(() => SFXManager.Instance.PlaySFX(hurtClip));
         buttHoleManager.OnShit.AddListener(() => SFXManager.Instance.PlaySFX(poopClip));
     }
 
