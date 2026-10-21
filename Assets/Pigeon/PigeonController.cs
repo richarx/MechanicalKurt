@@ -571,7 +571,7 @@ public class PigeonController : MonoBehaviour
         if (_boostFeedback == null || _controls.Flap || _controls.Dive || Speed < _minBarrelRollSpeed)
             return;
 
-        _boostFeedback.Play(restart: true, _rollDuration, isLeft);
+        _boostFeedback.Play(restart: true, _rollDuration, isLeft, false);
         OnRoll?.Invoke();
     }
 }

@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Linq;
 using DG.Tweening;
 using UnityEngine;
@@ -16,8 +17,10 @@ public class BoostRing : MonoBehaviour
     [SerializeField] Transform _visual;
     [SerializeField] float _punchScale = 0.3f;
     [SerializeField] float _punchDuration = 0.4f;
-    [SerializeField] AudioClip[] _sfx;
-    [SerializeField] float _sfxVolume = 0.3f;
+    [SerializeField] List<AudioClip> _mainSfx;
+    [SerializeField] float _mainSfxVolume = 0.3f;
+    [SerializeField] List<AudioClip> _secondarySfx;
+    [SerializeField] float _secondarySfxVolume = 0.3f;
 
     float _lastTriggerTime = float.NegativeInfinity;
     Tween _punchTween;
@@ -61,8 +64,11 @@ public class BoostRing : MonoBehaviour
             _punchTween = _visual.DOPunchScale(Vector3.one * _punchScale, _punchDuration, 6, 0.5f);
         }
 
-        if (_sfx != null && _sfx.Length > 0 && SFXManager.Instance != null)
-            SFXManager.Instance.PlayRandomSFXAtLocation(_sfx.ToList(), transform, _sfxVolume);
+        if (SFXManager.Instance != null)
+        {
+            SFXManager.Instance.PlayRandomSFX(_mainSfx, _mainSfxVolume);
+            SFXManager.Instance.PlayRandomSFX(_secondarySfx, _secondarySfxVolume);
+        }
     }
 
     void OnDestroy()
