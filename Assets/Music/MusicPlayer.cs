@@ -24,7 +24,7 @@ public class MusicPlayer : MonoBehaviour
 
     private Sequence currentSequence;
     private Sequence playbackSequence;
-    private Songs currentSong;
+    private Songs currentSong = Songs.None;
     private float elapsed;
     private float fadeVolume = 1f;
     private float musicVolume = maxVolume;
@@ -40,6 +40,7 @@ public class MusicPlayer : MonoBehaviour
 
     public enum Songs
     {
+        None,
         NightDelivery,
         WrongWay
     }
@@ -54,7 +55,7 @@ public class MusicPlayer : MonoBehaviour
 
     private IEnumerator Start()
     {
-        yield return new WaitForSeconds(120.0f);
+        yield return new WaitForSeconds(60.0f);
 
         if (!musicStarted && !currentAudioSource.isPlaying)
             PlayMusic(Songs.NightDelivery);
@@ -84,6 +85,9 @@ public class MusicPlayer : MonoBehaviour
 
     public void PlayMusic(Songs song, float delay = 0.0f)
     {
+        if (song == currentSong)
+            return;
+
         playbackSequence?.Kill();
         playbackSequence = DOTween.Sequence();
 
