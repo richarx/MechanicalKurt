@@ -65,8 +65,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4635222171588909783}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.13984351, y: 0.019052796, z: -0.0026913597, w: 0.98998666}
-  m_LocalPosition: {x: -0.04201716, y: 0.414793, z: -1.0912054}
+  m_LocalRotation: {x: 0.39930946, y: 0.0000004214461, z: -0.00000018323612, w: 0.9168163}
+  m_LocalPosition: {x: -0.0000017881393, y: 2.25, z: -2.0000005}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -162,7 +162,7 @@ MonoBehaviour:
     SplineCurvature: 0.5
   RecenteringTarget: 2
   HorizontalAxis:
-    Value: 124.89728
+    Value: 122.69217
     Center: 122.69217
     Range: {x: -180, y: 180}
     Wrap: 1
@@ -172,7 +172,7 @@ MonoBehaviour:
       Time: 2
     Restrictions: 0
   VerticalAxis:
-    Value: -7.9298434
+    Value: 17.5
     Center: 17.5
     Range: {x: -10, y: 45}
     Wrap: 0
@@ -1372,12 +1372,20 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 198671705615726118, guid: dedfe334c1b156e4d9ef773f4e4de8f9, type: 3}
+      propertyPath: InitialModule.startSize.scalar
+      value: 1.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 198671705615726118, guid: dedfe334c1b156e4d9ef773f4e4de8f9, type: 3}
+      propertyPath: InitialModule.startSize.minScalar
+      value: 0.75
+      objectReference: {fileID: 0}
+    - target: {fileID: 198671705615726118, guid: dedfe334c1b156e4d9ef773f4e4de8f9, type: 3}
       propertyPath: InitialModule.gravityModifier.scalar
-      value: -10
+      value: -1.5
       objectReference: {fileID: 0}
     - target: {fileID: 198671705615726118, guid: dedfe334c1b156e4d9ef773f4e4de8f9, type: 3}
       propertyPath: InitialModule.gravityModifier.minScalar
-      value: -5
+      value: -0.5
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
