@@ -91,4 +91,9 @@ public class PauseMenu : MonoBehaviour
         Cursor.lockState = state ? CursorLockMode.None : CursorLockMode.Locked;
         Cursor.visible = state;
     }
+
+    private void OnDestroy()
+    {
+        backgroundMaterial.SetFloat("_UnscaledTime", 0.0f);
+    }
 }

@@ -95,5 +95,6 @@ public class PigeonBoostFeedback : MonoBehaviour
     {
         _sequence?.Kill();
         materialSequence?.Kill();
+        speedMaterial.SetFloat("_Alpha", 0.0f);
     }
 }
