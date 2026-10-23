@@ -68394,6 +68394,67 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1315199950}
   m_LocalEulerAnglesHint: {x: -9.0581045, y: 149.85588, z: 147.24231}
+--- !u!1 &1293286619
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1293286621}
+  - component: {fileID: 1293286620}
+  m_Layer: 0
+  m_Name: Caustics Decal
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1293286620
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1293286619}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0777d029ed3dffa4692f417d4aba19ca, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.RenderPipelines.Universal.Runtime::UnityEngine.Rendering.Universal.DecalProjector
+  m_Material: {fileID: 2100000, guid: ed77fba8b0480784d9264e76cd78aa47, type: 2}
+  m_DrawDistance: 1000
+  m_FadeScale: 0.9
+  m_StartAngleFade: 180
+  m_EndAngleFade: 180
+  m_UVScale: {x: 1, y: 1}
+  m_UVBias: {x: 0, y: 0}
+  m_RenderingLayerMask:
+    serializedVersion: 0
+    m_Bits: 1
+  m_ScaleMode: 0
+  m_Offset: {x: 0, y: 0, z: 410}
+  m_Size: {x: 820, y: 2.5, z: 820}
+  m_FadeFactor: 1
+  m_VisibleInScene: 1
+  version: 1
+  m_DecalLayerMask: 1
+--- !u!4 &1293286621
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1293286619}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -26, y: -6, z: -432}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1294037452
 GameObject:
   m_ObjectHideFlags: 0
@@ -94669,52 +94730,28 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 572717186}
     - target: {fileID: 896265278413080483, guid: 013420fdddab85a48be5b875e08e2729, type: 3}
+      propertyPath: HorizontalAxis.Value
+      value: 122.69217
+      objectReference: {fileID: 0}
+    - target: {fileID: 896265278413080483, guid: 013420fdddab85a48be5b875e08e2729, type: 3}
       propertyPath: HorizontalAxis.Center
       value: 122.69217
       objectReference: {fileID: 0}
-    - target: {fileID: 4807081451739982482, guid: 013420fdddab85a48be5b875e08e2729, type: 3}
-      propertyPath: m_LocalPosition.x
-      value: -0.0000017881393
-      objectReference: {fileID: 0}
-    - target: {fileID: 4807081451739982482, guid: 013420fdddab85a48be5b875e08e2729, type: 3}
-      propertyPath: m_LocalPosition.y
-      value: 2.25
-      objectReference: {fileID: 0}
-    - target: {fileID: 4807081451739982482, guid: 013420fdddab85a48be5b875e08e2729, type: 3}
-      propertyPath: m_LocalPosition.z
-      value: -2.0000005
-      objectReference: {fileID: 0}
-    - target: {fileID: 4807081451739982482, guid: 013420fdddab85a48be5b875e08e2729, type: 3}
-      propertyPath: m_LocalRotation.w
-      value: 0.9168163
-      objectReference: {fileID: 0}
-    - target: {fileID: 4807081451739982482, guid: 013420fdddab85a48be5b875e08e2729, type: 3}
-      propertyPath: m_LocalRotation.x
-      value: 0.39930946
-      objectReference: {fileID: 0}
-    - target: {fileID: 4807081451739982482, guid: 013420fdddab85a48be5b875e08e2729, type: 3}
-      propertyPath: m_LocalRotation.y
-      value: 0.0000004214461
-      objectReference: {fileID: 0}
-    - target: {fileID: 4807081451739982482, guid: 013420fdddab85a48be5b875e08e2729, type: 3}
-      propertyPath: m_LocalRotation.z
-      value: -0.00000018323612
-      objectReference: {fileID: 0}
     - target: {fileID: 5917645698477372326, guid: 013420fdddab85a48be5b875e08e2729, type: 3}
       propertyPath: moveWithTransform
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 5917645698477372326, guid: 013420fdddab85a48be5b875e08e2729, type: 3}
       propertyPath: InitialModule.startSize.scalar
-      value: 1.5
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 5917645698477372326, guid: 013420fdddab85a48be5b875e08e2729, type: 3}
       propertyPath: InitialModule.startSize.minScalar
-      value: 0.75
+      value: 0.5
       objectReference: {fileID: 0}
     - target: {fileID: 5917645698477372326, guid: 013420fdddab85a48be5b875e08e2729, type: 3}
       propertyPath: InitialModule.gravityModifier.scalar
-      value: -1.5
+      value: -2
       objectReference: {fileID: 0}
     - target: {fileID: 5917645698477372326, guid: 013420fdddab85a48be5b875e08e2729, type: 3}
       propertyPath: 'TriggerModule.primitives.Array.data[0]'
@@ -94722,15 +94759,11 @@ PrefabInstance:
       objectReference: {fileID: 103027135}
     - target: {fileID: 5917645698477372326, guid: 013420fdddab85a48be5b875e08e2729, type: 3}
       propertyPath: InitialModule.gravityModifier.minScalar
-      value: -0.5
+      value: -1
       objectReference: {fileID: 0}
     - target: {fileID: 5917645698477372326, guid: 013420fdddab85a48be5b875e08e2729, type: 3}
       propertyPath: InitialModule.startSize.minCurve.m_Curve.Array.size
       value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5917645698477372326, guid: 013420fdddab85a48be5b875e08e2729, type: 3}
-      propertyPath: InitialModule.gravityModifier.minCurve.m_Curve.Array.size
-      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 5917645698477372326, guid: 013420fdddab85a48be5b875e08e2729, type: 3}
       propertyPath: InitialModule.startSize.minCurve.m_Curve.Array.data[1].time
@@ -118355,3 +118388,4 @@ SceneRoots:
   - {fileID: 477230057}
   - {fileID: 1844697968}
   - {fileID: 1356537266}
+  - {fileID: 1293286621}
