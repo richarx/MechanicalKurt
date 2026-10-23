@@ -5,7 +5,7 @@ using UnityEngine;
 public class PlayerControls : MonoBehaviour, IPigeonControls
 {
     Controls _controls;
-    CinemachineOrbitalFollow _camera;
+    [SerializeField] CinemachineOrbitalFollow _camera;
 
     bool _interact;
 
@@ -27,7 +27,6 @@ public class PlayerControls : MonoBehaviour, IPigeonControls
     void Awake()
     {
         _controls = new Controls();
-        _camera = GetComponentInChildren<CinemachineOrbitalFollow>();
     }
 
     void OnEnable()

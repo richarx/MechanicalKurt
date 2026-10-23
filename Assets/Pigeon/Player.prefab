@@ -44,11 +44,11 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4807081451739982482}
-  - component: {fileID: 6218093093544502874}
   - component: {fileID: 6749645902862693039}
   - component: {fileID: 896265278413080483}
   - component: {fileID: 2956392642080481460}
   - component: {fileID: 3661470257311205162}
+  - component: {fileID: 6218093093544502874}
   - component: {fileID: 3034673749432928965}
   m_Layer: 3
   m_Name: FreeLook Camera
@@ -65,26 +65,14 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4635222171588909783}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.39930946, y: 0.0000004214461, z: -0.00000018323612, w: 0.9168163}
-  m_LocalPosition: {x: -0.0000017881393, y: 2.25, z: -2.0000005}
+  m_LocalRotation: {x: 0.3993095, y: 6.7504385e-10, z: -1.6671076e-10, w: 0.91681623}
+  m_LocalPosition: {x: 0, y: 2.25, z: -2}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 2104848856782868777}
   m_Father: {fileID: 7718967718942241121}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &6218093093544502874
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4635222171588909783}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 20ac4d7c0efd582448b9738735f9694c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::WaterCamera
 --- !u!114 &6749645902862693039
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -162,8 +150,8 @@ MonoBehaviour:
     SplineCurvature: 0.5
   RecenteringTarget: 2
   HorizontalAxis:
-    Value: 122.69217
-    Center: 122.69217
+    Value: 0
+    Center: 0
     Range: {x: -180, y: 180}
     Wrap: 1
     Recentering:
@@ -237,6 +225,18 @@ MonoBehaviour:
   references:
     version: 2
     RefIds: []
+--- !u!114 &6218093093544502874
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4635222171588909783}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 20ac4d7c0efd582448b9738735f9694c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::WaterCamera
 --- !u!114 &3034673749432928965
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -417,6 +417,10 @@ GameObject:
   - component: {fileID: 248335099495966708}
   - component: {fileID: 5405790448048564387}
   - component: {fileID: 7640124386893371793}
+  - component: {fileID: 8209984083396803717}
+  - component: {fileID: 457265001341831757}
+  - component: {fileID: 7843387565400470936}
+  - component: {fileID: 3510523586792754108}
   m_Layer: 3
   m_Name: Player
   m_TagString: Untagged
@@ -454,6 +458,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9da5f819bcd684048a51fa62543d7231, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerControls
+  _camera: {fileID: 896265278413080483}
 --- !u!143 &3115296685156824235
 CharacterController:
   m_ObjectHideFlags: 0
@@ -636,7 +641,6 @@ MonoBehaviour:
   - {fileID: 8300000, guid: 33ec72da27e336446b91a3d7ad4f3e32, type: 3}
   - {fileID: 8300000, guid: 8b902c0fa7c9a974d8089d569cec9e6d, type: 3}
   - {fileID: 8300000, guid: 3418b1fa006b0b845b90a66e1cbdc08e, type: 3}
-  waterPlane: {fileID: 0}
   enterWater: {fileID: 8300000, guid: 2466f5e40cdf95841987426ab3fd8a8a, type: 3}
   exitWater: {fileID: 8300000, guid: 57d0a0e2f565fee49b46984530c9d3da, type: 3}
 --- !u!114 &5724445451644833352
@@ -721,6 +725,113 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PositionFailSafe
   _minDeep: -10
   _maxLinearDist: 450
+--- !u!114 &8209984083396803717
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8893443228925278897}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 98dbb08343eac044895b9b52872bcb49, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: PurrNet.Prediction::PurrNet.Prediction.PredictedTransform
+  _predictionPolicySource: 0
+  _predictionPolicy: 0
+  _graphics: {fileID: 0}
+  _floatAccuracy: 1
+  _interpolationSettings: {fileID: 11400000, guid: 4a8aa8e44e23cfd4a8d4387ef3f36173, type: 2}
+  _unparentGraphics: 0
+  _characterControllerPatch: 1
+  _softCorrection:
+    correctionRate: 8
+    snapPositionThreshold: 3
+    snapRotationThreshold: 75
+--- !u!114 &457265001341831757
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8893443228925278897}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 939517533de889a4f948d4e2041fb798, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: PurrNet.Prediction::PurrNet.Prediction.PredictedRigidbody
+  _predictionPolicySource: 0
+  _predictionPolicy: 0
+  _softVelocityCorrectionRate: 8
+  _rigidbody: {fileID: 248335099495966708}
+  _floatAccuracy: 1
+  _eventMask: 27
+  _ignoreTriggerOnTrigger: 0
+--- !u!114 &7843387565400470936
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8893443228925278897}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 39d5e4b97b1615f4aae984a3d5f4235f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: PurrNet.Runtime::PurrNet.NetworkOwnershipToggle
+  _networkRules: {fileID: 0}
+  _visitiblityRules: {fileID: 0}
+  _isSetup: 0
+  _prefabId: -2147483648
+  _hasPrefabScope: 0
+  _prefabScope: 0
+  _componentIndex: -2147483648
+  _shouldBePooled: 0
+  _parent: {fileID: 0}
+  _invertedPathToNearestParent: 
+  _directChildren: []
+  _components:
+  - target: {fileID: 2514600447504455624}
+    activeAsOwner: 1
+  - target: {fileID: 9067972791712886796}
+    activeAsOwner: 1
+  - target: {fileID: 4297972850498651588}
+    activeAsOwner: 1
+  _gameObjects:
+  - target: {fileID: 4635222171588909783}
+    activeAsOwner: 1
+  _applyInLateUpdate: 0
+  _toActivate: []
+  _toDeactivate: []
+  _toEnable: []
+  _toDisable: []
+--- !u!114 &3510523586792754108
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8893443228925278897}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e7b598b9d8509d64abb9fdaf07fa3f6e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: PurrNet.Runtime::PurrNet.NetworkAnimator
+  _networkRules: {fileID: 0}
+  _visitiblityRules: {fileID: 0}
+  _isSetup: 0
+  _prefabId: -2147483648
+  _hasPrefabScope: 0
+  _prefabScope: 0
+  _componentIndex: -2147483648
+  _shouldBePooled: 0
+  _parent: {fileID: 0}
+  _invertedPathToNearestParent: 
+  _directChildren: []
+  _animator: {fileID: 6797807791699032715}
+  _ownerAuth: 1
+  _autoSyncParameters: 1
+  _dontSyncParameters: []
 --- !u!1001 &902121178248826382
 PrefabInstance:
   m_ObjectHideFlags: 0

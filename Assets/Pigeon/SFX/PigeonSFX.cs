@@ -13,10 +13,10 @@ public class PigeonSFX : MonoBehaviour
     [SerializeField] private List<AudioClip> rollClips;
 
     [Space]
-    [SerializeField] private Transform waterPlane;
     [SerializeField] private AudioClip enterWater;
     [SerializeField] private AudioClip exitWater;
 
+    private Transform waterPlane;
     private IPigeonControls controls;
     private PigeonController pigeonController;
     private ButtHoleManager buttHoleManager;
@@ -35,6 +35,7 @@ public class PigeonSFX : MonoBehaviour
 
     private void Start()
     {
+        waterPlane = FindAnyObjectByType<Water>().transform;
         controls = GetComponent<IPigeonControls>();
         pigeonController = GetComponent<PigeonController>();
         buttHoleManager = GetComponent<ButtHoleManager>();
