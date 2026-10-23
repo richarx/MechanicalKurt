@@ -46,6 +46,10 @@ public class ManagerCinematic : MonoBehaviour
     private enum Phase { Idle, Entering, Waiting, Returning }
     private Phase _phase;
     private Coroutine _routine;
+    private Coroutine _switchRoutine;
+    private bool _overridesBlend;
+    private CinemachineBlendDefinition _previousBlend;
+    private CinemachineBlenderSettings _previousCustomBlends;
     private CinemachineVirtualCameraBase _cinematicCamera;
     private CinemachineVirtualCameraBase _returnCamera;
     private PrioritySettings _previousPriority;
@@ -128,7 +132,78 @@ public class ManagerCinematic : MonoBehaviour
             return;
         }
         _onCancelFinished += onFinished;
+        StopCameraSwitch();
         _cancelRequested = true;
+    }
+
+    /// <summary>Changes shot while keeping controls locked and the original return camera.</summary>
+    public bool SwitchCinematicCamera(CinemachineVirtualCameraBase camera, bool cut = false)
+        => SwitchCamera(camera, cut
+            ? new CinemachineBlendDefinition(CinemachineBlendDefinition.Styles.Cut, 0f)
+            : (CinemachineBlendDefinition?)null);
+
+    /// <summary>Overrides only this transition. Zero cuts; positive durations use EaseInOut.</summary>
+    public bool SwitchCinematicCamera(CinemachineVirtualCameraBase camera, float transitionSeconds)
+    {
+        if (transitionSeconds < 0f || float.IsNaN(transitionSeconds) || float.IsInfinity(transitionSeconds))
+            return false;
+        return SwitchCamera(camera, new CinemachineBlendDefinition(transitionSeconds == 0f
+            ? CinemachineBlendDefinition.Styles.Cut : CinemachineBlendDefinition.Styles.EaseInOut,
+            transitionSeconds));
+    }
+
+    private bool SwitchCamera(CinemachineVirtualCameraBase camera, CinemachineBlendDefinition? blend)
+    {
+        if (!IsReady || !_usesCamera || !HasValidCameraSetup(camera))
+            return false;
+        if (camera == _cinematicCamera)
+            return true;
+
+        int livePriority = _cinematicCamera.Priority.Value;
+        _cinematicCamera.Priority = _previousPriority;
+        _cinematicCamera = camera;
+        _previousPriority = camera.Priority;
+        camera.Priority = Mathf.Max(CinematicPriority,
+            livePriority < int.MaxValue ? livePriority + 1 : int.MaxValue);
+        camera.Prioritize();
+        if (blend.HasValue)
+        {
+            _previousBlend = Brain.DefaultBlend;
+            _previousCustomBlends = Brain.CustomBlends;
+            _overridesBlend = true;
+            Brain.DefaultBlend = blend.Value;
+            Brain.CustomBlends = null;
+        }
+        _phase = Phase.Entering;
+        _switchRoutine = StartCoroutine(FinishCameraSwitch(camera, blend.HasValue ? blend.Value.Time : 0f));
+        return true;
+    }
+
+    private IEnumerator FinishCameraSwitch(CinemachineVirtualCameraBase camera, float transitionSeconds)
+    {
+        yield return WaitForCamera(camera, true, transitionSeconds);
+        RestoreBlend();
+        _switchRoutine = null;
+        if (!_cancelRequested)
+            _phase = Phase.Waiting;
+    }
+
+    private void RestoreBlend()
+    {
+        if (_overridesBlend && Brain != null)
+        {
+            Brain.DefaultBlend = _previousBlend;
+            Brain.CustomBlends = _previousCustomBlends;
+        }
+        _overridesBlend = false;
+        _previousCustomBlends = null;
+    }
+
+    private void StopCameraSwitch()
+    {
+        if (_switchRoutine != null) StopCoroutine(_switchRoutine);
+        _switchRoutine = null;
+        RestoreBlend();
     }
 
     private IEnumerator PlayCinematic()
@@ -163,12 +238,14 @@ public class ManagerCinematic : MonoBehaviour
             && Brain.IsValidChannel(camera) && Brain.IsValidChannel(GameplayCamera);
     }
 
-    private IEnumerator WaitForCamera(CinemachineVirtualCameraBase target, bool entering)
+    private IEnumerator WaitForCamera(CinemachineVirtualCameraBase target, bool entering, float transitionSeconds = 0f)
     {
         if (!_usesCamera) yield break;
         // Let the Brain evaluate the changed priority in LateUpdate first.
         yield return null;
         float elapsed = 0f;
+        float timeout = transitionSeconds > 0f
+            ? Mathf.Max(CameraTimeoutSeconds, transitionSeconds + 1f) : CameraTimeoutSeconds;
         while (!entering || !_cancelRequested)
         {
             if (Brain == null || !Brain.isActiveAndEnabled || target == null || !target.isActiveAndEnabled)
@@ -178,7 +255,7 @@ public class ManagerCinematic : MonoBehaviour
             }
             if (ReferenceEquals(Brain.ActiveVirtualCamera, target) && !Brain.IsBlending) yield break;
             elapsed += Time.unscaledDeltaTime;
-            if (elapsed >= CameraTimeoutSeconds)
+            if (elapsed >= timeout)
             {
                 Debug.LogWarning("Cinematic camera transition timed out. Check priorities, output channels and Brain settings.", this);
                 // Never announce a shot as ready if the camera did not reach it.
@@ -242,6 +319,7 @@ public class ManagerCinematic : MonoBehaviour
 
     private void RestoreScene()
     {
+        StopCameraSwitch();
         RestoreCamera();
         if (Letterbox != null) Letterbox.alpha = _previousBarAlpha;
         if (_blockedControls != null) _blockedControls.SetControlsBlocked(_wereControlsBlocked);

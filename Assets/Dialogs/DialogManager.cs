@@ -36,6 +36,7 @@ public class DialogManager : MonoBehaviour
 
     public bool IsPlaying => isOpen || isClosing;
     public DialogSequence CurrentSequence => currentSequence;
+    public bool IsScriptControlled { get; private set; }
 
     private DialogSequence currentSequence;
     private int lineIndex;
@@ -62,11 +63,19 @@ public class DialogManager : MonoBehaviour
 
     private void Update()
     {
-        if (Keyboard.current != null && Keyboard.current.pKey.wasPressedThisFrame)
+        if (!IsScriptControlled && Keyboard.current != null && Keyboard.current.pKey.wasPressedThisFrame)
             StartDialog(testSequence);
 
         if (!isOpen)
             return;
+
+        // Scripted timing keeps the typewriter, but never accepts input or shows prompts.
+        if (IsScriptControlled)
+        {
+            if (isTyping)
+                UpdateTyping();
+            return;
+        }
 
         if (isTyping)
         {
@@ -89,6 +98,36 @@ public class DialogManager : MonoBehaviour
     }
 
     public void StartDialog(DialogSequence sequence)
+    {
+        if (IsScriptControlled)
+            return;
+        OpenDialog(sequence);
+    }
+
+    // The caller owns timing and closure; player input and prompts stay disabled.
+    public bool StartScriptedDialog(DialogSequence sequence)
+    {
+        if (!isActiveAndEnabled || IsPlaying || sequence == null
+            || sequence.lines == null || sequence.lines.Count == 0)
+            return false;
+
+        IsScriptControlled = true;
+        OpenDialog(sequence);
+        return true;
+    }
+
+    public bool ShowScriptedLine(DialogSequence sequence, int index)
+    {
+        if (!isOpen || !IsScriptControlled || currentSequence != sequence
+            || index < 0 || index >= sequence.lines.Count)
+            return false;
+
+        lineIndex = index;
+        ShowLine(sequence.lines[index].text);
+        return true;
+    }
+
+    private void OpenDialog(DialogSequence sequence)
     {
         SetVisible(true);
         canvasGroup.DOFade(1f, fadeDuration);
@@ -122,6 +161,7 @@ public class DialogManager : MonoBehaviour
     private void EndDialog()
     {
         SetVisible(false);
+        IsScriptControlled = false;
 
         currentSequence = null;
         lineIndex = 0;

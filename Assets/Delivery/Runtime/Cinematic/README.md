@@ -134,6 +134,20 @@ scénarios en simulation (enchaînement, appels répétés et relecture, annulat
 l'entrée, désactivation, interruption du manager, managers occupés, remplacement
 du dialogue). Les animations et les blends réels restent à vérifier dans Unity.
 
+## SpecialDanceCinematic : dialogue chronométré, descente et danses
+
+Le composant `SpecialDanceCinematic` enchaîne les répliques d'un dialogue contrôlées par script,
+une descente d'objet, un cut caméra et les passages successifs des personnages.
+Les branchements, les durées X/Y/Z/W, les transitions Animator et les vérifications
+sont décrits dans [SpecialDanceCinematic.md](SpecialDanceCinematic.md).
+
+`ManagerCinematic.SwitchCinematicCamera(camera, cut)` change de plan sans libérer
+les commandes ni perdre la caméra de retour. Attendre `IsReady` avant de commencer
+l'action du nouveau plan ; `cut: true` force une coupe pour cette transition.
+La surcharge `SwitchCinematicCamera(camera, transitionSeconds)` définit une durée
+pour ce seul changement de plan : 0 = cut, valeur positive = Ease In Out.
+Les réglages de blend du Brain sont restaurés après la transition ou son annulation.
+
 ## Vérification dans Unity
 
 - Tester un appel direct à BeginCinematic avec une caméra : `onReady` arrive après
