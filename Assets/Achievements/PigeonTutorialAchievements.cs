@@ -69,7 +69,7 @@ public class PigeonTutorialAchievements : MonoBehaviour
         {
             // Remember flapping until actual ascent, including a short tap followed by release.
             _takeoffRequested |= _controls.Flap;
-            if (_takeoffRequested && Player.Velocity.y > 0.01f)
+            if (_takeoffRequested && Player.LastVelocity.y > 0.01f)
                 Manager.Unlock(Takeoff);
             return;
         }

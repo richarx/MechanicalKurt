@@ -4,7 +4,10 @@ using UnityEngine.Events;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
 using Unity.Cinemachine;
+using System;
+using Unity.Mathematics;
 
+[DefaultExecutionOrder(50)]
 [RequireComponent(typeof(CharacterController))]
 public class PigeonController : MonoBehaviour
 {
@@ -15,6 +18,7 @@ public class PigeonController : MonoBehaviour
     [SerializeField] float _stunMinHorizontalSpeed = 3;
     [SerializeField] float _stunMinDuration = 0.5f;
     [SerializeField] float _stunImmuneDuration = 0.5f;
+
     [SerializeField] private LayerMask _groundLayer;
 
 
@@ -94,23 +98,26 @@ public class PigeonController : MonoBehaviour
     IPigeonControls _controls;
     PigeonBoostFeedback _boostFeedback;
     PigeonRagdollHandler _pigeonRagdollHandler;
+    PigeonOnMoving _onMoving;
     Vector3 _lastHitNormal;
 
     public float Speed => _lastVelocity.magnitude;
     public float HorizontalSpeed => new Vector3(_lastVelocity.x, 0f, _lastVelocity.z).magnitude;
-    public Vector3 Velocity => _lastVelocity;
+    public Vector3 LastVelocity => _lastVelocity;
+    public Vector3 Velocity => _velocity;
     public bool IsUndeWater => _water != null && transform.position.y < _water.transform.position.y - _waterLevelModifier;
     public bool IsStun => _stunned;
 
     public bool IsMovementFrozen { get; private set; }
 
-    public bool IsGrounded => _controller.isGrounded;
+    public bool IsGrounded => _controller.isGrounded || (_onMoving != null && _onMoving.HasSupport);
 
     // Applied once on the next flight physics step (cleared while grounded).
     public void AddImpulse(Vector3 impulse) => _pendingImpulse += impulse;
 
     public void SetMovementFrozen(bool frozen)
     {
+        _onMoving?.ClearSupport();
         IsMovementFrozen = frozen;
         _velocity = Vector3.zero;
         _lastVelocity = Vector3.zero;
@@ -122,6 +129,7 @@ public class PigeonController : MonoBehaviour
 
     public void Teleport(Vector3 position, Quaternion rotation)
     {
+        _onMoving?.ClearSupport();
         if (_controller == null)
             _controller = GetComponent<CharacterController>();
         bool wasEnabled = _controller.enabled;
@@ -157,6 +165,7 @@ public class PigeonController : MonoBehaviour
         _controls = GetComponent<IPigeonControls>();
         _boostFeedback = GetComponent<PigeonBoostFeedback>();
         _pigeonRagdollHandler = GetComponent<PigeonRagdollHandler>();
+        _onMoving = GetComponent<PigeonOnMoving>();
         _yaw = transform.eulerAngles.y;
     }
 
@@ -167,6 +176,7 @@ public class PigeonController : MonoBehaviour
 
     void OnDisable()
     {
+        _onMoving?.ClearSupport();
         SetCursorCaptured(false);
     }
 
@@ -220,6 +230,7 @@ public class PigeonController : MonoBehaviour
 
     void Stun(Vector3 hitnormal)
     {
+        _onMoving?.ClearSupport();
         OnStunned.Invoke();
         _lastHitNormal = hitnormal;
         _stunned = true;
@@ -279,10 +290,15 @@ public class PigeonController : MonoBehaviour
 
     void OnControllerColliderHit(ControllerColliderHit hit)
     {
+        if (_onMoving != null && _onMoving.isActiveAndEnabled && _onMoving.IsSupportContact(hit))
+            return;
+
         Rigidbody body = hit.collider.attachedRigidbody;
         if (body == null || body.isKinematic)
         {
-            if (!IsUndeWater && _stunImmuneRemaining < 0 && HorizontalSpeed > _stunMinHorizontalSpeed && CalculateImpactForce(hit).magnitude > _stunMinImpact)
+            if (!IsUndeWater && _stunImmuneRemaining < 0 &&
+                HorizontalSpeed > _stunMinHorizontalSpeed
+                && CalculateImpactForce(hit).magnitude > _stunMinImpact)
             {
                 Stun(hit.normal);
             }
@@ -329,7 +345,7 @@ public class PigeonController : MonoBehaviour
         }
         else if (!_lastFramePaused && !_skipVelocityRead)
         {
-            _lastVelocity = _controller.velocity;
+           // _lastVelocity = _controller.velocity;
         }
         _lastFramePaused = false;
         _skipVelocityRead = false;
@@ -344,7 +360,7 @@ public class PigeonController : MonoBehaviour
 
         _velocity = Vector3.zero;
 
-        if (_controller.isGrounded && _lastVelocity.y <= 0.001f)
+        if (IsGrounded && (_lastVelocity.y <= 0.001f || (_onMoving != null && _onMoving.HasSupport)))
         {
             GroundMovement();
             ResetVisualRotation(dt);
@@ -355,13 +371,25 @@ public class PigeonController : MonoBehaviour
             UpdateVisualRotation(dt);
         }
 
-        _velocity = PigeonFan.ApplyUpdrafts(transform.position, _velocity, dt, _controller.isGrounded);
+        
+
+        _velocity = PigeonFan.ApplyUpdrafts(transform.position, _velocity, dt, IsGrounded);
         if (IsUndeWater)
         {
             float deep = _water.transform.position.y - _waterLevelModifier - transform.position.y;
             _velocity += Vector3.up * _buoyancyForce * deep * deep * dt;
         }
-        _controller.Move(_velocity * dt);
+        if (_onMoving != null && _onMoving.isActiveAndEnabled)
+            _onMoving.Move(_velocity * dt);
+        else
+            _controller.Move(_velocity * dt);
+
+        _lastVelocity = _velocity;
+        if (IsGrounded)
+        {
+            _lastVelocity.y += 1;
+        }
+
     }
 
     void GroundMovement()

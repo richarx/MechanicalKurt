@@ -41,7 +41,7 @@ public class BoostRing : MonoBehaviour
 
         _lastTriggerTime = Time.time;
 
-        Vector3 velocity = pigeon.Velocity;
+        Vector3 velocity = pigeon.LastVelocity;
         float speed = velocity.magnitude;
         Vector3 direction = speed > 0.1f ? velocity / speed : pigeon.transform.forward;
 
