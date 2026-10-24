@@ -6,6 +6,7 @@ public class PigeonOnMoving : MonoBehaviour
     private CharacterController _controller;
     private PigeonController _pigeon;
     private Collider _supportCollider;
+    private MovingSupport _support;
     private Vector3 _localAnchor;
     private Vector3 _worldAnchor;
     private Vector3 _lastSupportVelocity;
@@ -14,6 +15,7 @@ public class PigeonOnMoving : MonoBehaviour
     private bool _hasSupportAnchor;
 
     public bool HasSupport => isActiveAndEnabled && _controller.enabled &&
+                              _support != null && _support.isActiveAndEnabled &&
                               _supportCollider != null && _supportCollider.enabled &&
                               _supportCollider.gameObject.activeInHierarchy;
 
@@ -41,7 +43,7 @@ public class PigeonOnMoving : MonoBehaviour
             return;
 
         bool hadSupport = _hasSupportAnchor;
-        Collider oldSupport = _supportCollider;
+        MovingSupport oldSupport = _support;
         Vector3 departureVelocity = _lastSupportVelocity;
 
         Physics.SyncTransforms();
@@ -71,7 +73,7 @@ public class PigeonOnMoving : MonoBehaviour
             _worldAnchor = transform.position;
             _localAnchor = _supportCollider.transform.InverseTransformPoint(_worldAnchor);
             _hasSupportAnchor = true;
-            _lastSupportVelocity = oldSupport == _supportCollider ? departureVelocity : Vector3.zero;
+            _lastSupportVelocity = oldSupport == _support ? departureVelocity : Vector3.zero;
         }
         else if (hadSupport && _controller.enabled)
         {
@@ -79,24 +81,36 @@ public class PigeonOnMoving : MonoBehaviour
         }
     }
 
-    public bool IsSupportContact(ControllerColliderHit hit)
+    private bool TryGetSupport(ControllerColliderHit hit, out MovingSupport support)
     {
+        support = null;
         float minimumNormalY = Mathf.Cos(_controller.slopeLimit * Mathf.Deg2Rad);
-        return hit.normal.y > 0.01f && hit.normal.y >= minimumNormalY &&
-               hit.point.y <= transform.TransformPoint(_controller.center).y;
+        if (hit.normal.y <= 0.01f || hit.normal.y < minimumNormalY ||
+            hit.point.y > transform.TransformPoint(_controller.center).y)
+            return false;
+
+        support = hit.collider.GetComponentInParent<MovingSupport>();
+        return support != null && support.isActiveAndEnabled;
     }
 
-    private void OnControllerColliderHit(ControllerColliderHit hit)
+    public bool TryRegisterSupportContact(ControllerColliderHit hit)
     {
-        if (!_collectSupportContacts || !IsSupportContact(hit) || hit.normal.y < _supportNormalY)
-            return;
+        if (!TryGetSupport(hit, out MovingSupport support))
+            return false;
 
-        _supportCollider = hit.collider;
-        _supportNormalY = hit.normal.y;
+        if (_collectSupportContacts && hit.normal.y >= _supportNormalY)
+        {
+            _support = support;
+            _supportCollider = hit.collider;
+            _supportNormalY = hit.normal.y;
+        }
+
+        return true;
     }
 
     public void ClearSupport()
     {
+        _support = null;
         _supportCollider = null;
         _supportNormalY = 0f;
         _collectSupportContacts = false;

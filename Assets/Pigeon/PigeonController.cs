@@ -290,20 +290,23 @@ public class PigeonController : MonoBehaviour
 
     void OnControllerColliderHit(ControllerColliderHit hit)
     {
-        if (_onMoving != null && _onMoving.isActiveAndEnabled && _onMoving.IsSupportContact(hit))
+        if (_stunned)
+            return;
+
+        if (!IsUndeWater && _stunImmuneRemaining < 0 &&
+            HorizontalSpeed > _stunMinHorizontalSpeed &&
+            CalculateImpactForce(hit).magnitude > _stunMinImpact)
+        {
+            Stun(hit.normal);
+            return;
+        }
+
+        if (_onMoving != null && _onMoving.isActiveAndEnabled && _onMoving.TryRegisterSupportContact(hit))
             return;
 
         Rigidbody body = hit.collider.attachedRigidbody;
         if (body == null || body.isKinematic)
-        {
-            if (!IsUndeWater && _stunImmuneRemaining < 0 &&
-                HorizontalSpeed > _stunMinHorizontalSpeed
-                && CalculateImpactForce(hit).magnitude > _stunMinImpact)
-            {
-                Stun(hit.normal);
-            }
             return;
-        }
 
         Vector3 pushDir = new Vector3(hit.moveDirection.x, 0, hit.moveDirection.z).normalized;
 
@@ -384,10 +387,13 @@ public class PigeonController : MonoBehaviour
         else
             _controller.Move(_velocity * dt);
 
+        if (_stunned || !_controller.enabled)
+            return;
+
         _lastVelocity = _velocity;
-        if (IsGrounded)
+        if (IsGrounded && _lastVelocity.y < 0f)
         {
-            _lastVelocity.y += 1;
+            _lastVelocity.y = 0f;
         }
 
     }

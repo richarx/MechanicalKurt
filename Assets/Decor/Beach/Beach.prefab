@@ -192,12 +192,27 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 243072f519c26384aabded558ec7dd06, type: 3}
       insertIndex: -1
       addedObject: {fileID: 4121232479880484059}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 243072f519c26384aabded558ec7dd06, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 8258437801459878320}
   m_SourcePrefab: {fileID: 100100000, guid: 243072f519c26384aabded558ec7dd06, type: 3}
 --- !u!1 &410225066709628444 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: 243072f519c26384aabded558ec7dd06, type: 3}
   m_PrefabInstance: {fileID: 680043920469330765}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &8258437801459878320
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 410225066709628444}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3a89fa1eb385466a9bc11118d60ca816, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::MovingSupport
 --- !u!135 &4349978055732971042
 SphereCollider:
   m_ObjectHideFlags: 0
