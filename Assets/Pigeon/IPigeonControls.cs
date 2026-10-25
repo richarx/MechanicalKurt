@@ -8,6 +8,7 @@ public interface IPigeonControls
     bool Dive { get; }
     bool Brake { get; }
     bool Flex { get; }
+    bool PrecisionCamera { get; }
     bool ConsumeInteract { get; }
     bool ConsumeCooing { get; }
     bool ConsumeShit { get; }

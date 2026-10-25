@@ -130,6 +130,8 @@ public class PlayerControls : MonoBehaviour, IPigeonControls
 
     public bool Flex => (CanReadControls && (_controls.Player.LeftFlex.IsPressed() || _controls.Player.RightFlex.IsPressed())) || _forceFlex;
 
+    public bool PrecisionCamera => CanReadControls && _controls.Player.PrecisionCamera.IsPressed();
+
     public bool ConsumeInteract
     {
         get
