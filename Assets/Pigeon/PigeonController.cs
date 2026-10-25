@@ -348,7 +348,7 @@ public class PigeonController : MonoBehaviour
         }
         else if (!_lastFramePaused && !_skipVelocityRead)
         {
-           // _lastVelocity = _controller.velocity;
+            // _lastVelocity = _controller.velocity;
         }
         _lastFramePaused = false;
         _skipVelocityRead = false;
@@ -374,7 +374,7 @@ public class PigeonController : MonoBehaviour
             UpdateVisualRotation(dt);
         }
 
-        
+
 
         _velocity = PigeonFan.ApplyUpdrafts(transform.position, _velocity, dt, IsGrounded);
         if (IsUndeWater)
@@ -382,6 +382,17 @@ public class PigeonController : MonoBehaviour
             float deep = _water.transform.position.y - _waterLevelModifier - transform.position.y;
             _velocity += Vector3.up * _buoyancyForce * deep * deep * dt;
         }
+
+        if (_water != null && _velocity.y < 0f)
+        {
+            float minimumY = _water.transform.position.y - _waterLevelModifier - 2f;
+
+            float allowedDrop = Mathf.Max(0f, transform.position.y - minimumY);
+
+            _velocity.y = Mathf.Max(_velocity.y, -allowedDrop / dt);
+        }
+
+
         if (_onMoving != null && _onMoving.isActiveAndEnabled)
             _onMoving.Move(_velocity * dt);
         else
@@ -492,7 +503,6 @@ public class PigeonController : MonoBehaviour
     {
         float targetSpeed;
         float dragAtMaxSpeed;
-
         _velocity = _lastVelocity + Physics.gravity * dt + _pendingImpulse;
         _pendingImpulse = Vector3.zero;
 
@@ -569,6 +579,7 @@ public class PigeonController : MonoBehaviour
             {
                 steeringFactor = 0f;
             }
+
 
             _velocity = Vector3.Slerp(_velocity.normalized, transform.forward, steeringFactor * dt) * speed;
         }
