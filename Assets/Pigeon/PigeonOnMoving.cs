@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 [RequireComponent(typeof(CharacterController))]
@@ -6,6 +7,7 @@ public class PigeonOnMoving : MonoBehaviour
     private CharacterController _controller;
     private PigeonController _pigeon;
     private Collider _supportCollider;
+    private MovingSupport _oldSupport = null;
     private MovingSupport _support;
     private Vector3 _localAnchor;
     private Vector3 _worldAnchor;
@@ -18,6 +20,8 @@ public class PigeonOnMoving : MonoBehaviour
                               _support != null && _support.isActiveAndEnabled &&
                               _supportCollider != null && _supportCollider.enabled &&
                               _supportCollider.gameObject.activeInHierarchy;
+
+    public event Action<MovingSupport> PigeonChangedSupport;
 
     private void Awake()
     {
@@ -43,7 +47,7 @@ public class PigeonOnMoving : MonoBehaviour
             return;
 
         bool hadSupport = _hasSupportAnchor;
-        MovingSupport oldSupport = _support;
+        _oldSupport = _support;
         Vector3 departureVelocity = _lastSupportVelocity;
 
         Physics.SyncTransforms();
@@ -73,11 +77,13 @@ public class PigeonOnMoving : MonoBehaviour
             _worldAnchor = transform.position;
             _localAnchor = _supportCollider.transform.InverseTransformPoint(_worldAnchor);
             _hasSupportAnchor = true;
-            _lastSupportVelocity = oldSupport == _support ? departureVelocity : Vector3.zero;
+            _lastSupportVelocity = _oldSupport == _support ? departureVelocity : Vector3.zero;
         }
         else if (hadSupport && _controller.enabled)
         {
             _pigeon.AddImpulse(departureVelocity);
+            _oldSupport = null;
+            PigeonChangedSupport?.Invoke(null);
         }
     }
 
@@ -100,12 +106,21 @@ public class PigeonOnMoving : MonoBehaviour
 
         if (_collectSupportContacts && hit.normal.y >= _supportNormalY)
         {
+            if (support != _oldSupport)
+            {
+                PigeonChangedSupport?.Invoke(support);
+            }
             _support = support;
             _supportCollider = hit.collider;
             _supportNormalY = hit.normal.y;
         }
 
         return true;
+    }
+
+    public bool IsSupport(Collider collider)
+    {
+        return (collider == _support);
     }
 
     public void ClearSupport()

@@ -97303,6 +97303,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1737bba54d0415b4cbee35e0c4466df4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PigeonSFX
+--- !u!114 &1769670856 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 5357851348377741376, guid: 013420fdddab85a48be5b875e08e2729, type: 3}
+  m_PrefabInstance: {fileID: 1769670839}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1e448efc9d02a664c9b17914eadc1537, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PigeonOnMoving
 --- !u!1 &1770822444
 GameObject:
   m_ObjectHideFlags: 0
@@ -104088,12 +104099,36 @@ PrefabInstance:
       value: 7
       objectReference: {fileID: 0}
     - target: {fileID: 471344247363952126, guid: d5421b66b51e59e4bb8e187029cdae3b, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 0.9
+      objectReference: {fileID: 0}
+    - target: {fileID: 471344247363952126, guid: d5421b66b51e59e4bb8e187029cdae3b, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 0.9
+      objectReference: {fileID: 0}
+    - target: {fileID: 471344247363952126, guid: d5421b66b51e59e4bb8e187029cdae3b, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 0.9
+      objectReference: {fileID: 0}
+    - target: {fileID: 471344247363952126, guid: d5421b66b51e59e4bb8e187029cdae3b, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0.22
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 1052906034661937362, guid: d5421b66b51e59e4bb8e187029cdae3b, type: 3}
       propertyPath: m_LocalPosition.y
       value: 0.18
+      objectReference: {fileID: 0}
+    - target: {fileID: 1079378654129056934, guid: d5421b66b51e59e4bb8e187029cdae3b, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1079378654129056934, guid: d5421b66b51e59e4bb8e187029cdae3b, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1079378654129056934, guid: d5421b66b51e59e4bb8e187029cdae3b, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 1079378654129056934, guid: d5421b66b51e59e4bb8e187029cdae3b, type: 3}
       propertyPath: m_LocalPosition.x
@@ -104101,7 +104136,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1079378654129056934, guid: d5421b66b51e59e4bb8e187029cdae3b, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 1.26
+      value: 1.206
       objectReference: {fileID: 0}
     - target: {fileID: 1079378654129056934, guid: d5421b66b51e59e4bb8e187029cdae3b, type: 3}
       propertyPath: m_LocalPosition.z
@@ -104148,8 +104183,12 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4349978055732971042, guid: d5421b66b51e59e4bb8e187029cdae3b, type: 3}
+      propertyPath: m_Radius
+      value: 0.801
+      objectReference: {fileID: 0}
+    - target: {fileID: 4349978055732971042, guid: d5421b66b51e59e4bb8e187029cdae3b, type: 3}
       propertyPath: m_Center.y
-      value: 0.23
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4648381936287413798, guid: d5421b66b51e59e4bb8e187029cdae3b, type: 3}
       propertyPath: m_LocalRotation.w
@@ -104246,13 +104285,40 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 410225066709628444, guid: d5421b66b51e59e4bb8e187029cdae3b, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1908415847}
   m_SourcePrefab: {fileID: 100100000, guid: d5421b66b51e59e4bb8e187029cdae3b, type: 3}
 --- !u!4 &1908415845 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 2864886902964577100, guid: d5421b66b51e59e4bb8e187029cdae3b, type: 3}
   m_PrefabInstance: {fileID: 1908415844}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &1908415846 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 410225066709628444, guid: d5421b66b51e59e4bb8e187029cdae3b, type: 3}
+  m_PrefabInstance: {fileID: 1908415844}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1908415847
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1908415846}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6aedfdc1a4096304cbf7789753317693, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BallRolling
+  _pigeonController: {fileID: 1769670844}
+  _pigeonOnMoving: {fileID: 1769670856}
+  _rotationMax: 10
+  _powerTorque: 150
+  _acceleration: 100
+  rotationAxis: {x: 0, y: 0, z: 0}
+  angularVelocity: {x: 0, y: 0, z: 0}
 --- !u!1 &1909673040
 GameObject:
   m_ObjectHideFlags: 0
