@@ -384,6 +384,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 8f1b298c3bc369644aa9d52eef541350, type: 3}
       insertIndex: -1
       addedObject: {fileID: 7844618289368154720}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 8f1b298c3bc369644aa9d52eef541350, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 8029093190485281017}
   m_SourcePrefab: {fileID: 100100000, guid: 8f1b298c3bc369644aa9d52eef541350, type: 3}
 --- !u!1 &2621318110551415838 stripped
 GameObject:
@@ -495,6 +498,19 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 7.0920076, y: 2.5901527, z: 2.3667443}
   m_Center: {x: 0.043867588, y: 1.2647064, z: 0.20827079}
+--- !u!114 &8029093190485281017
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2621318110551415838}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 201323ffb66354a419fa383e2accbd1a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CheckForGoal
+  achievement: {fileID: 11400000, guid: b1b05b81ef2c9784ca7854ad10e4fbd4, type: 2}
 --- !u!4 &3398839216632186532 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 8f1b298c3bc369644aa9d52eef541350, type: 3}
