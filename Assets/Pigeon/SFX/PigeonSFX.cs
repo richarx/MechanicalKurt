@@ -86,8 +86,7 @@ public class PigeonSFX : MonoBehaviour
         {
             if (currentAudioSource != null)
             {
-                if (flySequence != null && flySequence.IsPlaying())
-                    flySequence.Kill();
+                flySequence?.Kill();
 
                 flySequence = DOTween.Sequence();
 

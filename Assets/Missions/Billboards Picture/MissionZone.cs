@@ -1,8 +1,10 @@
-using System.Collections;
+using DG.Tweening;
+using DG.Tweening.Core.Easing;
 using Sirenix.OdinInspector;
 using Unity.Cinemachine;
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.UI;
 
 public class MissionZone : MonoBehaviour
 {
@@ -11,7 +13,7 @@ public class MissionZone : MonoBehaviour
 
     [field: SerializeField, Required]
     [field: Tooltip("Texte d'instruction partagé sur le canvas (« Appuyer sur Y / F »).")]
-    public GameObject Prompt { get; private set; }
+    public CanvasGroup Prompt { get; private set; }
 
     [field: SerializeField, MinValue(0.01f), SuffixLabel("unités", true)]
     public float Radius { get; private set; } = 3f;
@@ -32,14 +34,22 @@ public class MissionZone : MonoBehaviour
     private float _nextPigeonSearch;
     private bool _isInside;
 
-    [SerializeField] private AudioClip pictureBillboardSFX;
+    private Sequence promptAnimationSequence;
+    private bool isPromptDisplayed;
+    private bool isValidated;
+
+    [SerializeField] private Image cameraFlashImage;
+    [SerializeField] private AudioClip cameraAnticipationSFX;
+    [SerializeField] private AudioClip cameraSFX;
     [SerializeField] private AudioClip successBillboardSFX;
     [SerializeField] private CinemachineCamera camera;
     [SerializeField] private float cameraSwapDuration = 3f;
 
-
     private void LateUpdate()
     {
+        if (isValidated)
+            return;
+
         if (_pigeon == null && Time.time >= _nextPigeonSearch)
         {
             _pigeon = FindAnyObjectByType<PigeonController>();
@@ -58,7 +68,7 @@ public class MissionZone : MonoBehaviour
         {
             _isInside = inside;
             // Le prompt est partagé : ne le toucher qu'à l'entrée / la sortie de cette zone.
-            Prompt.SetActive(inside);
+            SetPromptState(inside);
             // Jeter un appui fait hors zone pour ne pas valider dès l'entrée.
             if (inside)
                 _ = _controls.ConsumeInteract;
@@ -66,21 +76,42 @@ public class MissionZone : MonoBehaviour
         }
 
         if (_isInside && _controls.ConsumeInteract)
-            StartCoroutine(Validate());
+            Validate();
     }
 
-    private IEnumerator Validate()
+    private void Validate()
     {
-        HidePrompt();
-        Mission.ReportZoneCompleted(this);
-        OnStartValidation.Invoke();
+        Sequence sequence = DOTween.Sequence()
+            .AppendCallback(() =>
+            {
+                isValidated = true;
+                PunchAndHidePrompt();
+                Mission.ReportZoneCompleted(this);
+                _controls.SetControlsBlocked(true);
+                SFXManager.Instance.PlaySFX(cameraAnticipationSFX);
+                OnStartValidation.Invoke();
+            })
+            .AppendInterval(1.5f)
+            .AppendCallback(() => ResetCameraFlash())
+            .AppendCallback(() => SFXManager.Instance.PlaySFX(cameraSFX))
+            .Join(cameraFlashImage.DOFade(0.0f, 0.2f))
+            .AppendInterval(Mathf.Min(0.0f, cameraSwapDuration - 1.5f))
+            .AppendCallback(() =>
+            {
+                cameraFlashImage.gameObject.SetActive(false);
+                _controls.SetControlsBlocked(false);
 
-        _controls.SetControlsBlocked(true);
-        yield return new WaitForSeconds(cameraSwapDuration);
-        _controls.SetControlsBlocked(false);
-        
-        OnValidated.Invoke();
-        gameObject.SetActive(false);
+                OnValidated.Invoke();
+                gameObject.SetActive(false);
+            });
+    }
+
+    private void ResetCameraFlash()
+    {
+        cameraFlashImage.gameObject.SetActive(true);
+        Color flashColor = cameraFlashImage.color;
+        flashColor.a = 0.25f;
+        cameraFlashImage.color = flashColor;
     }
 
     private void OnDisable()
@@ -89,10 +120,62 @@ public class MissionZone : MonoBehaviour
         _nextPigeonSearch = 0f;
     }
 
+    private void SetPromptState(bool state)
+    {
+        if (Prompt == null)
+            return;
+
+        if (state)
+            DisplayPrompt();
+        else
+            HidePrompt();
+    }
+
+    private void DisplayPrompt()
+    {
+        if (isPromptDisplayed)
+            return;
+
+        isPromptDisplayed = true;
+
+        promptAnimationSequence?.Kill();
+
+        promptAnimationSequence = DOTween.Sequence()
+            .AppendCallback(() => Prompt.gameObject.SetActive(true))
+            .Append(Prompt.DOFade(1.0f, 0.3f));
+    }
+
     private void HidePrompt()
     {
-        if (_isInside && Prompt != null)
-            Prompt.SetActive(false);
+        if (!isPromptDisplayed)
+            return;
+
+        isPromptDisplayed = false;
+
+        promptAnimationSequence?.Kill();
+
+        promptAnimationSequence = DOTween.Sequence()
+            .Append(Prompt.DOFade(0.0f, 0.3f))
+            .AppendCallback(() => Prompt.gameObject.SetActive(false));
+    }
+
+    private void PunchAndHidePrompt()
+    {
+        if (Prompt == null)
+            return;
+
+        if (!isPromptDisplayed)
+            return;
+
+        isPromptDisplayed = false;
+
+        promptAnimationSequence?.Kill();
+
+        promptAnimationSequence = DOTween.Sequence()
+            .Append(Prompt.GetComponent<RectTransform>().DOPunchScale(Vector3.one * 0.5f, 0.5f))
+            .Append(Prompt.DOFade(0.0f, 0.3f))
+            .AppendCallback(() => Prompt.gameObject.SetActive(false));
+
         _isInside = false;
     }
 
@@ -106,8 +189,7 @@ public class MissionZone : MonoBehaviour
 
     public void PlayValidatedBillboardSFX()
     {
-        SFXManager.Instance.PlaySFX(pictureBillboardSFX);
         float newPitch = 0.95f + Mission.CompletedCount * -0.05f;
-        SFXManager.Instance.PlaySFX(successBillboardSFX, delay: 0.2f, pitch: newPitch);
+        SFXManager.Instance.PlaySFX(successBillboardSFX, pitch: newPitch);
     }
 }

@@ -2705,6 +2705,7 @@ GameObject:
   - component: {fileID: 60255024}
   - component: {fileID: 60255023}
   - component: {fileID: 60255025}
+  - component: {fileID: 60255026}
   m_Layer: 0
   m_Name: InteractPopup
   m_TagString: Untagged
@@ -2785,6 +2786,18 @@ MonoBehaviour:
   _keyboardText: Press <color=#F2FA00>F</color> to interact
   _joypadText: Press <sprite name="xbox_y" tint=0> to interact
   _textBox: {fileID: 1339596019}
+--- !u!225 &60255026
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 60255020}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 0
+  m_BlocksRaycasts: 0
+  m_IgnoreParentGroups: 0
 --- !u!1001 &60623926
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -6811,6 +6824,10 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6310373061646992575, guid: ec45962f05ef93242b6384064c979844, type: 3}
+      propertyPath: cameraFlashImage
+      value: 
+      objectReference: {fileID: 1874267015}
+    - target: {fileID: 6310373061646992575, guid: ec45962f05ef93242b6384064c979844, type: 3}
       propertyPath: pictureBillboardSFX
       value: 
       objectReference: {fileID: 8300000, guid: 1af00d435cd423740ae9d018754e9817, type: 3}
@@ -6821,7 +6838,7 @@ PrefabInstance:
     - target: {fileID: 6310373061646992575, guid: ec45962f05ef93242b6384064c979844, type: 3}
       propertyPath: <Prompt>k__BackingField
       value: 
-      objectReference: {fileID: 60255020}
+      objectReference: {fileID: 60255026}
     - target: {fileID: 6310373061646992575, guid: ec45962f05ef93242b6384064c979844, type: 3}
       propertyPath: <Mission>k__BackingField
       value: 
@@ -15495,6 +15512,10 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6310373061646992575, guid: ec45962f05ef93242b6384064c979844, type: 3}
+      propertyPath: cameraFlashImage
+      value: 
+      objectReference: {fileID: 1874267015}
+    - target: {fileID: 6310373061646992575, guid: ec45962f05ef93242b6384064c979844, type: 3}
       propertyPath: pictureBillboardSFX
       value: 
       objectReference: {fileID: 8300000, guid: 1af00d435cd423740ae9d018754e9817, type: 3}
@@ -15505,7 +15526,7 @@ PrefabInstance:
     - target: {fileID: 6310373061646992575, guid: ec45962f05ef93242b6384064c979844, type: 3}
       propertyPath: <Prompt>k__BackingField
       value: 
-      objectReference: {fileID: 60255020}
+      objectReference: {fileID: 60255026}
     - target: {fileID: 6310373061646992575, guid: ec45962f05ef93242b6384064c979844, type: 3}
       propertyPath: <Mission>k__BackingField
       value: 
@@ -61575,6 +61596,7 @@ RectTransform:
   - {fileID: 1594338367}
   - {fileID: 720397071}
   - {fileID: 86682239}
+  - {fileID: 1874267014}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -72613,6 +72635,10 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 872915498}
     - target: {fileID: 6310373061646992575, guid: ec45962f05ef93242b6384064c979844, type: 3}
+      propertyPath: cameraFlashImage
+      value: 
+      objectReference: {fileID: 1874267015}
+    - target: {fileID: 6310373061646992575, guid: ec45962f05ef93242b6384064c979844, type: 3}
       propertyPath: pictureBillboardSFX
       value: 
       objectReference: {fileID: 8300000, guid: 1af00d435cd423740ae9d018754e9817, type: 3}
@@ -72623,7 +72649,7 @@ PrefabInstance:
     - target: {fileID: 6310373061646992575, guid: ec45962f05ef93242b6384064c979844, type: 3}
       propertyPath: <Prompt>k__BackingField
       value: 
-      objectReference: {fileID: 60255020}
+      objectReference: {fileID: 60255026}
     - target: {fileID: 6310373061646992575, guid: ec45962f05ef93242b6384064c979844, type: 3}
       propertyPath: <Mission>k__BackingField
       value: 
@@ -86686,6 +86712,10 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6310373061646992575, guid: ec45962f05ef93242b6384064c979844, type: 3}
+      propertyPath: cameraFlashImage
+      value: 
+      objectReference: {fileID: 1874267015}
+    - target: {fileID: 6310373061646992575, guid: ec45962f05ef93242b6384064c979844, type: 3}
       propertyPath: pictureBillboardSFX
       value: 
       objectReference: {fileID: 8300000, guid: 1af00d435cd423740ae9d018754e9817, type: 3}
@@ -86696,7 +86726,7 @@ PrefabInstance:
     - target: {fileID: 6310373061646992575, guid: ec45962f05ef93242b6384064c979844, type: 3}
       propertyPath: <Prompt>k__BackingField
       value: 
-      objectReference: {fileID: 60255020}
+      objectReference: {fileID: 60255026}
     - target: {fileID: 6310373061646992575, guid: ec45962f05ef93242b6384064c979844, type: 3}
       propertyPath: <Mission>k__BackingField
       value: 
@@ -89362,6 +89392,10 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6310373061646992575, guid: ec45962f05ef93242b6384064c979844, type: 3}
+      propertyPath: cameraFlashImage
+      value: 
+      objectReference: {fileID: 1874267015}
+    - target: {fileID: 6310373061646992575, guid: ec45962f05ef93242b6384064c979844, type: 3}
       propertyPath: pictureBillboardSFX
       value: 
       objectReference: {fileID: 8300000, guid: 1af00d435cd423740ae9d018754e9817, type: 3}
@@ -89372,7 +89406,7 @@ PrefabInstance:
     - target: {fileID: 6310373061646992575, guid: ec45962f05ef93242b6384064c979844, type: 3}
       propertyPath: <Prompt>k__BackingField
       value: 
-      objectReference: {fileID: 60255020}
+      objectReference: {fileID: 60255026}
     - target: {fileID: 6310373061646992575, guid: ec45962f05ef93242b6384064c979844, type: 3}
       propertyPath: <Mission>k__BackingField
       value: 
@@ -104565,6 +104599,81 @@ Transform:
   - {fileID: 1506880503}
   m_Father: {fileID: 1314401314}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1874267013
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1874267014}
+  - component: {fileID: 1874267016}
+  - component: {fileID: 1874267015}
+  m_Layer: 5
+  m_Name: CameraFlash
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 0
+--- !u!224 &1874267014
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1874267013}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1094115699}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 1, y: 1}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &1874267015
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1874267013}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
+  m_Material: {fileID: 0}
+  m_Color: {r: 1, g: 1, b: 0.9009434, a: 0.2509804}
+  m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  m_Sprite: {fileID: 0}
+  m_Type: 0
+  m_PreserveAspect: 0
+  m_FillCenter: 1
+  m_FillMethod: 4
+  m_FillAmount: 1
+  m_FillClockwise: 1
+  m_FillOrigin: 0
+  m_UseSpriteMesh: 0
+  m_PixelsPerUnitMultiplier: 1
+--- !u!222 &1874267016
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1874267013}
+  m_CullTransparentMesh: 1
 --- !u!1 &1875118457
 GameObject:
   m_ObjectHideFlags: 0
