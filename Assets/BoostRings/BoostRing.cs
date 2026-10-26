@@ -22,6 +22,9 @@ public class BoostRing : MonoBehaviour
     [SerializeField] List<AudioClip> _secondarySfx;
     [SerializeField] float _secondarySfxVolume = 0.3f;
 
+    private static float lastRingUsedTimestamp;
+    private static int ringComboCount;
+
     float _lastTriggerTime = float.NegativeInfinity;
     Tween _punchTween;
 
@@ -56,6 +59,13 @@ public class BoostRing : MonoBehaviour
         if (feedback != null)
             feedback.Play();
 
+        if (Time.time - lastRingUsedTimestamp <= 5.0f)
+            ringComboCount += 1;
+        else
+            ringComboCount = 1;
+
+        lastRingUsedTimestamp = Time.time;
+
         PlayRingFeedback();
     }
 
@@ -69,7 +79,8 @@ public class BoostRing : MonoBehaviour
 
         if (SFXManager.Instance != null)
         {
-            SFXManager.Instance.PlayRandomSFX(_mainSfx, _mainSfxVolume);
+            float pitch = Mathf.Min(1.0f + ringComboCount * 0.1f, 3.0f);
+            SFXManager.Instance.PlayRandomSFX(_mainSfx, _mainSfxVolume, pitch: pitch);
             SFXManager.Instance.PlayRandomSFX(_secondarySfx, _secondarySfxVolume);
         }
     }
