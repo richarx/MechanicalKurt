@@ -8,6 +8,7 @@ public class PigeonEquipment : MonoBehaviour
     [SerializeField] private GameObject hat;
     [SerializeField] private GameObject shoeLeft;
     [SerializeField] private GameObject shoeRight;
+    [SerializeField] private GameObject sunglasses;
 
     [Space]
     [SerializeField] private CinemachineCamera equipmentCamera;
@@ -20,7 +21,8 @@ public class PigeonEquipment : MonoBehaviour
     {
         Backpack,
         Hat,
-        Shoes
+        Shoes,
+        Sunglasses
     }
 
     PlayerControls playerControls;
@@ -46,6 +48,12 @@ public class PigeonEquipment : MonoBehaviour
     public void ToggleShoes()
     {
         UnlockItem(Equipment.Shoes);
+    }
+
+    [ContextMenu("Toggle Sunglasses")]
+    public void ToggleSunglasses()
+    {
+        UnlockItem(Equipment.Sunglasses);
     }
 
     public void UnlockItem(Equipment equipment)
@@ -95,6 +103,8 @@ public class PigeonEquipment : MonoBehaviour
                 return (hat, null);
             case Equipment.Shoes:
                 return (shoeLeft, shoeRight);
+            case Equipment.Sunglasses:
+                return (sunglasses, null);
             default:
                 return (null, null);
         }
@@ -113,6 +123,9 @@ public class PigeonEquipment : MonoBehaviour
             case Equipment.Shoes:
                 shoeLeft.SetActive(!shoeLeft.activeSelf);
                 shoeRight.SetActive(!shoeRight.activeSelf);
+                break;
+            case Equipment.Sunglasses:
+                sunglasses.SetActive(!sunglasses.activeSelf);
                 break;
         }
     }

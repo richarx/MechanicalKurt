@@ -69,8 +69,7 @@ public class PigeonSFX : MonoBehaviour
                 lowPassFlySource = SFXManager.Instance.PlaySFX(lowPassFlyLoopClip, 0.0f, loop: true);
             }
 
-            if (flySequence != null && flySequence.IsPlaying())
-                flySequence.Kill();
+            flySequence?.Kill();
 
             if (currentAudioSource.volume < 0.5f)
             {
