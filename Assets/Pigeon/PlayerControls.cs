@@ -9,6 +9,8 @@ public class PlayerControls : MonoBehaviour, IPigeonControls
 
     bool _interact;
 
+    bool _predictedInteract;
+
     bool _cooing;
 
     bool _shit;
@@ -52,7 +54,9 @@ public class PlayerControls : MonoBehaviour, IPigeonControls
         if (!CanReadControls)
             return;
 
-        _interact |= _controls.Player.Interact.WasPressedThisFrame();
+        bool interactPressed = _controls.Player.Interact.WasPressedThisFrame();
+        _interact |= interactPressed;
+        _predictedInteract |= interactPressed;
         _cooing |= _controls.Player.Cooing.WasPressedThisFrame();
         _shit |= _controls.Player.Shit.WasPressedThisFrame();
         _leftFlex |= _controls.Player.LeftFlex.WasPressedThisFrame();
@@ -101,7 +105,7 @@ public class PlayerControls : MonoBehaviour, IPigeonControls
 
     private void ClearPendingActions()
     {
-        _interact = _cooing = _shit = _leftFlex = _rightFlex = false;
+        _interact = _predictedInteract = _cooing = _shit = _leftFlex = _rightFlex = false;
     }
 
     Vector2 IPigeonControls.RelativeMovement => CanReadControls ? _controls.Player.Move.ReadValue<Vector2>() : Vector2.zero;
@@ -135,6 +139,16 @@ public class PlayerControls : MonoBehaviour, IPigeonControls
         {
             bool value = CanReadControls && _interact;
             _interact = false;
+            return value;
+        }
+    }
+
+    public bool ConsumePredictedInteract
+    {
+        get
+        {
+            bool value = CanReadControls && _predictedInteract;
+            _predictedInteract = false;
             return value;
         }
     }

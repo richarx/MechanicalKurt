@@ -25,7 +25,7 @@ Transform:
   m_GameObject: {fileID: 1626611015860793681}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: 0.0952, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -65,7 +65,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4635222171588909783}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.3993095, y: 6.7504385e-10, z: -1.6671076e-10, w: 0.91681623}
+  m_LocalRotation: {x: 0.39930946, y: -0.000000008450708, z: -0.000000009142009, w: 0.91681623}
   m_LocalPosition: {x: 0, y: 2.25, z: -2}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -414,11 +414,8 @@ GameObject:
   - component: {fileID: 8858055023861483610}
   - component: {fileID: 612529284508758725}
   - component: {fileID: 5724445451644833352}
-  - component: {fileID: 248335099495966708}
-  - component: {fileID: 5405790448048564387}
   - component: {fileID: 7640124386893371793}
   - component: {fileID: 8209984083396803717}
-  - component: {fileID: 457265001341831757}
   - component: {fileID: 7843387565400470936}
   - component: {fileID: 3510523586792754108}
   m_Layer: 3
@@ -496,21 +493,30 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 220a88b6c93f5b24e898fee231663b01, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PigeonController
+  _predictionPolicySource: 0
+  _predictionPolicy: 0
+  _repeatInputFactor: 0.8
+  _extrapolateInput: 1
   _pushPower: 5
   _weight: 1.5
   _stunMinImpact: 10
   _stunMinHorizontalSpeed: 3
   _stunMinDuration: 0.5
   _stunImmuneDuration: 0.5
-  _groundLayer:
+  _boostLayer:
     serializedVersion: 2
-    m_Bits: 1
+    m_Bits: 0
+  _stunKnockback: 1
+  _stunFriction: 50
+  _stunBounce: 0.35
+  _stunBounceMinSpeed: 1.5
+  _stunRollRadius: 0.3
   _groundSpeed: 1
   _turnSpeed: 90
   _pitchSpeed: 60
   _visualRollAmount: 90
   _rollSpeed: 3
-  _visualRoot: {fileID: 7541785080196244376}
+  _visualRoot: {fileID: 992670146320973476}
   _maxSpeed: 25
   _dragAtMaxSpeed: 3
   _liftFactor: 0.85
@@ -657,60 +663,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PigeonRagdollHandler
   _animator: {fileID: 6797807791699032715}
   _characterController: {fileID: 3115296685156824235}
-  _pigeonController: {fileID: 2514600447504455624}
-  _hipsBone: {fileID: 8660264594570947058}
+  _hipsBone: {fileID: 4056307548251551459}
   _visualRoot: {fileID: 7541785080196244376}
-  _groundLayer:
-    serializedVersion: 2
-    m_Bits: 255
---- !u!54 &248335099495966708
-Rigidbody:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8893443228925278897}
-  serializedVersion: 5
-  m_Mass: 1
-  m_LinearDamping: 10
-  m_AngularDamping: 10
-  m_CenterOfMass: {x: 0, y: 0, z: 0}
-  m_InertiaTensor: {x: 1, y: 1, z: 1}
-  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ImplicitCom: 1
-  m_ImplicitTensor: 1
-  m_UseGravity: 1
-  m_IsKinematic: 1
-  m_Interpolate: 0
-  m_Constraints: 0
-  m_CollisionDetection: 3
---- !u!135 &5405790448048564387
-SphereCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8893443228925278897}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 0
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Radius: 0.1
-  m_Center: {x: 0, y: 0.09, z: 0}
 --- !u!114 &7640124386893371793
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -725,6 +679,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PositionFailSafe
   _minDeep: -10
   _maxLinearDist: 450
+  _retriggerDelay: 1
 --- !u!114 &8209984083396803717
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -748,25 +703,6 @@ MonoBehaviour:
     correctionRate: 8
     snapPositionThreshold: 3
     snapRotationThreshold: 75
---- !u!114 &457265001341831757
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8893443228925278897}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 939517533de889a4f948d4e2041fb798, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: PurrNet.Prediction::PurrNet.Prediction.PredictedRigidbody
-  _predictionPolicySource: 0
-  _predictionPolicy: 0
-  _softVelocityCorrectionRate: 8
-  _rigidbody: {fileID: 248335099495966708}
-  _floatAccuracy: 1
-  _eventMask: 27
-  _ignoreTriggerOnTrigger: 0
 --- !u!114 &7843387565400470936
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3648,15 +3584,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8897093224900880590, guid: 0065f115667c06940a51b2747e6108a2, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 0
+      value: -0.000000007450581
       objectReference: {fileID: 0}
     - target: {fileID: 8897093224900880590, guid: 0065f115667c06940a51b2747e6108a2, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0
+      value: -0.09142681
       objectReference: {fileID: 0}
     - target: {fileID: 8897093224900880590, guid: 0065f115667c06940a51b2747e6108a2, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 0
+      value: 0.0213392
       objectReference: {fileID: 0}
     - target: {fileID: 8897093224900880590, guid: 0065f115667c06940a51b2747e6108a2, type: 3}
       propertyPath: m_LocalRotation.w
@@ -4543,7 +4479,7 @@ ConfigurableJoint:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5731406971321160909}
   serializedVersion: 4
-  m_ConnectedBody: {fileID: 248335099495966708}
+  m_ConnectedBody: {fileID: 0}
   m_ConnectedArticulationBody: {fileID: 0}
   m_Anchor: {x: 0, y: 0, z: 0}
   m_Axis: {x: 1, y: 0, z: 0}
@@ -4666,7 +4602,7 @@ SphereCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Radius: 0.002499917
+  m_Radius: 1.5
   m_Center: {x: 0, y: 0, z: 0.002499917}
 --- !u!54 &7194997664216422288
 Rigidbody:
@@ -5054,11 +4990,6 @@ CharacterJoint:
   m_EnablePreprocessing: 0
   m_MassScale: 1
   m_ConnectedMassScale: 1
---- !u!4 &8660264594570947058 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: -7505855668175694854, guid: 0065f115667c06940a51b2747e6108a2, type: 3}
-  m_PrefabInstance: {fileID: 8068947269522700808}
-  m_PrefabAsset: {fileID: 0}
 --- !u!4 &8761204759105641240 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 1615848358607724816, guid: 0065f115667c06940a51b2747e6108a2, type: 3}

@@ -73,6 +73,7 @@ public class ManagerCinematic : MonoBehaviour
     public bool BeginCinematic(CinemachineVirtualCameraBase camera, Action onReady = null, Action onEnded = null)
     {
         if (!isActiveAndEnabled || IsPlaying) return false;
+        ResolveLocalPlayerReferences();
         if (camera != null && !HasValidCameraSetup(camera))
         {
             Debug.LogWarning("Cinematic refused: assign an active Brain on the rendering Camera, a separate gameplay camera and an active cinematic camera on the same output channel.", this);
@@ -95,7 +96,7 @@ public class ManagerCinematic : MonoBehaviour
         _cancelRequested = false;
         _phase = Phase.Entering;
 
-        _blockedControls = PlayerControls != null ? PlayerControls : FindAnyObjectByType<PlayerControls>();
+        _blockedControls = PlayerControls;
         if (_blockedControls != null)
         {
             _wereControlsBlocked = _blockedControls.AreControlsBlocked;
@@ -152,6 +153,17 @@ public class ManagerCinematic : MonoBehaviour
         yield return FadeBars(_previousBarAlpha, false);
         _routine = null;
         RestoreScene();
+    }
+
+    // Multijoueur : la caméra de jeu et les commandes vivent dans le prefab réseau du joueur local, que la scène ne
+    // peut pas référencer. Si rien n'est assigné (ou si le pigeon a été recréé), on les reprend sur PigeonController.Local.
+    private void ResolveLocalPlayerReferences()
+    {
+        PigeonController local = PigeonController.Local;
+        if (GameplayCamera == null && local != null)
+            GameplayCamera = local.GetComponentInChildren<CinemachineVirtualCameraBase>();
+        if (PlayerControls == null)
+            PlayerControls = local != null ? local.GetComponentInChildren<PlayerControls>() : FindAnyObjectByType<PlayerControls>();
     }
 
     private bool HasValidCameraSetup(CinemachineVirtualCameraBase camera)

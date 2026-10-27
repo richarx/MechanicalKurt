@@ -40,9 +40,13 @@ public class MissionZone : MonoBehaviour
 
     private void LateUpdate()
     {
+        // En multijoueur, seul le pigeon du joueur local compte.
+        if (_pigeon != null && PigeonController.Local != null && _pigeon != PigeonController.Local)
+            _pigeon = null;
+
         if (_pigeon == null && Time.time >= _nextPigeonSearch)
         {
-            _pigeon = FindAnyObjectByType<PigeonController>();
+            _pigeon = PigeonController.Local != null ? PigeonController.Local : FindAnyObjectByType<PigeonController>();
             _controls = _pigeon != null ? _pigeon.GetComponentInChildren<PlayerControls>() : null;
             if (_controls == null)
                 _controls = FindAnyObjectByType<PlayerControls>();

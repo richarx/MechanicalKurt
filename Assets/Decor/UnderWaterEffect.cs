@@ -16,6 +16,10 @@ public class UnderWaterEffect : MonoBehaviour
 
     private void Update()
     {
+        // Multijoueur : PigeonSFX vit dans le prefab réseau du joueur local, la scène ne peut pas le référencer.
+        if (pigeonSFX == null && PigeonController.Local != null)
+            pigeonSFX = PigeonController.Local.GetComponentInChildren<PigeonSFX>();
+
         bool isUnderWater = transform.position.y < waterPlane.position.y;
 
         if (isUnderWater != isUnderWaterEffectActivated)
@@ -24,12 +28,16 @@ public class UnderWaterEffect : MonoBehaviour
             globalVolume.profile = isUnderWaterEffectActivated ? waterProfile : cityProfile;
             RenderSettings.fog = isUnderWaterEffectActivated;
             musicPlayer.SetLowPassMode(isUnderWaterEffectActivated);
-            pigeonSFX.SetLowPassMode(isUnderWaterEffectActivated);
+            if (pigeonSFX != null)
+                pigeonSFX.SetLowPassMode(isUnderWaterEffectActivated);
 
-            if (isUnderWaterEffectActivated)
-                bubbleParticles.Play();
-            else
-                bubbleParticles.Stop();
+            if (bubbleParticles != null)
+            {
+                if (isUnderWaterEffectActivated)
+                    bubbleParticles.Play();
+                else
+                    bubbleParticles.Stop();
+            }
 
             fullScreenEffect.SetFloat("_Alpha", isUnderWater ? 0.15f : 0.0f);
         }

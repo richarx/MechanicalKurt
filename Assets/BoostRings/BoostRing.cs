@@ -1,9 +1,11 @@
 using System.Collections.Generic;
-using System.Linq;
 using DG.Tweening;
 using UnityEngine;
 
 // Fly through to get a one-shot speed kick along the pigeon's direction of travel (works from both sides).
+// La détection et l'application du boost sont faites par PigeonController.Simulate (déterministe, rejouable) :
+// ce composant ne porte plus que les paramètres et le feedback visuel/sonore.
+// Le collider doit rester un trigger, sur le layer renseigné dans PigeonController._boostLayer.
 [RequireComponent(typeof(Collider))]
 public class BoostRing : MonoBehaviour
 {
@@ -11,7 +13,6 @@ public class BoostRing : MonoBehaviour
     [SerializeField] float _boostAmount = 15f;
     [SerializeField] float _minExitSpeed = 35f;
     [SerializeField] float _maxSpeed = 55f;
-    [SerializeField] float _cooldown = 0.5f;
 
     [Header("Feedback")]
     [SerializeField] Transform _visual;
@@ -22,41 +23,19 @@ public class BoostRing : MonoBehaviour
     [SerializeField] List<AudioClip> _secondarySfx;
     [SerializeField] float _secondarySfxVolume = 0.3f;
 
-    float _lastTriggerTime = float.NegativeInfinity;
     Tween _punchTween;
+
+    public float BoostAmount => _boostAmount;
+    public float MinExitSpeed => _minExitSpeed;
+    public float MaxSpeed => _maxSpeed;
 
     void Reset()
     {
         GetComponent<Collider>().isTrigger = true;
     }
 
-    void OnTriggerEnter(Collider other)
-    {
-        if (Time.time - _lastTriggerTime < _cooldown)
-            return;
-
-        PigeonController pigeon = other.GetComponentInParent<PigeonController>();
-        if (pigeon == null)
-            return;
-
-        _lastTriggerTime = Time.time;
-
-        Vector3 velocity = pigeon.Velocity;
-        float speed = velocity.magnitude;
-        Vector3 direction = speed > 0.1f ? velocity / speed : pigeon.transform.forward;
-
-        float targetSpeed = Mathf.Min(Mathf.Max(speed + _boostAmount, _minExitSpeed), _maxSpeed);
-        if (targetSpeed > speed)
-            pigeon.AddImpulse(direction * (targetSpeed - speed));
-
-        PigeonBoostFeedback feedback = pigeon.GetComponent<PigeonBoostFeedback>();
-        if (feedback != null)
-            feedback.Play();
-
-        PlayRingFeedback();
-    }
-
-    void PlayRingFeedback()
+    // Appelé par un PredictedEvent du pigeon : présentation uniquement.
+    public void PlayRingFeedback()
     {
         if (_visual != null)
         {

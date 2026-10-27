@@ -9227,7 +9227,7 @@ PrefabInstance:
       objectReference: {fileID: 1999883115}
     - target: {fileID: 6837691243096775787, guid: 9f84bce467ef4a64bb284e849e69b1a0, type: 3}
       propertyPath: m_VersionIndex
-      value: 2563
+      value: 2566
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -17463,8 +17463,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 330585543}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.39930955, y: -0.00000005838632, z: 0.000000025429541, w: 0.9168162}
-  m_LocalPosition: {x: 0, y: 2.25, z: -2}
+  m_LocalRotation: {x: 0.191476, y: 0.80453575, z: -0.3504071, w: 0.43962947}
+  m_LocalPosition: {x: 23.19059, y: 31.364, z: -21.782755}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -20284,7 +20284,7 @@ PrefabInstance:
       objectReference: {fileID: 106375802}
     - target: {fileID: 6837691243096775787, guid: 9f84bce467ef4a64bb284e849e69b1a0, type: 3}
       propertyPath: m_VersionIndex
-      value: 2563
+      value: 2566
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -26678,7 +26678,7 @@ PrefabInstance:
       objectReference: {fileID: 1331480491}
     - target: {fileID: 6837691243096775787, guid: 9f84bce467ef4a64bb284e849e69b1a0, type: 3}
       propertyPath: m_VersionIndex
-      value: 2560
+      value: 2563
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -26847,6 +26847,7 @@ Transform:
   - {fileID: 392230922}
   - {fileID: 244504200}
   - {fileID: 1508863947}
+  - {fileID: 993813900}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &511804697
@@ -28688,11 +28689,11 @@ MonoBehaviour:
 
       <sprite name="xbox_left_stick" tint=0> Up / down: pitch'
   - <Achievement>k__BackingField: {fileID: 11400000, guid: 6741217f46454adab4e776a0f0eb0184, type: 2}
-    <Objective>k__BackingField: Land in a mission circle and stay still to activate it.
-    <Commands>k__BackingField: "<color=#F2FA00>V</color>: brake \nStay still in the circle to activate it."
+    <Objective>k__BackingField: Land in a mission circle, stay still and confirm to activate it.
+    <Commands>k__BackingField: "<color=#F2FA00>V</color>: brake \nStay still in the circle and press <color=#F2FA00>F</color> to activate it."
     <GamepadCommands>k__BackingField: 'Hold <sprite name="xbox_b" tint=0> to brake and land.
 
-      Stay still in the circle to activate it.'
+      Stay still in the circle and press <color=#F2FA00>Y</color> to activate it.'
   <Panel>k__BackingField: {fileID: 1909673042}
   <ObjectiveText>k__BackingField: {fileID: 1332205792}
   <CommandsText>k__BackingField: {fileID: 3804845}
@@ -33319,7 +33320,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 60d1c7bd9c164bb5ae848de998137a09, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PigeonStopDialogCinematic
-  <StopZone>k__BackingField: {fileID: 630067718}
+  <StartZone>k__BackingField: {fileID: 630067718}
   <Cinematic>k__BackingField: {fileID: 630067717}
   <CompletionAchievement>k__BackingField: {fileID: 11400000, guid: 6741217f46454adab4e776a0f0eb0184, type: 2}
   _cylinder: {fileID: 318538036}
@@ -33346,19 +33347,7 @@ MonoBehaviour:
       m_Calls: []
   <OnCinematicEnded>k__BackingField:
     m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 0}
-        m_TargetAssemblyTypeName: PigeonEquipment, Assembly-CSharp
-        m_MethodName: ToggleBackPack
-        m_Mode: 1
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
+      m_Calls: []
 --- !u!114 &630067718
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -33368,14 +33357,28 @@ MonoBehaviour:
   m_GameObject: {fileID: 630067714}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b7be3d7bcc2a4d7ba19e22efbd683ef8, type: 3}
+  m_Script: {fileID: 11500000, guid: a854b35dfa5757a4eb370ecc4bc4b5ae, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::PigeonStopZone
-  _pigeon: {fileID: 0}
-  <Radius>k__BackingField: 2
-  <StopSpeedThreshold>k__BackingField: 0.15
-  <StopDuration>k__BackingField: 0.1
-  <OnPlayerStopped>k__BackingField:
+  m_EditorClassIdentifier: Assembly-CSharp::MissionStartZone
+  _predictionPolicySource: 0
+  _predictionPolicy: 0
+  _radius: 2
+  _stopSpeedThreshold: 0.15
+  _startRule: 1
+  _rearm: 1
+  _countdownSeconds: 0.1
+  _startPose: {fileID: 0}
+  _prompt: {fileID: 60255020}
+  <OnCountdownStarted>k__BackingField:
+    m_PersistentCalls:
+      m_Calls: []
+  <OnCancelled>k__BackingField:
+    m_PersistentCalls:
+      m_Calls: []
+  <OnStarted>k__BackingField:
+    m_PersistentCalls:
+      m_Calls: []
+  <OnStartedLocal>k__BackingField:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 630067716}
@@ -45388,7 +45391,7 @@ PrefabInstance:
       objectReference: {fileID: 1072847353}
     - target: {fileID: 6837691243096775787, guid: 9f84bce467ef4a64bb284e849e69b1a0, type: 3}
       propertyPath: m_VersionIndex
-      value: 2560
+      value: 2563
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -47123,7 +47126,7 @@ PrefabInstance:
       objectReference: {fileID: 786023064}
     - target: {fileID: 6837691243096775787, guid: 9f84bce467ef4a64bb284e849e69b1a0, type: 3}
       propertyPath: m_VersionIndex
-      value: 2560
+      value: 2563
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -53128,6 +53131,81 @@ Transform:
   - {fileID: 1708487185}
   m_Father: {fileID: 797740042}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &993813899
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 993813900}
+  - component: {fileID: 993813901}
+  m_Layer: 0
+  m_Name: StartingCamera
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &993813900
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 993813899}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0.39930972, y: 0.00000023841852, z: -0.00000011920926, w: 0.9168161}
+  m_LocalPosition: {x: -0.11, y: 1.64, z: -2.16}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 510311342}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &993813901
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 993813899}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f9dfa5b682dcd46bda6128250e975f58, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.Cinemachine::Unity.Cinemachine.CinemachineCamera
+  Priority:
+    Enabled: 1
+    m_Value: 1
+  OutputChannel: 1
+  StandbyUpdate: 2
+  m_StreamingVersion: 20241001
+  m_LegacyPriority: 0
+  Target:
+    TrackingTarget: {fileID: 0}
+    LookAtTarget: {fileID: 0}
+    CustomLookAtTarget: 0
+  Lens:
+    FieldOfView: 60.000004
+    OrthographicSize: 5
+    NearClipPlane: 0.3
+    FarClipPlane: 1000
+    Dutch: 0
+    ModeOverride: 0
+    PhysicalProperties:
+      GateFit: 2
+      SensorSize: {x: 21.946, y: 16.002}
+      LensShift: {x: 0, y: 0}
+      FocusDistance: 10
+      Iso: 200
+      ShutterSpeed: 0.005
+      Aperture: 16
+      BladeCount: 5
+      Curvature: {x: 2, y: 11}
+      BarrelClipping: 0.25
+      Anamorphism: 0
+  BlendHint: 0
 --- !u!1 &993866808
 GameObject:
   m_ObjectHideFlags: 0
@@ -54479,7 +54557,7 @@ PrefabInstance:
       objectReference: {fileID: 1170506764}
     - target: {fileID: 6837691243096775787, guid: 9f84bce467ef4a64bb284e849e69b1a0, type: 3}
       propertyPath: m_VersionIndex
-      value: 2560
+      value: 2563
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -58787,7 +58865,7 @@ PrefabInstance:
       objectReference: {fileID: 1720358077}
     - target: {fileID: 6837691243096775787, guid: 9f84bce467ef4a64bb284e849e69b1a0, type: 3}
       propertyPath: m_VersionIndex
-      value: 2563
+      value: 2566
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -69058,7 +69136,7 @@ PrefabInstance:
       objectReference: {fileID: 769348299}
     - target: {fileID: 6837691243096775787, guid: 9f84bce467ef4a64bb284e849e69b1a0, type: 3}
       propertyPath: m_VersionIndex
-      value: 2560
+      value: 2563
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -76939,8 +77017,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1438648683}
-  - component: {fileID: 1438648682}
   - component: {fileID: 1438648681}
+  - component: {fileID: 1438648684}
   m_Layer: 0
   m_Name: PigeonRace (1)
   m_TagString: Untagged
@@ -76971,50 +77049,7 @@ MonoBehaviour:
       m_Calls: []
   <OnCinematicEnded>k__BackingField:
     m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 1564036690}
-        m_TargetAssemblyTypeName: PigeonCharacterRace, Assembly-CSharp
-        m_MethodName: StartRace
-        m_Mode: 1
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
---- !u!114 &1438648682
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1438648680}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b7be3d7bcc2a4d7ba19e22efbd683ef8, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::PigeonStopZone
-  _pigeon: {fileID: 0}
-  <Radius>k__BackingField: 2
-  <StopSpeedThreshold>k__BackingField: 0.15
-  <StopDuration>k__BackingField: 0.1
-  <OnPlayerStopped>k__BackingField:
-    m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 1438648681}
-        m_TargetAssemblyTypeName: DialogCinematic, Assembly-CSharp
-        m_MethodName: PlayCinematic
-        m_Mode: 1
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
+      m_Calls: []
 --- !u!4 &1438648683
 Transform:
   m_ObjectHideFlags: 0
@@ -77033,6 +77068,35 @@ Transform:
   - {fileID: 819929865}
   m_Father: {fileID: 1356537266}
   m_LocalEulerAnglesHint: {x: 0, y: -44.708, z: 0}
+--- !u!114 &1438648684
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1438648680}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a854b35dfa5757a4eb370ecc4bc4b5ae, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MissionStartZone
+  _predictionPolicySource: 0
+  _predictionPolicy: 0
+  _radius: 2
+  _stopSpeedThreshold: 0.15
+  _startRule: 0
+  _countdownSeconds: 12
+  _startPose: {fileID: 959949187}
+  _prompt: {fileID: 60255020}
+  <OnCountdownStarted>k__BackingField:
+    m_PersistentCalls:
+      m_Calls: []
+  <OnCancelled>k__BackingField:
+    m_PersistentCalls:
+      m_Calls: []
+  <OnStarted>k__BackingField:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!1001 &1438655053
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -83322,11 +83386,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 64ba317df1b84745b2773d4962cc5099, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PigeonCharacterRace
-  <DepartureStop>k__BackingField: {fileID: 1438648682}
+  _predictionPolicySource: 0
+  _predictionPolicy: 0
+  <DepartureZone>k__BackingField: {fileID: 1438648684}
   <DepartureCinematic>k__BackingField: {fileID: 1438648681}
   <DepartureMarker>k__BackingField: {fileID: 255844404}
-  <PlayerDeparturePose>k__BackingField: {fileID: 959949187}
-  <Player>k__BackingField: {fileID: 0}
   <Character>k__BackingField: {fileID: 819929865}
   <Path>k__BackingField: {fileID: 781650950}
   <Waypoints>k__BackingField: []
@@ -83338,6 +83402,7 @@ MonoBehaviour:
   <DestinationStop>k__BackingField: {fileID: 1653775514}
   <CharacterArrivalPose>k__BackingField: {fileID: 620439260}
   <ArrivalCinematic>k__BackingField: {fileID: 1301428010}
+  <ArrivalCinematicSeconds>k__BackingField: 5
   <CompletionAchievement>k__BackingField: {fileID: 11400000, guid: 5e70c332e17f99b478fff8c97a999d59, type: 2}
   <MaximumHeight>k__BackingField: 15
   <FailureMessage>k__BackingField: {fileID: 1594338369}
@@ -88448,7 +88513,7 @@ PrefabInstance:
       objectReference: {fileID: 1981248594}
     - target: {fileID: 6837691243096775787, guid: 9f84bce467ef4a64bb284e849e69b1a0, type: 3}
       propertyPath: m_VersionIndex
-      value: 2560
+      value: 2563
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -89038,19 +89103,7 @@ MonoBehaviour:
   <StopDuration>k__BackingField: 0
   <OnPlayerStopped>k__BackingField:
     m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 1564036690}
-        m_TargetAssemblyTypeName: PigeonCharacterRace, Assembly-CSharp
-        m_MethodName: CompleteRace
-        m_Mode: 1
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
+      m_Calls: []
 --- !u!4 &1653775515
 Transform:
   m_ObjectHideFlags: 0
@@ -110333,7 +110386,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ManagerCinematic
   <Brain>k__BackingField: {fileID: 330585548}
   <GameplayCamera>k__BackingField: {fileID: 0}
-  <PrototypeViewSource>k__BackingField: {fileID: 330585545}
+  <PrototypeViewSource>k__BackingField: {fileID: 0}
   <PlayerControls>k__BackingField: {fileID: 0}
   <CinematicPriority>k__BackingField: 100
   <CameraTimeoutSeconds>k__BackingField: 10
@@ -118623,6 +118676,57 @@ Transform:
   - {fileID: 9125056011812187901}
   m_Father: {fileID: 7300960502141445294}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1987650001
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1987650002}
+  - component: {fileID: 1987650003}
+  m_Layer: 0
+  m_Name: DebugManager
+  m_TagString: EditorOnly
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1987650002
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1987650001}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1987650003
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1987650001}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ef54dea8dcbd41d28548fcdd9ef8115f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::DebugManager
+  _runScenariosOnPlay: 0
+  _ringScenario: 1
+  _tutoScenario: 1
+  _raceStartScenario: 1
+  _raceHeightScenario: 1
+  _extraBots: 0
+  _botSpacing: 2.5
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
@@ -118649,3 +118753,4 @@ SceneRoots:
   - {fileID: 477230057}
   - {fileID: 1844697968}
   - {fileID: 1356537266}
+  - {fileID: 1987650002}

@@ -5,7 +5,8 @@ using UnityEngine;
 public class PigeonStopDialogCinematic : MonoBehaviour
 {
     [field: SerializeField, Required]
-    public PigeonStopZone StopZone { get; private set; }
+    [field: Tooltip("Zone de départ multijoueur. Brancher PlayCinematic sur son OnStartedLocal (pas OnStarted).")]
+    public MissionStartZone StartZone { get; private set; }
 
     [field: SerializeField, Required]
     public DialogCinematic Cinematic { get; private set; }
@@ -16,28 +17,32 @@ public class PigeonStopDialogCinematic : MonoBehaviour
 
     [SerializeField] private GameObject _cylinder;
 
-    // Brancher sur PigeonStopZone.OnPlayerStopped.
+    public GameObject Cylinder => _cylinder;
+
+    // Consommation locale : la zone reste utilisable par les autres joueurs.
+    private bool _consumed;
+
+    // Brancher sur MissionStartZone.OnStartedLocal.
     public void PlayCinematic()
     {
-        if (!isActiveAndEnabled)
+        if (!isActiveAndEnabled || _consumed)
             return;
 
-        if (StopZone == null || Cinematic == null)
+        if (StartZone == null || Cinematic == null)
         {
-            Debug.LogWarning("PigeonStopDialogCinematic : assigner la zone d'arrêt et le DialogCinematic.", this);
+            Debug.LogWarning("PigeonStopDialogCinematic : assigner la zone de départ et le DialogCinematic.", this);
             return;
         }
 
-        if (!StopZone.isActiveAndEnabled || Cinematic.IsPlaying)
+        if (Cinematic.IsPlaying)
             return;
 
         Cinematic.PlayCinematic();
 
         // Ne consommer la zone que si le lancement a été accepté.
-        // Désactiver uniquement le composant pour laisser la cinématique active.
         if (Cinematic.IsPlaying)
         {
-            StopZone.enabled = false;
+            _consumed = true;
             if (_cylinder != null)
                 _cylinder.SetActive(false);
 
@@ -65,7 +70,7 @@ public class PigeonStopDialogCinematic : MonoBehaviour
 
     private void Reset()
     {
-        StopZone = GetComponent<PigeonStopZone>();
+        StartZone = GetComponent<MissionStartZone>();
         Cinematic = GetComponent<DialogCinematic>();
     }
 }

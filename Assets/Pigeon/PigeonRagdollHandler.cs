@@ -1,16 +1,16 @@
 using UnityEngine;
 
+// Ragdoll purement VISUEL : la position et la rotation du pigeon viennent du state prédit (PigeonController).
+// - Les hips sont cinématiques : ils suivent le _visualRoot (qui reçoit StunRotation depuis le contrôleur).
+// - Les autres os sont dynamiques et ballottent autour des hips via leurs joints.
+// - Le CharacterController reste actif pendant le stun : on ignore les collisions avec les os du ragdoll.
 public class PigeonRagdollHandler : MonoBehaviour
 {
     [Header("References")]
     [SerializeField] private Animator _animator;
     [SerializeField] private CharacterController _characterController;
-    [SerializeField] private PigeonController _pigeonController;
-    [SerializeField] private Transform _hipsBone;
+    [SerializeField] private Rigidbody _hipsBone;
     [SerializeField] private Transform _visualRoot;
-
-    [Header("Get Up Settings")]
-    [SerializeField] private LayerMask _groundLayer = ~0;
 
     private Rigidbody[] _ragdollRigidbodies;
     private Collider[] _ragdollColliders;
@@ -22,6 +22,15 @@ public class PigeonRagdollHandler : MonoBehaviour
     {
         _ragdollRigidbodies = GetComponentsInChildren<Rigidbody>();
         _ragdollColliders = GetComponentsInChildren<Collider>();
+
+        if (_characterController != null)
+        {
+            foreach (var col in _ragdollColliders)
+            {
+                if (col.gameObject == gameObject) continue;
+                Physics.IgnoreCollision(_characterController, col, true);
+            }
+        }
 
         SetRagdollState(false);
     }
@@ -45,32 +54,21 @@ public class PigeonRagdollHandler : MonoBehaviour
             if (col.gameObject == gameObject) continue;
             col.enabled = active;
         }
+
+        // Les hips suivent la hiérarchie (donc le visuel piloté par l'état) au lieu d'être simulés.
+        if (active && _hipsBone != null)
+            _hipsBone.isKinematic = true;
     }
 
-    public void AlignAndGetUp()
+    // Plus de repositionnement depuis les hips : la position vient de l'état simulé.
+    public void EndRagdoll()
     {
         if (!_isRagdoll) return;
 
-        Vector3 hipsPosition = _hipsBone.position;
-        Quaternion hipsRotation = _hipsBone.rotation;
-
-        Vector3 targetPosition = hipsPosition;
-        if (Physics.Raycast(hipsPosition + Vector3.up * 0.5f, Vector3.down, out RaycastHit hit, 2f, _groundLayer))
-        {
-            targetPosition.y = hit.point.y;
-        }
-
-        Vector3 projectedForward = Vector3.ProjectOnPlane(hipsRotation * Vector3.forward, Vector3.up).normalized;
-        if (projectedForward == Vector3.zero) projectedForward = transform.forward;
-        Quaternion targetRotation = Quaternion.LookRotation(projectedForward, Vector3.up);
-
-        transform.position = targetPosition;
-        transform.rotation = targetRotation;
+        SetRagdollState(false);
 
         if (_visualRoot != null)
             _visualRoot.localRotation = Quaternion.identity;
-
-        SetRagdollState(false);
 
         if (_animator != null)
         {
@@ -78,4 +76,7 @@ public class PigeonRagdollHandler : MonoBehaviour
             _animator.Update(0f);
         }
     }
+
+    // Compatibilité avec l'ancien nom.
+    public void AlignAndGetUp() => EndRagdoll();
 }
