@@ -17,7 +17,7 @@ public partial class ScenarioRunner
     {
         RingScenario, TutoScenario, RaceStartScenario, RaceHeightScenario,
         DeliveryScenario, CollectionScenario, BillboardScenario, PrayerScenario,
-        EquipmentScenario,
+        EquipmentScenario, WaterSpeedScenario,
     };
 
     List<ScenarioDef> BuildScenarios() => new List<ScenarioDef>
@@ -31,6 +31,7 @@ public partial class ScenarioRunner
         new ScenarioDef { Name = BillboardScenario, Body = RunBillboardMission },
         new ScenarioDef { Name = PrayerScenario, Body = RunPrayerMission },
         new ScenarioDef { Name = EquipmentScenario, Body = RunEquipmentPickup },
+        new ScenarioDef { Name = WaterSpeedScenario, Body = RunWaterSpeedway },
     };
 
     // ─────────────────────────────────────────────────────────────────────────

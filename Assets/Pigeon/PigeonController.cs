@@ -139,6 +139,18 @@ public class PigeonController : PredictedIdentity<PigeonInput, PigeonState>
     [SerializeField] float _waterLevelModifier = 0.1f;
     [SerializeField] float _buoyancyForce = 10f;
 
+    // L'ancienne version (calculée à chaque frame) faisait gagner de la vitesse en piquant sous l'eau : la poussée
+    // de l'eau, réorientée par le steering, devenait de la vitesse vers l'avant. Cet effet de bord dépendait des FPS
+    // et a disparu avec la simulation à 20 ticks/s : il est recréé ici, explicitement et identique pour tous.
+    // Valeurs par défaut calées sur l'ancienne version à 144 FPS (20 ticks/s).
+    [Header("Sous l'eau : speedway")]
+    [Tooltip("Accélération horizontale (m/s²) gagnée sous l'eau en piquant du nez, au piqué maximal du plané. 0 = effet désactivé.")]
+    [SerializeField, Min(0f)] float _underwaterThrust = 7.5f;
+    [Tooltip("Vitesse horizontale (m/s) à laquelle cette poussée s'annule ; elle diminue progressivement jusque-là. Avec les réglages par défaut, la vitesse plafonne vers 34 m/s.")]
+    [SerializeField, Min(1f)] float _underwaterThrustFadeSpeed = 50f;
+    [Tooltip("Part de la traînée de vol gardée pendant l'effet (0 = aucune, 1 = comme en l'air). Dosée selon le piqué.")]
+    [SerializeField, Range(0f, 1f)] float _underwaterDragFactor = 0f;
+
     [Header("Debug")]
     [SerializeField] bool _activeDebug = false;
 
@@ -516,6 +528,7 @@ public class PigeonController : PredictedIdentity<PigeonInput, PigeonState>
         {
             float deep = _water.transform.position.y - _waterLevelModifier - s.Position.y;
             velocity += Vector3.up * _buoyancyForce * deep * deep * dt;
+            velocity += UnderwaterThrust(s, velocity) * dt;
         }
 
         _stunPossible = !UnderWater(s.Position)
@@ -704,8 +717,37 @@ public class PigeonController : PredictedIdentity<PigeonInput, PigeonState>
             velocity = Vector3.Slerp(velocity.normalized, forward, steeringFactor * dt) * speed;
         }
 
+        // Speedway : en piqué sous l'eau, la traînée de vol est réduite (voir UnderwaterThrust).
+        float speedway = UnderwaterDiveFactor(s);
+        if (speedway > 0f)
+            dragAtMaxSpeed *= Mathf.Lerp(1f, _underwaterDragFactor, speedway);
+
         ComputeDrag(ref velocity, targetSpeed, dragAtMaxSpeed, dt);
         return velocity;
+    }
+
+    // 0 hors de l'eau, effet désactivé ou nez relevé ; 1 au piqué maximal du plané (ou plus, en Dive).
+    float UnderwaterDiveFactor(in PigeonState s)
+    {
+        if (_underwaterThrust <= 0f || !UnderWater(s.Position))
+            return 0f;
+        float down = -ForwardOf(s.Pitch, s.Yaw).y;
+        return Mathf.Clamp01(down / Mathf.Sin(_maxPitch * Mathf.Deg2Rad));
+    }
+
+    // Poussée horizontale vers l'avant, qui s'éteint en approchant de _underwaterThrustFadeSpeed.
+    Vector3 UnderwaterThrust(in PigeonState s, Vector3 velocity)
+    {
+        float factor = UnderwaterDiveFactor(s);
+        if (factor <= 0f)
+            return Vector3.zero;
+        Vector3 forward = ForwardOf(s.Pitch, s.Yaw);
+        Vector3 flat = new Vector3(forward.x, 0f, forward.z);
+        if (flat.sqrMagnitude < 0.0001f)
+            return Vector3.zero;
+        flat.Normalize();
+        float room = 1f - Mathf.Clamp01(Vector3.Dot(velocity, flat) / _underwaterThrustFadeSpeed);
+        return flat * (_underwaterThrust * factor * room);
     }
 
     // ── Stun : chute / glissade / roulade simulées à la main (plus de Rigidbody) ──

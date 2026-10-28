@@ -38,6 +38,9 @@ public static class ScenarioMenu
     [MenuItem(Root + "9. " + ScenarioRunner.EquipmentScenario, priority = 28)]
     static void RunEquipment() => Run(ScenarioRunner.EquipmentScenario);
 
+    [MenuItem(Root + "10. " + ScenarioRunner.WaterSpeedScenario, priority = 29)]
+    static void RunWaterSpeed() => Run(ScenarioRunner.WaterSpeedScenario);
+
     [MenuItem(Root + "Ouvrir le dernier rapport", priority = 40)]
     static void OpenReport()
     {
