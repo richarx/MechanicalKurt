@@ -9,7 +9,13 @@ public class LootableEquipment : MonoBehaviour
     [SerializeField] private Transform LightShaft;
 
     [Space]
-    [SerializeField] PigeonController _pigeon;
+    [SerializeField, Tooltip("Facultatif : forcer un pigeon précis. Vide = pigeon du joueur local.")]
+    PigeonController _pigeon;
+
+    [SerializeField, Tooltip("Équipement donné au pigeon qui ramasse l'objet (son PigeonEquipment, dans le prefab du joueur).")]
+    PigeonEquipment.Equipment _equipment = PigeonEquipment.Equipment.Hat;
+
+    public PigeonEquipment.Equipment Equipment => _equipment;
 
     [field: SerializeField, MinValue(0.01f), SuffixLabel("unités", true)]
     public float Radius { get; private set; } = 2f;
@@ -23,7 +29,8 @@ public class LootableEquipment : MonoBehaviour
     public float StopDuration { get; private set; } = 0.25f;
 
     [field: SerializeField]
-    public UnityEvent OnPlayerStopped { get; private set; } = new UnityEvent();
+    [field: Tooltip("Reçoit le pigeon qui a ramassé l'objet, après l'équipement.")]
+    public UnityEvent<PigeonController> OnPlayerStopped { get; private set; } = new UnityEvent<PigeonController>();
 
     private Sequence glideSequence;
     private Sequence spinSequence;
@@ -41,7 +48,6 @@ public class LootableEquipment : MonoBehaviour
     }
 
     private float _stoppedTime;
-    private float _nextPigeonSearch;
     private bool _hasTriggered;
 
     private void LateUpdate()
@@ -49,16 +55,12 @@ public class LootableEquipment : MonoBehaviour
         if (Time.deltaTime <= 0f)
             return;
 
-        if (_pigeon == null && Time.time >= _nextPigeonSearch)
-        {
-            _pigeon = FindAnyObjectByType<PigeonController>();
-            _nextPigeonSearch = Time.time + 1f;
-        }
+        PigeonController pigeon = _pigeon != null ? _pigeon : PigeonController.Local;
 
         // Evaluate after the player has moved in Update, using its actual speed.
-        bool stoppedInside = _pigeon != null && _pigeon.isActiveAndEnabled &&
-                             (_pigeon.transform.position - transform.position).sqrMagnitude <= Radius * Radius &&
-                             _pigeon.Speed <= StopSpeedThreshold;
+        bool stoppedInside = pigeon != null && pigeon.isActiveAndEnabled &&
+                             (pigeon.transform.position - transform.position).sqrMagnitude <= Radius * Radius &&
+                             pigeon.Speed <= StopSpeedThreshold;
 
         if (!stoppedInside)
         {
@@ -78,7 +80,15 @@ public class LootableEquipment : MonoBehaviour
             glideSequence.Kill();
             spinSequence.Kill();
 
-            OnPlayerStopped?.Invoke();
+            // Les anciens appels de l'événement visaient le PigeonEquipment du pigeon de la scène, qui n'existe plus :
+            // l'équipement est donné directement au pigeon qui ramasse l'objet.
+            PigeonEquipment equipment = pigeon.GetComponentInChildren<PigeonEquipment>();
+            if (equipment != null)
+                equipment.UnlockItem(_equipment);
+            else
+                Debug.LogWarning("LootableEquipment : le pigeon n'a pas de PigeonEquipment.", this);
+
+            OnPlayerStopped?.Invoke(pigeon);
             Destroy(gameObject);
         }
     }

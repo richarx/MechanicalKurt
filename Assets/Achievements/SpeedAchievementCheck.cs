@@ -2,7 +2,8 @@ using UnityEngine;
 
 public class SpeedAchievementCheck : MonoBehaviour
 {
-    [SerializeField] private PigeonController _pigeon;
+    [SerializeField, Tooltip("Facultatif. Vide = pigeon du joueur local.")]
+    private PigeonController _pigeon;
     [SerializeField] private AchievementData _achievement;
     [SerializeField] private float _speedThreshold = 40f;
 
@@ -14,7 +15,8 @@ public class SpeedAchievementCheck : MonoBehaviour
 
     private void Update()
     {
-        if (_pigeon == null || _pigeon.Speed <= _speedThreshold) return;
+        PigeonController pigeon = _pigeon != null ? _pigeon : PigeonController.Local;
+        if (pigeon == null || pigeon.Speed <= _speedThreshold) return;
 
         if (AchievementManager.Instance != null)
             AchievementManager.Instance.Unlock(_achievement);

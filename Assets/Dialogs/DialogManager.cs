@@ -90,6 +90,7 @@ public class DialogManager : MonoBehaviour
 
     public void StartDialog(DialogSequence sequence)
     {
+        confirmRequested = false;
         SetVisible(true);
         canvasGroup.DOFade(1f, fadeDuration);
         PlaySound(openClip);
@@ -226,10 +227,18 @@ public class DialogManager : MonoBehaviour
 
     // ---- Helpers ----
 
+    /// <summary>Simule un appui de validation (bots des scénarios, bouton UI…), lu à la prochaine frame.</summary>
+    public void RequestConfirm() => confirmRequested = true;
+
+    private bool confirmRequested;
+
     // Temporary input, to be replaced once the Input Actions are decided.
     private bool ConfirmPressed()
     {
-        return (Keyboard.current != null && Keyboard.current.spaceKey.wasPressedThisFrame)
+        bool requested = confirmRequested;
+        confirmRequested = false;
+        return requested
+            || (Keyboard.current != null && Keyboard.current.spaceKey.wasPressedThisFrame)
             || (Gamepad.current != null && Gamepad.current.buttonSouth.wasPressedThisFrame);
     }
 

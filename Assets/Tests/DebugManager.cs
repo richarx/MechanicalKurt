@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Sirenix.OdinInspector;
 using UnityEngine;
 
 // Options de debug réglées dans l'inspecteur avant Play. Éditeur uniquement : ce composant ne fait rien en build.
@@ -11,12 +12,11 @@ public class DebugManager : MonoBehaviour
     // Champs lus seulement dans l'éditeur.
 #pragma warning disable CS0414
     [Header("Scénarios au lancement")]
-    [Tooltip("Joue les scénarios cochés dès le Play (même chose que Tools > Scénarios).")]
+    [Tooltip("Joue les scénarios choisis dès le Play (même chose que Tools > Scénarios).")]
     [SerializeField] bool _runScenariosOnPlay;
-    [SerializeField] bool _ringScenario = true;
-    [SerializeField] bool _tutoScenario = true;
-    [SerializeField] bool _raceStartScenario = true;
-    [SerializeField] bool _raceHeightScenario = true;
+    [Tooltip("Liste vide = tous les scénarios.")]
+    [SerializeField, ShowIf(nameof(_runScenariosOnPlay)), ValueDropdown("ScenarioOptions")]
+    List<string> _scenarios = new List<string>();
 
     [Header("Bots en plus")]
     [Tooltip("Pigeons bots immobiles créés autour du joueur. Ignoré quand des scénarios tournent (ils créent leurs propres bots).")]
@@ -44,11 +44,7 @@ public class DebugManager : MonoBehaviour
 
         if (_runScenariosOnPlay)
         {
-            string filter = BuildFilter();
-            if (string.IsNullOrEmpty(filter))
-                Debug.LogWarning("DebugManager : aucun scénario coché.", this);
-            else
-                ScenarioRunner.Launch(filter);
+            ScenarioRunner.Launch(BuildFilter());
         }
 
         if (_extraBots > 0)
@@ -62,15 +58,11 @@ public class DebugManager : MonoBehaviour
         }
     }
 
-    string BuildFilter()
-    {
-        var names = new List<string>();
-        if (_ringScenario) names.Add(ScenarioRunner.RingScenario);
-        if (_tutoScenario) names.Add(ScenarioRunner.TutoScenario);
-        if (_raceStartScenario) names.Add(ScenarioRunner.RaceStartScenario);
-        if (_raceHeightScenario) names.Add(ScenarioRunner.RaceHeightScenario);
-        return names.Count == 4 ? ScenarioRunner.AllScenarios : string.Join(",", names);
-    }
+    static IEnumerable<string> ScenarioOptions() => ScenarioRunner.ScenarioNames;
+
+    string BuildFilter() => _scenarios == null || _scenarios.Count == 0
+        ? ScenarioRunner.AllScenarios
+        : string.Join(",", _scenarios);
 
     IEnumerator SpawnExtraBots()
     {

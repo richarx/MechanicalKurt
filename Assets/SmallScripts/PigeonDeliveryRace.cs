@@ -25,8 +25,9 @@ public class PigeonDeliveryRace : MonoBehaviour
     [field: SerializeField, BoxGroup("Arrivée"), Tooltip("Repère visuel facultatif, sans les scripts de cinématique ni le contrôleur de course.")]
     public GameObject DestinationMarker { get; private set; }
 
-    [field: SerializeField, BoxGroup("Course"), Required]
-    public Transform Player { get; private set; }
+    // Mission locale, jouée par chaque joueur sur son écran : le pigeon est celui du joueur local.
+    // (Il vit dans le prefab réseau du joueur : la scène ne peut pas le référencer.)
+    public Transform Player => PigeonController.Local != null ? PigeonController.Local.transform : null;
 
     [field: SerializeField, BoxGroup("Course"), MinValue(0.01f), SuffixLabel("s", true)]
     public float DurationSeconds { get; private set; } = 60f;

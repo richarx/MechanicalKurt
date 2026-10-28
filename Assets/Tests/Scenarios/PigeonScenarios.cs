@@ -13,7 +13,12 @@ public partial class ScenarioRunner
     public const string RaceStartScenario = "Course : départ à 2 pigeons";
     public const string RaceHeightScenario = "Course : échec de hauteur";
 
-    public static readonly string[] ScenarioNames = { RingScenario, TutoScenario, RaceStartScenario, RaceHeightScenario };
+    public static readonly string[] ScenarioNames =
+    {
+        RingScenario, TutoScenario, RaceStartScenario, RaceHeightScenario,
+        DeliveryScenario, CollectionScenario, BillboardScenario, PrayerScenario,
+        EquipmentScenario,
+    };
 
     List<ScenarioDef> BuildScenarios() => new List<ScenarioDef>
     {
@@ -21,6 +26,11 @@ public partial class ScenarioRunner
         new ScenarioDef { Name = TutoScenario, Body = TutoStartZone },
         new ScenarioDef { Name = RaceStartScenario, Body = RaceStart },
         new ScenarioDef { Name = RaceHeightScenario, Body = RaceHeightFailure },
+        new ScenarioDef { Name = DeliveryScenario, Body = RunDeliveryMission },
+        new ScenarioDef { Name = CollectionScenario, Body = RunCollectionMission },
+        new ScenarioDef { Name = BillboardScenario, Body = RunBillboardMission },
+        new ScenarioDef { Name = PrayerScenario, Body = RunPrayerMission },
+        new ScenarioDef { Name = EquipmentScenario, Body = RunEquipmentPickup },
     };
 
     // ─────────────────────────────────────────────────────────────────────────

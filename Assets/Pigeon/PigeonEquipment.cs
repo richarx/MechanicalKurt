@@ -2,6 +2,11 @@ using DG.Tweening;
 using Unity.Cinemachine;
 using UnityEngine;
 
+// Équipement du pigeon (sac, chapeau, chaussures).
+// - Ce qui est porté vit dans l'état prédit du pigeon (PigeonState.Equipment) : tous les clients le voient,
+//   y compris ceux qui arrivent en cours de partie. On ne le change que par une requête d'input (RequestEquipment).
+// - La vue (objets affichés, petit « pop » et VFX) se déduit de cet état sur chaque client : ApplyWorn.
+// - La petite cinématique de ramassage (caméra, pose, musique, son) reste locale au joueur qui ramasse.
 public class PigeonEquipment : MonoBehaviour
 {
     [SerializeField] private GameObject backpack;
@@ -23,66 +28,137 @@ public class PigeonEquipment : MonoBehaviour
         Shoes
     }
 
-    PlayerControls playerControls;
+    public const byte AllBits = (1 << 3) - 1;
+    public static byte Bit(Equipment equipment) => (byte)(1 << (int)equipment);
 
-    private void Start()
+    PigeonController _pigeon;
+    PlayerControls playerControls;
+    bool _viewApplied;
+    byte _shownMask;
+
+    private void Awake()
     {
+        _pigeon = GetComponent<PigeonController>();
         playerControls = GetComponent<PlayerControls>();
+    }
+
+    /// <summary>Équipements affichés en ce moment (vue).</summary>
+    public bool IsWorn(Equipment equipment) => (CurrentWornMask() & Bit(equipment)) != 0;
+
+    /// <summary>Masque de ce que montrent les objets en ce moment (sert d'état initial au spawn).</summary>
+    public byte CurrentWornMask()
+    {
+        byte mask = 0;
+        if (backpack != null && backpack.activeSelf) mask |= Bit(Equipment.Backpack);
+        if (hat != null && hat.activeSelf) mask |= Bit(Equipment.Hat);
+        if (shoeLeft != null && shoeLeft.activeSelf) mask |= Bit(Equipment.Shoes);
+        return mask;
     }
 
     [ContextMenu("Toggle BackPack")]
     public void ToggleBackPack()
     {
-        UnlockItem(Equipment.Backpack);
+        PlayUnlock(Equipment.Backpack, toggle: true);
     }
 
     [ContextMenu("Toggle Hat")]
     public void ToggleHat()
     {
-        UnlockItem(Equipment.Hat);
+        PlayUnlock(Equipment.Hat, toggle: true);
     }
 
     [ContextMenu("Toggle Shoes")]
     public void ToggleShoes()
     {
-        UnlockItem(Equipment.Shoes);
+        PlayUnlock(Equipment.Shoes, toggle: true);
     }
 
+    // Ramassage (LootableEquipment) : porte l'équipement.
     public void UnlockItem(Equipment equipment)
     {
-        playerControls.SetControlsBlocked(true);
-        equipmentCamera.Priority = 100;
+        PlayUnlock(equipment, toggle: false);
+    }
+
+    private void PlayUnlock(Equipment equipment, bool toggle)
+    {
+        // Caméra, commandes, pose et musique appartiennent au joueur local : un bot (ou un pigeon contrôlé
+        // ailleurs) s'équipe directement, sans cinématique chez ce client.
+        if (_pigeon != null && !_pigeon.isOwner)
+        {
+            Request(equipment, toggle);
+            return;
+        }
+
+        if (playerControls != null)
+            playerControls.SetControlsBlocked(true);
+        if (equipmentCamera != null)
+            equipmentCamera.Priority = 100;
 
         Sequence sequence = DOTween.Sequence();
 
-        (GameObject equipment1, GameObject equipment2) = GetEquipmentObjects(equipment);
-
         sequence.AppendInterval(1.5f);
-        sequence.AppendCallback(() => ActivateEquipmentObject(equipment));
+        // L'objet apparaît quand la simulation a appliqué la requête (ApplyWorn), chez tous les joueurs.
+        sequence.AppendCallback(() => Request(equipment, toggle));
+        sequence.AppendCallback(() => SFXManager.Instance.PlaySFX(equipClip, 0.5f));
+        sequence.AppendInterval(0.5f);
 
-        if (equipment1 != null)
-        {
-            sequence.Append(equipment1.transform.DOPunchScale(Vector3.one * 0.5f, 0.5f));
-            sequence.JoinCallback(() => Destroy(Instantiate(equipVFX, equipment1.transform.position, Quaternion.identity), 3.0f));
-        }
-
-        if (equipment2 != null)
-        {
-            sequence.Join(equipment2.transform.DOPunchScale(Vector3.one * 0.5f, 0.5f));
-            sequence.JoinCallback(() => Destroy(Instantiate(equipVFX, equipment2.transform.position, Quaternion.identity), 3.0f));
-        }
-
-        sequence.JoinCallback(() => SFXManager.Instance.PlaySFX(equipClip, 0.5f));
-
-
-        sequence.AppendCallback(() => playerControls.SetForceFlex(true));
+        sequence.AppendCallback(() => { if (playerControls != null) playerControls.SetForceFlex(true); });
         sequence.AppendInterval(3.0f);
-        sequence.AppendCallback(() => playerControls.SetForceFlex(false));
+        sequence.AppendCallback(() => { if (playerControls != null) playerControls.SetForceFlex(false); });
 
-        sequence.AppendCallback(() => equipmentCamera.Priority = 0);
-        sequence.AppendCallback(() => playerControls.SetControlsBlocked(false));
+        sequence.AppendCallback(() => { if (equipmentCamera != null) equipmentCamera.Priority = 0; });
+        sequence.AppendCallback(() => { if (playerControls != null) playerControls.SetControlsBlocked(false); });
 
-        sequence.AppendCallback(() => MusicPlayer.instance.PlayMusic(MusicPlayer.Songs.NightDelivery, 5.0f));
+        sequence.AppendCallback(() => { if (MusicPlayer.instance != null) MusicPlayer.instance.PlayMusic(MusicPlayer.Songs.NightDelivery, 5.0f); });
+    }
+
+    private void Request(Equipment equipment, bool toggle)
+    {
+        if (_pigeon != null)
+            _pigeon.RequestEquipment(equipment, toggle);
+        else
+            ApplyWorn((byte)(toggle ? CurrentWornMask() ^ Bit(equipment) : CurrentWornMask() | Bit(equipment)));
+    }
+
+    // Vue, sur chaque client, à partir de l'état du pigeon. Le premier passage (spawn, arrivée en cours de partie)
+    // pose l'état sans effet ; ensuite, un objet qui apparaît fait un petit « pop » avec VFX.
+    public void ApplyWorn(byte worn)
+    {
+        if (_viewApplied && worn == _shownMask)
+            return;
+
+        byte changed = (byte)(worn ^ _shownMask);
+        bool animate = _viewApplied;
+        _viewApplied = true;
+        _shownMask = worn;
+
+        for (int i = 0; i <= (int)Equipment.Shoes; i++)
+        {
+            Equipment equipment = (Equipment)i;
+            byte bit = Bit(equipment);
+            if (animate && (changed & bit) == 0)
+                continue;
+
+            bool on = (worn & bit) != 0;
+            (GameObject first, GameObject second) = GetEquipmentObjects(equipment);
+            ShowEquipmentObject(first, on, animate);
+            ShowEquipmentObject(second, on, animate);
+        }
+    }
+
+    private void ShowEquipmentObject(GameObject equipmentObject, bool on, bool animate)
+    {
+        if (equipmentObject == null)
+            return;
+        equipmentObject.SetActive(on);
+        if (!animate || !on)
+            return;
+
+        equipmentObject.transform.DOComplete();
+        // Lié à l'objet : le pigeon peut disparaître pendant le « pop » (joueur qui se déconnecte).
+        equipmentObject.transform.DOPunchScale(Vector3.one * 0.5f, 0.5f).SetLink(equipmentObject);
+        if (equipVFX != null)
+            Destroy(Instantiate(equipVFX, equipmentObject.transform.position, Quaternion.identity), 3.0f);
     }
 
     private (GameObject, GameObject) GetEquipmentObjects(Equipment equipment)
@@ -97,23 +173,6 @@ public class PigeonEquipment : MonoBehaviour
                 return (shoeLeft, shoeRight);
             default:
                 return (null, null);
-        }
-    }
-
-    private void ActivateEquipmentObject(Equipment equipment)
-    {
-        switch (equipment)
-        {
-            case Equipment.Backpack:
-                backpack.SetActive(!backpack.activeSelf);
-                break;
-            case Equipment.Hat:
-                hat.SetActive(!hat.activeSelf);
-                break;
-            case Equipment.Shoes:
-                shoeLeft.SetActive(!shoeLeft.activeSelf);
-                shoeRight.SetActive(!shoeRight.activeSelf);
-                break;
         }
     }
 }

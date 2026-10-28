@@ -33,15 +33,13 @@ public static class AchievementTutorialSetup
         Scene scene = SceneManager.GetActiveScene();
         AchievementManager manager = Find<AchievementManager>(scene);
         DeliveryOfferSelector zones = Find<DeliveryOfferSelector>(scene);
-        PigeonController player = zones != null && zones.Player != null
-            ? zones.Player.GetComponent<PigeonController>() : Find<PigeonController>(scene);
+        // Le pigeon n'est plus dans la scène (prefab réseau) : PigeonTutorialAchievements prend le joueur local en jeu.
         TMP_FontAsset font = AssetDatabase.LoadAssetAtPath<TMP_FontAsset>(
             "Assets/TextMesh Pro/Resources/Fonts & Materials/LiberationSans SDF.asset");
         AchievementData[] achievements = { Load("Takeoff"), Load("Steering"), Load("Interaction") };
-        if (manager == null || player == null || zones == null || zones.Player != player.transform
-            || font == null || achievements.Any(a => a == null))
+        if (manager == null || zones == null || font == null || achievements.Any(a => a == null))
         {
-            Debug.LogError("Tutorial: open a scene with an active AchievementManager, pigeon and DeliveryOfferSelector. Check tutorial assets and TMP font.");
+            Debug.LogError("Tutorial: open a scene with an active AchievementManager and DeliveryOfferSelector. Check tutorial assets and TMP font.");
             return;
         }
         TMP_SpriteAsset glyphs = TutorialGlyphAsset.GetOrCreate();
@@ -121,7 +119,6 @@ public static class AchievementTutorialSetup
             PigeonTutorialAchievements detector = Undo.AddComponent<PigeonTutorialAchievements>(root);
             SerializedObject detection = new SerializedObject(detector);
             Property(detection, "Manager").objectReferenceValue = manager;
-            Property(detection, "Player").objectReferenceValue = player;
             Property(detection, "MissionZones").objectReferenceValue = zones;
             Property(detection, "Takeoff").objectReferenceValue = achievements[0];
             Property(detection, "Steering").objectReferenceValue = achievements[1];

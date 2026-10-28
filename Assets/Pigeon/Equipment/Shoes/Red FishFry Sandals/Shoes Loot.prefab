@@ -50,6 +50,7 @@ MonoBehaviour:
   item: {fileID: 4522303993559125815}
   LightShaft: {fileID: 2071495472649870168}
   _pigeon: {fileID: 0}
+  _equipment: 2
   <Radius>k__BackingField: 2
   <StopSpeedThreshold>k__BackingField: 0.15
   <StopDuration>k__BackingField: 0.1

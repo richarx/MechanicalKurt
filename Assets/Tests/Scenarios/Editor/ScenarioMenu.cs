@@ -23,6 +23,21 @@ public static class ScenarioMenu
     [MenuItem(Root + "4. " + ScenarioRunner.RaceHeightScenario, priority = 23)]
     static void RunRaceHeight() => Run(ScenarioRunner.RaceHeightScenario);
 
+    [MenuItem(Root + "5. " + ScenarioRunner.DeliveryScenario, priority = 24)]
+    static void RunDelivery() => Run(ScenarioRunner.DeliveryScenario);
+
+    [MenuItem(Root + "6. " + ScenarioRunner.CollectionScenario, priority = 25)]
+    static void RunCollection() => Run(ScenarioRunner.CollectionScenario);
+
+    [MenuItem(Root + "7. " + ScenarioRunner.BillboardScenario, priority = 26)]
+    static void RunBillboard() => Run(ScenarioRunner.BillboardScenario);
+
+    [MenuItem(Root + "8. " + ScenarioRunner.PrayerScenario, priority = 27)]
+    static void RunPrayer() => Run(ScenarioRunner.PrayerScenario);
+
+    [MenuItem(Root + "9. " + ScenarioRunner.EquipmentScenario, priority = 28)]
+    static void RunEquipment() => Run(ScenarioRunner.EquipmentScenario);
+
     [MenuItem(Root + "Ouvrir le dernier rapport", priority = 40)]
     static void OpenReport()
     {

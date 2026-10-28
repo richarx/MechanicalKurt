@@ -84,7 +84,10 @@ public class PigeonProximityHit : MonoBehaviour
     {
         ApplyHitMotion();
 
-        if (Pigeon == null && Time.time >= _nextPigeonSearch)
+        // Réaction vue par le joueur local, déclenchée par son propre pigeon.
+        if (PigeonController.Local != null)
+            Pigeon = PigeonController.Local;
+        else if (Pigeon == null && Time.time >= _nextPigeonSearch)
         {
             Pigeon = FindAnyObjectByType<PigeonController>();
             _nextPigeonSearch = Time.time + 1f;

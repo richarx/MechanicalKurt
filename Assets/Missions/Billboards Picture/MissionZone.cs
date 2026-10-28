@@ -28,8 +28,7 @@ public class MissionZone : MonoBehaviour
 
 
     private PigeonController _pigeon;
-    private PlayerControls _controls;
-    private float _nextPigeonSearch;
+    private PlayerControls _blockableControls;
     private bool _isInside;
 
     [SerializeField] private AudioClip pictureBillboardSFX;
@@ -40,21 +39,17 @@ public class MissionZone : MonoBehaviour
 
     private void LateUpdate()
     {
-        // En multijoueur, seul le pigeon du joueur local compte.
-        if (_pigeon != null && PigeonController.Local != null && _pigeon != PigeonController.Local)
-            _pigeon = null;
-
-        if (_pigeon == null && Time.time >= _nextPigeonSearch)
+        // Mission locale : seul le pigeon du joueur local compte (prefab réseau, recâblé s'il change).
+        if (PigeonController.Local != _pigeon)
         {
-            _pigeon = PigeonController.Local != null ? PigeonController.Local : FindAnyObjectByType<PigeonController>();
-            _controls = _pigeon != null ? _pigeon.GetComponentInChildren<PlayerControls>() : null;
-            if (_controls == null)
-                _controls = FindAnyObjectByType<PlayerControls>();
-            _nextPigeonSearch = Time.time + 1f;
+            _pigeon = PigeonController.Local;
+            _blockableControls = _pigeon != null ? _pigeon.GetComponentInChildren<PlayerControls>() : null;
         }
+        // Les appuis passent par la source d'input du pigeon (joueur ou bot des scénarios).
+        IPigeonControls controls = _pigeon != null ? _pigeon.Controls : null;
 
         // Évalué après le déplacement du pigeon dans Update, comme PigeonStopZone.
-        bool inside = _pigeon != null && _controls != null && _pigeon.isActiveAndEnabled &&
+        bool inside = _pigeon != null && controls != null && _pigeon.isActiveAndEnabled &&
                       (_pigeon.transform.position - transform.position).sqrMagnitude <= Radius * Radius &&
                       _pigeon.Speed <= StopSpeedThreshold;
 
@@ -65,11 +60,11 @@ public class MissionZone : MonoBehaviour
             Prompt.SetActive(inside);
             // Jeter un appui fait hors zone pour ne pas valider dès l'entrée.
             if (inside)
-                _ = _controls.ConsumeInteract;
+                _ = controls.ConsumeInteract;
             return;
         }
 
-        if (_isInside && _controls.ConsumeInteract)
+        if (_isInside && controls.ConsumeInteract)
             StartCoroutine(Validate());
     }
 
@@ -79,10 +74,13 @@ public class MissionZone : MonoBehaviour
         Mission.ReportZoneCompleted(this);
         OnStartValidation.Invoke();
 
-        _controls.SetControlsBlocked(true);
+        PlayerControls blocked = _blockableControls;
+        if (blocked != null)
+            blocked.SetControlsBlocked(true);
         yield return new WaitForSeconds(cameraSwapDuration);
-        _controls.SetControlsBlocked(false);
-        
+        if (blocked != null)
+            blocked.SetControlsBlocked(false);
+
         OnValidated.Invoke();
         gameObject.SetActive(false);
     }
@@ -90,7 +88,6 @@ public class MissionZone : MonoBehaviour
     private void OnDisable()
     {
         HidePrompt();
-        _nextPigeonSearch = 0f;
     }
 
     private void HidePrompt()

@@ -12,7 +12,9 @@ public sealed class AchievementTriggerZone : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        if (other.GetComponentInParent<PigeonController>() == null) return;
+        // Achievement du joueur local : un autre joueur ou un bot qui passe ne le débloque pas.
+        PigeonController pigeon = other.GetComponentInParent<PigeonController>();
+        if (pigeon == null || pigeon != PigeonController.Local) return;
         if (AchievementManager.Instance != null)
             AchievementManager.Instance.Unlock(_achievement);
     }

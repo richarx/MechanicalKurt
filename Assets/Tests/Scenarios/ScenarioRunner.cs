@@ -290,9 +290,29 @@ public partial class ScenarioRunner : MonoBehaviour
     protected IEnumerator ExpectLanded(PigeonController pigeon, float timeout, float stopSpeed = 0.15f)
     {
         PigeonController target = pigeon;
-        yield return ExpectHolds($"{pigeon.name} posé et immobile",
-            () => target.IsGrounded && target.Speed <= stopSpeed, 0.4f, timeout,
-            () => $"au sol {target.IsGrounded}, vitesse {target.Speed:0.00}");
+        var trace = new StringBuilder();
+        float start = Time.realtimeSinceStartup, nextSample = 0f;
+        bool Landed()
+        {
+            float t = Time.realtimeSinceStartup - start;
+            if (t >= nextSample && trace.Length < 900)
+            {
+                nextSample = t + 0.25f;
+                Vector3 p = target.transform.position;
+                trace.Append($" [{t:0.00}s {(target.IsGrounded ? "sol" : "air")} v{target.Speed:0.00} ({p.x:0.0},{p.y:0.00},{p.z:0.0})]");
+            }
+            return target.IsGrounded && target.Speed <= stopSpeed;
+        }
+        yield return ExpectHolds($"{pigeon.name} posé et immobile", Landed, 0.4f, timeout,
+            () => $"au sol {target.IsGrounded}, vitesse {target.Speed:0.00} — trace :{trace}");
+    }
+
+    /// <summary>Attend qu'un pigeon soit immobile (au sol ou en vol stationnaire) de façon stable.</summary>
+    protected IEnumerator ExpectStill(PigeonController pigeon, float timeout, float stopSpeed = 0.15f)
+    {
+        PigeonController target = pigeon;
+        yield return ExpectHolds($"{pigeon.name} immobile", () => target.Speed <= stopSpeed, 0.4f, timeout,
+            () => $"au sol {target.IsGrounded}, vitesse {target.Speed:0.00}, position {target.transform.position}");
     }
 
     /// <summary>Attend que la condition reste vraie <paramref name="hold"/> secondes d'affilée, au plus <paramref name="timeout"/>.</summary>

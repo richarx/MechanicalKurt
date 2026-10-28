@@ -2,9 +2,13 @@ using Sirenix.OdinInspector;
 using UnityEngine;
 using UnityEngine.Events;
 
+// Zone locale : chaque client surveille le pigeon de SON joueur (PigeonController.Local). Les missions branchées
+// dessus (livraison, collecte, billboard…) sont jouées par chaque joueur sur son écran. Pour un départ commun
+// à plusieurs joueurs, utiliser MissionStartZone (prédit).
 public class PigeonStopZone : MonoBehaviour
 {
-    [SerializeField] PigeonController _pigeon;
+    [SerializeField, Tooltip("Facultatif : forcer un pigeon précis. Vide = pigeon du joueur local.")]
+    PigeonController _pigeon;
 
     [field: SerializeField, MinValue(0.01f), SuffixLabel("unités", true)]
     public float Radius { get; private set; } = 2f;
@@ -18,27 +22,25 @@ public class PigeonStopZone : MonoBehaviour
     public float StopDuration { get; private set; } = 0.25f;
 
     [field: SerializeField]
-    public UnityEvent OnPlayerStopped { get; private set; } = new UnityEvent();
+    [field: Tooltip("Reçoit le pigeon qui s'est arrêté. Les méthodes sans paramètre déjà branchées restent valides.")]
+    public UnityEvent<PigeonController> OnPlayerStopped { get; private set; } = new UnityEvent<PigeonController>();
 
     private float _stoppedTime;
-    private float _nextPigeonSearch;
     private bool _hasTriggered;
+
+    public PigeonController Pigeon => _pigeon != null ? _pigeon : PigeonController.Local;
 
     private void LateUpdate()
     {
         if (Time.deltaTime <= 0f)
             return;
 
-        if (_pigeon == null && Time.time >= _nextPigeonSearch)
-        {
-            _pigeon = FindAnyObjectByType<PigeonController>();
-            _nextPigeonSearch = Time.time + 1f;
-        }
+        PigeonController pigeon = Pigeon;
 
         // Evaluate after the player has moved in Update, using its actual speed.
-        bool stoppedInside = _pigeon != null && _pigeon.isActiveAndEnabled &&
-                             (_pigeon.transform.position - transform.position).sqrMagnitude <= Radius * Radius &&
-                             _pigeon.Speed <= StopSpeedThreshold;
+        bool stoppedInside = pigeon != null && pigeon.isActiveAndEnabled &&
+                             (pigeon.transform.position - transform.position).sqrMagnitude <= Radius * Radius &&
+                             pigeon.Speed <= StopSpeedThreshold;
 
         if (!stoppedInside)
         {
@@ -54,7 +56,7 @@ public class PigeonStopZone : MonoBehaviour
         if (_stoppedTime >= StopDuration)
         {
             _hasTriggered = true;
-            OnPlayerStopped?.Invoke();
+            OnPlayerStopped?.Invoke(pigeon);
         }
     }
 
@@ -62,7 +64,6 @@ public class PigeonStopZone : MonoBehaviour
     {
         _stoppedTime = 0f;
         _hasTriggered = false;
-        _nextPigeonSearch = 0f;
     }
 
     private void OnDrawGizmosSelected()

@@ -22,6 +22,8 @@ public struct PigeonInput : IPredictedData
     public bool BarrelRight;          // one-shot
     public bool Interact;             // one-shot : bascule WantsStart
     public bool Respawn;              // one-shot : retour au point d'apparition (fail-safe)
+    public byte EquipmentWear;        // one-shot : équipements à porter (bit = PigeonEquipment.Equipment)
+    public byte EquipmentToggle;      // one-shot : équipements à basculer
 
     public void Dispose() { }
 }
@@ -58,6 +60,10 @@ public struct PigeonState : IPredictedData<PigeonState>
     public PredictedComponentID ReadyZone;     // zone de départ validée (une seule à la fois)
     public PredictedComponentID LastStartZone; // dernière MissionStartZone qui a lancé ce pigeon
     public int LastStartCount;                 // numéro de ce départ dans la zone (distingue deux départs)
+
+    // Équipements portés (bit = PigeonEquipment.Equipment) : dans l'état, donc vus par tous les clients,
+    // y compris ceux qui arrivent en cours de partie.
+    public byte Equipment;
 
     // Point de réapparition du fail-safe.
     public Vector3 SpawnPosition;
@@ -150,6 +156,7 @@ public class PigeonController : PredictedIdentity<PigeonInput, PigeonState>
     CharacterController _controller;
     IPigeonControls _controls;
     PigeonBoostFeedback _boostFeedback;
+    PigeonEquipment _equipment;
     PigeonRagdollHandler _ragdoll;
     Water _water;
 
@@ -172,8 +179,10 @@ public class PigeonController : PredictedIdentity<PigeonInput, PigeonState>
     // Assez grand pour contenir aussi les colliders du pigeon (ragdoll) et du décor autour d'un anneau.
     readonly Collider[] _overlapBuffer = new Collider[32];
 
-    // ── Requête locale (owner) transformée en input au prochain tick ─────────
+    // ── Requêtes locales (owner) transformées en input au prochain tick ──────
     bool _respawnRequested;
+    byte _equipmentWearRequested;
+    byte _equipmentToggleRequested;
 
     // ── Vue ──────────────────────────────────────────────────────────────────
     PigeonState _viewState;
@@ -211,6 +220,8 @@ public class PigeonController : PredictedIdentity<PigeonInput, PigeonState>
     public bool IsStun => _viewState.Stunned;
     public bool IsGrounded => _viewState.Grounded;
     public bool IsMovementFrozen => _viewState.Frozen;
+    /// <summary>Équipements portés, lus depuis la vue (bit = PigeonEquipment.Equipment).</summary>
+    public byte WornEquipment => _viewState.Equipment;
     /// <summary>Le joueur a validé une zone de départ (lu depuis la vue).</summary>
     public bool WantsStart => _viewState.HasReadyZone;
 
@@ -232,6 +243,24 @@ public class PigeonController : PredictedIdentity<PigeonInput, PigeonState>
             return;
         _respawnRequested = true;
     }
+
+    /// <summary>
+    /// Demande à porter (ou basculer) un équipement. Passe par l'input : la simulation l'applique, puis l'état le
+    /// montre à tous les clients. Ignorée si ce pigeon n'est pas contrôlé ici.
+    /// </summary>
+    public void RequestEquipment(PigeonEquipment.Equipment equipment, bool toggle = false)
+    {
+        if (!isController)
+            return;
+        byte bit = PigeonEquipment.Bit(equipment);
+        if (toggle)
+            _equipmentToggleRequested ^= bit;
+        else
+            _equipmentWearRequested |= bit;
+    }
+
+    /// <summary>Source d'input actuelle (joueur ou bot). Les scripts qui lisent des appuis passent par ici plutôt que par PlayerControls.</summary>
+    public IPigeonControls Controls => _controls;
 
     /// <summary>Remplace la source d'input (bots, scénarios de test). null rétablit le composant IPigeonControls.</summary>
     public void SetControlsOverride(IPigeonControls controls)
@@ -276,6 +305,7 @@ public class PigeonController : PredictedIdentity<PigeonInput, PigeonState>
         _controller = GetComponent<CharacterController>();
         _controls = GetComponent<IPigeonControls>();
         _boostFeedback = GetComponent<PigeonBoostFeedback>();
+        _equipment = GetComponent<PigeonEquipment>();
         _ragdoll = GetComponent<PigeonRagdollHandler>();
 
         _takeoffEvent = new PredictedEvent(predictionManager, this);
@@ -333,6 +363,8 @@ public class PigeonController : PredictedIdentity<PigeonInput, PigeonState>
             Position = transform.position,
             Yaw = transform.eulerAngles.y,
             StunRotation = Quaternion.identity,
+            // Ce que le prefab porte au départ (GetInitialState peut précéder LateAwake : pas de champ en cache).
+            Equipment = TryGetComponent(out PigeonEquipment equipment) ? equipment.CurrentWornMask() : (byte)0,
             SpawnPosition = transform.position,
             SpawnRotation = transform.rotation
         };
@@ -380,6 +412,9 @@ public class PigeonController : PredictedIdentity<PigeonInput, PigeonState>
     {
         input.Respawn = _respawnRequested;
         _respawnRequested = false;
+        input.EquipmentWear = _equipmentWearRequested;
+        input.EquipmentToggle = _equipmentToggleRequested;
+        _equipmentWearRequested = _equipmentToggleRequested = 0;
 
         if (_controls == null)
         {
@@ -400,6 +435,8 @@ public class PigeonController : PredictedIdentity<PigeonInput, PigeonState>
     {
         input.Movement = Vector2.ClampMagnitude(input.Movement, 1f);
         input.RelativeMovement = Vector2.ClampMagnitude(input.RelativeMovement, 1f);
+        input.EquipmentWear &= PigeonEquipment.AllBits;
+        input.EquipmentToggle &= PigeonEquipment.AllBits;
     }
 
     // Quand le serveur répète le dernier input connu, on ne répète pas les actions ponctuelles.
@@ -409,6 +446,8 @@ public class PigeonController : PredictedIdentity<PigeonInput, PigeonState>
         input.BarrelRight = false;
         input.Interact = false;
         input.Respawn = false;
+        input.EquipmentWear = 0;
+        input.EquipmentToggle = 0;
     }
 
     // ─────────────────────────────────────────────────────────────────────────
@@ -428,6 +467,8 @@ public class PigeonController : PredictedIdentity<PigeonInput, PigeonState>
         // Avant le gel : un joueur gelé pendant un compte à rebours peut encore annuler.
         // La zone concernée interprète l'appui (valider / annuler) dans son propre Simulate.
         s.InteractPressed = input.Interact;
+
+        s.Equipment = (byte)((s.Equipment | input.EquipmentWear) ^ input.EquipmentToggle);
 
         // Gelé : aucune physique. Pas de Move(0) non plus, qui faisait perdre isGrounded : au dégel le pigeon
         // retombait d'un cheveu et dépassait le seuil d'arrêt des zones pendant un tick.
@@ -879,6 +920,8 @@ public class PigeonController : PredictedIdentity<PigeonInput, PigeonState>
 
         UpdateRagdollView(view);
         UpdateVisualRotation(view, Time.deltaTime);
+        if (_equipment != null)
+            _equipment.ApplyWorn(view.Equipment);
     }
 
     void UpdateRagdollView(in PigeonState view)

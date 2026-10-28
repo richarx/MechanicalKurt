@@ -8,8 +8,10 @@ public class PigeonTutorialAchievements : MonoBehaviour
     [field: SerializeField, Required]
     public AchievementManager Manager { get; private set; }
 
-    [field: SerializeField, Required]
-    public PigeonController Player { get; private set; }
+    // Pigeon du joueur local (prefab réseau, non référençable depuis la scène). Il peut apparaître après
+    // l'activation de ce composant, ou être recréé : on se recâble dès qu'il change.
+    public PigeonController Player => PigeonController.Local;
+    private PigeonController _boundPlayer;
 
     [field: SerializeField, Required]
     public DeliveryOfferSelector MissionZones { get; private set; }
@@ -32,14 +34,17 @@ public class PigeonTutorialAchievements : MonoBehaviour
     private float _previousYaw;
     private float _steeredAngle;
 
+    private void BindPlayer()
+    {
+        _boundPlayer = Player;
+        _body = _boundPlayer != null ? _boundPlayer.GetComponent<CharacterController>() : null;
+        _controls = _boundPlayer != null ? _boundPlayer.Controls : null;
+        ResetFlightProgress();
+    }
+
     private void OnEnable()
     {
-        if (Player != null)
-        {
-            _body = Player.GetComponent<CharacterController>();
-            _controls = Player.GetComponent<IPigeonControls>();
-            ResetFlightProgress();
-        }
+        BindPlayer();
         if (MissionZones != null) MissionZones.OnOfferAccepted.AddListener(HandleMissionActivated);
         if (Manager != null) Manager.OnReset += ResetFlightProgress;
     }
@@ -52,6 +57,12 @@ public class PigeonTutorialAchievements : MonoBehaviour
 
     private void LateUpdate()
     {
+        if (Player != _boundPlayer)
+            BindPlayer();
+        // Les inputs peuvent être remplacés (bot) : toujours lire la source actuelle du pigeon.
+        if (_boundPlayer != null)
+            _controls = _boundPlayer.Controls;
+
         if (Manager == null || Player == null || !Player.isActiveAndEnabled
             || _body == null || _controls == null || Time.timeScale <= 0f) return;
 
