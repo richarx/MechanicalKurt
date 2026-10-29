@@ -7,21 +7,30 @@ using UnityEngine.Events;
 //  Course contre un personnage, version multijoueur prédite.
 //
 //  Gameplay (dans Simulate, déterministe, piloté par dt) :
-//    Ready   -> Racing   quand la MissionStartZone a lancé le départ (tous les joueurs prêts)
-//    Racing  -> Ready    échec : un pigeon dépasse MaximumHeight, ou temps écoulé
-//    Racing  -> Arrival  un pigeon s'est arrêté dans la zone d'arrivée assez longtemps (le premier gagne)
-//    Arrival -> Completed après ArrivalCinematicSeconds (tous les pigeons sont gelés pendant ce temps)
+//    Ready   -> Racing   quand la MissionStartZone a lancé le départ : tous les joueurs prêts, décompte
+//                        terminé, puis cinématique de départ finie sur chaque écran
+//    Racing  -> Ready    échec : un coureur dépasse MaximumHeight, ou temps écoulé (le personnage est arrivé)
+//    Racing  -> Arrival  un coureur s'est arrêté dans la zone d'arrivée assez longtemps (le premier gagne)
+//    Arrival -> Ready    quand tous les coureurs ont fini la cinématique d'arrivée (ou au bout de
+//                        ArrivalCinematicTimeout) ; ils restent gelés jusque-là. La course peut être refaite.
+//
+//  Une seule course à la fois : la zone de départ reste verrouillée de la fin du décompte jusqu'à la fin de
+//  la course (échec, ou fin de la cinématique d'arrivée). Seuls les coureurs de ce départ comptent ; un joueur
+//  arrivé en cours de route n'influence pas la course et ne reçoit ni cinématique, ni message, ni succès.
 //
 //  Présentation (vue, locale à chaque client) : personnage sur son trajet, objets de course,
-//  cinématiques, messages, succès. Les cinématiques NE pilotent PLUS le gameplay : leur durée
-//  est portée par le compte à rebours de la MissionStartZone et par ArrivalCinematicSeconds.
+//  cinématiques, messages, succès. Le personnage (le pigeon à battre) est placé d'après Elapsed, état
+//  prédit et répliqué : il est au même endroit sur tous les écrans, y compris pour un joueur qui rejoint.
+//  Les cinématiques ne pilotent le gameplay que par leur fin, remontée par l'input du pigeon : à la
+//  MissionStartZone pour le départ, à cette course pour l'arrivée.
 // ─────────────────────────────────────────────────────────────────────────────
 public struct RaceState : IPredictedData<RaceState>
 {
     public byte Phase;             // (byte)PigeonCharacterRace.RacePhase
     public float Elapsed;          // secondes de course écoulées (dt cumulé, jamais Time.time)
     public float StoppedTime;      // durée pendant laquelle un pigeon est arrêté à l'arrivée
-    public float ArrivalRemaining; // secondes restantes de la cinématique d'arrivée
+    public float ArrivalRemaining; // délai max restant pour la cinématique d'arrivée
+    public int StartCount;         // départ de la zone qui a lancé cette course (identifie les coureurs)
 
     public void Dispose() { }
 }
@@ -31,14 +40,14 @@ public class PigeonCharacterRace : PredictedIdentity<RaceState>
 {
     private static readonly int GlideHash = Animator.StringToHash("Glide");
 
-    public enum RacePhase { Ready, DepartureCinematic, Racing, ArrivalCinematic, Completed }
+    public enum RacePhase { Ready, DepartureCinematic, Racing, ArrivalCinematic }
 
     [field: SerializeField, BoxGroup("Départ"), Required]
-    [field: Tooltip("Zone de départ multijoueur. Son StartPose remplace l'ancien PlayerDeparturePose : l'y régler à la même pose. Son compte à rebours doit durer autant que la cinématique de départ.")]
+    [field: Tooltip("Zone de départ multijoueur. Son StartPose remplace l'ancien PlayerDeparturePose : l'y régler à la même pose. Régler son Cinematic Timeout (> 0) pour attendre la cinématique de départ.")]
     public MissionStartZone DepartureZone { get; private set; }
 
     [field: SerializeField, BoxGroup("Départ"), Required]
-    [field: Tooltip("Jouée localement au début du compte à rebours. Ne plus la relier à l'ancien PigeonStopZone ni à StartRace.")]
+    [field: Tooltip("Jouée localement à la fin du décompte, par chaque participant ; la course part quand tous l'ont finie. Ne plus la relier à l'ancien PigeonStopZone ni à StartRace.")]
     public DialogCinematic DepartureCinematic { get; private set; }
 
     [field: SerializeField, BoxGroup("Départ"), Tooltip("Visuel facultatif, séparé des cinématiques et du contrôleur de course.")]
@@ -82,8 +91,9 @@ public class PigeonCharacterRace : PredictedIdentity<RaceState>
     public DialogCinematic ArrivalCinematic { get; private set; }
 
     [field: SerializeField, BoxGroup("Arrivée"), MinValue(0.01f), SuffixLabel("s", true)]
-    [field: Tooltip("Durée de gel des pigeons pendant la cinématique d'arrivée. À régler sur la durée de la cinématique.")]
-    public float ArrivalCinematicSeconds { get; private set; } = 5f;
+    [field: Tooltip("Les coureurs restent gelés jusqu'à ce que chacun ait fini la cinématique d'arrivée sur son écran. "
+        + "Délai maximal, si un joueur ne la termine pas (ou pour un bot).")]
+    public float ArrivalCinematicTimeout { get; private set; } = 90f;
 
     [field: SerializeField, BoxGroup("Arrivée")]
     [field: Tooltip("Achievement attribué à la victoire. L'ajouter aussi à la liste de l'AchievementManager.")]
@@ -107,16 +117,18 @@ public class PigeonCharacterRace : PredictedIdentity<RaceState>
         {
             RacePhase phase = (RacePhase)_viewState.Phase;
             if (phase == RacePhase.Ready && DepartureZone != null
-                && DepartureZone.Phase == MissionStartZone.CountingDown)
+                && DepartureZone.Phase == MissionStartZone.Cinematic)
                 return RacePhase.DepartureCinematic;
             return phase;
         }
     }
 
     // ── Événements de simulation (filtrés par PurrDiction) : présentation ponctuelle uniquement ──
-    private PredictedEvent<bool> _failedEvent;
-    private PredictedEvent _arrivalEvent;
-    private PredictedEvent _completedEvent;
+    // Argument : numéro du départ, pour ne présenter qu'aux coureurs.
+    private PredictedEvent<int> _cheaterEvent;
+    private PredictedEvent<int> _timeoutEvent;
+    private PredictedEvent<int> _arrivalEvent;
+    private PredictedEvent<int> _completedEvent;
 
     // ── Présentation locale ──────────────────────────────────────────────────
     private RaceState _viewState;
@@ -130,6 +142,8 @@ public class PigeonCharacterRace : PredictedIdentity<RaceState>
     private Animator _characterAnimator;
     private bool _wasRootMotionEnabled;
     private bool _ownsRootMotion;
+    private bool _playingDepartureCinematic;
+    private int _playingArrivalStart;   // départ dont la cinématique d'arrivée joue ici (0 = aucune)
 
     // ─────────────────────────────────────────────────────────────────────────
     //  Cycle de vie
@@ -147,28 +161,40 @@ public class PigeonCharacterRace : PredictedIdentity<RaceState>
         if (DestinationStop != null)
             DestinationStop.enabled = false;
 
-        _failedEvent = new PredictedEvent<bool>(predictionManager, this);
-        _arrivalEvent = new PredictedEvent(predictionManager, this);
-        _completedEvent = new PredictedEvent(predictionManager, this);
+        _cheaterEvent = new PredictedEvent<int>(predictionManager, this);
+        _timeoutEvent = new PredictedEvent<int>(predictionManager, this);
+        _arrivalEvent = new PredictedEvent<int>(predictionManager, this);
+        _completedEvent = new PredictedEvent<int>(predictionManager, this);
 
-        _failedEvent.AddListener(HandleFailed);
+        _cheaterEvent.AddListener(startCount => HandleFailed(startCount, true));
+        _timeoutEvent.AddListener(startCount => HandleFailed(startCount, false));
         _arrivalEvent.AddListener(HandleArrival);
         _completedEvent.AddListener(HandleCompleted);
 
         if (DepartureZone != null)
         {
-            DepartureZone.OnCountdownStarted.AddListener(HandleDepartureStarted);
+            DepartureZone.OnCountdownStarted.AddListener(HandleDepartureCountdown);
             DepartureZone.OnCancelled.AddListener(HandleDepartureCancelled);
+            DepartureZone.OnCinematicLocal.AddListener(HandleDepartureCinematic);
         }
+        if (DepartureCinematic != null)
+            DepartureCinematic.OnCinematicEnded.AddListener(HandleDepartureCinematicEnded);
+        if (ArrivalCinematic != null)
+            ArrivalCinematic.OnCinematicEnded.AddListener(HandleArrivalCinematicEnded);
     }
 
     protected override void Destroyed()
     {
         if (DepartureZone != null)
         {
-            DepartureZone.OnCountdownStarted.RemoveListener(HandleDepartureStarted);
+            DepartureZone.OnCountdownStarted.RemoveListener(HandleDepartureCountdown);
             DepartureZone.OnCancelled.RemoveListener(HandleDepartureCancelled);
+            DepartureZone.OnCinematicLocal.RemoveListener(HandleDepartureCinematic);
         }
+        if (DepartureCinematic != null)
+            DepartureCinematic.OnCinematicEnded.RemoveListener(HandleDepartureCinematicEnded);
+        if (ArrivalCinematic != null)
+            ArrivalCinematic.OnCinematicEnded.RemoveListener(HandleArrivalCinematicEnded);
         RestoreRootMotion();
     }
 
@@ -201,6 +227,7 @@ public class PigeonCharacterRace : PredictedIdentity<RaceState>
                     s.Phase = (byte)RacePhase.Racing;
                     s.Elapsed = 0f;
                     s.StoppedTime = 0f;
+                    s.StartCount = DepartureZone.SimState.StartCount;
                 }
                 break;
 
@@ -210,11 +237,12 @@ public class PigeonCharacterRace : PredictedIdentity<RaceState>
 
             case RacePhase.ArrivalCinematic:
                 s.ArrivalRemaining -= dt;
-                if (s.ArrivalRemaining <= 0f)
+                if (AllRacersFinishedArrival(s.StartCount) || s.ArrivalRemaining <= 0f)
                 {
-                    SetAllFrozen(false);
-                    s.Phase = (byte)RacePhase.Completed;
-                    _completedEvent.Invoke();
+                    // Victoire : course rejouable, la zone de départ se rouvre.
+                    SetRacersFrozen(false);
+                    ResetRace(ref s);
+                    _completedEvent.Invoke(s.StartCount);
                 }
                 break;
         }
@@ -224,49 +252,82 @@ public class PigeonCharacterRace : PredictedIdentity<RaceState>
     {
         s.Elapsed += dt;
 
-        if (IsAnyPigeonAboveMaxHeight())
+        // Tous les coureurs ont quitté la partie : la course s'arrête sans message.
+        if (!AnyRacer())
         {
-            Fail(ref s, true);
+            ResetRace(ref s);
+            return;
+        }
+        if (IsAnyRacerAboveMaxHeight())
+        {
+            ResetRace(ref s);
+            _cheaterEvent.Invoke(s.StartCount);
             return;
         }
         if (s.Elapsed >= DurationSeconds)
         {
-            Fail(ref s, false);
+            ResetRace(ref s);
+            _timeoutEvent.Invoke(s.StartCount);
             return;
         }
 
-        // Le premier pigeon qui s'arrête assez longtemps à l'arrivée gagne pour tout le monde.
+        // Le premier coureur qui s'arrête assez longtemps à l'arrivée gagne pour tout le monde.
         // « stopped » est requis en plus de la durée : avec StopDuration = 0, 0 >= 0 validait l'arrivée dès le départ.
-        bool stopped = IsAnyPigeonStoppedAtDestination();
+        bool stopped = IsAnyRacerStoppedAtDestination();
         s.StoppedTime = stopped ? s.StoppedTime + dt : 0f;
         if (stopped && s.StoppedTime >= DestinationStop.StopDuration)
         {
             s.Phase = (byte)RacePhase.ArrivalCinematic;
-            s.ArrivalRemaining = ArrivalCinematicSeconds;
-            SetAllFrozen(true);
-            _arrivalEvent.Invoke();
+            s.ArrivalRemaining = ArrivalCinematicTimeout;
+            SetRacersFrozen(true);
+            _arrivalEvent.Invoke(s.StartCount);
         }
     }
 
-    private void Fail(ref RaceState s, bool cheater)
+    // Fin de course (échec ou victoire) : la course revient au départ et la zone se rouvre.
+    private void ResetRace(ref RaceState s)
     {
         s.Phase = (byte)RacePhase.Ready;
         s.Elapsed = 0f;
         s.StoppedTime = 0f;
         DepartureZone.ResetToWaiting();
-        _failedEvent.Invoke(cheater);
     }
 
-    private bool IsAnyPigeonAboveMaxHeight()
+    // Coureurs : pigeons lancés par le départ en cours de la zone (verrouillée pendant la course).
+    private bool AnyRacer()
     {
         var pigeons = PigeonController.All;
         for (int i = 0; i < pigeons.Count; i++)
-            if (pigeons[i].SimState.Position.y > MaximumHeight)
+            if (DepartureZone.IsInCurrentStart(pigeons[i]))
                 return true;
         return false;
     }
 
-    private bool IsAnyPigeonStoppedAtDestination()
+    // Coureurs restants (un coureur parti de la partie n'est plus attendu).
+    private bool AllRacersFinishedArrival(int startCount)
+    {
+        var pigeons = PigeonController.All;
+        for (int i = 0; i < pigeons.Count; i++)
+        {
+            if (!DepartureZone.IsInCurrentStart(pigeons[i]))
+                continue;
+            ref PigeonState ps = ref pigeons[i].SimState;
+            if (ps.StartAckCount != startCount || !ps.StartAckZone.Equals(id))
+                return false;
+        }
+        return true;
+    }
+
+    private bool IsAnyRacerAboveMaxHeight()
+    {
+        var pigeons = PigeonController.All;
+        for (int i = 0; i < pigeons.Count; i++)
+            if (DepartureZone.IsInCurrentStart(pigeons[i]) && pigeons[i].SimState.Position.y > MaximumHeight)
+                return true;
+        return false;
+    }
+
+    private bool IsAnyRacerStoppedAtDestination()
     {
         Vector3 center = DestinationStop.transform.position;
         float radius = DestinationStop.Radius;
@@ -275,6 +336,8 @@ public class PigeonCharacterRace : PredictedIdentity<RaceState>
         var pigeons = PigeonController.All;
         for (int i = 0; i < pigeons.Count; i++)
         {
+            if (!DepartureZone.IsInCurrentStart(pigeons[i]))
+                continue;
             ref PigeonState ps = ref pigeons[i].SimState;
             if ((ps.Position - center).sqrMagnitude <= radius * radius
                 && ps.LastVelocity.magnitude <= stopSpeed)
@@ -283,11 +346,12 @@ public class PigeonCharacterRace : PredictedIdentity<RaceState>
         return false;
     }
 
-    private static void SetAllFrozen(bool frozen)
+    private void SetRacersFrozen(bool frozen)
     {
         var pigeons = PigeonController.All;
         for (int i = 0; i < pigeons.Count; i++)
-            pigeons[i].ForceFreeze(frozen);
+            if (DepartureZone.IsInCurrentStart(pigeons[i]))
+                pigeons[i].ForceFreeze(frozen);
     }
 
     // ─────────────────────────────────────────────────────────────────────────
@@ -324,7 +388,6 @@ public class PigeonCharacterRace : PredictedIdentity<RaceState>
                 break;
 
             case RacePhase.ArrivalCinematic:
-            case RacePhase.Completed:
                 SetCharacterGliding(false);
                 SetDestinationActive(false);
                 SetRaceObjectsActive(false);
@@ -368,46 +431,95 @@ public class PigeonCharacterRace : PredictedIdentity<RaceState>
     }
 
     // ── Réactions aux événements de la zone de départ (présentation) ─────────
-    private void HandleDepartureStarted()
+    private void HandleDepartureCountdown()
     {
-        if (!HasValidSetup())
-        {
-            Debug.LogWarning("PigeonCharacterRace : assigner la zone de départ, le personnage, un CharacterRacePath avec des points, une zone d'arrivée, deux cinématiques distinctes, l'objet d'arrivée, la pose finale et le FadingMessage actif avec CanvasGroup et texte TMP. Vérifier les durées positives, la hauteur finie et les hiérarchies des Race Objects.", this);
-            return;
-        }
-
-        FailureMessage.Hide();
+        if (FailureMessage != null)
+            FailureMessage.Hide();
         SetDepartureActive(false);
-        DepartureCinematic.PlayCinematic();
     }
 
     private void HandleDepartureCancelled()
     {
-        if (DepartureCinematic != null)
-            DepartureCinematic.CancelCinematic();
         SetDepartureActive(true);
     }
 
-    // ── Réactions aux PredictedEvent de la simulation (présentation ponctuelle) ──
-    private void HandleFailed(bool cheater)
+    // Fin du décompte, sur l'écran d'un participant : sa cinématique, puis le signal « fini » à la zone.
+    private void HandleDepartureCinematic()
     {
-        if (FailureMessage != null)
+        if (!HasValidSetup())
+        {
+            Debug.LogWarning("PigeonCharacterRace : assigner la zone de départ, le personnage, un CharacterRacePath avec des points, une zone d'arrivée, deux cinématiques distinctes, l'objet d'arrivée, la pose finale et le FadingMessage actif avec CanvasGroup et texte TMP. Vérifier les durées positives, la hauteur finie et les hiérarchies des Race Objects.", this);
+            // Sans cinématique jouable, ne pas bloquer les autres joueurs.
+            if (DepartureZone != null)
+                DepartureZone.ReportLocalCinematicFinished();
+            return;
+        }
+
+        _playingDepartureCinematic = true;
+        DepartureCinematic.PlayCinematic();
+        if (!DepartureCinematic.IsPlaying)
+            HandleDepartureCinematicEnded();
+    }
+
+    private void HandleDepartureCinematicEnded()
+    {
+        if (!_playingDepartureCinematic)
+            return;
+        _playingDepartureCinematic = false;
+        DepartureZone.ReportLocalCinematicFinished();
+    }
+
+    // ── Réactions aux PredictedEvent de la simulation (présentation ponctuelle) ──
+    // Message, cinématique d'arrivée et succès : coureurs seulement. Le personnage, lui, bouge pour tout le monde.
+    private bool LocalRaced(int startCount) => DepartureZone != null && DepartureZone.LocalParticipated(startCount);
+
+    private void HandleFailed(int startCount, bool cheater)
+    {
+        if (FailureMessage != null && LocalRaced(startCount))
             FailureMessage.Show(cheater ? "CHEATER" : "YOU LOOSE");
     }
 
-    private void HandleArrival()
+    private void HandleArrival(int startCount)
     {
         _holdCharacter = true;
         SetCharacterGliding(false);
         RestoreRootMotion();
         if (Character != null && CharacterArrivalPose != null)
             Character.SetPositionAndRotation(CharacterArrivalPose.position, CharacterArrivalPose.rotation);
+        if (!LocalRaced(startCount))
+            return;
+
+        // Fin de la cinématique → accusé par l'input du pigeon : les coureurs sont dégelés quand tous l'ont fini.
+        _playingArrivalStart = startCount;
         if (ArrivalCinematic != null)
             ArrivalCinematic.PlayCinematic();
+        if (ArrivalCinematic == null || !ArrivalCinematic.IsPlaying)
+            HandleArrivalCinematicEnded();
     }
 
-    private void HandleCompleted()
+    private void HandleArrivalCinematicEnded()
     {
+        if (_playingArrivalStart == 0)
+            return;
+        ReportArrivalCinematicFinished(PigeonController.Local, _playingArrivalStart);
+        _playingArrivalStart = 0;
+    }
+
+    /// <summary>Fin de la cinématique d'arrivée pour un pigeon contrôlé ici (joueur local, ou bot sur l'hôte).</summary>
+    public void ReportArrivalCinematicFinished(PigeonController pigeon, int startCount)
+    {
+        if (pigeon != null && startCount > 0)
+            pigeon.AcknowledgeStartCinematic(id, startCount);
+    }
+
+    /// <summary>Scénarios : fin de la cinématique d'arrivée pour ce pigeon, sur son dernier départ de cette course.</summary>
+    public void ReportArrivalCinematicFinished(PigeonController pigeon)
+        => ReportArrivalCinematicFinished(pigeon, pigeon != null && DepartureZone != null ? pigeon.LastStartCountFor(DepartureZone.id) : 0);
+
+    private void HandleCompleted(int startCount)
+    {
+        if (!LocalRaced(startCount))
+            return;
         if (CompletionAchievement != null)
         {
             if (AchievementManager.Instance != null)
@@ -516,7 +628,7 @@ public class PigeonCharacterRace : PredictedIdentity<RaceState>
             || FailureMessage == null || !FailureMessage.isActiveAndEnabled || FailureMessage.Group == null
             || FailureMessage.GetComponent<TMPro.TMP_Text>() == null
             || !IsFinite(DurationSeconds) || DurationSeconds <= 0f || !IsFinite(MaximumHeight)
-            || !IsFinite(ArrivalCinematicSeconds) || ArrivalCinematicSeconds <= 0f)
+            || !IsFinite(ArrivalCinematicTimeout) || ArrivalCinematicTimeout <= 0f)
             return false;
 
         if (Path != null)

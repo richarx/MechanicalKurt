@@ -2,7 +2,7 @@ using DG.Tweening;
 using Unity.Cinemachine;
 using UnityEngine;
 
-// Équipement du pigeon (sac, chapeau, chaussures).
+// Équipement du pigeon (sac, chapeau, chaussures, lunettes).
 // - Ce qui est porté vit dans l'état prédit du pigeon (PigeonState.Equipment) : tous les clients le voient,
 //   y compris ceux qui arrivent en cours de partie. On ne le change que par une requête d'input (RequestEquipment).
 // - La vue (objets affichés, petit « pop » et VFX) se déduit de cet état sur chaque client : ApplyWorn.
@@ -13,6 +13,7 @@ public class PigeonEquipment : MonoBehaviour
     [SerializeField] private GameObject hat;
     [SerializeField] private GameObject shoeLeft;
     [SerializeField] private GameObject shoeRight;
+    [SerializeField] private GameObject sunglasses;
 
     [Space]
     [SerializeField] private CinemachineCamera equipmentCamera;
@@ -21,14 +22,18 @@ public class PigeonEquipment : MonoBehaviour
     [SerializeField] private AudioClip equipClip;
     [SerializeField] private GameObject equipVFX;
 
+    // La valeur sert de numéro de bit dans l'état réseau ET est sérialisée dans les prefabs de loot (_equipment) :
+    // n'ajouter qu'à la fin, ne jamais réordonner. Au-delà de 8, passer les masques (état, input) en ushort.
     public enum Equipment
     {
-        Backpack,
-        Hat,
-        Shoes
+        Backpack,   // bit 0
+        Hat,        // bit 1
+        Shoes,      // bit 2
+        Sunglasses  // bit 3
     }
 
-    public const byte AllBits = (1 << 3) - 1;
+    public const int Count = (int)Equipment.Sunglasses + 1;
+    public const byte AllBits = (1 << Count) - 1;
     public static byte Bit(Equipment equipment) => (byte)(1 << (int)equipment);
 
     PigeonController _pigeon;
@@ -52,6 +57,7 @@ public class PigeonEquipment : MonoBehaviour
         if (backpack != null && backpack.activeSelf) mask |= Bit(Equipment.Backpack);
         if (hat != null && hat.activeSelf) mask |= Bit(Equipment.Hat);
         if (shoeLeft != null && shoeLeft.activeSelf) mask |= Bit(Equipment.Shoes);
+        if (sunglasses != null && sunglasses.activeSelf) mask |= Bit(Equipment.Sunglasses);
         return mask;
     }
 
@@ -71,6 +77,12 @@ public class PigeonEquipment : MonoBehaviour
     public void ToggleShoes()
     {
         PlayUnlock(Equipment.Shoes, toggle: true);
+    }
+
+    [ContextMenu("Toggle Sunglasses")]
+    public void ToggleSunglasses()
+    {
+        PlayUnlock(Equipment.Sunglasses, toggle: true);
     }
 
     // Ramassage (LootableEquipment) : porte l'équipement.
@@ -132,7 +144,7 @@ public class PigeonEquipment : MonoBehaviour
         _viewApplied = true;
         _shownMask = worn;
 
-        for (int i = 0; i <= (int)Equipment.Shoes; i++)
+        for (int i = 0; i < Count; i++)
         {
             Equipment equipment = (Equipment)i;
             byte bit = Bit(equipment);
@@ -171,6 +183,8 @@ public class PigeonEquipment : MonoBehaviour
                 return (hat, null);
             case Equipment.Shoes:
                 return (shoeLeft, shoeRight);
+            case Equipment.Sunglasses:
+                return (sunglasses, null);
             default:
                 return (null, null);
         }

@@ -81,23 +81,34 @@ public class PlayerControls : MonoBehaviour, IPigeonControls
         _forceFlex = isForcing;
     }
 
+    // La caméra orbitale (pas celle sous l'eau ni de précision, qui ont aussi un OrbitalFollow) : référencée dans
+    // le prefab, sinon reprise sur le CameraSwapper.
+    CinemachineOrbitalFollow OrbitalCamera
+    {
+        get
+        {
+            if (_camera == null && TryGetComponent(out CameraSwapper swapper) && swapper.OrbitalCamera != null)
+                _camera = swapper.OrbitalCamera.GetComponent<CinemachineOrbitalFollow>();
+            return _camera;
+        }
+    }
+
     public void SnapCameraBehind()
     {
-        if (_camera == null)
-            _camera = GetComponentInChildren<CinemachineOrbitalFollow>();
-        if (_camera == null || _camera.VirtualCamera == null || _camera.FollowTarget == null)
+        CinemachineOrbitalFollow camera = OrbitalCamera;
+        if (camera == null || camera.VirtualCamera == null || camera.FollowTarget == null)
             return;
 
-        CinemachineVirtualCameraBase virtualCamera = _camera.VirtualCamera;
+        CinemachineVirtualCameraBase virtualCamera = camera.VirtualCamera;
         // Initialiser l'orbite et annuler les anciennes vitesses d'entrée.
         virtualCamera.PreviousStateIsValid = false;
         virtualCamera.InternalUpdateCameraState(Vector3.up, -1f);
-        Vector3 targetPosition = _camera.FollowTargetPosition
-            + _camera.FollowTargetRotation * _camera.TargetOffset;
+        Vector3 targetPosition = camera.FollowTargetPosition
+            + camera.FollowTargetRotation * camera.TargetOffset;
         float distance = Mathf.Max(0.1f, Vector3.Distance(virtualCamera.State.GetFinalPosition(), targetPosition));
         virtualCamera.ForceCameraPosition(targetPosition - transform.forward * distance, transform.rotation);
-        _camera.HorizontalAxis.CancelRecentering();
-        _camera.VerticalAxis.CancelRecentering();
+        camera.HorizontalAxis.CancelRecentering();
+        camera.VerticalAxis.CancelRecentering();
         // Replacer la caméra immédiatement, sans amortissement depuis l'ancien emplacement.
         virtualCamera.PreviousStateIsValid = false;
         virtualCamera.InternalUpdateCameraState(Vector3.up, 0f);
@@ -117,7 +128,10 @@ public class PlayerControls : MonoBehaviour, IPigeonControls
                 return Vector2.zero;
 
             Vector2 movement = _controls.Player.Move.ReadValue<Vector2>();
-            float angle = _camera.HorizontalAxis.Value;
+            CinemachineOrbitalFollow camera = OrbitalCamera;
+            if (camera == null)
+                return movement;
+            float angle = camera.HorizontalAxis.Value;
             float rad = angle * Mathf.Deg2Rad;
             float cos = Mathf.Cos(rad);
             float sin = Mathf.Sin(rad);
@@ -132,6 +146,9 @@ public class PlayerControls : MonoBehaviour, IPigeonControls
     public bool Brake => CanReadControls && _controls.Player.Brake.IsPressed();
 
     public bool Flex => (CanReadControls && (_controls.Player.LeftFlex.IsPressed() || _controls.Player.RightFlex.IsPressed())) || _forceFlex;
+
+    // Présentation seulement (choix de caméra) : jamais dans PigeonInput.
+    public bool PrecisionCamera => CanReadControls && _controls.Player.PrecisionCamera.IsPressed();
 
     public bool ConsumeInteract
     {

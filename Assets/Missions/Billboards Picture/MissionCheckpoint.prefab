@@ -127,3 +127,11 @@ MonoBehaviour:
   <OnValidated>k__BackingField:
     m_PersistentCalls:
       m_Calls: []
+  <OnStartValidation>k__BackingField:
+    m_PersistentCalls:
+      m_Calls: []
+  cameraAnticipationSFX: {fileID: 8300000, guid: 95996fad4d94d6e4381d04db7907f732, type: 3}
+  cameraSFX: {fileID: 8300000, guid: 77038bcf95988db4b88b129e5dbdfefb, type: 3}
+  successBillboardSFX: {fileID: 0}
+  camera: {fileID: 0}
+  cameraSwapDuration: 3

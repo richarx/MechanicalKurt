@@ -23,6 +23,12 @@ public class BoostRing : MonoBehaviour
     [SerializeField] List<AudioClip> _secondarySfx;
     [SerializeField] float _secondarySfxVolume = 0.3f;
 
+    // Enchaînement d'anneaux : le son principal monte de 0.1 par anneau du combo (plafond 3).
+    // Le combo est compté par pigeon (PigeonController.PlayBoost) : un autre joueur ne fait pas monter le vôtre.
+    public const float ComboWindow = 5f;
+    const float ComboPitchStep = 0.1f;
+    const float ComboMaxPitch = 3f;
+
     Tween _punchTween;
 
     public float BoostAmount => _boostAmount;
@@ -35,7 +41,8 @@ public class BoostRing : MonoBehaviour
     }
 
     // Appelé par un PredictedEvent du pigeon : présentation uniquement.
-    public void PlayRingFeedback()
+    // comboCount = rang de cet anneau dans l'enchaînement du pigeon qui le traverse (1 = premier).
+    public void PlayRingFeedback(int comboCount = 1)
     {
         if (_visual != null)
         {
@@ -45,7 +52,8 @@ public class BoostRing : MonoBehaviour
 
         if (SFXManager.Instance != null)
         {
-            SFXManager.Instance.PlayRandomSFX(_mainSfx, _mainSfxVolume);
+            float pitch = Mathf.Min(1.0f + comboCount * ComboPitchStep, ComboMaxPitch);
+            SFXManager.Instance.PlayRandomSFX(_mainSfx, _mainSfxVolume, pitch: pitch);
             SFXManager.Instance.PlayRandomSFX(_secondarySfx, _secondarySfxVolume);
         }
     }

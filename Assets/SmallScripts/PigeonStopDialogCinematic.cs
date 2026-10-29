@@ -5,8 +5,8 @@ using UnityEngine;
 public class PigeonStopDialogCinematic : MonoBehaviour
 {
     [field: SerializeField, Required]
-    [field: Tooltip("Zone de départ multijoueur. Brancher PlayCinematic sur son OnStartedLocal (pas OnStarted).")]
-    public MissionStartZone StartZone { get; private set; }
+    [field: Tooltip("Zone locale : se poser dans le cercle lance le tuto pour le pigeon du joueur local. Brancher PlayCinematic sur son OnPlayerStopped.")]
+    public PigeonStopZone StopZone { get; private set; }
 
     [field: SerializeField, Required]
     public DialogCinematic Cinematic { get; private set; }
@@ -17,32 +17,71 @@ public class PigeonStopDialogCinematic : MonoBehaviour
 
     [SerializeField] private GameObject _cylinder;
 
+    [Header("Récompense")]
+    [SerializeField, Tooltip("Donne un équipement au pigeon du joueur à la fin de la cinématique (autrefois un appel ToggleBackPack sur le pigeon de la scène, qui n'existe plus).")]
+    private bool _giveEquipmentReward = true;
+    [SerializeField, ShowIf(nameof(_giveEquipmentReward))]
+    private PigeonEquipment.Equipment _rewardEquipment = PigeonEquipment.Equipment.Backpack;
+
     public GameObject Cylinder => _cylinder;
+    public bool GivesEquipmentReward => _giveEquipmentReward;
+    public PigeonEquipment.Equipment RewardEquipment => _rewardEquipment;
 
-    // Consommation locale : la zone reste utilisable par les autres joueurs.
+    // Tuto joué une seule fois, par chaque joueur sur son écran.
     private bool _consumed;
+    private bool _rewardGiven;
 
-    // Brancher sur MissionStartZone.OnStartedLocal.
+    private void OnEnable()
+    {
+        if (Cinematic != null)
+            Cinematic.OnCinematicEnded.AddListener(HandleCinematicEnded);
+    }
+
+    private void OnDisable()
+    {
+        if (Cinematic != null)
+            Cinematic.OnCinematicEnded.RemoveListener(HandleCinematicEnded);
+    }
+
+    // Fin de la cinématique lancée par CE joueur : l'équipement va à son pigeon (état répliqué, vu par tous).
+    private void HandleCinematicEnded()
+    {
+        if (!_consumed || _rewardGiven || !_giveEquipmentReward)
+            return;
+        PigeonController local = PigeonController.Local;
+        PigeonEquipment equipment = local != null ? local.GetComponentInChildren<PigeonEquipment>() : null;
+        if (equipment == null)
+        {
+            Debug.LogWarning("PigeonStopDialogCinematic : pas de pigeon local avec PigeonEquipment pour la récompense.", this);
+            return;
+        }
+        _rewardGiven = true;
+        equipment.UnlockItem(_rewardEquipment);
+    }
+
+    // Brancher sur PigeonStopZone.OnPlayerStopped.
     public void PlayCinematic()
     {
         if (!isActiveAndEnabled || _consumed)
             return;
 
-        if (StartZone == null || Cinematic == null)
+        if (StopZone == null || Cinematic == null)
         {
-            Debug.LogWarning("PigeonStopDialogCinematic : assigner la zone de départ et le DialogCinematic.", this);
+            Debug.LogWarning("PigeonStopDialogCinematic : assigner la zone d'arrêt et le DialogCinematic.", this);
             return;
         }
 
-        if (Cinematic.IsPlaying)
+        if (!StopZone.isActiveAndEnabled || Cinematic.IsPlaying)
             return;
 
         Cinematic.PlayCinematic();
 
         // Ne consommer la zone que si le lancement a été accepté.
+        // Désactiver uniquement le composant pour laisser la cinématique active.
         if (Cinematic.IsPlaying)
         {
             _consumed = true;
+            StopZone.enabled = false;
             if (_cylinder != null)
                 _cylinder.SetActive(false);
 
@@ -70,7 +109,7 @@ public class PigeonStopDialogCinematic : MonoBehaviour
 
     private void Reset()
     {
-        StartZone = GetComponent<MissionStartZone>();
+        StopZone = GetComponent<PigeonStopZone>();
         Cinematic = GetComponent<DialogCinematic>();
     }
 }

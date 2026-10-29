@@ -120,18 +120,35 @@ public partial class ScenarioRunner
             Bot.Flap = true;
             Bot.Brake = true;
             yield return ExpectStill(Pigeon, 4f, zone.StopSpeedThreshold);
-            yield return Expect($"Zone {expected} : le prompt s'affiche", () => zone.Prompt != null && zone.Prompt.activeInHierarchy, 1.5f,
+            // Prompt en fondu (CanvasGroup, 0,3 s) : affiché ET opaque.
+            yield return Expect($"Zone {expected} : le prompt s'affiche", () => zone.Prompt != null && zone.IsPromptDisplayed
+                    && zone.Prompt.gameObject.activeInHierarchy && zone.Prompt.alpha > 0.99f, 1.5f,
                 () => $"distance {Vector3.Distance(Pigeon.transform.position, zone.transform.position):0.00} / rayon {zone.Radius}, "
-                    + $"vitesse {Pigeon.Speed:0.00}, au sol {Pigeon.IsGrounded}");
+                    + $"vitesse {Pigeon.Speed:0.00}, au sol {Pigeon.IsGrounded}, alpha {(zone.Prompt != null ? zone.Prompt.alpha : 0f):0.00}");
             Bot.PressInteract();
             yield return Expect($"Zone {expected} validée", () => mission.CompletedCount >= expected, 1.5f,
                 () => $"{mission.CompletedCount}/{mission.TotalCount}");
             yield return Expect($"Zone {expected} : fin du plan photo", () => !zone.gameObject.activeSelf, 6f);
+            yield return Check($"Zone {expected} : commandes rendues après la photo",
+                Pigeon.GetComponent<PlayerControls>() == null || !Pigeon.GetComponent<PlayerControls>().AreControlsBlocked);
             Bot.Flap = false;
             Bot.Brake = false;
         }
         yield return Expect("Mission billboards terminée", () => !mission.IsRunning && completed == 1, 2f,
             () => $"{mission.CompletedCount}/{mission.TotalCount}, OnCompleted {completed}");
+
+        // Le prompt est partagé avec les MissionStartZone (SetActive seulement) : après les fondus des billboards,
+        // il doit rester visible et opaque dans une zone de départ.
+        MissionStartZone startZone = null;
+        foreach (MissionStartZone candidate in FindObjectsByType<MissionStartZone>(FindObjectsInactive.Exclude))
+            if (candidate.Prompt != null && (startZone == null || string.CompareOrdinal(candidate.name, startZone.name) < 0))
+                startZone = candidate;
+        if (startZone != null)
+        {
+            yield return HoldStillAt(startZone.transform.position, startZone.Radius, startZone.StopSpeedThreshold, $"zone de départ « {startZone.name} »");
+            yield return Expect("Prompt partagé visible et opaque dans une zone de départ", () => PromptVisible(startZone.Prompt), 1.5f,
+                () => $"actif {startZone.Prompt.activeInHierarchy}, alpha {PromptAlpha(startZone.Prompt):0.00}");
+        }
     }
 
     // ─────────────────────────────────────────────────────────────────────────

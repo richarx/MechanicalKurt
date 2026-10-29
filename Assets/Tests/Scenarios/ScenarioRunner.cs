@@ -85,6 +85,7 @@ public partial class ScenarioRunner : MonoBehaviour
     IEnumerator Start()
     {
         UnityEditor.SessionState.SetBool(ActiveKey, true);
+        MissionStartZone.TraceTransitions = true;
         _scenarios = BuildScenarios();
         foreach (ScenarioDef def in _scenarios)
             if (Selected(def))

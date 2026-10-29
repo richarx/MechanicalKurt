@@ -160,8 +160,11 @@ public class ManagerCinematic : MonoBehaviour
     private void ResolveLocalPlayerReferences()
     {
         PigeonController local = PigeonController.Local;
+        // La caméra orbitale du CameraSwapper : le prefab a plusieurs caméras (équipement, sous l'eau, précision).
         if (GameplayCamera == null && local != null)
-            GameplayCamera = local.GetComponentInChildren<CinemachineVirtualCameraBase>();
+            GameplayCamera = local.TryGetComponent(out CameraSwapper cameras) && cameras.OrbitalCamera != null
+                ? cameras.OrbitalCamera
+                : local.GetComponentInChildren<CinemachineVirtualCameraBase>();
         if (PlayerControls == null)
             PlayerControls = local != null ? local.GetComponentInChildren<PlayerControls>() : FindAnyObjectByType<PlayerControls>();
     }

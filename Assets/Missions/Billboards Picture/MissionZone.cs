@@ -1,8 +1,9 @@
-using System.Collections;
+using DG.Tweening;
 using Sirenix.OdinInspector;
 using Unity.Cinemachine;
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.UI;
 
 public class MissionZone : MonoBehaviour
 {
@@ -10,8 +11,8 @@ public class MissionZone : MonoBehaviour
     public BillboardMission Mission { get; private set; }
 
     [field: SerializeField, Required]
-    [field: Tooltip("Texte d'instruction partagé sur le canvas (« Appuyer sur Y / F »).")]
-    public GameObject Prompt { get; private set; }
+    [field: Tooltip("Texte d'instruction partagé sur le canvas (« Appuyer sur Y / F »), aussi affiché par les MissionStartZone (SetActive) : on lui rend alpha et échelle à chaque masquage.")]
+    public CanvasGroup Prompt { get; private set; }
 
     [field: SerializeField, MinValue(0.01f), SuffixLabel("unités", true)]
     public float Radius { get; private set; } = 3f;
@@ -31,14 +32,32 @@ public class MissionZone : MonoBehaviour
     private PlayerControls _blockableControls;
     private bool _isInside;
 
-    [SerializeField] private AudioClip pictureBillboardSFX;
+    private bool isPromptDisplayed;
+    private bool isValidated;
+
+    [SerializeField] private Image cameraFlashImage;
+    [SerializeField] private AudioClip cameraAnticipationSFX;
+    [SerializeField] private AudioClip cameraSFX;
     [SerializeField] private AudioClip successBillboardSFX;
     [SerializeField] private CinemachineCamera camera;
     [SerializeField] private float cameraSwapDuration = 3f;
 
+    private const float FlashDelay = 1.5f;
+
+    /// <summary>Le prompt est affiché pour cette zone (lu par les scénarios).</summary>
+    public bool IsPromptDisplayed => isPromptDisplayed;
+
+    private void OnEnable()
+    {
+        // BillboardMission.Launch réactive les zones à chaque partie.
+        isValidated = false;
+    }
 
     private void LateUpdate()
     {
+        if (isValidated)
+            return;
+
         // Mission locale : seul le pigeon du joueur local compte (prefab réseau, recâblé s'il change).
         if (PigeonController.Local != _pigeon)
         {
@@ -57,7 +76,7 @@ public class MissionZone : MonoBehaviour
         {
             _isInside = inside;
             // Le prompt est partagé : ne le toucher qu'à l'entrée / la sortie de cette zone.
-            Prompt.SetActive(inside);
+            SetPromptState(inside);
             // Jeter un appui fait hors zone pour ne pas valider dès l'entrée.
             if (inside)
                 _ = controls.ConsumeInteract;
@@ -65,36 +84,130 @@ public class MissionZone : MonoBehaviour
         }
 
         if (_isInside && controls.ConsumeInteract)
-            StartCoroutine(Validate());
+            Validate();
     }
 
-    private IEnumerator Validate()
+    private void Validate()
     {
-        HidePrompt();
-        Mission.ReportZoneCompleted(this);
-        OnStartValidation.Invoke();
-
+        // Tout de suite : le premier callback d'une Sequence ne part qu'à la mise à jour DOTween suivante.
+        isValidated = true;
         PlayerControls blocked = _blockableControls;
-        if (blocked != null)
-            blocked.SetControlsBlocked(true);
-        yield return new WaitForSeconds(cameraSwapDuration);
-        if (blocked != null)
-            blocked.SetControlsBlocked(false);
 
-        OnValidated.Invoke();
-        gameObject.SetActive(false);
+        Sequence sequence = DOTween.Sequence().SetLink(gameObject)
+            .AppendCallback(() =>
+            {
+                PunchAndHidePrompt();
+                Mission.ReportZoneCompleted(this);
+                if (blocked != null)
+                    blocked.SetControlsBlocked(true);
+                PlaySFX(cameraAnticipationSFX);
+                OnStartValidation.Invoke();
+            })
+            .AppendInterval(FlashDelay)
+            .AppendCallback(ResetCameraFlash)
+            .AppendCallback(() => PlaySFX(cameraSFX));
+        if (cameraFlashImage != null)
+            sequence.Join(cameraFlashImage.DOFade(0.0f, 0.2f));
+        sequence
+            // Max (et non Min, comme sur main) : le plan photo dure bien cameraSwapDuration au total.
+            .AppendInterval(Mathf.Max(0.0f, cameraSwapDuration - FlashDelay))
+            .AppendCallback(() =>
+            {
+                if (cameraFlashImage != null)
+                    cameraFlashImage.gameObject.SetActive(false);
+                if (blocked != null)
+                    blocked.SetControlsBlocked(false);
+
+                OnValidated.Invoke();
+                gameObject.SetActive(false);
+            });
+    }
+
+    private void ResetCameraFlash()
+    {
+        if (cameraFlashImage == null)
+            return;
+        cameraFlashImage.gameObject.SetActive(true);
+        Color flashColor = cameraFlashImage.color;
+        flashColor.a = 0.25f;
+        cameraFlashImage.color = flashColor;
+    }
+
+    private static void PlaySFX(AudioClip clip)
+    {
+        if (clip != null && SFXManager.Instance != null)
+            SFXManager.Instance.PlaySFX(clip);
     }
 
     private void OnDisable()
     {
         HidePrompt();
+        _isInside = false;
+    }
+
+    private void SetPromptState(bool state)
+    {
+        if (Prompt == null)
+            return;
+
+        if (state)
+            DisplayPrompt();
+        else
+            HidePrompt();
+    }
+
+    // Prompt partagé entre zones : les Sequences ciblent le CanvasGroup, pour que la zone suivante coupe celle d'avant.
+    private void DisplayPrompt()
+    {
+        if (isPromptDisplayed)
+            return;
+
+        isPromptDisplayed = true;
+
+        DOTween.Kill(Prompt);
+        Prompt.transform.localScale = Vector3.one;
+        if (!Prompt.gameObject.activeSelf)
+            Prompt.alpha = 0f;
+        DOTween.Sequence().SetTarget(Prompt)
+            .AppendCallback(() => Prompt.gameObject.SetActive(true))
+            .Append(Prompt.DOFade(1.0f, 0.3f));
     }
 
     private void HidePrompt()
     {
-        if (_isInside && Prompt != null)
-            Prompt.SetActive(false);
+        if (!isPromptDisplayed || Prompt == null)
+            return;
+
+        isPromptDisplayed = false;
+
+        DOTween.Kill(Prompt);
+        DOTween.Sequence().SetTarget(Prompt)
+            .Append(Prompt.DOFade(0.0f, 0.3f))
+            .AppendCallback(DeactivatePrompt);
+    }
+
+    private void PunchAndHidePrompt()
+    {
         _isInside = false;
+
+        if (!isPromptDisplayed || Prompt == null)
+            return;
+
+        isPromptDisplayed = false;
+
+        DOTween.Kill(Prompt);
+        DOTween.Sequence().SetTarget(Prompt)
+            .Append(Prompt.GetComponent<RectTransform>().DOPunchScale(Vector3.one * 0.5f, 0.5f))
+            .Append(Prompt.DOFade(0.0f, 0.3f))
+            .AppendCallback(DeactivatePrompt);
+    }
+
+    // Les MissionStartZone affichent le même objet par SetActive seulement : lui rendre alpha et échelle.
+    private void DeactivatePrompt()
+    {
+        Prompt.gameObject.SetActive(false);
+        Prompt.alpha = 1f;
+        Prompt.transform.localScale = Vector3.one;
     }
 
     private void OnDrawGizmosSelected()
@@ -107,8 +220,7 @@ public class MissionZone : MonoBehaviour
 
     public void PlayValidatedBillboardSFX()
     {
-        SFXManager.Instance.PlaySFX(pictureBillboardSFX);
         float newPitch = 0.95f + Mission.CompletedCount * -0.05f;
-        SFXManager.Instance.PlaySFX(successBillboardSFX, delay: 0.2f, pitch: newPitch);
+        SFXManager.Instance.PlaySFX(successBillboardSFX, pitch: newPitch);
     }
 }

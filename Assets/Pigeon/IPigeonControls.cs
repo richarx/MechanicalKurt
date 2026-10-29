@@ -8,6 +8,7 @@ public interface IPigeonControls
     bool Dive { get; }
     bool Brake { get; }
     bool Flex { get; }
+    bool PrecisionCamera { get; }
     bool ConsumeInteract { get; }
     // Canal séparé pour l'input prédit : ne vole pas l'appui aux scripts qui lisent ConsumeInteract.
     bool ConsumePredictedInteract { get; }

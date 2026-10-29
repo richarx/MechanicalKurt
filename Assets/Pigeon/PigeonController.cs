@@ -24,6 +24,9 @@ public struct PigeonInput : IPredictedData
     public bool Respawn;              // one-shot : retour au point d'apparition (fail-safe)
     public byte EquipmentWear;        // one-shot : équipements à porter (bit = PigeonEquipment.Equipment)
     public byte EquipmentToggle;      // one-shot : équipements à basculer
+    // Continu (répété à chaque tick, robuste aux pertes) : dernière cinématique de départ finie sur cet écran.
+    public PredictedComponentID StartAckZone;
+    public int StartAckCount;         // 0 = aucune
 
     public void Dispose() { }
 }
@@ -51,6 +54,11 @@ public struct PigeonState : IPredictedData<PigeonState>
 
     public bool InsideBoostRing;
 
+    // Support mobile (MovingSupport : ballon de plage, voitures) : le pigeon posé dessus est transporté.
+    public int SupportId;              // MovingSupport.Id, 0 = aucun
+    public Vector3 SupportLocalAnchor; // position du pigeon dans le repère du support, en fin de tick
+    public Vector3 SupportVelocity;    // vitesse du support au dernier tick, héritée en le quittant
+
     // ── Posés/lus par des orchestrateurs (zones de départ, courses) pendant leur Simulate ──
     public bool Frozen;                // mouvement gelé (compte à rebours, cinématique de course)
     public bool FrozenByZone;          // gel posé par FreezingZone (compte à rebours) : c'est elle qui le lève
@@ -60,6 +68,8 @@ public struct PigeonState : IPredictedData<PigeonState>
     public PredictedComponentID ReadyZone;     // zone de départ validée (une seule à la fois)
     public PredictedComponentID LastStartZone; // dernière MissionStartZone qui a lancé ce pigeon
     public int LastStartCount;                 // numéro de ce départ dans la zone (distingue deux départs)
+    public PredictedComponentID StartAckZone;  // dernière cinématique de départ finie par ce joueur (zone, numéro)
+    public int StartAckCount;
 
     // Équipements portés (bit = PigeonEquipment.Equipment) : dans l'état, donc vus par tous les clients,
     // y compris ceux qui arrivent en cours de partie.
@@ -138,6 +148,8 @@ public class PigeonController : PredictedIdentity<PigeonInput, PigeonState>
     [Header("Buoyancy")]
     [SerializeField] float _waterLevelModifier = 0.1f;
     [SerializeField] float _buoyancyForce = 10f;
+    [Tooltip("Profondeur maximale (m) sous le niveau de l'eau : en dessous, le pigeon ne peut plus descendre.")]
+    [SerializeField, Min(0f)] float _maxUnderwaterDepth = 2f;
 
     // L'ancienne version (calculée à chaque frame) faisait gagner de la vitesse en piquant sous l'eau : la poussée
     // de l'eau, réorientée par le steering, devenait de la vitesse vers l'avant. Cet effet de bord dépendait des FPS
@@ -188,13 +200,20 @@ public class PigeonController : PredictedIdentity<PigeonInput, PigeonState>
     Vector3 _stunHitNormal;
     bool _hasStaticHit;
     Vector3 _staticHitNormal;
+    bool _carrying;                    // Move de transport par le support en cours (pas de stun ni de support)
+    bool _collectSupport;              // Move propre vers le bas : on cherche un support sous le pigeon
+    int _foundSupportId;
+    float _foundSupportNormalY;
     // Assez grand pour contenir aussi les colliders du pigeon (ragdoll) et du décor autour d'un anneau.
     readonly Collider[] _overlapBuffer = new Collider[32];
+    readonly RaycastHit[] _castBuffer = new RaycastHit[32];
 
     // ── Requêtes locales (owner) transformées en input au prochain tick ──────
     bool _respawnRequested;
     byte _equipmentWearRequested;
     byte _equipmentToggleRequested;
+    PredictedComponentID _startAckZone;  // fin de cinématique de départ, répétée dans chaque input
+    int _startAckCount;
 
     // ── Vue ──────────────────────────────────────────────────────────────────
     PigeonState _viewState;
@@ -227,10 +246,17 @@ public class PigeonController : PredictedIdentity<PigeonInput, PigeonState>
     // Accesseurs lus par les autres scripts : ils lisent la VUE, jamais l'état en cours de simulation.
     public float Speed => _viewState.LastVelocity.magnitude;
     public float HorizontalSpeed => new Vector3(_viewState.LastVelocity.x, 0f, _viewState.LastVelocity.z).magnitude;
+    /// <summary>Vitesse propre mesurée (relative au support s'il y en a un), lue depuis la vue.</summary>
     public Vector3 Velocity => _viewState.LastVelocity;
+    /// <summary>Même valeur que Velocity (nom utilisé par les scripts de main).</summary>
+    public Vector3 LastVelocity => _viewState.LastVelocity;
     public bool IsUndeWater => UnderWater(transform.position);
     public bool IsStun => _viewState.Stunned;
+    /// <summary>Au sol, ou posé sur un support mobile.</summary>
     public bool IsGrounded => _viewState.Grounded;
+    public bool HasSupport => _viewState.SupportId != 0;
+    /// <summary>MovingSupport.Id du support sous le pigeon (0 = aucun), lu depuis la vue.</summary>
+    public int SupportId => _viewState.SupportId;
     public bool IsMovementFrozen => _viewState.Frozen;
     /// <summary>Équipements portés, lus depuis la vue (bit = PigeonEquipment.Equipment).</summary>
     public byte WornEquipment => _viewState.Equipment;
@@ -242,6 +268,19 @@ public class PigeonController : PredictedIdentity<PigeonInput, PigeonState>
     public bool WasStartedBy(PredictedComponentID zone, int count)
         => (_viewState.LastStartCount == count && _viewState.LastStartZone.Equals(zone))
         || (currentState.LastStartCount == count && currentState.LastStartZone.Equals(zone));
+
+    /// <summary>Numéro du dernier départ de cette zone auquel ce pigeon a participé (0 = aucun). État simulé d'abord : la vue peut retarder d'un tick.</summary>
+    public int LastStartCountFor(PredictedComponentID zone)
+        => currentState.LastStartZone.Equals(zone) ? currentState.LastStartCount
+        : _viewState.LastStartZone.Equals(zone) ? _viewState.LastStartCount : 0;
+
+    /// <summary>Le joueur a validé cette zone de départ (lu depuis la vue).</summary>
+    public bool IsReadyFor(PredictedComponentID zone) => _viewState.HasReadyZone && _viewState.ReadyZone.Equals(zone);
+
+    /// <summary>Ce pigeon a fini la cinématique du départ numéro <paramref name="count"/> de cette zone (vue, ou demande en cours).</summary>
+    public bool HasFinishedStartCinematic(PredictedComponentID zone, int count)
+        => (_viewState.StartAckCount == count && _viewState.StartAckZone.Equals(zone))
+        || (_startAckCount == count && _startAckZone.Equals(zone));
 
     // ─────────────────────────────────────────────────────────────────────────
     //  API locale (owner) : appelable depuis n'importe où, par exemple PositionFailSafe.
@@ -269,6 +308,20 @@ public class PigeonController : PredictedIdentity<PigeonInput, PigeonState>
             _equipmentToggleRequested ^= bit;
         else
             _equipmentWearRequested |= bit;
+    }
+
+    /// <summary>
+    /// Signale la fin d'une cinématique partagée : départ (MissionStartZone.ReportCinematicFinished, zone = la zone)
+    /// ou arrivée d'une course (zone = la course). Passe par l'input : l'orchestrateur avance quand tous les
+    /// participants l'ont signalée. Un seul accusé à la fois (le dernier remplace le précédent). Ignorée si ce
+    /// pigeon n'est pas contrôlé ici.
+    /// </summary>
+    public void AcknowledgeStartCinematic(PredictedComponentID zone, int count)
+    {
+        if (!isController)
+            return;
+        _startAckZone = zone;
+        _startAckCount = count;
     }
 
     /// <summary>Source d'input actuelle (joueur ou bot). Les scripts qui lisent des appuis passent par ici plutôt que par PlayerControls.</summary>
@@ -299,6 +352,7 @@ public class PigeonController : PredictedIdentity<PigeonInput, PigeonState>
         {
             s.LastVelocity = Vector3.zero;
             s.PendingImpulse = Vector3.zero;
+            ClearSupport(ref s);
         }
     }
 
@@ -401,6 +455,15 @@ public class PigeonController : PredictedIdentity<PigeonInput, PigeonState>
         result.Pitch = Mathf.LerpAngle(from.Pitch, to.Pitch, t);
         result.LastVelocity = Vector3.Lerp(from.LastVelocity, to.LastVelocity, t);
         result.StunRotation = Quaternion.Slerp(from.StunRotation, to.StunRotation, t);
+        if (from.SupportId == to.SupportId)
+            result.SupportLocalAnchor = Vector3.Lerp(from.SupportLocalAnchor, to.SupportLocalAnchor, t);
+        // Prise ou perte de support : interpoler dans un même repère, sinon la vue saute d'un tick entier.
+        else if (to.SupportId != 0 && MovingSupport.TryGet(to.SupportId, out MovingSupport toSupport))
+            result.SupportLocalAnchor = Vector3.Lerp(
+                toSupport.ViewTransform.InverseTransformPoint(from.Position), to.SupportLocalAnchor, t);
+        else if (from.SupportId != 0 && MovingSupport.TryGet(from.SupportId, out MovingSupport fromSupport))
+            result.Position = Vector3.Lerp(
+                fromSupport.ViewTransform.TransformPoint(from.SupportLocalAnchor), to.Position, t);
         return result;
     }
 
@@ -427,6 +490,8 @@ public class PigeonController : PredictedIdentity<PigeonInput, PigeonState>
         input.EquipmentWear = _equipmentWearRequested;
         input.EquipmentToggle = _equipmentToggleRequested;
         _equipmentWearRequested = _equipmentToggleRequested = 0;
+        input.StartAckZone = _startAckZone;
+        input.StartAckCount = _startAckCount;
 
         if (_controls == null)
         {
@@ -479,6 +544,12 @@ public class PigeonController : PredictedIdentity<PigeonInput, PigeonState>
         // Avant le gel : un joueur gelé pendant un compte à rebours peut encore annuler.
         // La zone concernée interprète l'appui (valider / annuler) dans son propre Simulate.
         s.InteractPressed = input.Interact;
+        // Un input vide (aucun reçu) ne doit pas effacer une fin de cinématique déjà signalée.
+        if (input.StartAckCount != 0)
+        {
+            s.StartAckZone = input.StartAckZone;
+            s.StartAckCount = input.StartAckCount;
+        }
 
         s.Equipment = (byte)((s.Equipment | input.EquipmentWear) ^ input.EquipmentToggle);
 
@@ -488,6 +559,7 @@ public class PigeonController : PredictedIdentity<PigeonInput, PigeonState>
         {
             s.LastVelocity = Vector3.zero;
             s.PendingImpulse = Vector3.zero;
+            ClearSupport(ref s);
             return;
         }
 
@@ -517,8 +589,9 @@ public class PigeonController : PredictedIdentity<PigeonInput, PigeonState>
         if (input.BarrelRight)
             TryBarrelRoll(input, s, false);
 
+        // Sur un support, la vitesse propre (relative au support) peut remonter un peu : on reste en mode sol.
         Vector3 velocity;
-        if (s.Grounded && s.LastVelocity.y <= 0.001f)
+        if (s.Grounded && (s.LastVelocity.y <= 0.001f || s.SupportId != 0))
             velocity = GroundMovement(input, ref s);
         else
             velocity = CalculateFlightPhysics(input, ref s, dt);
@@ -531,35 +604,121 @@ public class PigeonController : PredictedIdentity<PigeonInput, PigeonState>
             velocity += UnderwaterThrust(s, velocity) * dt;
         }
 
+        // Profondeur maximale sous l'eau : on ne descend pas plus bas que ce plancher invisible.
+        if (_water != null && velocity.y < 0f && dt > 0f)
+        {
+            float minimumY = _water.transform.position.y - _waterLevelModifier - _maxUnderwaterDepth;
+            float allowedDrop = Mathf.Max(0f, s.Position.y - minimumY);
+            velocity.y = Mathf.Max(velocity.y, -allowedDrop / dt);
+        }
+
         _stunPossible = !UnderWater(s.Position)
             && s.StunImmuneRemaining < 0f
             && new Vector2(s.LastVelocity.x, s.LastVelocity.z).magnitude > _stunMinHorizontalSpeed;
 
         Vector3 velocityBeforeStun = s.LastVelocity;
+        Vector3 positionBeforeMove = s.Position;
         MoveController(ref s, velocity, dt);
 
         if (_hasStunHit)
             Stun(ref s, _stunHitNormal, velocityBeforeStun);
 
-        DetectBoostRings(ref s);
+        DetectBoostRings(ref s, positionBeforeMove);
     }
 
-    void MoveController(ref PigeonState s, Vector3 velocity, float dt)
+    // Déplace le CharacterController. Sur un support mobile : d'abord le transport (le chemin parcouru par le
+    // support depuis le tick précédent), puis le déplacement propre. LastVelocity ne mesure que ce dernier
+    // (vitesse relative au support) ; la vitesse du support est gardée à part et héritée en le quittant.
+    void MoveController(ref PigeonState s, Vector3 velocity, float dt, bool allowSupport = true)
     {
         _velocityBeforeMove = s.LastVelocity;
         _hasStunHit = false;
         _bestStunImpact = 0f;
         _hasStaticHit = false;
 
-        Vector3 before = transform.position;
+        int previousSupport = s.SupportId;
+        Vector3 departureVelocity = s.SupportVelocity;
         _simulating = true;
+
+        if (previousSupport != 0 && allowSupport && dt > 0f && MovingSupport.TryGet(previousSupport, out MovingSupport support))
+        {
+            Physics.SyncTransforms();
+            Vector3 carry = support.transform.TransformPoint(s.SupportLocalAnchor) - s.Position;
+            // Pendant un replay, le support n'est pas à sa pose historique (figé à sa pose actuelle) : sa vitesse
+            // déduite de la pose serait fausse (nulle, ou plusieurs ticks d'un coup). On propage la vitesse de l'état.
+            bool replaying = predictionManager != null && predictionManager.isReplaying;
+            departureVelocity = replaying ? s.SupportVelocity : carry / dt;
+            if (velocity.y <= 0f && carry.sqrMagnitude > 0f)
+            {
+                if (carry.sqrMagnitude > MaxSupportCarry * MaxSupportCarry)
+                    WritePosition(s.Position + carry);   // support très loin (rollback, téléportation du support)
+                else
+                {
+                    _carrying = true;
+                    _controller.Move(carry);
+                    _carrying = false;
+                }
+            }
+        }
+
+        _collectSupport = allowSupport && velocity.y <= 0f;
+        _foundSupportId = 0;
+        _foundSupportNormalY = 0f;
+
+        Vector3 before = transform.position;
         _controller.Move(velocity * dt);
         _simulating = false;
+        _collectSupport = false;
         Vector3 after = transform.position;
 
         s.Position = after;
         s.LastVelocity = dt > 0f ? (after - before) / dt : Vector3.zero;
-        s.Grounded = _controller.isGrounded;
+
+        if (_foundSupportId != 0 && MovingSupport.TryGet(_foundSupportId, out MovingSupport found))
+        {
+            s.SupportLocalAnchor = found.transform.InverseTransformPoint(after);
+            s.SupportVelocity = _foundSupportId == previousSupport ? departureVelocity : Vector3.zero;
+            s.SupportId = _foundSupportId;
+        }
+        else
+        {
+            // Quitter un support : on garde sa vitesse (comme sauter d'une voiture en marche).
+            if (previousSupport != 0)
+                s.PendingImpulse += departureVelocity;
+            s.SupportId = 0;
+            s.SupportVelocity = Vector3.zero;
+        }
+
+        s.Grounded = _controller.isGrounded || s.SupportId != 0;
+    }
+
+    const float MaxSupportCarry = 1.5f;
+
+    // Téléportation, gel, stun : on lâche le support sans hériter de sa vitesse.
+    static void ClearSupport(ref PigeonState s)
+    {
+        s.SupportId = 0;
+        s.SupportVelocity = Vector3.zero;
+    }
+
+    // Contact sous le pigeon avec un MovingSupport assez plat : on garde le plus horizontal (règles de main).
+    bool TryRegisterSupport(ControllerColliderHit hit)
+    {
+        float minimumNormalY = Mathf.Cos(_controller.slopeLimit * Mathf.Deg2Rad);
+        if (hit.normal.y <= 0.01f || hit.normal.y < minimumNormalY
+            || hit.point.y > transform.position.y + _controller.center.y)
+            return false;
+
+        MovingSupport support = hit.collider.GetComponentInParent<MovingSupport>();
+        if (support == null || !support.isActiveAndEnabled || support.Id == 0)
+            return false;
+
+        if (_collectSupport && hit.normal.y >= _foundSupportNormalY)
+        {
+            _foundSupportId = support.Id;
+            _foundSupportNormalY = hit.normal.y;
+        }
+        return true;
     }
 
     Vector3 GroundMovement(in PigeonInput input, ref PigeonState s)
@@ -763,7 +922,7 @@ public class PigeonController : PredictedIdentity<PigeonInput, PigeonState>
             velocity = new Vector3(horizontal.x, Mathf.Max(velocity.y, -1f), horizontal.z);
         }
 
-        MoveController(ref s, velocity, dt);
+        MoveController(ref s, velocity, dt, allowSupport: false);
 
         // Rebond sur ce qu'on a touché pendant le Move.
         if (_hasStaticHit && -Vector3.Dot(velocity, _staticHitNormal) > _stunBounceMinSpeed)
@@ -788,6 +947,7 @@ public class PigeonController : PredictedIdentity<PigeonInput, PigeonState>
         s.LastVelocity = preImpactVelocity + hitNormal * _stunKnockback;
         s.StunRemaining = _stunMinDuration;
         s.StunRotation = Quaternion.identity;
+        ClearSupport(ref s);
         _stunnedEvent.Invoke();
     }
 
@@ -837,28 +997,55 @@ public class PigeonController : PredictedIdentity<PigeonInput, PigeonState>
         s.LastVelocity = Vector3.zero;
         s.PendingImpulse = Vector3.zero;
         s.StunRotation = Quaternion.identity;
+        ClearSupport(ref s);
 
         transform.rotation = rotation;
         _teleportEvent.Invoke(position - previous);
     }
 
     // Anneaux de boost : détectés par le pigeon pendant la simulation (le trigger Unity serait rejoué à chaque replay).
-    void DetectBoostRings(ref PigeonState s)
+    // Balayage sur tout le trajet du tick : à 20 ticks/s le pigeon avance de 1 à 3 m par tick, plus que l'épaisseur
+    // d'un anneau (0,6 m pour les petits des égouts) ; un test au seul point d'arrivée en raterait la moitié.
+    void DetectBoostRings(ref PigeonState s, Vector3 start)
     {
-        BoostRing ring = null;
         int layers = _boostLayer.value != 0 ? _boostLayer.value : Physics.AllLayers;
+        Vector3 center = _controller.center;
+        float radius = _controller.radius;
+
+        // Dans un anneau en fin de tick (sert à ne pas rebooster tant qu'on y reste).
+        BoostRing insideRing = null;
         int count = Physics.OverlapSphereNonAlloc(
-            transform.position + _controller.center, _controller.radius,
-            _overlapBuffer, layers, QueryTriggerInteraction.Collide);
-        for (int i = 0; i < count && ring == null; i++)
+            transform.position + center, radius, _overlapBuffer, layers, QueryTriggerInteraction.Collide);
+        for (int i = 0; i < count && insideRing == null; i++)
         {
             Collider col = _overlapBuffer[i];
             if (col.isTrigger)
-                ring = col.GetComponentInParent<BoostRing>();
+                insideRing = col.GetComponentInParent<BoostRing>();
         }
 
-        bool inside = ring != null;
-        if (inside && !s.InsideBoostRing)
+        // Traversé pendant le tick : le premier anneau rencontré sur le trajet.
+        BoostRing ring = insideRing;
+        Vector3 path = transform.position - start;
+        float distance = path.magnitude;
+        if (!s.InsideBoostRing && distance > 0.0001f)
+        {
+            int hits = Physics.SphereCastNonAlloc(
+                start + center, radius, path / distance, _castBuffer, distance, layers, QueryTriggerInteraction.Collide);
+            float closest = float.PositiveInfinity;
+            for (int i = 0; i < hits; i++)
+            {
+                RaycastHit hit = _castBuffer[i];
+                if (!hit.collider.isTrigger || hit.distance >= closest)
+                    continue;
+                BoostRing crossed = hit.collider.GetComponentInParent<BoostRing>();
+                if (crossed == null)
+                    continue;
+                ring = crossed;
+                closest = hit.distance;
+            }
+        }
+
+        if (ring != null && !s.InsideBoostRing)
         {
             float speed = s.LastVelocity.magnitude;
             Vector3 direction = speed > 0.1f ? s.LastVelocity / speed : ForwardOf(s.Pitch, s.Yaw);
@@ -867,7 +1054,7 @@ public class PigeonController : PredictedIdentity<PigeonInput, PigeonState>
                 s.PendingImpulse += direction * (targetSpeed - speed);
             _boostEvent.Invoke(ring);
         }
-        s.InsideBoostRing = inside;
+        s.InsideBoostRing = insideRing != null;
     }
 
     // ─────────────────────────────────────────────────────────────────────────
@@ -887,7 +1074,36 @@ public class PigeonController : PredictedIdentity<PigeonInput, PigeonState>
         }
 
         Rigidbody body = hit.collider.attachedRigidbody;
-        if (body != null && !body.isKinematic)
+        bool dynamicBody = body != null && !body.isKinematic;
+
+        // Transport par le support : seulement mémoriser un contact statique (rebond), ni stun ni support ni poussée.
+        if (_carrying)
+        {
+            if (!dynamicBody)
+            {
+                _hasStaticHit = true;
+                _staticHitNormal = hit.normal;
+            }
+            return;
+        }
+
+        // Le stun d'abord, quel que soit l'obstacle (sol, mur, support, objet physique), comme sur main.
+        if (_stunPossible)
+        {
+            float impact = ImpactOf(_velocityBeforeMove, hit.normal);
+            if (impact > _stunMinImpact && impact > _bestStunImpact)
+            {
+                _hasStunHit = true;
+                _bestStunImpact = impact;
+                _stunHitNormal = hit.normal;
+            }
+        }
+
+        // Posé sur un support mobile : il nous transporte, on ne le pousse pas.
+        if (TryRegisterSupport(hit))
+            return;
+
+        if (dynamicBody)
         {
             PushBody(hit, body);
             return;
@@ -895,17 +1111,6 @@ public class PigeonController : PredictedIdentity<PigeonInput, PigeonState>
 
         _hasStaticHit = true;
         _staticHitNormal = hit.normal;
-
-        if (!_stunPossible)
-            return;
-
-        float impact = ImpactOf(_velocityBeforeMove, hit.normal);
-        if (impact > _stunMinImpact && impact > _bestStunImpact)
-        {
-            _hasStunHit = true;
-            _bestStunImpact = impact;
-            _stunHitNormal = hit.normal;
-        }
     }
 
     void HandlePigeonHit(ControllerColliderHit hit, PigeonController other)
@@ -935,9 +1140,11 @@ public class PigeonController : PredictedIdentity<PigeonInput, PigeonState>
         float forwardComponent = Mathf.Max(0f, Vector3.Dot(horizontalVelocity, pushDir));
         float finalPushPower = _pushPower + forwardComponent * _weight;
 
-        // Un rigidbody non prédit serait poussé à chaque replay : on ne pousse que les PredictedRigidbody.
         if (body.TryGetComponent(out PredictedRigidbody predictedBody))
             predictedBody.AddForce(pushDir * finalPushPower, ForceMode.Force);
+        // Objet physique local (ballon de plage…) : poussé une seule fois, jamais pendant un replay.
+        else if (predictionManager != null && !predictionManager.isReplaying)
+            body.AddForce(pushDir * finalPushPower, ForceMode.Force);
     }
 
     float ImpactOf(Vector3 velocity, Vector3 normal)
@@ -956,8 +1163,14 @@ public class PigeonController : PredictedIdentity<PigeonInput, PigeonState>
     {
         _viewState = view;
 
+        // Posé sur un support mobile : affiché par rapport à lui, sinon le pigeon (vue interpolée, en léger retard)
+        // glisserait sur une voiture qui avance à chaque frame.
+        Vector3 position = view.Position;
+        if (view.SupportId != 0 && MovingSupport.TryGet(view.SupportId, out MovingSupport support))
+            position = support.ViewTransform.TransformPoint(view.SupportLocalAnchor);
+
         transform.SetPositionAndRotation(
-            view.Position,
+            position,
             Quaternion.Euler(view.Stunned ? 0f : -view.Pitch, view.Yaw, 0f));
 
         UpdateRagdollView(view);
@@ -991,7 +1204,7 @@ public class PigeonController : PredictedIdentity<PigeonInput, PigeonState>
             return;
         }
 
-        bool groundMode = view.Grounded && view.LastVelocity.y <= 0.001f;
+        bool groundMode = view.Grounded && (view.LastVelocity.y <= 0.001f || view.SupportId != 0);
         Quaternion target = groundMode
             ? Quaternion.identity
             : Quaternion.Euler(0f, 0f, -currentInput.RelativeMovement.x * _visualRollAmount);
@@ -1007,11 +1220,22 @@ public class PigeonController : PredictedIdentity<PigeonInput, PigeonState>
         OnRoll.Invoke();
     }
 
+    // Combo d'anneaux (son qui monte, repris de main) : compté par pigeon dans la vue. Le PredictedEvent ne part
+    // qu'une fois par boost (pas au replay), donc compter ici suffit, et un autre joueur ne fait pas monter le vôtre.
+    int _ringCombo;
+    float _lastRingTime = float.NegativeInfinity;
+
+    /// <summary>Rang du dernier anneau dans l'enchaînement en cours (présentation).</summary>
+    public int RingCombo => _ringCombo;
+
     void PlayBoost(BoostRing ring)
     {
         if (_boostFeedback != null)
             _boostFeedback.Play();
-        ring.PlayRingFeedback();
+        float now = Time.time;
+        _ringCombo = now - _lastRingTime <= BoostRing.ComboWindow ? _ringCombo + 1 : 1;
+        _lastRingTime = now;
+        ring.PlayRingFeedback(_ringCombo);
         OnBoosted.Invoke();
     }
 
@@ -1024,6 +1248,8 @@ public class PigeonController : PredictedIdentity<PigeonInput, PigeonState>
         if (!isOwner)
             return;
         CinemachineCore.OnTargetObjectWarped(transform, delta);
+        if (TryGetComponent(out CameraSwapper cameras))
+            cameras.SnapNow();
         if (_controls is PlayerControls playerControls)
             playerControls.SnapCameraBehind();
     }

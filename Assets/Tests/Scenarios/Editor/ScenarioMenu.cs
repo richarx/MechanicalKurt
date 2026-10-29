@@ -41,6 +41,24 @@ public static class ScenarioMenu
     [MenuItem(Root + "10. " + ScenarioRunner.WaterSpeedScenario, priority = 29)]
     static void RunWaterSpeed() => Run(ScenarioRunner.WaterSpeedScenario);
 
+    [MenuItem(Root + "11. " + ScenarioRunner.BeachBallScenario, priority = 30)]
+    static void RunBeachBall() => Run(ScenarioRunner.BeachBallScenario);
+
+    [MenuItem(Root + "12. " + ScenarioRunner.MaxDepthScenario, priority = 31)]
+    static void RunMaxDepth() => Run(ScenarioRunner.MaxDepthScenario);
+
+    [MenuItem(Root + "13. " + ScenarioRunner.CamerasScenario, priority = 32)]
+    static void RunCameras() => Run(ScenarioRunner.CamerasScenario);
+
+    [MenuItem(Root + "14. " + ScenarioRunner.SunglassesScenario, priority = 33)]
+    static void RunSunglasses() => Run(ScenarioRunner.SunglassesScenario);
+
+    [MenuItem(Root + "15. " + ScenarioRunner.SewerRingsScenario, priority = 34)]
+    static void RunSewerRings() => Run(ScenarioRunner.SewerRingsScenario);
+
+    [MenuItem(Root + "16. " + ScenarioRunner.CarRideScenario, priority = 35)]
+    static void RunCarRide() => Run(ScenarioRunner.CarRideScenario);
+
     [MenuItem(Root + "Ouvrir le dernier rapport", priority = 40)]
     static void OpenReport()
     {

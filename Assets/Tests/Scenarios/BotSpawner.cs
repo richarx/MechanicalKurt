@@ -46,8 +46,9 @@ public static class BotSpawner
 
     public static void Delete(PigeonController bot)
     {
+        // Peut être demandé deux fois (scénario puis nettoyage) : le bot peut être détruit quand la commande passe.
         if (bot != null)
-            PigeonController.RunInSimulation(manager => manager.hierarchy.Delete(bot.gameObject));
+            PigeonController.RunInSimulation(manager => { if (bot != null) manager.hierarchy.Delete(bot.gameObject); });
     }
 
     // Le bot ne doit ni prendre la caméra, ni l'audio, ni lire le clavier.

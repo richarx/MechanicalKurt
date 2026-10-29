@@ -3,23 +3,26 @@ using UnityEngine;
 public class PigeonAnimationControl : MonoBehaviour
 {
     Animator _animator;
-    IPigeonControls _pigeonControls;
-    CharacterController _character;
+    PigeonController _pigeonController;
 
     void Start()
     {
         _animator = GetComponent<Animator>();
-        _pigeonControls = GetComponentInParent<IPigeonControls>();
-        _character = GetComponentInParent<CharacterController>();
+        _pigeonController = GetComponentInParent<PigeonController>();
     }
 
+    // Tout vient du pigeon : sa vue (vitesse propre, sol ou support) et sa source d'input actuelle (joueur ou bot).
+    // Le CharacterController ne bouge que pendant la simulation (replays compris) : il ne reflète pas la vue.
     void Update()
     {
-        _animator.SetFloat("Speed", _character.velocity.magnitude);
-        _animator.SetFloat("VerticalSpeed", _character.velocity.y);
-        _animator.SetBool("IsGrounded", _character.isGrounded);
-        _animator.SetBool("Flap", _pigeonControls.Flap);
-        _animator.SetBool("Dive", _pigeonControls.Dive);
-        _animator.SetBool("Dance", _pigeonControls.Flex);
+        Vector3 velocity = _pigeonController.LastVelocity;
+        _animator.SetFloat("Speed", velocity.magnitude);
+        _animator.SetFloat("VerticalSpeed", velocity.y);
+        _animator.SetBool("IsGrounded", _pigeonController.IsGrounded);
+
+        IPigeonControls controls = _pigeonController.Controls;
+        _animator.SetBool("Flap", controls != null && controls.Flap);
+        _animator.SetBool("Dive", controls != null && controls.Dive);
+        _animator.SetBool("Dance", controls != null && controls.Flex);
     }
 }
