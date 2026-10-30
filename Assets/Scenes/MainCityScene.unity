@@ -49573,6 +49573,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SFXManager
   audioSourcePrefab: {fileID: 4261137926694444932, guid: 658532294b526b345b9dc5cc890655a8, type: 3}
+  spatialMinDistance: 3
+  spatialMaxDistance: 50
 --- !u!4 &882296085
 Transform:
   m_ObjectHideFlags: 0
@@ -87270,7 +87272,7 @@ MonoBehaviour:
   <DestinationStop>k__BackingField: {fileID: 1653775514}
   <CharacterArrivalPose>k__BackingField: {fileID: 620439260}
   <ArrivalCinematic>k__BackingField: {fileID: 1301428010}
-  <ArrivalCinematicSeconds>k__BackingField: 5
+  <ArrivalCinematicTimeout>k__BackingField: 90
   <CompletionAchievement>k__BackingField: {fileID: 11400000, guid: 5e70c332e17f99b478fff8c97a999d59, type: 2}
   <MaximumHeight>k__BackingField: 15
   <FailureMessage>k__BackingField: {fileID: 1594338369}
@@ -111596,22 +111598,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::DebugManager
   _runScenariosOnPlay: 0
   _scenarios:
-  - Anneau de boost
-  - "Tuto : zone de d\xE9part"
-  - "Course : d\xE9part \xE0 2 pigeons"
-  - "Course : \xE9chec de hauteur"
-  - 'Mission : livraison simple'
-  - 'Mission : collecte (Spidey)'
-  - 'Mission : billboards'
-  - "Mission : pri\xE8re (Roar)"
-  - "\xC9quipement : ramassage"
-  - 'Eau : speedway'
-  - 'Ballon de plage : support mobile'
-  - 'Eau : profondeur maximale'
-  - "Cam\xE9ras : sous l'eau et pr\xE9cision"
-  - "\xC9quipement : lunettes"
-  - "Anneaux des \xE9gouts : boost et combo"
-  - 'Voitures : solides en solo, on roule dessus'
+  - "Multi : d\xE9part de course \xE0 2 joueurs"
+  - 'Multi : victoire, gel et course refaite'
+  - "Multi : \xE9chec de hauteur"
+  - "Multi : arriv\xE9e en pleine course"
+  - 'Multi : tuto local au second joueur'
+  - "Multi : \xE9quipement du second joueur"
+  - 'Multi : sons chez le second joueur'
   _extraBots: 0
   _botSpacing: 2.5
 --- !u!1 &1987946908

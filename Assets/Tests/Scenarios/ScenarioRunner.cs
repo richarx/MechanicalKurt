@@ -2,30 +2,44 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Text;
+using System.Text.RegularExpressions;
 using UnityEngine;
 
 // ─────────────────────────────────────────────────────────────────────────────
 //  Banc de scénarios « en situation réelle ».
 //
-//  Lancé depuis Tools > Scénarios : ouvre MainCityScene, entre en Play et joue les scénarios dans la
-//  vraie scène, en temps réel, avec la vraie simulation PurrNet. Seuls les joueurs sont remplacés
-//  par des bots (BotControls). Chaque étape attend une condition avec un délai maximal ;
-//  à la première étape ratée, le scénario s'arrête et ses nettoyages sont exécutés.
+//  Lancé depuis Tools > Scénarios ou le DebugManager : ouvre MainCityScene, entre en Play et joue les scénarios
+//  dans la vraie scène, en temps réel, avec la vraie simulation PurrNet. Chaque étape attend une condition avec un
+//  délai maximal ; à la première étape ratée, le scénario s'arrête et ses nettoyages sont exécutés.
+//
+//  Deux familles :
+//   - solo : l'hôte seul, les autres pigeons sont des bots (BotControls) ;
+//   - multi : un vrai second joueur, l'éditeur clone « Player 2 » de Multiplayer Play Mode, client PurrNet.
+//     Il est piloté par ScenarioClientAgent via ScenarioRemoteLink : ses actions passent par l'input de son
+//     pigeon (vrai réseau), et il renvoie ce qu'il voit sur son écran.
+//  Pendant les scénarios solo, le second joueur éventuel est déconnecté de la partie, puis reconnecté.
 //
 //  Rapport : panneau à l'écran, console, et Logs/ScenarioReport.txt.
 //  Les achievements sont sauvegardés au début puis restaurés à la fin (PlayerPrefs).
-//  Limite : hôte solo uniquement (les commandes de test ne passent pas par l'input réseau).
 // ─────────────────────────────────────────────────────────────────────────────
 public partial class ScenarioRunner : MonoBehaviour
 {
     public const string RunKey = "ScenarioRunner.Run";
     public const string ExitOnFinishKey = "ScenarioRunner.ExitOnFinish";
     public const string ActiveKey = "ScenarioRunner.Active";   // lu par ScenarioPauseGuard (éditeur)
+    // Filtre : noms de scénarios séparés par FilterSeparator, ou l'un de ces jokers.
     public const string AllScenarios = "*";
+    public const string AllSolo = "*solo";
+    public const string AllMulti = "*multi";
+    public const char FilterSeparator = '|';   // pas la virgule : certains noms en contiennent
     const string ReportPath = "Logs/ScenarioReport.txt";
     const float ScenarioTimeout = 90f;
+    const float MultiScenarioTimeout = 150f;
+    const float RemoteWaitInteractive = 45f;
+    const float RemoteWaitCommandLine = 300f;
 
     class StepResult
     {
@@ -40,9 +54,10 @@ public partial class ScenarioRunner : MonoBehaviour
     {
         public string Name;
         public Func<IEnumerator> Body;
+        public bool Multi;   // demande un vrai second joueur (Player 2)
     }
 
-    string _filter = AllScenarios;
+    string _filter = AllSolo;
     readonly List<StepResult> _results = new List<StepResult>();
     readonly List<Action> _cleanups = new List<Action>();
     readonly Dictionary<string, int> _achievementBackup = new Dictionary<string, int>();
@@ -52,10 +67,17 @@ public partial class ScenarioRunner : MonoBehaviour
     string _currentScenario;
     string _currentStep;
     float _scenarioStart;
+    float _scenarioTimeout = ScenarioTimeout;
     bool _scenarioFailed;
     bool _finished;
+    bool _commandLine;
     bool _achievementsRestored = true;
     Vector2 _scroll;
+
+    // Second joueur (scénarios multi) : null tant qu'aucun n'est attendu.
+    ScenarioRemoteLink _link;
+    bool _lastRemoteOk;
+    string _lastRemoteDetail;
 
     // Pigeon du joueur, piloté par un bot pendant les scénarios.
     protected PigeonController Pigeon { get; private set; }
@@ -73,7 +95,10 @@ public partial class ScenarioRunner : MonoBehaviour
 
     public static bool IsRunning => FindAnyObjectByType<ScenarioRunner>() != null;
 
-    /// <summary>Lance les scénarios dont le nom figure dans <paramref name="filter"/> (séparés par des virgules, ou « * »).</summary>
+    /// <summary>
+    /// Lance les scénarios dont le nom figure dans <paramref name="filter"/> (séparés par FilterSeparator),
+    /// ou AllSolo / AllMulti / AllScenarios.
+    /// </summary>
     public static void Launch(string filter)
     {
         if (IsRunning)
@@ -85,11 +110,20 @@ public partial class ScenarioRunner : MonoBehaviour
     IEnumerator Start()
     {
         UnityEditor.SessionState.SetBool(ActiveKey, true);
+        _commandLine = UnityEditor.SessionState.GetBool(ExitOnFinishKey, false);
         MissionStartZone.TraceTransitions = true;
         _scenarios = BuildScenarios();
+
+        // Les solo d'abord, les multi ensuite : une seule déconnexion / reconnexion du second joueur.
+        var selected = new List<ScenarioDef>();
         foreach (ScenarioDef def in _scenarios)
-            if (Selected(def))
-                _scenarioStatus[def.Name] = null;
+            if (Selected(def) && !def.Multi)
+                selected.Add(def);
+        foreach (ScenarioDef def in _scenarios)
+            if (Selected(def) && def.Multi)
+                selected.Add(def);
+        foreach (ScenarioDef def in selected)
+            _scenarioStatus[def.Name] = null;
 
         _currentScenario = "Préparation";
         _scenarioStart = Time.realtimeSinceStartup;
@@ -110,18 +144,34 @@ public partial class ScenarioRunner : MonoBehaviour
         BackupAndResetAchievements();
         Bot = new BotControls();
 
-        foreach (ScenarioDef def in _scenarios)
+        // Après la sauvegarde des achievements : le second joueur repart lui aussi d'une sauvegarde vide.
+        yield return PrepareRemote(selected.Exists(def => def.Multi));
+
+        foreach (ScenarioDef def in selected)
         {
-            if (!Selected(def))
-                continue;
+            if (def.Multi)
+                yield return EnsureRemoteOnline();
+            else
+                yield return EnsureRemoteOffline();
             yield return RunScenario(def);
             yield return new WaitForSecondsRealtime(1f);
         }
 
+        yield return ReleaseRemote();
         Finish();
     }
 
-    bool Selected(ScenarioDef def) => _filter == AllScenarios || Array.IndexOf(_filter.Split(','), def.Name) >= 0;
+    bool Selected(ScenarioDef def)
+    {
+        foreach (string part in _filter.Split(FilterSeparator))
+        {
+            string token = part.Trim();
+            if (token == AllScenarios || token == def.Name
+                || (token == AllSolo && !def.Multi) || (token == AllMulti && def.Multi))
+                return true;
+        }
+        return false;
+    }
 
     IEnumerator WaitForLocalPigeon()
     {
@@ -138,6 +188,7 @@ public partial class ScenarioRunner : MonoBehaviour
         _currentScenario = def.Name;
         _currentStep = "";
         _scenarioStart = Time.realtimeSinceStartup;
+        _scenarioTimeout = def.Multi ? MultiScenarioTimeout : ScenarioTimeout;
         _scenarioFailed = false;
         Debug.Log($"[Scénario] ▶ {def.Name}");
 
@@ -145,7 +196,15 @@ public partial class ScenarioRunner : MonoBehaviour
         Pigeon.SetControlsOverride(Bot);
         Defer(() => Pigeon.SetControlsOverride(null));
 
-        yield return Execute(def.Body());
+        // Le second joueur est piloté par les tests pendant le scénario (son clavier n'agit plus).
+        bool withRemote = def.Multi && RemoteReady;
+        if (withRemote)
+        {
+            yield return RemoteCommand("override", "on");
+            yield return RemoteCommand("release");
+        }
+
+        yield return Execute(def.Multi && !withRemote ? MissingRemote() : def.Body());
 
         _scenarioStatus[def.Name] = !_scenarioFailed;
         Debug.Log($"[Scénario] {(_scenarioFailed ? "✘ ÉCHEC" : "✔ OK")} {def.Name} ({Time.realtimeSinceStartup - _scenarioStart:0.0} s)");
@@ -160,12 +219,21 @@ public partial class ScenarioRunner : MonoBehaviour
         }
         _cleanups.Clear();
         Bot.ReleaseAll();
+        if (def.Multi && _link != null && _link.Connected)
+        {
+            yield return RemoteCommand("play-dialogs", "off");
+            yield return RemoteCommand("release");
+            yield return RemoteCommand("cancel-dialogs");
+        }
 
         // Laisser les nettoyages passer par quelques ticks de simulation (échec de course, suppression de bot),
-        // puis remettre le pigeon à son point d'apparition pour le scénario suivant.
+        // puis remettre les pigeons à leur point d'apparition pour le scénario suivant.
         yield return new WaitForSecondsRealtime(0.5f);
+        yield return SettleRace();
         Debug.Log("[Scénario]   · respawn du joueur");
         Pigeon.RequestRespawn();
+        if (def.Multi && RemoteReady)
+            yield return RemoteCommand("respawn");   // seul le joueur qui possède le pigeon peut le respawn
         yield return new WaitForSecondsRealtime(1f);
         Debug.Log("[Scénario]   · prêt pour la suite");
     }
@@ -178,9 +246,9 @@ public partial class ScenarioRunner : MonoBehaviour
         stack.Push(root);
         while (stack.Count > 0 && !_scenarioFailed)
         {
-            if (Time.realtimeSinceStartup - _scenarioStart > ScenarioTimeout)
+            if (Time.realtimeSinceStartup - _scenarioStart > _scenarioTimeout)
             {
-                Fail($"Scénario trop long (> {ScenarioTimeout:0} s), étape « {_currentStep} »", null);
+                Fail($"Scénario trop long (> {_scenarioTimeout:0} s), étape « {_currentStep} »", null);
                 yield break;
             }
 
@@ -364,6 +432,244 @@ public partial class ScenarioRunner : MonoBehaviour
         yield return new WaitForSecondsRealtime(0.5f);
     }
 
+    // ── Second joueur (vrai client : éditeur clone « Player 2 ») ─────────────
+    //  Ces étapes tournent entre les scénarios : pas d'Expect / Check (ils bloquent jusqu'au scénario suivant).
+
+    /// <summary>Second joueur relié, en jeu, et son pigeon présent chez l'hôte.</summary>
+    protected bool RemoteReady => _link != null && _link.Connected && _link.Get("net") == "connected"
+        && _link.Get("local") == "1" && RemotePigeon != null;
+
+    /// <summary>Le pigeon du second joueur, tel que l'hôte le simule (null s'il n'est pas en jeu).</summary>
+    protected PigeonController RemotePigeon
+    {
+        get
+        {
+            if (_link == null || !_link.Connected)
+                return null;
+            string id = _link.Get("net/player");
+            if (id == null)
+                return null;
+            foreach (PigeonController pigeon in PigeonController.All)
+                if (pigeon != Pigeon && pigeon.owner.HasValue && !pigeon.owner.Value.isBot
+                    && pigeon.owner.Value.id.value.ToString(CultureInfo.InvariantCulture) == id)
+                    return pigeon;
+            return null;
+        }
+    }
+
+    /// <summary>Un pigeon de joueur autre que celui de l'hôte (les bots n'ont pas de propriétaire).</summary>
+    static bool HasRemotePlayerPigeon()
+    {
+        foreach (PigeonController pigeon in PigeonController.All)
+            if (pigeon != PigeonController.Local && pigeon.owner.HasValue && !pigeon.owner.Value.isBot)
+                return true;
+        return false;
+    }
+
+    // Multiplayer Play Mode : un joueur virtuel est activé (Window > Multiplayer > Multiplayer Play Mode).
+    static bool MppmVirtualPlayerActive()
+    {
+        try
+        {
+            string path = Path.Combine("Library", "VP", "SystemData.json");
+            if (!File.Exists(path))
+                return false;
+            string json = File.ReadAllText(path);
+            return Regex.IsMatch(json, "\"IsMppmActive\"\\s*:\\s*true")
+                && Regex.IsMatch(json, "\"Active\"\\s*:\\s*true\\s*,\\s*\"Index\"\\s*:\\s*\\d+\\s*,\\s*\"Type\"\\s*:\\s*1\\b");
+        }
+        catch (Exception)
+        {
+            return false;
+        }
+    }
+
+    // Ouvre le lien et attend le second joueur : toujours si un scénario multi est choisi ; sinon seulement s'il y en
+    // a un (les scénarios solo le déconnectent le temps de leur passage).
+    IEnumerator PrepareRemote(bool required)
+    {
+        bool expected = required || HasRemotePlayerPigeon() || (!_commandLine && MppmVirtualPlayerActive());
+        if (!expected)
+            yield break;
+
+        _currentScenario = "Second joueur";
+        _scenarioStart = Time.realtimeSinceStartup;
+        _link = new ScenarioRemoteLink();
+        if (!_link.Listen())
+        {
+            Record($"Lien de test avec le second joueur impossible (port {ScenarioLinkProtocol.Port})", false, () => _link.ListenError);
+            _link = null;
+            yield break;
+        }
+
+        float timeout = required ? (_commandLine ? RemoteWaitCommandLine : RemoteWaitInteractive) : RemoteWaitInteractive;
+        Debug.Log($"[Scénario] En attente du second joueur (au plus {timeout:0} s)…");
+        float deadline = Time.realtimeSinceStartup + timeout;
+        float nextConnect = 0f;
+        // Solo seul : il suffit d'être relié (il sera déconnecté). Multi : il faut qu'il soit en jeu.
+        while (Time.realtimeSinceStartup < deadline && !(required ? RemoteReady : _link.Connected))
+        {
+            _lastProgress = Time.realtimeSinceStartup;   // attente normale : pas un blocage
+            // Clone entré en Play avant le serveur : son client PurrNet a abandonné et ne réessaie pas seul.
+            if (required && _link.Connected && _link.Get("net") == "offline" && Time.realtimeSinceStartup >= nextConnect)
+            {
+                _link.Send("connect");
+                nextConnect = Time.realtimeSinceStartup + 5f;
+            }
+            yield return null;
+        }
+
+        if (_link.Connected)
+            yield return ResetRemoteAchievementsOnce();
+        if (!(required ? RemoteReady : _link.Connected))
+        {
+            Record(required ? "Aucun second joueur : les scénarios multi vont échouer" : "Second joueur annoncé mais jamais relié",
+                false, RemoteMissingReason);
+            yield break;
+        }
+        Record("Second joueur relié (éditeur clone, client PurrNet)", true, RemoteState);
+    }
+
+    // Le clone a chargé ses achievements au démarrage, depuis la vraie sauvegarde (partagée avec l'hôte) : il repart
+    // d'une sauvegarde vide, une seule fois, la vraie étant restaurée par l'hôte à la fin (Finish).
+    bool _remoteAchievementsReset;
+
+    IEnumerator ResetRemoteAchievementsOnce()
+    {
+        if (_remoteAchievementsReset || _link == null || !_link.Connected)
+            yield break;
+        yield return RemoteCommand("reset-achievements");
+        _remoteAchievementsReset = _lastRemoteOk;
+        if (!_lastRemoteOk)
+            Debug.LogWarning($"[Scénario] Achievements du second joueur non remis à zéro : {_lastRemoteDetail}");
+    }
+
+    string RemoteMissingReason()
+    {
+        if (_link == null)
+            return "lien de test non ouvert";
+        if (!_link.Connected)
+            return "aucun éditeur clone relié : activer Player 2 (Window > Multiplayer > Multiplayer Play Mode), "
+                + "ou lancer ScenarioMenu.JoinAsClientFromCommandLine dans le clone";
+        return $"relié mais pas en jeu : réseau {_link.Get("net") ?? "?"}, pigeon local {_link.Get("local") ?? "?"}, "
+            + $"pigeon vu par l'hôte {(RemotePigeon != null ? "oui" : "non")}";
+    }
+
+    IEnumerator MissingRemote()
+    {
+        yield return Check("Second joueur en jeu", false, RemoteMissingReason());
+    }
+
+    // Avant un scénario solo : le second joueur quitte la partie (sinon il compte dans les départs de course, etc.).
+    IEnumerator EnsureRemoteOffline()
+    {
+        if (_link == null || !_link.Connected)
+        {
+            if (HasRemotePlayerPigeon())
+                Debug.LogWarning("[Scénario] Un autre joueur est en jeu sans agent de test : les scénarios solo peuvent échouer.");
+            yield break;
+        }
+        if (_link.Get("net") == "offline" && !HasRemotePlayerPigeon())
+            yield break;
+
+        yield return RemoteCommand("override", "off");
+        yield return RemoteCommand("disconnect");
+        float deadline = Time.realtimeSinceStartup + 15f;
+        while (Time.realtimeSinceStartup < deadline && (HasRemotePlayerPigeon() || _link.Get("net") != "offline"))
+        {
+            _lastProgress = Time.realtimeSinceStartup;
+            yield return null;
+        }
+        if (HasRemotePlayerPigeon())
+        {
+            string previous = _currentScenario;
+            _currentScenario = "Second joueur";
+            Record("Le second joueur n'a pas quitté la partie : les scénarios solo peuvent échouer", false, RemoteState);
+            _currentScenario = previous;
+        }
+        yield return new WaitForSecondsRealtime(0.5f);
+    }
+
+    // Avant un scénario multi : le second joueur (re)joint la partie.
+    IEnumerator EnsureRemoteOnline()
+    {
+        if (_link == null || !_link.Connected)
+            yield break;
+        yield return ResetRemoteAchievementsOnce();
+        if (RemoteReady)
+            yield break;
+
+        yield return RemoteCommand("connect");
+        float deadline = Time.realtimeSinceStartup + 30f;
+        while (Time.realtimeSinceStartup < deadline && !RemoteReady)
+        {
+            _lastProgress = Time.realtimeSinceStartup;
+            yield return null;
+        }
+        // Laisser le pigeon apparaître et se poser.
+        if (RemoteReady)
+            yield return new WaitForSecondsRealtime(1f);
+    }
+
+    // Fin : rendre au second joueur sa partie telle qu'avant les tests (en jeu, commandes au clavier).
+    IEnumerator ReleaseRemote()
+    {
+        if (_link == null || !_link.Connected)
+            yield break;
+        yield return EnsureRemoteOnline();
+        yield return RemoteCommand("override", "off");
+        yield return RemoteCommand(_commandLine ? "quit" : "bye");
+    }
+
+    /// <summary>Commande au second joueur ; résultat dans _lastRemoteOk / _lastRemoteDetail (sans faire échouer).</summary>
+    IEnumerator RemoteCommand(string verb, string argument = "", float timeout = 5f)
+    {
+        _lastRemoteOk = false;
+        _lastRemoteDetail = "pas de second joueur relié";
+        if (_link == null || !_link.Connected)
+            yield break;
+
+        int id = _link.Send(verb, argument);
+        float deadline = Time.realtimeSinceStartup + timeout;
+        while (Time.realtimeSinceStartup < deadline)
+        {
+            if (_link.TryGetReply(id, out bool ok, out string detail))
+            {
+                _lastRemoteOk = ok;
+                _lastRemoteDetail = detail;
+                yield break;
+            }
+            if (!_link.Connected)
+            {
+                _lastRemoteDetail = "lien perdu";
+                yield break;
+            }
+            yield return null;
+        }
+        _lastRemoteDetail = $"pas de réponse en {timeout:0} s";
+    }
+
+    /// <summary>Résumé de ce que voit le second joueur, pour le détail des étapes.</summary>
+    protected string RemoteState()
+    {
+        if (_link == null || !_link.Connected)
+            return "second joueur non relié";
+        var sb = new StringBuilder();
+        sb.Append($"chez le second joueur : réseau {_link.Get("net")}, pigeon {_link.Get("local/pos") ?? "absent"}");
+        sb.Append($", gelé {_link.Get("local/frozen")}, prêt {_link.Get("local/ready")}, piloté {_link.Get("local/driven")}");
+        string dialogs = _link.Get("dialogs");
+        if (!string.IsNullOrEmpty(dialogs))
+            sb.Append($", dialogues [{dialogs}]");
+        foreach (KeyValuePair<string, string> entry in _link.Snapshot)
+            if (entry.Key.StartsWith("zone/", StringComparison.Ordinal) || entry.Key.StartsWith("dialogs/", StringComparison.Ordinal)
+                || (entry.Key.StartsWith("race/", StringComparison.Ordinal)
+                && (entry.Key.EndsWith("/phase", StringComparison.Ordinal) || entry.Key.EndsWith("/departure", StringComparison.Ordinal)
+                    || entry.Key.EndsWith("/arrival", StringComparison.Ordinal))))
+                sb.Append($", {entry.Key} « {entry.Value} »");
+        sb.Append($" (instantané il y a {Time.realtimeSinceStartup - _link.LastSnapshotTime:0.00} s)");
+        return sb.ToString();
+    }
+
     // ─────────────────────────────────────────────────────────────────────────
     //  Résultats
     // ─────────────────────────────────────────────────────────────────────────
@@ -416,6 +722,8 @@ public partial class ScenarioRunner : MonoBehaviour
         UnityEditor.SessionState.EraseBool(ActiveKey);
         _currentScenario = null;
         RestoreAchievements();
+        _link?.Dispose();
+        _link = null;
 
         int ok = 0, failed = 0;
         foreach (bool? status in _scenarioStatus.Values)
@@ -498,6 +806,8 @@ public partial class ScenarioRunner : MonoBehaviour
             Debug.LogWarning($"[Scénario] Runner détruit avant la fin (scénario « {_currentScenario} », étape « {_currentStep} »).");
         UnityEditor.SessionState.EraseBool(ActiveKey);
         RestoreAchievements();
+        _link?.Dispose();
+        _link = null;
     }
 
     // Battement dans le log (utile en ligne de commande) et garde-fou si plus rien n'avance.
@@ -507,6 +817,7 @@ public partial class ScenarioRunner : MonoBehaviour
 
     void Update()
     {
+        _link?.Poll();
         if (_finished)
             return;
         float now = Time.realtimeSinceStartup;

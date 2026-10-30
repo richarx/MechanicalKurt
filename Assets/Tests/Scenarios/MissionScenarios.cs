@@ -225,7 +225,7 @@ public partial class ScenarioRunner
             yield return null;
         }
         yield return Check($"Fin normale du {label}", !cinematic.IsPlaying && cinematic.CompletedNormally,
-            cinematic.IsPlaying ? "toujours en cours après 60 s" : "interrompue");
+            cinematic.IsPlaying ? "toujours en cours après 60 s" : cinematic.CompletedNormally ? "terminée" : "interrompue");
     }
 
     static void CancelIfPlaying(DialogCinematic cinematic)

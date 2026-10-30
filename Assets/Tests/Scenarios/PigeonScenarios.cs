@@ -15,7 +15,8 @@ public partial class ScenarioRunner
     public const string RaceLockedScenario = "Course : une seule à la fois";
     public const string RaceWinScenario = "Course : victoire et course refaite";
 
-    public static readonly string[] ScenarioNames =
+    /// <summary>Scénarios joués par l'hôte seul (les autres pigeons sont des bots).</summary>
+    public static readonly string[] SoloScenarioNames =
     {
         RingScenario, TutoScenario, RaceStartScenario, RaceHeightScenario, RaceLockedScenario, RaceWinScenario,
         DeliveryScenario, CollectionScenario, BillboardScenario, PrayerScenario,
@@ -23,6 +24,25 @@ public partial class ScenarioRunner
         BeachBallScenario, MaxDepthScenario, CamerasScenario, SunglassesScenario, SewerRingsScenario, CarRideScenario,
         PigeonAudioScenario,
     };
+
+    /// <summary>Scénarios avec un vrai second joueur (Player 2 de Multiplayer Play Mode).</summary>
+    public static readonly string[] MultiScenarioNames =
+    {
+        MultiRaceStartScenario, MultiRaceWinScenario, MultiRaceHeightScenario, MultiLateJoinScenario,
+        MultiTutoScenario, MultiEquipmentScenario, MultiAudioScenario,
+    };
+
+    public static readonly string[] ScenarioNames = Concat(SoloScenarioNames, MultiScenarioNames);
+
+    public static bool IsMultiScenario(string name) => System.Array.IndexOf(MultiScenarioNames, name) >= 0;
+
+    static string[] Concat(string[] first, string[] second)
+    {
+        var all = new string[first.Length + second.Length];
+        first.CopyTo(all, 0);
+        second.CopyTo(all, first.Length);
+        return all;
+    }
 
     List<ScenarioDef> BuildScenarios() => new List<ScenarioDef>
     {
@@ -45,6 +65,14 @@ public partial class ScenarioRunner
         new ScenarioDef { Name = SewerRingsScenario, Body = RunSewerRings },
         new ScenarioDef { Name = CarRideScenario, Body = RunCarRide },
         new ScenarioDef { Name = PigeonAudioScenario, Body = RunPigeonAudio },
+
+        new ScenarioDef { Name = MultiRaceStartScenario, Body = MultiRaceStart, Multi = true },
+        new ScenarioDef { Name = MultiRaceWinScenario, Body = MultiRaceWin, Multi = true },
+        new ScenarioDef { Name = MultiRaceHeightScenario, Body = MultiRaceHeight, Multi = true },
+        new ScenarioDef { Name = MultiLateJoinScenario, Body = MultiLateJoin, Multi = true },
+        new ScenarioDef { Name = MultiTutoScenario, Body = MultiTuto, Multi = true },
+        new ScenarioDef { Name = MultiEquipmentScenario, Body = MultiEquipment, Multi = true },
+        new ScenarioDef { Name = MultiAudioScenario, Body = MultiAudio, Multi = true },
     };
 
     // ─────────────────────────────────────────────────────────────────────────
@@ -431,6 +459,9 @@ public partial class ScenarioRunner
             race.DepartureCinematic.CancelCinematic();
         if (race.ArrivalCinematic != null && race.ArrivalCinematic.IsPlaying)
             race.ArrivalCinematic.CancelCinematic();
+        // Second joueur : il finit ses cinématiques lui-même (sa fin passe par son input) ; sans attendre sa réponse.
+        if (_link != null && _link.Connected)
+            _link.Send("cancel-dialogs");
         // Arrêté en pleine cinématique de départ : la libérer pour tous, sinon les pigeons restent gelés jusqu'au délai max.
         if (race.DepartureZone != null && race.DepartureZone.Phase == MissionStartZone.Cinematic)
             foreach (PigeonController pigeon in PigeonController.All)
@@ -446,6 +477,56 @@ public partial class ScenarioRunner
             PigeonController.RunInSimulation(_ => pigeon.ForceTeleport(above, pigeon.transform.rotation));
         }
         // Les validations (WantsStart) tombent d'elles-mêmes quand les pigeons quittent la zone au respawn.
+    }
+
+    // Après les nettoyages, entre deux scénarios : la course doit finir au repos, quoi qu'il reste en route
+    // (décompte presque fini, cinématique démarrée chez le second joueur juste après le nettoyage, accusé tardif
+    // qui relance la course…). Hors Execute : pas d'Expect.
+    IEnumerator SettleRace()
+    {
+        PigeonCharacterRace race = FindRace();
+        if (race == null)
+            yield break;
+        MissionStartZone zone = race.DepartureZone;
+        float deadline = Time.realtimeSinceStartup + 12f;
+        float nextAction = 0f;
+        while (Time.realtimeSinceStartup < deadline)
+        {
+            if (race.Phase == PigeonCharacterRace.RacePhase.Ready && zone.Phase == MissionStartZone.Waiting)
+                yield break;
+            _lastProgress = Time.realtimeSinceStartup;
+            if (Time.realtimeSinceStartup >= nextAction)
+            {
+                nextAction = Time.realtimeSinceStartup + 0.5f;
+                if (zone.Phase == MissionStartZone.CountingDown)
+                    MoveAllPigeons(zone.transform.position + zone.transform.forward * (zone.Radius * 3f + 3f) + Vector3.up * 2f);
+                else if (zone.Phase == MissionStartZone.Cinematic)
+                {
+                    CancelIfPlaying(race.DepartureCinematic);
+                    zone.ReportCinematicFinished(Pigeon);
+                    _link?.Send("finish-cinematics", "departure");
+                }
+                else if (race.Phase == PigeonCharacterRace.RacePhase.ArrivalCinematic)
+                {
+                    CancelIfPlaying(race.ArrivalCinematic);
+                    race.ReportArrivalCinematicFinished(Pigeon);
+                    _link?.Send("finish-cinematics", "arrival");
+                }
+                else if (race.Phase == PigeonCharacterRace.RacePhase.Racing)
+                    MoveAllPigeons(AboveMaximumHeightAwayFromFinish(race));   // échec : retour au départ
+            }
+            yield return null;
+        }
+        Debug.LogWarning($"[Scénario] Course pas revenue au repos entre deux scénarios : course {race.Phase}, {zone.Describe()}");
+    }
+
+    static void MoveAllPigeons(Vector3 position)
+    {
+        foreach (PigeonController pigeon in PigeonController.All)
+        {
+            PigeonController target = pigeon;
+            PigeonController.RunInSimulation(_ => { if (target != null) target.ForceTeleport(position, target.transform.rotation); });
+        }
     }
 
     // Au-dessus de MaximumHeight, à la verticale de la zone de départ, et assez loin de l'arrivée
@@ -469,10 +550,11 @@ public partial class ScenarioRunner
     }
 
     // Le prompt est partagé avec les MissionZone (CanvasGroup en fondu) : actif ne suffit pas, il doit être opaque.
-    static float PromptAlpha(GameObject prompt)
+    internal static float PromptAlpha(GameObject prompt)
         => prompt != null && prompt.TryGetComponent(out CanvasGroup group) ? group.alpha : 1f;
 
-    static bool PromptVisible(GameObject prompt) => prompt != null && prompt.activeInHierarchy && PromptAlpha(prompt) > 0.99f;
+    // Aussi lu par ScenarioClientAgent : ce que voit le second joueur se mesure de la même façon.
+    internal static bool PromptVisible(GameObject prompt) => prompt != null && prompt.activeInHierarchy && PromptAlpha(prompt) > 0.99f;
 
     static float DistanceXZ(PigeonController pigeon, Transform target)
     {

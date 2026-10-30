@@ -13,15 +13,18 @@ public class DebugManager : MonoBehaviour
 #pragma warning disable CS0414
     [Header("Scénarios au lancement")]
     [Tooltip("Joue les scénarios choisis dès le Play (même chose que Tools > Scénarios).")]
-    [SerializeField] bool _runScenariosOnPlay;
-    [Tooltip("Liste vide = tous les scénarios.")]
-    [SerializeField, ShowIf(nameof(_runScenariosOnPlay)), ValueDropdown("ScenarioOptions")]
+    [SerializeField, PropertyOrder(0)] bool _runScenariosOnPlay;
+    [Tooltip("Un par un avec le menu déroulant, ou d'un coup avec les boutons. Liste vide = tous les scénarios solo.")]
+    [SerializeField, ShowIf(nameof(_runScenariosOnPlay)), PropertyOrder(1)]
+    [ValueDropdown("ScenarioOptions", IsUniqueList = true, ExcludeExistingValuesInList = true, DrawDropdownForListElements = false)]
+    [InfoBox("Scénarios multi : activer Player 2 (Window > Multiplayer > Multiplayer Play Mode) avant Play. "
+        + "Pendant les scénarios solo, Player 2 est déconnecté de la partie, puis reconnecté.", "HasMultiScenario")]
     List<string> _scenarios = new List<string>();
 
     [Header("Bots en plus")]
     [Tooltip("Pigeons bots immobiles créés autour du joueur. Ignoré quand des scénarios tournent (ils créent leurs propres bots).")]
-    [SerializeField, Range(0, 8)] int _extraBots;
-    [SerializeField, Min(1f)] float _botSpacing = 2.5f;
+    [SerializeField, Range(0, 8), PropertyOrder(3)] int _extraBots;
+    [SerializeField, Min(1f), PropertyOrder(4)] float _botSpacing = 2.5f;
 #pragma warning restore CS0414
 
 #if UNITY_EDITOR
@@ -58,11 +61,52 @@ public class DebugManager : MonoBehaviour
         }
     }
 
-    static IEnumerable<string> ScenarioOptions() => ScenarioRunner.ScenarioNames;
+    // Menu déroulant rangé en deux dossiers : Solo / Multi.
+    static IEnumerable ScenarioOptions()
+    {
+        var options = new ValueDropdownList<string>();
+        foreach (string name in ScenarioRunner.SoloScenarioNames)
+            options.Add("Solo/" + name, name);
+        foreach (string name in ScenarioRunner.MultiScenarioNames)
+            options.Add("Multi/" + name, name);
+        return options;
+    }
+
+    bool HasMultiScenario()
+    {
+        foreach (string name in _scenarios)
+            if (ScenarioRunner.IsMultiScenario(name))
+                return true;
+        return false;
+    }
+
+    [ShowIf(nameof(_runScenariosOnPlay)), HorizontalGroup("ScenarioButtons"), PropertyOrder(2), Button("+ Tous les solo")]
+    void AddAllSolo() => AddScenarios(ScenarioRunner.SoloScenarioNames, "Ajouter tous les scénarios solo");
+
+    [ShowIf(nameof(_runScenariosOnPlay)), HorizontalGroup("ScenarioButtons"), PropertyOrder(2), Button("+ Tous les multi")]
+    void AddAllMulti() => AddScenarios(ScenarioRunner.MultiScenarioNames, "Ajouter tous les scénarios multi");
+
+    [ShowIf(nameof(_runScenariosOnPlay)), HorizontalGroup("ScenarioButtons"), PropertyOrder(2), Button("Vider")]
+    void ClearScenarios()
+    {
+        UnityEditor.Undo.RecordObject(this, "Vider la liste des scénarios");
+        _scenarios.Clear();
+        UnityEditor.EditorUtility.SetDirty(this);
+    }
+
+    // Ajoute à la fin ceux qui manquent, sans toucher à ceux déjà choisis un par un.
+    void AddScenarios(IEnumerable<string> names, string undoName)
+    {
+        UnityEditor.Undo.RecordObject(this, undoName);
+        foreach (string name in names)
+            if (!_scenarios.Contains(name))
+                _scenarios.Add(name);
+        UnityEditor.EditorUtility.SetDirty(this);
+    }
 
     string BuildFilter() => _scenarios == null || _scenarios.Count == 0
-        ? ScenarioRunner.AllScenarios
-        : string.Join(",", _scenarios);
+        ? ScenarioRunner.AllSolo
+        : string.Join(ScenarioRunner.FilterSeparator.ToString(), _scenarios);
 
     IEnumerator SpawnExtraBots()
     {
