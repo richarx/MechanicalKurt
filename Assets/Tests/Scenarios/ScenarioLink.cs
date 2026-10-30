@@ -7,20 +7,12 @@ using System.Net.Sockets;
 using System.Text;
 using UnityEngine;
 
-// ─────────────────────────────────────────────────────────────────────────────
-//  Lien de test entre l'hôte (ScenarioRunner) et un vrai second joueur : l'éditeur clone de Multiplayer Play Mode
-//  (« Player 2 »), où tourne ScenarioClientAgent.
-//
-//  TCP en boucle locale, à côté du réseau du jeu : seules les commandes de test et ce que voit le second joueur
-//  passent ici. Ses actions (validation F, battements d'ailes, fin de cinématique…) passent, elles, par le vrai
-//  chemin du jeu : l'input de son pigeon, envoyé au serveur par PurrNet.
-//
-//  Une ligne UTF-8 par message, champs séparés par des tabulations :
-//    client → hôte : HELLO <version>              à la connexion
-//                    SNAP  <clé␟valeur␞clé␟valeur…>  ce que voit le client, environ 10 fois par seconde
-//                    ACK   <id> ok|err <détail>    réponse à une commande
-//    hôte → client : CMD   <id> <verbe> <argument>
-// ─────────────────────────────────────────────────────────────────────────────
+/// <summary>
+/// Lien de test (TCP local) entre le ScenarioRunner de l'hôte et ScenarioClientAgent dans le second joueur.
+/// Une ligne UTF-8 par message, champs séparés par des tabulations :
+/// client → hôte : HELLO version ; SNAP clé␟valeur␞… (ce qu'il voit, ~10 fois par seconde) ; ACK id ok|err détail.
+/// hôte → client : CMD id verbe argument.
+/// </summary>
 public static class ScenarioLinkProtocol
 {
     public const int Port = 47811;
@@ -93,7 +85,6 @@ public sealed class ScenarioLinkConnection : IDisposable
             return;
         try
         {
-            // Lisible sans rien à lire : l'autre côté a fermé la connexion.
             if (_client.Client.Poll(0, SelectMode.SelectRead) && _client.Available == 0)
             {
                 Close();
@@ -107,7 +98,6 @@ public sealed class ScenarioLinkConnection : IDisposable
                     Close();
                     return;
                 }
-                // '\n' n'apparaît jamais au milieu d'un caractère UTF-8 : on peut couper les octets dessus.
                 for (int i = 0; i < read; i++)
                 {
                     if (_buffer[i] != (byte)'\n')
@@ -162,8 +152,6 @@ public sealed class ScenarioRemoteLink : IDisposable
     {
         if (_listener != null)
             return true;
-        // Sous Windows, ReuseAddress laisserait un second écouteur prendre le port en silence (autre éditeur en
-        // pleins scénarios) : vérifier d'abord que personne n'y répond. Un port en TIME_WAIT ne répond pas.
         if (SomeoneListens())
         {
             ListenError = "port déjà utilisé (un autre éditeur fait-il tourner des scénarios ?)";
@@ -207,7 +195,6 @@ public sealed class ScenarioRemoteLink : IDisposable
                 while (_listener.Pending())
                 {
                     TcpClient client = _listener.AcceptTcpClient();
-                    // Un seul second joueur : le premier relié garde la main (Player 3 / 4 éventuels refusés).
                     if (Connected)
                     {
                         client.Close();
@@ -230,7 +217,6 @@ public sealed class ScenarioRemoteLink : IDisposable
         _connection.Receive(_lines);
         foreach (string line in _lines)
             Handle(line);
-        // Lien coupé : ne plus rien croire de l'ancien instantané.
         if (!_connection.IsOpen)
         {
             _connection = null;

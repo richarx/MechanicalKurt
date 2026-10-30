@@ -3,13 +3,9 @@ using System.Collections.Generic;
 using Sirenix.OdinInspector;
 using UnityEngine;
 
-// Options de debug réglées dans l'inspecteur avant Play. Éditeur uniquement : ce composant ne fait rien en build.
-// N'agit que sur l'hôte : un client (ex. joueur virtuel de Multiplayer Play Mode) ignore ces options,
-// les bots créés par l'hôte lui sont répliqués automatiquement.
 [DisallowMultipleComponent]
 public class DebugManager : MonoBehaviour
 {
-    // Champs lus seulement dans l'éditeur.
 #pragma warning disable CS0414
     [Header("Scénarios au lancement")]
     [Tooltip("Joue les scénarios choisis dès le Play (même chose que Tools > Scénarios).")]
@@ -52,7 +48,6 @@ public class DebugManager : MonoBehaviour
 
         if (_extraBots > 0)
         {
-            // Laisser un éventuel ScenarioRunner (menu ou option ci-dessus) démarrer avant de décider.
             yield return null;
             if (ScenarioRunner.IsRunning)
                 Debug.Log("DebugManager : scénarios en cours, bots en plus ignorés.", this);
@@ -61,7 +56,6 @@ public class DebugManager : MonoBehaviour
         }
     }
 
-    // Menu déroulant rangé en deux dossiers : Solo / Multi.
     static IEnumerable ScenarioOptions()
     {
         var options = new ValueDropdownList<string>();
@@ -94,7 +88,6 @@ public class DebugManager : MonoBehaviour
         UnityEditor.EditorUtility.SetDirty(this);
     }
 
-    // Ajoute à la fin ceux qui manquent, sans toucher à ceux déjà choisis un par un.
     void AddScenarios(IEnumerable<string> names, string undoName)
     {
         UnityEditor.Undo.RecordObject(this, undoName);

@@ -5,10 +5,6 @@ using System.Collections.Generic;
 using System.Globalization;
 using UnityEngine;
 
-// Scénarios multi : l'hôte (pigeon piloté par Bot) et un VRAI second joueur, l'éditeur clone « Player 2 » de
-// Multiplayer Play Mode. Ses actions passent par l'input de son pigeon, envoyé au serveur par le vrai réseau ;
-// ce qu'il voit (HUD, cinématiques, gel, sons…) est lu dans l'instantané que renvoie son agent.
-// Les téléportations restent faites par l'hôte, dans la simulation serveur, comme pour les bots.
 public partial class ScenarioRunner
 {
     public const string MultiRaceStartScenario = "Multi : départ de course à 2 joueurs";
@@ -19,10 +15,6 @@ public partial class ScenarioRunner
     public const string MultiEquipmentScenario = "Multi : équipement du second joueur";
     public const string MultiAudioScenario = "Multi : sons chez le second joueur";
 
-    // ─────────────────────────────────────────────────────────────────────────
-    //  M1. Départ de course : attente, décompte et annulation vus des deux côtés ; cinématique sur chaque écran ;
-    //      la course attend la fin de celle du second joueur ; personnage à battre au même endroit chez les deux.
-    // ─────────────────────────────────────────────────────────────────────────
     IEnumerator MultiRaceStart()
     {
         PigeonCharacterRace race = FindRace();
@@ -32,7 +24,6 @@ public partial class ScenarioRunner
         yield return PlaceHostAndRemoteInDepartureZone(race);
         PigeonController remote = RemotePigeon;
 
-        // Le second joueur valide seul : il attend l'hôte, et le voit sur son écran.
         yield return RemoteDo("interact");
         yield return Expect("F du second joueur : il est prêt (vu par l'hôte)", () => remote.WantsStart, 2f, RemoteState);
         yield return ExpectStays("Un seul joueur prêt : pas de départ", () => zone.Phase == MissionStartZone.Waiting && remote.WantsStart,
@@ -40,7 +31,6 @@ public partial class ScenarioRunner
         yield return Expect("Le second joueur voit qu'il attend l'autre joueur", () => RemoteHudContains(zone, "1/2 ready"), 2f, RemoteState);
         yield return Check("L'hôte, pas encore prêt, n'a pas de décompte à l'écran", zone.HudText == null, HudState(zone));
 
-        // L'hôte valide : décompte chez les deux, gel, nombre de joueurs.
         Bot.PressInteract();
         yield return Expect("Les deux joueurs prêts : décompte", () => zone.Phase == MissionStartZone.CountingDown, 2f, () => zone.Describe());
         yield return Expect("Les deux pigeons sont gelés (hôte)", () => Pigeon.IsMovementFrozen && remote.IsMovementFrozen, 1f);
@@ -48,7 +38,6 @@ public partial class ScenarioRunner
         yield return Expect("Décompte à l'écran de l'hôte : 2 joueurs", () => HudContains(zone, "Players: 2/2"), 1f, () => HudState(zone));
         yield return Expect("Décompte à l'écran du second joueur : 2 joueurs", () => RemoteHudContains(zone, "Players: 2/2"), 2f, RemoteState);
 
-        // Le second joueur annule pendant le décompte.
         yield return RemoteDo("interact");
         yield return Expect("Annulation par le second joueur : retour en attente", () => zone.Phase == MissionStartZone.Waiting, 2f,
             () => zone.Describe());
@@ -58,24 +47,20 @@ public partial class ScenarioRunner
         yield return Check("Annulation : pas de cinématique chez l'hôte", !race.DepartureCinematic.IsPlaying);
         yield return Check("Annulation : pas de cinématique chez le second joueur", RemoteIs(RaceKey(race, "departure"), "0"), RemoteState());
 
-        // Relance : la cinématique ne démarre qu'à la fin du décompte, sur chaque écran.
         yield return RemoteDo("interact");
         yield return Expect("Relance : décompte", () => zone.Phase == MissionStartZone.CountingDown, 2f, () => zone.Describe());
         yield return Expect("Fin du décompte : cinématique chez l'hôte", () => race.DepartureCinematic.IsPlaying,
             zone.CountdownSeconds + 3f, () => zone.Describe());
         yield return Expect("Fin du décompte : cinématique chez le second joueur", () => RemoteFlag(RaceKey(race, "departure")), 3f, RemoteState);
-        // État simulé (ce qui décide du jeu) : l'affichage du pigeon d'un client chez l'hôte peut basculer une image.
         yield return ExpectStays("Pendant les cinématiques, personne n'est libéré",
             () => zone.SimState.Phase == MissionStartZone.Cinematic && Pigeon.SimState.Frozen && remote.SimState.Frozen, 1f,
             () => $"{zone.Describe()} | vue : zone {zone.Phase}, gelés hôte {Pigeon.IsMovementFrozen}, second {remote.IsMovementFrozen}");
 
-        // L'hôte finit la sienne : la course attend le second joueur.
         yield return PlayThroughDialogCinematic(race.DepartureCinematic, "dialogue de départ (hôte)");
         yield return ExpectStays("Le second joueur n'a pas fini : la course attend",
             () => race.Phase != PigeonCharacterRace.RacePhase.Racing && Pigeon.IsMovementFrozen, 1.5f, () => zone.Describe());
         yield return Expect("L'hôte voit qu'on attend l'autre joueur", () => HudContains(zone, "1/2"), 1f, () => HudState(zone));
 
-        // Le second joueur lit son dialogue jusqu'au bout, en validant comme un joueur : fin signalée par son input.
         yield return RemoteDo("play-dialogs", "on");
         yield return Expect("Le second joueur a fini sa cinématique : course lancée", () => race.Phase == PigeonCharacterRace.RacePhase.Racing,
             40f, () => $"{zone.Describe()} | {RemoteState()}");
@@ -94,10 +79,6 @@ public partial class ScenarioRunner
         yield return ExpectCharacterInSync(race, "Le personnage à battre est au même endroit chez les deux joueurs");
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    //  M2. Victoire du second joueur : gel des deux coureurs tant que chacun n'a pas fini la cinématique d'arrivée
-    //      sur son écran, achievement chez les deux, puis course refaite.
-    // ─────────────────────────────────────────────────────────────────────────
     IEnumerator MultiRaceWin()
     {
         PigeonCharacterRace race = FindRace();
@@ -105,8 +86,6 @@ public partial class ScenarioRunner
         Defer(() => CleanupRace(race));
         MissionStartZone zone = race.DepartureZone;
 
-        // Les deux repartent sans l'achievement (la course solo a pu le donner à l'hôte) : sinon le test ne prouve rien.
-        // La vraie sauvegarde est restaurée à la fin des scénarios.
         if (race.CompletionAchievement != null)
         {
             AchievementManager.Instance?.ResetAll();
@@ -128,7 +107,6 @@ public partial class ScenarioRunner
         yield return Expect("Les deux coureurs sont gelés (hôte)", () => Pigeon.IsMovementFrozen && remote.IsMovementFrozen, 1f);
         yield return Expect("Le second joueur est gelé sur son écran", () => RemoteFlag("local/frozen"), 2f, RemoteState);
 
-        // Les deux essaient de bouger : rien ne doit bouger tant que les cinématiques ne sont pas finies.
         Bot.Flap = true;
         yield return RemoteDo("flap", "1");
         Vector3 remoteAt = remote.transform.position;
@@ -144,8 +122,6 @@ public partial class ScenarioRunner
         yield return ExpectStays("L'hôte a fini, le second joueur non : toujours gelés",
             () => race.Phase == PigeonCharacterRace.RacePhase.ArrivalCinematic && Pigeon.IsMovementFrozen && remote.IsMovementFrozen, 1.5f, Frozen);
 
-        // Chez le second joueur, la fin de cette cinématique attend le retour de sa caméra de jeu, qui expire au bout de
-        // 10 s (CameraTimeoutSeconds) quand son pigeon a été téléporté jusqu'à l'arrivée : délai large.
         yield return RemoteDo("cancel-dialogs");
         yield return Expect("Tout le monde a fini : la course revient au départ", () => race.Phase == PigeonCharacterRace.RacePhase.Ready
             && zone.Phase == MissionStartZone.Waiting, 15f, () => $"course {race.Phase}, zone {zone.Phase} | {RemoteState()}");
@@ -159,7 +135,6 @@ public partial class ScenarioRunner
                 () => $"achievements du second joueur [{Remote("ach")}]");
         }
 
-        // On refait la course à deux.
         yield return PlaceHostAndRemoteInDepartureZone(race);
         Bot.PressInteract();
         yield return RemoteDo("interact");
@@ -168,9 +143,6 @@ public partial class ScenarioRunner
         yield return Expect("Annulation du nouveau départ", () => zone.Phase == MissionStartZone.Waiting, 2f, () => zone.Describe());
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    //  M3. Le second joueur dépasse MaximumHeight : échec pour les deux, message sur les deux écrans.
-    // ─────────────────────────────────────────────────────────────────────────
     IEnumerator MultiRaceHeight()
     {
         PigeonCharacterRace race = FindRace();
@@ -192,10 +164,6 @@ public partial class ScenarioRunner
         yield return Expect("Le second joueur n'est pas gelé", () => RemoteIs("local/frozen", "0"), 2f, RemoteState);
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    //  M4. Le second joueur rejoint une course déjà lancée : il voit le personnage au bon endroit, « Race in
-    //      progress » dans la zone de départ, et ne peut ni relancer, ni faire échouer, ni gagner la course.
-    // ─────────────────────────────────────────────────────────────────────────
     IEnumerator MultiLateJoin()
     {
         PigeonCharacterRace race = FindRace();
@@ -205,7 +173,6 @@ public partial class ScenarioRunner
         yield return Check("Course au repos", race.Phase == PigeonCharacterRace.RacePhase.Ready && zone.Phase == MissionStartZone.Waiting,
             $"course {race.Phase}, zone {zone.Phase}");
 
-        // Le second joueur quitte la partie ; l'hôte lance la course seul.
         yield return RemoteDo("disconnect");
         yield return Expect("Le second joueur quitte la partie", () => !HasRemotePlayerPigeon() && Remote("net") == "offline", 10f, RemoteState);
         yield return Check("L'hôte est seul dans la partie", PigeonController.All.Count == 1, $"{PigeonController.All.Count} pigeons");
@@ -220,7 +187,6 @@ public partial class ScenarioRunner
         CancelIfPlaying(race.DepartureCinematic);
         yield return Expect("Course lancée, l'hôte seul", () => race.Phase == PigeonCharacterRace.RacePhase.Racing, 4f, () => zone.Describe());
 
-        // Le second joueur revient en pleine course.
         yield return RemoteDo("connect");
         yield return Expect("Le second joueur rejoint la partie en pleine course", () => RemoteReady, 30f, RemoteMissingReason);
         PigeonController late = RemotePigeon;
@@ -248,9 +214,6 @@ public partial class ScenarioRunner
             Mathf.Max(1f, race.DestinationStop.StopDuration + 0.5f), () => $"course {race.Phase}, distance à l'arrivée {DistanceToFinish(race, late):0.0} m");
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    //  M5. Le tuto du second joueur est local : cinématique, achievement et récompense chez lui seulement.
-    // ─────────────────────────────────────────────────────────────────────────
     IEnumerator MultiTuto()
     {
         PigeonStopDialogCinematic tuto = null;
@@ -271,8 +234,6 @@ public partial class ScenarioRunner
             yield return Check($"Le second joueur ne porte pas encore la récompense ({tuto.RewardEquipment})",
                 (remote.WornEquipment & PigeonEquipment.Bit(tuto.RewardEquipment)) == 0, $"état {Convert.ToString(remote.WornEquipment, 2)}");
 
-        // Le cercle de l'hôte doit rester sourd au pigeon de l'autre joueur. S'il a déjà servi (tuto solo), on le
-        // réactive le temps du test pour que la vérification puisse échouer, puis on le remet comme avant.
         bool hostZoneBefore = zone.enabled;
         bool hostZoneFired = false;
         UnityEngine.Events.UnityAction<PigeonController> onHostStopped = _ => hostZoneFired = true;
@@ -308,7 +269,6 @@ public partial class ScenarioRunner
         }
         yield return Expect("Commandes rendues au second joueur", () => RemoteIs("local/blocked", "0"), 8f, RemoteState);
 
-        // Ressortir puis revenir : le tuto ne se rejoue pas pour lui.
         yield return Teleport(remote, zone.transform.position + zone.transform.forward * (zone.Radius + 4f) + Vector3.up * 2f,
             zone.transform.rotation, "Il ressort du cercle");
         yield return Teleport(remote, zone.transform.position + Vector3.up * 0.5f, zone.transform.rotation, "Il revient dans le cercle");
@@ -316,17 +276,12 @@ public partial class ScenarioRunner
         yield return ExpectStays("Le tuto ne se rejoue pas pour lui", () => RemoteIs(key + "/playing", "0"), 2f, RemoteState);
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    //  M6. Le second joueur ramasse un équipement : cinématique chez lui, état répliqué chez l'hôte.
-    // ─────────────────────────────────────────────────────────────────────────
     IEnumerator MultiEquipment()
     {
         PigeonController remote = RemotePigeon;
         PigeonEquipment remoteEquipment = remote.GetComponent<PigeonEquipment>();
         yield return Check("Le pigeon du second joueur a un PigeonEquipment", remoteEquipment != null);
 
-        // Chaque joueur a ses propres objets à ramasser : on prend un objet encore présent chez lui, et de préférence
-        // aussi chez l'hôte, d'un type que l'hôte ne porte pas (sinon « rien ne change chez l'hôte » ne prouverait rien).
         bool found = TryPickRemoteLoot(remote.WornEquipment, out PigeonEquipment.Equipment kind, out Vector3 spot, out bool hostCanDetect);
         yield return Check("Un objet à ramasser existe chez le second joueur", found, $"objets [{Remote("loots")}]");
         if (!hostCanDetect)
@@ -364,14 +319,10 @@ public partial class ScenarioRunner
         return count;
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    //  M7. Sons chez le second joueur : les siens en 2D, ceux de l'hôte en 3D (et l'inverse chez l'hôte).
-    // ─────────────────────────────────────────────────────────────────────────
     IEnumerator MultiAudio()
     {
         yield return Check("SFXManager présent", SFXManager.Instance != null);
         PigeonController remote = RemotePigeon;
-        // Côte à côte sur un sol connu (le point d'apparition est en l'air) : les deux doivent pouvoir décoller du sol.
         PigeonCharacterRace race = FindRace();
         yield return Check("Un sol connu pour se poser (zone de départ de la course)", race != null);
         Transform ground = race.DepartureZone.transform;
@@ -382,9 +333,6 @@ public partial class ScenarioRunner
         yield return ExpectLanded(remote, 4f);
         yield return ExpectLanded(Pigeon, 4f);
 
-        // Les deux décollent : de vrais sons de décollage, déclenchés par la simulation de chaque côté. Seuls les sons
-        // ponctuels comptent (les boucles de vol existent dès l'apparition). Chaque liste est prise dès qu'elle
-        // apparaît : un son ponctuel disparaît à la fin de son clip.
         List<string> remoteOwn = null, remoteOther = null, hostOwn = null, hostOther = null;
         yield return Check("Aucun son ponctuel avant le décollage", OneShotBlends(Pigeon).Count == 0 && OneShotBlends(remote).Count == 0,
             $"hôte [{string.Join(ScenarioLinkProtocol.ListSeparator, OneShotBlends(Pigeon))}], second [{string.Join(ScenarioLinkProtocol.ListSeparator, OneShotBlends(remote))}]");
@@ -411,7 +359,6 @@ public partial class ScenarioRunner
 
     static List<string> NonEmpty(List<string> items) => items.Count > 0 ? items : null;
 
-    // Même format que l'instantané du second joueur : « clip=spatialBlend » des sons ponctuels sous ce pigeon.
     static List<string> OneShotBlends(PigeonController pigeon)
     {
         var items = new List<string>();
@@ -421,10 +368,6 @@ public partial class ScenarioRunner
         return items;
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    //  Outils des scénarios multi
-    // ─────────────────────────────────────────────────────────────────────────
-
     /// <summary>Commande au second joueur ; l'étape échoue s'il ne l'exécute pas.</summary>
     IEnumerator RemoteDo(string verb, string argument = "")
     {
@@ -432,7 +375,6 @@ public partial class ScenarioRunner
         yield return Check($"Second joueur : {verb}{(argument.Length > 0 ? " " + argument : "")}", _lastRemoteOk, _lastRemoteDetail);
     }
 
-    // Instantané trop vieux (clone figé, lien perdu) : rien n'est cru, dans un sens comme dans l'autre.
     const float RemoteSnapshotMaxAge = 1f;
 
     string Remote(string key) => _link != null && _link.Connected && _link.LastSnapshotTime >= 0f
@@ -470,7 +412,6 @@ public partial class ScenarioRunner
         return hud != null && hud.Contains(part);
     }
 
-    // « clip=0|clip=1 » : toutes les sources ont ce spatialBlend.
     static bool AllBlends(List<string> sources, float expected)
     {
         foreach (string source in sources)
@@ -482,8 +423,6 @@ public partial class ScenarioRunner
         return sources.Count > 0;
     }
 
-    // Objet présent chez le second joueur, d'un type qu'il ne porte pas encore. De préférence un objet encore là chez
-    // l'hôte, d'un type que l'hôte ne porte pas (hostCanDetect). Ordre stable d'un lancement à l'autre.
     bool TryPickRemoteLoot(byte worn, out PigeonEquipment.Equipment kind, out Vector3 spot, out bool hostCanDetect)
     {
         kind = default;
@@ -512,7 +451,6 @@ public partial class ScenarioRunner
         return found;
     }
 
-    // Rayon de ramassage de l'objet du même type au même endroit chez l'hôte (2 m par défaut s'il l'a déjà ramassé).
     static float LootableRadius(PigeonEquipment.Equipment kind, Vector3 spot)
     {
         foreach (LootableEquipment loot in FindObjectsByType<LootableEquipment>(FindObjectsInactive.Include))
@@ -521,8 +459,6 @@ public partial class ScenarioRunner
         return 2f;
     }
 
-    // Comme HoldStillAt, pour le second joueur : posé sur place, ou en vol stationnaire (battements + frein envoyés
-    // par son input) s'il n'y a rien dessous.
     IEnumerator HoldRemoteStillAt(PigeonController remote, Vector3 spot, float radius, float stopSpeed, string label)
     {
         yield return RemoteDo("flap", "0");
@@ -547,7 +483,6 @@ public partial class ScenarioRunner
             $"distance {Vector3.Distance(remote.transform.position, spot):0.00} / rayon {radius}, {(groundUnderSpot ? "posé" : "en vol stationnaire")}");
     }
 
-    // L'hôte et le second joueur posés côte à côte dans la zone de départ, personne de prêt.
     IEnumerator PlaceHostAndRemoteInDepartureZone(PigeonCharacterRace race)
     {
         MissionStartZone zone = race.DepartureZone;
@@ -569,7 +504,6 @@ public partial class ScenarioRunner
         yield return Check("Personne n'est encore prêt", !Pigeon.WantsStart && !remote.WantsStart && Remote("local/ready") == "0", RemoteState());
     }
 
-    // Départ à deux le plus court possible : validations, cinématiques interrompues de chaque côté, course lancée.
     IEnumerator StartRaceWithRemote(PigeonCharacterRace race)
     {
         MissionStartZone zone = race.DepartureZone;
@@ -585,8 +519,6 @@ public partial class ScenarioRunner
         yield return Expect("Course lancée chez le second joueur", () => Remote(RaceKey(race, "phase")) == "Racing", 3f, RemoteState);
     }
 
-    // Le personnage est placé d'après l'horloge répliquée de la course : il doit être au même endroit chez les deux.
-    // Tolérance : son déplacement pendant le retard de l'instantané (latence + 10 Hz), plus une marge.
     IEnumerator ExpectCharacterInSync(PigeonCharacterRace race, string step)
     {
         Vector3 before = race.Character.position;

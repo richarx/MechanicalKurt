@@ -54,11 +54,8 @@ public class PigeonSFX : MonoBehaviour
         buttHoleManager.OnShit.AddListener(() => Play(poopClip));
     }
 
-    // Son propre pigeon : 2D, toujours au même volume. Les autres (joueurs distants, bots) : localisés en 3D.
-    // Pigeon local réévalué à chaque son : il peut être désigné après le Start de ce composant.
     private bool IsSpatial => pigeonController == null || pigeonController != PigeonController.Local;
 
-    // Les sources suivent le pigeon (enfants de son transform) pour être localisées au bon endroit.
     private AudioSource Play(AudioClip clip, float volume = 0.3f, bool loop = false)
     {
         AudioSource source = SFXManager.Instance.PlaySFXAtLocation(clip, transform, volume, loop: loop);
@@ -77,11 +74,9 @@ public class PigeonSFX : MonoBehaviour
         if (controls.ConsumeCooing)
             PlayRandom(coohClips, 1.0f);
 
-        // La source d'input peut être remplacée en cours de route (bot des scénarios).
         if (pigeonController != null && pigeonController.Controls != null)
             controls = pigeonController.Controls;
 
-        // Boucles de vol créées avant que le pigeon local soit connu : les repasser en 2D / 3D.
         if (clearFlySource != null && (clearFlySource.spatialBlend > 0.5f) != IsSpatial)
         {
             SFXManager.Instance.SetSpatial(clearFlySource, IsSpatial);
@@ -137,7 +132,6 @@ public class PigeonSFX : MonoBehaviour
     {
         isLowPassActive = isLowPass;
 
-        // Les sources de vol ne sont créées qu'au premier vol plané.
         if (currentAudioSource == null || otherAudioSource == null)
             return;
 
@@ -147,7 +141,6 @@ public class PigeonSFX : MonoBehaviour
         otherAudioSource.volume = 0.0f;
     }
 
-    // Les boucles de vol sont des enfants du pigeon ; les détruire explicitement coupe aussi leurs tweens.
     private void OnDestroy()
     {
         flySequence?.Kill();

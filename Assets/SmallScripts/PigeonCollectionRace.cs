@@ -19,8 +19,6 @@ public class PigeonCollectionRace : MonoBehaviour
     [field: SerializeField, BoxGroup("Départ"), Tooltip("Facultative. Si renseignée, le lancement attend sa fin normale.")]
     public DialogCinematic DepartureCinematic { get; private set; }
 
-    // Mission locale, jouée par chaque joueur sur son écran : le pigeon est celui du joueur local.
-    // (Il vit dans le prefab réseau du joueur : la scène ne peut pas le référencer.)
     public PigeonController Player => PigeonController.Local;
 
     [field: SerializeField, BoxGroup("Collecte"), Required]

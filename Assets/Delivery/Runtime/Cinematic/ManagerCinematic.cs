@@ -155,12 +155,9 @@ public class ManagerCinematic : MonoBehaviour
         RestoreScene();
     }
 
-    // Multijoueur : la caméra de jeu et les commandes vivent dans le prefab réseau du joueur local, que la scène ne
-    // peut pas référencer. Si rien n'est assigné (ou si le pigeon a été recréé), on les reprend sur PigeonController.Local.
     private void ResolveLocalPlayerReferences()
     {
         PigeonController local = PigeonController.Local;
-        // La caméra orbitale du CameraSwapper : le prefab a plusieurs caméras (équipement, sous l'eau, précision).
         if (GameplayCamera == null && local != null)
             GameplayCamera = local.TryGetComponent(out CameraSwapper cameras) && cameras.OrbitalCamera != null
                 ? cameras.OrbitalCamera

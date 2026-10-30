@@ -11,8 +11,6 @@ public class PigeonAnimationControl : MonoBehaviour
         _pigeonController = GetComponentInParent<PigeonController>();
     }
 
-    // Tout vient du pigeon : sa vue (vitesse propre, sol ou support) et sa source d'input actuelle (joueur ou bot).
-    // Le CharacterController ne bouge que pendant la simulation (replays compris) : il ne reflète pas la vue.
     void Update()
     {
         Vector3 velocity = _pigeonController.LastVelocity;

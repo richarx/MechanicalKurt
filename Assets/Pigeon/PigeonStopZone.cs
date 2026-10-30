@@ -2,9 +2,9 @@ using Sirenix.OdinInspector;
 using UnityEngine;
 using UnityEngine.Events;
 
-// Zone locale : chaque client surveille le pigeon de SON joueur (PigeonController.Local). Les missions branchées
-// dessus (livraison, collecte, billboard…) sont jouées par chaque joueur sur son écran. Pour un départ commun
-// à plusieurs joueurs, utiliser MissionStartZone (prédit).
+/// <summary>
+/// Zone locale : surveille le pigeon du joueur local. Pour un dÃ©part commun Ã  plusieurs joueurs, utiliser MissionStartZone.
+/// </summary>
 public class PigeonStopZone : MonoBehaviour
 {
     [SerializeField, Tooltip("Facultatif : forcer un pigeon précis. Vide = pigeon du joueur local.")]

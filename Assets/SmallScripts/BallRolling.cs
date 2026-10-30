@@ -4,12 +4,9 @@ using Sirenix.OdinInspector;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-// Ballon de plage que les pigeons font rouler en marchant dessus.
-// Multijoueur : le ballon est un objet physique LOCAL à chaque client (pas synchronisé). Ses passagers sont les
-// pigeons dont l'état prédit dit qu'ils sont posés sur son MovingSupport. Le couple est appliqué une fois par pas
-// de physique de la prédiction (onBeforePhysicsPass), jamais pendant un replay : PurrDiction fait avancer la
-// physique au tick, FixedUpdate ne correspond plus aux pas réels. LocalPhysics (sur le ballon) le fige pendant
-// les rollbacks.
+/// <summary>
+/// Ballon de plage local Ã  chaque client, roulÃ© par les pigeons posÃ©s dessus d'aprÃ¨s leur Ã©tat prÃ©dit.
+/// </summary>
 [RequireComponent(typeof(Rigidbody), typeof(SphereCollider), typeof(MovingSupport))]
 public class BallRolling : MonoBehaviour
 {
@@ -37,7 +34,6 @@ public class BallRolling : MonoBehaviour
 
     void OnEnable()
     {
-        // Le PredictionManager peut apparaître après le ballon (démarrage du réseau).
         PredictionManager.OnInstanceAdded += HandleInstanceAdded;
         if (PredictionManager.TryGetInstance(gameObject.scene.handle, out PredictionManager manager))
             Bind(manager);
@@ -71,7 +67,6 @@ public class BallRolling : MonoBehaviour
         if (_prediction == null || _prediction.isReplaying || _rgbd.isKinematic)
             return;
 
-        // Passagers : pigeons posés sur ce support d'après leur état (vitesse propre = marche sur le ballon).
         _riders.Clear();
         Vector3 walkVelocity = Vector3.zero;
         IReadOnlyList<PigeonController> pigeons = PigeonController.All;

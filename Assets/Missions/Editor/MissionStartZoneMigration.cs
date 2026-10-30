@@ -4,12 +4,9 @@ using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.Events;
 
-// Migration ponctuelle des PigeonCharacterRace solo vers MissionStartZone (multijoueur prédit), sur les scènes ouvertes.
-// Pour chaque course sans DepartureZone :
-//  - ajoute une MissionStartZone sur l'objet de la cinématique de départ, avec le rayon / seuil de l'ancien PigeonStopZone ;
-//  - StartPose = objet « TrueStart » (ancien PlayerDeparturePose) s'il existe ;
-//  - supprime l'ancien PigeonStopZone de départ et les appels persistants devenus invalides (PlayCinematic, StartRace, CompleteRace).
-// Tout passe par Undo. Peut être supprimé une fois les scènes migrées.
+/// <summary>
+/// Migration ponctuelle des courses solo vers MissionStartZone, sur les scÃ¨nes ouvertes. Ã€ supprimer une fois les scÃ¨nes migrÃ©es.
+/// </summary>
 public static class MissionStartZoneMigration
 {
     const string DeparturePoseName = "TrueStart";
@@ -63,7 +60,6 @@ public static class MissionStartZoneMigration
         Debug.Log($"Migration MissionStartZone : {migrated} course(s) migrée(s). Vérifier le compte à rebours (durée de la cinématique de départ) puis sauvegarder la scène.");
     }
 
-    // Retire les appels vers une méthode qui n'existe plus (ou vers la course elle-même) ; les cibles nulles sont aussi nettoyées.
     static void RemoveCalls(UnityEventBase evt, Object target, string methodName)
     {
         for (int i = evt.GetPersistentEventCount() - 1; i >= 0; i--)

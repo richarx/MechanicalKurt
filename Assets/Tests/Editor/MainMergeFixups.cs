@@ -6,9 +6,6 @@ using Unity.Cinemachine;
 using UnityEditor;
 using UnityEngine;
 
-// Corrections faites après la fusion de main dans la branche multijoueur, là où le YAML seul ne suffit pas.
-// Idempotent : chaque étape vérifie l'état avant d'agir. Menu Tools > Fusion main > Appliquer les corrections,
-// ou en ligne de commande : -executeMethod MainMergeFixups.Run (quitte Unity ensuite si -quit).
 public static class MainMergeFixups
 {
     const string PlayerPath = "Assets/Pigeon/Player.prefab";
@@ -34,7 +31,6 @@ public static class MainMergeFixups
 
     static void Log(string line) => Report.AppendLine(line);
 
-    // La FreeLook de main garde un composant WaterCamera dont le script a été supprimé par main.
     static void FixFreeLookPrefab()
     {
         GameObject root = PrefabUtility.LoadPrefabContents(FreeLookPath);
@@ -63,7 +59,6 @@ public static class MainMergeFixups
             CinemachineCamera precision = swapperSo?.FindProperty("precisionCamera").objectReferenceValue as CinemachineCamera;
             Log($"Player : caméras orbitale={Name(orbital)}, sous l'eau={Name(underwater)}, précision={Name(precision)}");
 
-            // 1. Contrôles : la caméra orbitale (l'ancienne référence visait un objet local devenu prefab imbriqué).
             var controls = root.GetComponent<PlayerControls>();
             if (controls != null && orbital != null)
             {
@@ -79,7 +74,6 @@ public static class MainMergeFixups
                 }
             }
 
-            // 2. Orientation de départ de la FreeLook : 0 (choix de la branche, pigeon créé à une rotation quelconque).
             var orbitalFollow = orbital != null ? orbital.GetComponent<CinemachineOrbitalFollow>() : null;
             if (orbitalFollow != null)
             {
@@ -96,7 +90,6 @@ public static class MainMergeFixups
                 }
             }
 
-            // 3. Caméras désactivées sur les pigeons distants (NetworkOwnershipToggle) : FreeLook, sous l'eau, précision.
             var toggle = root.GetComponent<NetworkOwnershipToggle>();
             if (toggle != null)
             {
@@ -135,8 +128,6 @@ public static class MainMergeFixups
                 so.ApplyModifiedPropertiesWithoutUndo();
             }
 
-            // 4. Lunettes : main les avait ajoutées sur le pigeon de la scène, qui n'existe plus. Dans le prefab réseau,
-            //    à côté du chapeau, désactivées, et reliées à PigeonEquipment.sunglasses.
             var equipment = root.GetComponent<PigeonEquipment>();
             if (equipment != null)
             {
@@ -165,7 +156,6 @@ public static class MainMergeFixups
                 }
             }
 
-            // 5. Bulles sous l'eau : la scène les référençait sur le pigeon de scène ; PigeonSFX les expose désormais.
             var sfx = root.GetComponent<PigeonSFX>();
             if (sfx != null)
             {
@@ -203,7 +193,6 @@ public static class MainMergeFixups
         finally { PrefabUtility.UnloadPrefabContents(root); }
     }
 
-    // Le loot de lunettes de main n'a pas de _equipment (valeur par défaut : chapeau) et appelle encore ToggleSunglasses.
     static void FixSunglassesLoot()
     {
         string path = AssetDatabase.GUIDToAssetPath(SunglassesLootGuid);
@@ -245,7 +234,6 @@ public static class MainMergeFixups
         finally { PrefabUtility.UnloadPrefabContents(root); }
     }
 
-    // Ballon local à chaque client : LocalPhysics le fige pendant les rollbacks de la prédiction.
     static void FixBeach()
     {
         string path = AssetDatabase.GUIDToAssetPath(BeachGuid);

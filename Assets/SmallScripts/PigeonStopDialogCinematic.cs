@@ -27,7 +27,6 @@ public class PigeonStopDialogCinematic : MonoBehaviour
     public bool GivesEquipmentReward => _giveEquipmentReward;
     public PigeonEquipment.Equipment RewardEquipment => _rewardEquipment;
 
-    // Tuto joué une seule fois, par chaque joueur sur son écran.
     private bool _consumed;
     private bool _rewardGiven;
 
@@ -43,7 +42,6 @@ public class PigeonStopDialogCinematic : MonoBehaviour
             Cinematic.OnCinematicEnded.RemoveListener(HandleCinematicEnded);
     }
 
-    // Fin de la cinématique lancée par CE joueur : l'équipement va à son pigeon (état répliqué, vu par tous).
     private void HandleCinematicEnded()
     {
         if (!_consumed || _rewardGiven || !_giveEquipmentReward)

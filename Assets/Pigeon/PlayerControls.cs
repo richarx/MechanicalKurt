@@ -81,8 +81,6 @@ public class PlayerControls : MonoBehaviour, IPigeonControls
         _forceFlex = isForcing;
     }
 
-    // La caméra orbitale (pas celle sous l'eau ni de précision, qui ont aussi un OrbitalFollow) : référencée dans
-    // le prefab, sinon reprise sur le CameraSwapper.
     CinemachineOrbitalFollow OrbitalCamera
     {
         get
@@ -147,7 +145,6 @@ public class PlayerControls : MonoBehaviour, IPigeonControls
 
     public bool Flex => (CanReadControls && (_controls.Player.LeftFlex.IsPressed() || _controls.Player.RightFlex.IsPressed())) || _forceFlex;
 
-    // Présentation seulement (choix de caméra) : jamais dans PigeonInput.
     public bool PrecisionCamera => CanReadControls && _controls.Player.PrecisionCamera.IsPressed();
 
     public bool ConsumeInteract

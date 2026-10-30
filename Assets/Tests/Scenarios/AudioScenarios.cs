@@ -3,7 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-// Sons des pigeons : ceux de son propre pigeon en 2D, ceux des autres pigeons localisés en 3D autour d'eux.
 public partial class ScenarioRunner
 {
     public const string PigeonAudioScenario = "Sons : 2D pour soi, 3D pour les autres";
@@ -18,7 +17,6 @@ public partial class ScenarioRunner
         PigeonController other = bots[0].Pigeon;
         yield return Check("Le joueur est le pigeon local", PigeonController.Local == Pigeon);
 
-        // Même chemin que le jeu : l'événement de décollage joue le son via PigeonSFX.
         Pigeon.OnTakeoff.Invoke();
         other.OnTakeoff.Invoke();
         yield return Expect("Un son est joué sur chaque pigeon",

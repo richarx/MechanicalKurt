@@ -3,15 +3,12 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-// Équipement : ramassage par le joueur (vrai chemin LootableEquipment → requête d'input → état → vue), puis un
-// autre pigeon (bot) qui s'équipe : le joueur local doit le voir, sans cinématique chez lui.
 public partial class ScenarioRunner
 {
     public const string EquipmentScenario = "Équipement : ramassage";
 
     IEnumerator RunEquipmentPickup()
     {
-        // Toujours le même objet d'un lancement à l'autre.
         LootableEquipment loot = null;
         foreach (LootableEquipment candidate in FindObjectsByType<LootableEquipment>(FindObjectsInactive.Exclude))
             if (loot == null || string.CompareOrdinal(candidate.name, loot.name) < 0
@@ -37,7 +34,6 @@ public partial class ScenarioRunner
         yield return Expect("Fin de la cinématique : commandes rendues",
             () => playerControls == null || !playerControls.AreControlsBlocked, 6f);
 
-        // Un autre pigeon s'équipe : sa vue suit son état chez le joueur local, sans cinématique pour ce dernier.
         PigeonEquipment.Equipment otherKind = kind == PigeonEquipment.Equipment.Shoes
             ? PigeonEquipment.Equipment.Hat : PigeonEquipment.Equipment.Shoes;
         byte otherBit = PigeonEquipment.Bit(otherKind);

@@ -3,9 +3,9 @@ using DG.Tweening;
 using UnityEngine;
 
 // Fly through to get a one-shot speed kick along the pigeon's direction of travel (works from both sides).
-// La détection et l'application du boost sont faites par PigeonController.Simulate (déterministe, rejouable) :
-// ce composant ne porte plus que les paramètres et le feedback visuel/sonore.
-// Le collider doit rester un trigger, sur le layer renseigné dans PigeonController._boostLayer.
+/// <summary>
+/// ParamÃ¨tres et feedback d'un anneau ; le boost lui-mÃªme est dÃ©tectÃ© et appliquÃ© par PigeonController.Simulate.
+/// </summary>
 [RequireComponent(typeof(Collider))]
 public class BoostRing : MonoBehaviour
 {
@@ -23,8 +23,6 @@ public class BoostRing : MonoBehaviour
     [SerializeField] List<AudioClip> _secondarySfx;
     [SerializeField] float _secondarySfxVolume = 0.3f;
 
-    // Enchaînement d'anneaux : le son principal monte de 0.1 par anneau du combo (plafond 3).
-    // Le combo est compté par pigeon (PigeonController.PlayBoost) : un autre joueur ne fait pas monter le vôtre.
     public const float ComboWindow = 5f;
     const float ComboPitchStep = 0.1f;
     const float ComboMaxPitch = 3f;
@@ -40,8 +38,6 @@ public class BoostRing : MonoBehaviour
         GetComponent<Collider>().isTrigger = true;
     }
 
-    // Appelé par un PredictedEvent du pigeon : présentation uniquement.
-    // comboCount = rang de cet anneau dans l'enchaînement du pigeon qui le traverse (1 = premier).
     public void PlayRingFeedback(int comboCount = 1)
     {
         if (_visual != null)

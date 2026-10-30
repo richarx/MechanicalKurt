@@ -8,8 +8,6 @@ public class PigeonTutorialAchievements : MonoBehaviour
     [field: SerializeField, Required]
     public AchievementManager Manager { get; private set; }
 
-    // Pigeon du joueur local (prefab réseau, non référençable depuis la scène). Il peut apparaître après
-    // l'activation de ce composant, ou être recréé : on se recâble dès qu'il change.
     public PigeonController Player => PigeonController.Local;
     private PigeonController _boundPlayer;
 
@@ -59,7 +57,6 @@ public class PigeonTutorialAchievements : MonoBehaviour
     {
         if (Player != _boundPlayer)
             BindPlayer();
-        // Les inputs peuvent être remplacés (bot) : toujours lire la source actuelle du pigeon.
         if (_boundPlayer != null)
             _controls = _boundPlayer.Controls;
 

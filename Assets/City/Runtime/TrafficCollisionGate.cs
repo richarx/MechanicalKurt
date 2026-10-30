@@ -1,12 +1,10 @@
 using PurrNet;
 using UnityEngine;
 
-// Les voitures (colliders sur le layer PigeonOnly, MovingSupport) sont simulées localement par chaque client, au
-// hasard et à la frame : elles ne sont pas au même endroit d'une machine à l'autre. Tant que le trafic n'est pas
-// synchronisé, elles ne doivent donc pas entrer dans la simulation prédite des pigeons en multijoueur, sinon un client
-// serait corrigé sans arrêt (posé sur SA voiture, percuté par celles de l'hôte).
-// Règle, identique sur chaque machine : voitures solides (obstacle, support, stun) quand on joue seul, traversables
-// dès qu'un autre joueur est connecté. Les bots des scénarios ne sont pas des joueurs.
+/// <summary>
+/// Voitures solides en solo, traversables dÃ¨s qu'un autre joueur est connectÃ© : le trafic n'est pas synchronisÃ©
+/// et ne doit pas entrer dans la simulation prÃ©dite des pigeons.
+/// </summary>
 public class TrafficCollisionGate : MonoBehaviour
 {
     const string CarLayerName = "PigeonOnly";
@@ -55,7 +53,6 @@ public class TrafficCollisionGate : MonoBehaviour
         Physics.IgnoreLayerCollision(_carLayer, _pigeonLayer, ignore);
     }
 
-    // Réglage global de la physique : le rendre tel qu'au lancement (l'éditeur le garderait après le Play).
     void OnDestroy()
     {
         if (_carLayer >= 0 && _pigeonLayer >= 0)

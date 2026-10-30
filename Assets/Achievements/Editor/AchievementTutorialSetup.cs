@@ -33,7 +33,6 @@ public static class AchievementTutorialSetup
         Scene scene = SceneManager.GetActiveScene();
         AchievementManager manager = Find<AchievementManager>(scene);
         DeliveryOfferSelector zones = Find<DeliveryOfferSelector>(scene);
-        // Le pigeon n'est plus dans la scène (prefab réseau) : PigeonTutorialAchievements prend le joueur local en jeu.
         TMP_FontAsset font = AssetDatabase.LoadAssetAtPath<TMP_FontAsset>(
             "Assets/TextMesh Pro/Resources/Fonts & Materials/LiberationSans SDF.asset");
         AchievementData[] achievements = { Load("Takeoff"), Load("Steering"), Load("Interaction") };

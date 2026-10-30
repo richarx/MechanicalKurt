@@ -1,9 +1,9 @@
 using Unity.Cinemachine;
 using UnityEngine;
 
-// Choisit la caméra du joueur : sous l'eau, précision (bouton maintenu en vol) ou orbitale.
-// Multijoueur : ne touche aux priorités QUE pour le pigeon du joueur local. Cinemachine est global : un pigeon
-// distant ou un bot qui monterait sa caméra à 10 volerait la vue (à priorité égale, la plus récente gagne).
+/// <summary>
+/// Choisit la camÃ©ra du joueur local (sous l'eau, prÃ©cision, orbitale) ; ne touche pas aux autres pigeons.
+/// </summary>
 public class CameraSwapper : MonoBehaviour
 {
     public enum CameraType
@@ -57,7 +57,6 @@ public class CameraSwapper : MonoBehaviour
 
     private CameraType ComputeCameraType()
     {
-        // Les inputs passent par le pigeon : joueur ou bot des scénarios.
         IPigeonControls controls = pigeonController.Controls;
         if (waterPlane != null && pigeonController.transform.position.y < waterPlane.transform.position.y)
             return CameraType.UnderWater;

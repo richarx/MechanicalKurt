@@ -1,9 +1,8 @@
 using UnityEngine;
 
-// Détecte qu'un pigeon est sorti des limites et demande son retour au point d'apparition.
-// La détection reste locale (owner uniquement) ; la téléportation elle-même est faite par la simulation
-// de PigeonController via input.Respawn, donc rejouable et sans position transmise par le client.
-// Noms de champs conservés pour garder les valeurs déjà sérialisées dans le prefab.
+/// <summary>
+/// Pigeon local sorti des limites : demande son retour au point d'apparition (input.Respawn).
+/// </summary>
 [DisallowMultipleComponent]
 public class PositionFailSafe : MonoBehaviour
 {
@@ -22,7 +21,6 @@ public class PositionFailSafe : MonoBehaviour
 
     void Update()
     {
-        // Chaque client possède une copie de ce composant sur chaque pigeon : seul le pigeon local agit.
         if (_pigeonController == null || PigeonController.Local != _pigeonController)
             return;
 

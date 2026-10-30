@@ -9,16 +9,10 @@ using System.Threading.Tasks;
 using PurrNet;
 using UnityEngine;
 
-// ─────────────────────────────────────────────────────────────────────────────
-//  Côté second joueur : l'éditeur clone de Multiplayer Play Mode (« Player 2 »), client PurrNet.
-//
-//  Se relie au ScenarioRunner de l'hôte quand celui-ci tourne (sinon ne fait rien), puis :
-//   - joue les actions demandées comme le ferait le joueur : input de son pigeon (BotControls, envoyé au serveur
-//     par le vrai réseau), fin de cinématique, respawn, déconnexion / reconnexion PurrNet ;
-//   - envoie à l'hôte ce que ce joueur voit : son pigeon, la zone de départ, la course, le tuto, les dialogues,
-//     les objets à ramasser, ses achievements, ses sons.
-//  Éditeur uniquement : rien de tout ça n'existe dans un build.
-// ─────────────────────────────────────────────────────────────────────────────
+/// <summary>
+/// Dans le second joueur (clone Multiplayer Play Mode) : se relie au ScenarioRunner de l'hôte quand il tourne, joue ses
+/// commandes comme un joueur (input du pigeon, cinématiques, connexion) et lui renvoie ce que ce joueur voit.
+/// </summary>
 public class ScenarioClientAgent : MonoBehaviour
 {
     /// <summary>Clone lancé en ligne de commande (ScenarioMenu.JoinAsClientFromCommandLine) : quitter à la fin.</summary>
@@ -51,7 +45,6 @@ public class ScenarioClientAgent : MonoBehaviour
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
     static void Bootstrap()
     {
-        // Seulement dans un clone (Assets en jonction, comme le détecte PurrNet) : l'éditeur principal est l'hôte.
         if (!PurrNet.Utils.ApplicationContext.isClone || FindAnyObjectByType<ScenarioClientAgent>() != null)
             return;
         var go = new GameObject("[ScenarioClientAgent]");
@@ -103,9 +96,6 @@ public class ScenarioClientAgent : MonoBehaviour
         UnityEditor.SessionState.EraseBool(ScenarioRunner.ActiveKey);
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    //  Connexion à l'hôte
-    // ─────────────────────────────────────────────────────────────────────────
     void TryConnect(float now)
     {
         if (_connecting != null)
@@ -113,7 +103,7 @@ public class ScenarioClientAgent : MonoBehaviour
             if (!_connecting.IsCompleted)
                 return;
             bool connected = !_connecting.IsFaulted && !_connecting.IsCanceled && _tcp != null && _tcp.Connected;
-            _ = _connecting.Exception;   // observée : pas d'« unobserved task exception » quand l'hôte n'écoute pas
+            _ = _connecting.Exception;
             _connecting = null;
             if (!connected)
             {
@@ -126,8 +116,6 @@ public class ScenarioClientAgent : MonoBehaviour
             _tcp = null;
             _everLinked = true;
             _nextSnapshot = 0f;
-            // « Error Pause » ignorée ici aussi pendant les tests (ScenarioPauseGuard) : un clone en pause n'enverrait
-            // plus ni input ni instantané, et toute la suite multi échouerait.
             UnityEditor.SessionState.SetBool(ScenarioRunner.ActiveKey, true);
             _link.Send($"HELLO\t{ScenarioLinkProtocol.Version}");
             Debug.Log("[Agent] Relié aux scénarios de l'hôte : ce joueur est piloté par les tests.");
@@ -165,8 +153,6 @@ public class ScenarioClientAgent : MonoBehaviour
         Quit("hôte parti", 0);
     }
 
-    // Le joueur reprend la main : plus d'input scripté, plus de dialogue validé tout seul, et de retour dans la
-    // partie si les tests l'en avaient sorti (même si l'hôte s'est arrêté sans le reconnecter).
     void StopDriving()
     {
         _overrideWanted = false;
@@ -179,7 +165,6 @@ public class ScenarioClientAgent : MonoBehaviour
         _disconnectedByHost = false;
     }
 
-    // Seulement pour un clone lancé en ligne de commande : dans Multiplayer Play Mode, le joueur reste en jeu.
     void Quit(string reason, int code)
     {
         if (!_commandLine || _quitting)
@@ -190,9 +175,6 @@ public class ScenarioClientAgent : MonoBehaviour
         UnityEditor.EditorApplication.Exit(code);
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    //  Commandes
-    // ─────────────────────────────────────────────────────────────────────────
     void Handle(string line)
     {
         string[] parts = line.Split('\t');
@@ -278,7 +260,6 @@ public class ScenarioClientAgent : MonoBehaviour
 
             case "finish-cinematics":
             {
-                // Filet de nettoyage : interrompt ses cinématiques et signale directement leur fin (input du pigeon).
                 foreach (DialogCinematic cinematic in FindObjectsByType<DialogCinematic>(FindObjectsInactive.Exclude))
                     if (cinematic.IsPlaying)
                         cinematic.CancelCinematic();
@@ -305,7 +286,6 @@ public class ScenarioClientAgent : MonoBehaviour
                 if (network == null)
                     throw new InvalidOperationException("pas de NetworkManager");
                 _disconnectedByHost = false;
-                // Déjà en cours de connexion : StartClient loguerait une erreur (« already running »).
                 if (network.clientState == PurrNet.Transports.ConnectionState.Disconnected)
                     network.StartClient();
                 return network.clientState.ToString();
@@ -336,7 +316,6 @@ public class ScenarioClientAgent : MonoBehaviour
             throw new InvalidOperationException("input non piloté (envoyer « override on » d'abord)");
     }
 
-    // Le pigeon local change à chaque (re)connexion : y remettre l'input scripté tant qu'il est demandé.
     void ApplyOverride()
     {
         PigeonController local = PigeonController.Local;
@@ -354,7 +333,6 @@ public class ScenarioClientAgent : MonoBehaviour
         _overridden = null;
     }
 
-    // Valide les répliques comme un joueur (même rythme que PlayThroughDialogCinematic côté hôte).
     void ConfirmDialogs(float now)
     {
         DialogManager dialogs = DialogManager.instance;
@@ -364,9 +342,6 @@ public class ScenarioClientAgent : MonoBehaviour
         _nextConfirm = now + ConfirmInterval;
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    //  Ce que voit ce joueur
-    // ─────────────────────────────────────────────────────────────────────────
     string BuildSnapshot()
     {
         _snapshot.Clear();
@@ -430,7 +405,6 @@ public class ScenarioClientAgent : MonoBehaviour
         {
             if (cinematic.IsPlaying)
                 playing.Add(cinematic.name);
-            // Diagnostic : nombre de démarrages de chaque cinématique (une relance après interruption se voit ici).
             if (_watchedCinematics.Add(cinematic))
             {
                 DialogCinematic watched = cinematic;
@@ -474,13 +448,11 @@ public class ScenarioClientAgent : MonoBehaviour
         return _snapshot.ToString();
     }
 
-    // « clip=spatialBlend » pour chaque son ponctuel sous ce pigeon.
     static string DescribeSources(PigeonController pigeon)
     {
         if (pigeon == null)
             return "";
         var parts = new List<string>();
-        // Les boucles de vol existent dès l'apparition : seuls les sons ponctuels prouvent qu'un son vient d'être joué.
         foreach (AudioSource source in pigeon.GetComponentsInChildren<AudioSource>())
             if (!source.loop)
                 parts.Add($"{(source.clip != null ? source.clip.name : "?").Replace("=", "-").Replace("|", "/")}={ScenarioLinkProtocol.Format(source.spatialBlend)}");

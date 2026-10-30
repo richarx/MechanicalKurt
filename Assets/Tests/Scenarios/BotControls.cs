@@ -1,12 +1,10 @@
 #if UNITY_EDITOR
 using UnityEngine;
 
-// Input scripté pour les scénarios : remplace PlayerControls via PigeonController.SetControlsOverride.
-// Le pigeon passe ainsi par exactement le même code que pour un vrai joueur.
 public class BotControls : IPigeonControls
 {
-    public Vector2 Movement { get; set; }          // direction monde au sol (x, z)
-    public Vector2 RelativeMovement { get; set; }  // vol : x = virage, y = tangage
+    public Vector2 Movement { get; set; }
+    public Vector2 RelativeMovement { get; set; }
     public bool Flap { get; set; }
     public bool Dive { get; set; }
     public bool Brake { get; set; }

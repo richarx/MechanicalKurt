@@ -2,8 +2,6 @@ using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 
-// Tools > Scénarios : ouvre la vraie scène, entre en Play et lance les scénarios choisis (ScenarioRunner).
-// Les scénarios multi demandent Player 2 actif (Window > Multiplayer > Multiplayer Play Mode).
 public static class ScenarioMenu
 {
     const string ScenePath = "Assets/Scenes/MainCityScene.unity";
@@ -108,18 +106,12 @@ public static class ScenarioMenu
             Debug.LogWarning("Aucun rapport de scénarios pour l'instant.");
     }
 
-    // Ligne de commande : Unity.exe -projectPath … -executeMethod ScenarioMenu.RunAllFromCommandLine
-    // Joue tous les scénarios solo puis quitte Unity (code 0 si tout passe, 1 sinon). Rapport : Logs/ScenarioReport.txt.
     public static void RunAllFromCommandLine() => RunFromCommandLine(ScenarioRunner.AllSolo);
 
-    // Ligne de commande, scénarios multi : lancer d'abord l'hôte (cette méthode, dans le projet), puis le second
-    // joueur dans le clone Multiplayer Play Mode (JoinAsClientFromCommandLine, -projectPath Library/VP/<clone>).
-    // L'hôte attend le second joueur au plus 5 minutes, joue les scénarios multi, puis ferme les deux éditeurs.
     public static void RunMultiFromCommandLine() => RunFromCommandLine(ScenarioRunner.AllMulti);
 
     public static void RunEverythingFromCommandLine() => RunFromCommandLine(ScenarioRunner.AllScenarios);
 
-    // Ligne de commande, scénarios choisis : -scenarios "Nom 1|Nom 2" (ou *solo, *multi, *).
     public static void RunSelectedFromCommandLine()
     {
         string[] args = System.Environment.GetCommandLineArgs();
@@ -127,8 +119,6 @@ public static class ScenarioMenu
         RunFromCommandLine(index >= 0 && index + 1 < args.Length ? args[index + 1] : ScenarioRunner.AllSolo);
     }
 
-    // Ligne de commande, dans le clone : entre en Play comme second joueur (client PurrNet), se relie à l'hôte,
-    // obéit à ses scénarios puis quitte quand l'hôte a fini (ou au bout de 10 minutes sans hôte).
     public static void JoinAsClientFromCommandLine()
     {
         SessionState.SetBool(ScenarioClientAgent.ExitOnFinishKey, true);

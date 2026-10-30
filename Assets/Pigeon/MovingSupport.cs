@@ -2,11 +2,10 @@ using System.Collections.Generic;
 using System.Text;
 using UnityEngine;
 
-// Objet qui transporte le pigeon posé dessus (ballon de plage, voitures). Seuls les colliders sous un MovingSupport
-// servent de support.
-// Le pigeon garde dans son état prédit l'Id du support et sa position dans le repère du support : l'Id est donc
-// déduit du chemin dans la hiérarchie (identique sur chaque machine pour un objet de scène) plutôt que d'une
-// référence d'objet, qu'un état réseau ne peut pas porter.
+/// <summary>
+/// Objet qui transporte le pigeon posÃ© dessus (ballon, voitures). Son Id vient du chemin dans la hiÃ©rarchie,
+/// identique sur chaque machine, pour Ãªtre portÃ© par l'Ã©tat prÃ©dit du pigeon.
+/// </summary>
 [DisallowMultipleComponent]
 public class MovingSupport : MonoBehaviour
 {
@@ -35,7 +34,6 @@ public class MovingSupport : MonoBehaviour
     void OnEnable()
     {
         int id = ComputeId();
-        // Deux objets au même chemin (doublons de nom et d'index impossibles en pratique) : on décale.
         while (_byId.TryGetValue(id, out MovingSupport other) && other != null && other != this)
         {
             Debug.LogWarning($"MovingSupport : Id déjà pris par « {other.name} », décalé.", this);
@@ -51,8 +49,6 @@ public class MovingSupport : MonoBehaviour
             _byId.Remove(Id);
     }
 
-    // FNV-1a sur « scène/parent#index/enfant#index… » : stable d'une exécution et d'une machine à l'autre
-    // (contrairement à string.GetHashCode).
     int ComputeId()
     {
         var path = new StringBuilder(gameObject.scene.name);

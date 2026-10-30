@@ -2,9 +2,6 @@
 using System.Collections;
 using UnityEngine;
 
-// Scénarios des missions « locales » (jouées par chaque joueur sur son écran) : on les déroule de bout en bout
-// comme un joueur, dans la vraie scène — se poser sur le départ, faire défiler le dialogue, remplir l'objectif,
-// revenir à l'arrivée — et on vérifie l'achievement final.
 public partial class ScenarioRunner
 {
     public const string DeliveryScenario = "Mission : livraison simple";
@@ -12,9 +9,6 @@ public partial class ScenarioRunner
     public const string BillboardScenario = "Mission : billboards";
     public const string PrayerScenario = "Mission : prière (Roar)";
 
-    // ─────────────────────────────────────────────────────────────────────────
-    //  Livraison simple : départ → dialogue → chrono → arrivée → dialogue → achievement.
-    // ─────────────────────────────────────────────────────────────────────────
     IEnumerator RunDeliveryMission()
     {
         PigeonDeliveryRace delivery = FindAnyObjectByType<PigeonDeliveryRace>();
@@ -42,9 +36,6 @@ public partial class ScenarioRunner
         yield return Check("Achievement de livraison débloqué", IsUnlocked(delivery.CompletionAchievement));
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    //  Collecte (Spidey) : départ → dialogue → ramasser chaque objet → retour → dialogue → achievement.
-    // ─────────────────────────────────────────────────────────────────────────
     IEnumerator RunCollectionMission()
     {
         PigeonCollectionRace collection = FindAnyObjectByType<PigeonCollectionRace>();
@@ -83,9 +74,6 @@ public partial class ScenarioRunner
         yield return Check("Achievement de collecte débloqué", IsUnlocked(collection.CompletionAchievement));
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    //  Billboards : départ → dialogue → valider chaque zone (posé + F) → mission complète.
-    // ─────────────────────────────────────────────────────────────────────────
     IEnumerator RunBillboardMission()
     {
         BillboardMission mission = FindAnyObjectByType<BillboardMission>();
@@ -113,14 +101,11 @@ public partial class ScenarioRunner
             int expected = i + 1;
             yield return Check($"Zone {expected} active", zone != null && zone.gameObject.activeInHierarchy, zone != null ? zone.name : "null");
 
-            // Les zones photo peuvent être en l'air face au panneau : approche en vol stationnaire, comme un joueur
-            // (battre des ailes + freiner, nez relevé). Au sol, le pigeon s'y pose simplement.
             Quaternion noseUp = Quaternion.Euler(-45f, Pigeon.transform.eulerAngles.y, 0f);
             yield return Teleport(Pigeon, zone.transform.position, noseUp, $"Placement sur la zone {expected} ({zone.name})");
             Bot.Flap = true;
             Bot.Brake = true;
             yield return ExpectStill(Pigeon, 4f, zone.StopSpeedThreshold);
-            // Prompt en fondu (CanvasGroup, 0,3 s) : affiché ET opaque.
             yield return Expect($"Zone {expected} : le prompt s'affiche", () => zone.Prompt != null && zone.IsPromptDisplayed
                     && zone.Prompt.gameObject.activeInHierarchy && zone.Prompt.alpha > 0.99f, 1.5f,
                 () => $"distance {Vector3.Distance(Pigeon.transform.position, zone.transform.position):0.00} / rayon {zone.Radius}, "
@@ -137,8 +122,6 @@ public partial class ScenarioRunner
         yield return Expect("Mission billboards terminée", () => !mission.IsRunning && completed == 1, 2f,
             () => $"{mission.CompletedCount}/{mission.TotalCount}, OnCompleted {completed}");
 
-        // Le prompt est partagé avec les MissionStartZone (SetActive seulement) : après les fondus des billboards,
-        // il doit rester visible et opaque dans une zone de départ.
         MissionStartZone startZone = null;
         foreach (MissionStartZone candidate in FindObjectsByType<MissionStartZone>(FindObjectsInactive.Exclude))
             if (candidate.Prompt != null && (startZone == null || string.CompareOrdinal(candidate.name, startZone.name) < 0))
@@ -151,9 +134,6 @@ public partial class ScenarioRunner
         }
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    //  Prière : se poser sur la statue → cinématique Roar → achievement.
-    // ─────────────────────────────────────────────────────────────────────────
     IEnumerator RunPrayerMission()
     {
         RoarCinematic roar = FindAnyObjectByType<RoarCinematic>();
@@ -170,11 +150,6 @@ public partial class ScenarioRunner
         yield return Check("Achievement de prière débloqué", IsUnlocked(roar.CompletionAchievement));
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    //  Outils communs aux missions
-    // ─────────────────────────────────────────────────────────────────────────
-
-    // Rester immobile dans une PigeonStopZone le temps qu'elle se déclenche.
     IEnumerator LandOnStopZone(PigeonStopZone stop, string label)
     {
         yield return Check($"Zone « {label} » prête", stop != null && stop.isActiveAndEnabled,
@@ -182,8 +157,6 @@ public partial class ScenarioRunner
         yield return HoldStillAt(stop.transform.position, stop.Radius, stop.StopSpeedThreshold, label);
     }
 
-    // Rester immobile à un endroit, comme un joueur : se poser au centre, ou, s'il n'y a rien dessous
-    // (statue sans collider, zone en l'air), tenir en vol stationnaire.
     IEnumerator HoldStillAt(Vector3 spot, float radius, float stopSpeed, string label)
     {
         Bot.Flap = Bot.Brake = false;
@@ -207,7 +180,6 @@ public partial class ScenarioRunner
             $"distance {Vector3.Distance(Pigeon.transform.position, spot):0.00} / rayon {radius}, {(groundUnderZone ? "posé" : "en vol stationnaire")}");
     }
 
-    // Fait défiler le dialogue comme un joueur (appui de validation régulier) jusqu'à la fin de la cinématique.
     IEnumerator PlayThroughDialogCinematic(DialogCinematic cinematic, string label)
     {
         float deadline = Time.realtimeSinceStartup + 60f;
@@ -237,7 +209,6 @@ public partial class ScenarioRunner
     static bool IsUnlocked(AchievementData achievement)
         => achievement != null && AchievementManager.Instance != null && AchievementManager.Instance.IsUnlocked(achievement);
 
-    // La PigeonStopZone dont l'événement appelle une méthode de target (câblage fait dans l'inspecteur).
     static PigeonStopZone FindStopZoneCalling(Object target)
     {
         foreach (PigeonStopZone stop in FindObjectsByType<PigeonStopZone>(FindObjectsInactive.Include))

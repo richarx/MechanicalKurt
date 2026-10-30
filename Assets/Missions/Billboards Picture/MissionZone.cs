@@ -27,7 +27,6 @@ public class MissionZone : MonoBehaviour
     [field: SerializeField]
     public UnityEvent OnStartValidation { get; private set; } = new UnityEvent();
 
-
     private PigeonController _pigeon;
     private PlayerControls _blockableControls;
     private bool _isInside;
@@ -49,7 +48,6 @@ public class MissionZone : MonoBehaviour
 
     private void OnEnable()
     {
-        // BillboardMission.Launch réactive les zones à chaque partie.
         isValidated = false;
     }
 
@@ -58,13 +56,11 @@ public class MissionZone : MonoBehaviour
         if (isValidated)
             return;
 
-        // Mission locale : seul le pigeon du joueur local compte (prefab réseau, recâblé s'il change).
         if (PigeonController.Local != _pigeon)
         {
             _pigeon = PigeonController.Local;
             _blockableControls = _pigeon != null ? _pigeon.GetComponentInChildren<PlayerControls>() : null;
         }
-        // Les appuis passent par la source d'input du pigeon (joueur ou bot des scénarios).
         IPigeonControls controls = _pigeon != null ? _pigeon.Controls : null;
 
         // Évalué après le déplacement du pigeon dans Update, comme PigeonStopZone.
@@ -89,7 +85,6 @@ public class MissionZone : MonoBehaviour
 
     private void Validate()
     {
-        // Tout de suite : le premier callback d'une Sequence ne part qu'à la mise à jour DOTween suivante.
         isValidated = true;
         PlayerControls blocked = _blockableControls;
 
@@ -109,7 +104,6 @@ public class MissionZone : MonoBehaviour
         if (cameraFlashImage != null)
             sequence.Join(cameraFlashImage.DOFade(0.0f, 0.2f));
         sequence
-            // Max (et non Min, comme sur main) : le plan photo dure bien cameraSwapDuration au total.
             .AppendInterval(Mathf.Max(0.0f, cameraSwapDuration - FlashDelay))
             .AppendCallback(() =>
             {
@@ -156,7 +150,6 @@ public class MissionZone : MonoBehaviour
             HidePrompt();
     }
 
-    // Prompt partagé entre zones : les Sequences ciblent le CanvasGroup, pour que la zone suivante coupe celle d'avant.
     private void DisplayPrompt()
     {
         if (isPromptDisplayed)
@@ -202,7 +195,6 @@ public class MissionZone : MonoBehaviour
             .AppendCallback(DeactivatePrompt);
     }
 
-    // Les MissionStartZone affichent le même objet par SetActive seulement : lui rendre alpha et échelle.
     private void DeactivatePrompt()
     {
         Prompt.gameObject.SetActive(false);

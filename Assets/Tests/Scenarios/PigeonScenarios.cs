@@ -3,9 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-// Les scénarios eux-mêmes. Chacun part du pigeon du joueur à son point d'apparition et nettoie derrière lui.
-// Les cibles (anneau, tuto, course) sont cherchées dans la vraie scène : si un objet est déplacé ou
-// mal configuré, c'est le scénario qui le signale.
 public partial class ScenarioRunner
 {
     public const string RingScenario = "Anneau de boost";
@@ -75,12 +72,8 @@ public partial class ScenarioRunner
         new ScenarioDef { Name = MultiAudioScenario, Body = MultiAudio, Multi = true },
     };
 
-    // ─────────────────────────────────────────────────────────────────────────
-    //  1. Anneau : traversée en vol plané, boost unique, puis nouveau boost à la traversée suivante.
-    // ─────────────────────────────────────────────────────────────────────────
     IEnumerator RingBoost()
     {
-        // Toujours le même anneau d'un lancement à l'autre (FindAnyObjectByType n'a pas d'ordre garanti).
         BoostRing ring = null;
         foreach (BoostRing candidate in FindObjectsByType<BoostRing>(FindObjectsInactive.Exclude))
             if (ring == null || string.CompareOrdinal(candidate.name, ring.name) < 0
@@ -97,7 +90,6 @@ public partial class ScenarioRunner
         Pigeon.OnBoosted.AddListener(CountBoost);
         Defer(() => Pigeon.OnBoosted.RemoveListener(CountBoost));
 
-        // Départ 5 m devant l'anneau, 3 m au-dessus, nez à -30° : le vol plané passe par le centre.
         Vector3 start = center - normal * 5f + Vector3.up * 3f;
         Quaternion glide = Quaternion.LookRotation(normal) * Quaternion.Euler(30f, 0f, 0f);
 
@@ -115,10 +107,6 @@ public partial class ScenarioRunner
             () => $"boosts {boosts}, étourdi {Pigeon.IsStun}, vitesse {Pigeon.Speed:0.0}, distance au centre {Vector3.Distance(Pigeon.transform.position, center):0.0} m");
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    //  2. Tuto (zone locale) : se poser dans le cercle, sans F → cinématique + achievement + sac à dos,
-    //     puis plus jamais de relance pour ce joueur.
-    // ─────────────────────────────────────────────────────────────────────────
     IEnumerator TutoStopZone()
     {
         PigeonStopDialogCinematic tuto = null;
@@ -157,7 +145,6 @@ public partial class ScenarioRunner
         yield return ExpectLanded(Pigeon, 3f, zone.StopSpeedThreshold);
         yield return ExpectStays("Rester dans le cercle ne relance pas le tuto", () => !tuto.Cinematic.IsPlaying, 2f, ZoneState);
 
-        // Ressortir puis revenir : toujours rien, le tuto ne se joue qu'une fois par joueur.
         yield return Teleport(Pigeon, zone.transform.position + zone.transform.forward * (zone.Radius + 4f) + Vector3.up * 2f,
             zone.transform.rotation, "Sortie du cercle");
         yield return Teleport(Pigeon, zone.transform.position + Vector3.up * 0.5f, zone.transform.rotation, "Retour dans le cercle");
@@ -165,10 +152,6 @@ public partial class ScenarioRunner
         yield return ExpectStays("Revenir dans le cercle ne relance pas le tuto", () => !tuto.Cinematic.IsPlaying, 2f, ZoneState);
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    //  3. Course : un seul prêt → rien ; deux prêts → compte à rebours et gel ; annulation ;
-    //     relance → téléportation sur la ligne de départ et course lancée.
-    // ─────────────────────────────────────────────────────────────────────────
     IEnumerator RaceStart()
     {
         PigeonCharacterRace race = FindRace();
@@ -203,7 +186,6 @@ public partial class ScenarioRunner
         yield return Expect("Annulation : les deux pigeons sont dégelés", () => !Pigeon.IsMovementFrozen && !other.IsMovementFrozen, 1f);
         yield return Check("Annulation : pas de cinématique", !race.DepartureCinematic.IsPlaying);
 
-        // Le joueur est resté prêt : le bot revalide.
         bots[0].Controls.PressInteract();
         yield return Expect("Relance : décompte", () => zone.Phase == MissionStartZone.CountingDown, 2f,
             () => $"phase {zone.Phase}, prêts : joueur {Pigeon.WantsStart}, bot {other.WantsStart}");
@@ -242,7 +224,6 @@ public partial class ScenarioRunner
     static bool HudContains(MissionStartZone zone, string part) => zone.HudText != null && zone.HudText.Contains(part);
     static string HudState(MissionStartZone zone) => $"zone {zone.Phase}, texte « {zone.HudText?.Replace('\n', ' ') ?? "masqué"} »";
 
-    // Les deux participants finissent leur cinématique (bot signalé à la main), puis la course part.
     IEnumerator FinishDepartureCinematics(PigeonCharacterRace race, PigeonController other)
     {
         MissionStartZone zone = race.DepartureZone;
@@ -255,9 +236,6 @@ public partial class ScenarioRunner
     static float DistanceToFinish(PigeonCharacterRace race, PigeonController pigeon)
         => Vector3.Distance(pigeon.transform.position, race.DestinationStop.transform.position);
 
-    // ─────────────────────────────────────────────────────────────────────────
-    //  4. Course : un pigeon dépasse MaximumHeight → échec pour tous, message, zone réarmée.
-    // ─────────────────────────────────────────────────────────────────────────
     IEnumerator RaceHeightFailure()
     {
         PigeonCharacterRace race = FindRace();
@@ -292,10 +270,6 @@ public partial class ScenarioRunner
         yield return Check("Personne n'est gelé", !Pigeon.IsMovementFrozen && !other.IsMovementFrozen);
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    //  5. Course en cours : un pigeon arrivé après le départ ne peut pas relancer la course,
-    //     ni la faire échouer, ni la gagner ; le personnage à battre avance avec l'horloge de la course.
-    // ─────────────────────────────────────────────────────────────────────────
     IEnumerator RaceLockedWhileRunning()
     {
         PigeonCharacterRace race = FindRace();
@@ -316,7 +290,6 @@ public partial class ScenarioRunner
             () => $"phase course {race.Phase} ; {zone.Describe()}");
         Vector3 characterAtStart = race.Character.position;
 
-        // Un troisième pigeon arrive pendant la course et se pose dans la zone de départ.
         Vector3 center = zone.transform.position + Vector3.up * 0.5f;
         Quaternion rotation = Quaternion.Euler(0f, zone.transform.eulerAngles.y, 0f);
         yield return SpawnBot(center, rotation, bots);
@@ -347,10 +320,6 @@ public partial class ScenarioRunner
             $"{Vector3.Distance(race.Character.position, characterAtStart):0.0} m parcourus");
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    //  6. Course gagnée : les coureurs restent gelés tant que tous n'ont pas fini la cinématique d'arrivée,
-    //     puis la course revient au départ et peut être refaite.
-    // ─────────────────────────────────────────────────────────────────────────
     IEnumerator RaceWinAndReplay()
     {
         PigeonCharacterRace race = FindRace();
@@ -378,7 +347,6 @@ public partial class ScenarioRunner
         string Frozen() => $"course {race.Phase}, cinématique {race.ArrivalCinematic.IsPlaying}, gelés : joueur {Pigeon.IsMovementFrozen}, bot {other.IsMovementFrozen}";
         yield return Expect("Les deux coureurs sont gelés", () => Pigeon.IsMovementFrozen && other.IsMovementFrozen, 1f, Frozen);
 
-        // Plus long que l'ancienne durée fixe (5 s) : le gel tient tant que la cinématique n'est pas finie.
         Bot.PressInteract();
         yield return ExpectStays("Pendant la cinématique de fin, personne ne bouge",
             () => race.Phase == PigeonCharacterRace.RacePhase.ArrivalCinematic && Pigeon.IsMovementFrozen && other.IsMovementFrozen,
@@ -396,7 +364,6 @@ public partial class ScenarioRunner
         if (race.CompletionAchievement != null && AchievementManager.Instance != null)
             yield return Check("L'achievement de la course est débloqué", AchievementManager.Instance.IsUnlocked(race.CompletionAchievement));
 
-        // On refait la course.
         Vector3 center = zone.transform.position + Vector3.up * 0.5f;
         Vector3 side = zone.transform.right * Mathf.Min(0.8f, zone.Radius * 0.4f);
         Quaternion rotation = Quaternion.Euler(0f, zone.transform.eulerAngles.y, 0f);
@@ -410,14 +377,10 @@ public partial class ScenarioRunner
         yield return Expect("La course peut être refaite : décompte", () => zone.Phase == MissionStartZone.CountingDown, 2f,
             () => $"zone {zone.Phase}, prêts : joueur {Pigeon.WantsStart}, bot {other.WantsStart}");
 
-        // Annulation, pour laisser la course au repos au scénario suivant.
         Bot.PressInteract();
         yield return Expect("Annulation du nouveau départ", () => zone.Phase == MissionStartZone.Waiting, 2f, () => $"zone {zone.Phase}");
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    //  Outils communs aux courses
-    // ─────────────────────────────────────────────────────────────────────────
     PigeonCharacterRace FindRace()
     {
         foreach (PigeonCharacterRace race in FindObjectsByType<PigeonCharacterRace>(FindObjectsInactive.Exclude))
@@ -450,7 +413,6 @@ public partial class ScenarioRunner
         yield return Check("Personne n'est encore prêt", !Pigeon.WantsStart && !other.WantsStart);
     }
 
-    // Remet la course au repos : un pigeon trop haut fait échouer la course (même chemin que le jeu).
     void CleanupRace(PigeonCharacterRace race)
     {
         if (race == null)
@@ -459,10 +421,8 @@ public partial class ScenarioRunner
             race.DepartureCinematic.CancelCinematic();
         if (race.ArrivalCinematic != null && race.ArrivalCinematic.IsPlaying)
             race.ArrivalCinematic.CancelCinematic();
-        // Second joueur : il finit ses cinématiques lui-même (sa fin passe par son input) ; sans attendre sa réponse.
         if (_link != null && _link.Connected)
             _link.Send("cancel-dialogs");
-        // Arrêté en pleine cinématique de départ : la libérer pour tous, sinon les pigeons restent gelés jusqu'au délai max.
         if (race.DepartureZone != null && race.DepartureZone.Phase == MissionStartZone.Cinematic)
             foreach (PigeonController pigeon in PigeonController.All)
                 race.DepartureZone.ReportCinematicFinished(pigeon);
@@ -476,12 +436,8 @@ public partial class ScenarioRunner
             PigeonController pigeon = Pigeon;
             PigeonController.RunInSimulation(_ => pigeon.ForceTeleport(above, pigeon.transform.rotation));
         }
-        // Les validations (WantsStart) tombent d'elles-mêmes quand les pigeons quittent la zone au respawn.
     }
 
-    // Après les nettoyages, entre deux scénarios : la course doit finir au repos, quoi qu'il reste en route
-    // (décompte presque fini, cinématique démarrée chez le second joueur juste après le nettoyage, accusé tardif
-    // qui relance la course…). Hors Execute : pas d'Expect.
     IEnumerator SettleRace()
     {
         PigeonCharacterRace race = FindRace();
@@ -513,7 +469,7 @@ public partial class ScenarioRunner
                     _link?.Send("finish-cinematics", "arrival");
                 }
                 else if (race.Phase == PigeonCharacterRace.RacePhase.Racing)
-                    MoveAllPigeons(AboveMaximumHeightAwayFromFinish(race));   // échec : retour au départ
+                    MoveAllPigeons(AboveMaximumHeightAwayFromFinish(race));
             }
             yield return null;
         }
@@ -529,8 +485,6 @@ public partial class ScenarioRunner
         }
     }
 
-    // Au-dessus de MaximumHeight, à la verticale de la zone de départ, et assez loin de l'arrivée
-    // (sinon la course est gagnée au lieu d'échouer : l'arrivée se mesure en 3D).
     static Vector3 AboveMaximumHeightAwayFromFinish(PigeonCharacterRace race)
     {
         Vector3 point = race.DepartureZone.transform.position;
@@ -549,11 +503,9 @@ public partial class ScenarioRunner
         return point;
     }
 
-    // Le prompt est partagé avec les MissionZone (CanvasGroup en fondu) : actif ne suffit pas, il doit être opaque.
     internal static float PromptAlpha(GameObject prompt)
         => prompt != null && prompt.TryGetComponent(out CanvasGroup group) ? group.alpha : 1f;
 
-    // Aussi lu par ScenarioClientAgent : ce que voit le second joueur se mesure de la même façon.
     internal static bool PromptVisible(GameObject prompt) => prompt != null && prompt.activeInHierarchy && PromptAlpha(prompt) > 0.99f;
 
     static float DistanceXZ(PigeonController pigeon, Transform target)

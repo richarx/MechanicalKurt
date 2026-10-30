@@ -3,38 +3,22 @@ using Sirenix.OdinInspector;
 using UnityEngine;
 using UnityEngine.Events;
 
-// ─────────────────────────────────────────────────────────────────────────────
-//  Course contre un personnage, version multijoueur prédite.
-//
-//  Gameplay (dans Simulate, déterministe, piloté par dt) :
-//    Ready   -> Racing   quand la MissionStartZone a lancé le départ : tous les joueurs prêts, décompte
-//                        terminé, puis cinématique de départ finie sur chaque écran
-//    Racing  -> Ready    échec : un coureur dépasse MaximumHeight, ou temps écoulé (le personnage est arrivé)
-//    Racing  -> Arrival  un coureur s'est arrêté dans la zone d'arrivée assez longtemps (le premier gagne)
-//    Arrival -> Ready    quand tous les coureurs ont fini la cinématique d'arrivée (ou au bout de
-//                        ArrivalCinematicTimeout) ; ils restent gelés jusque-là. La course peut être refaite.
-//
-//  Une seule course à la fois : la zone de départ reste verrouillée de la fin du décompte jusqu'à la fin de
-//  la course (échec, ou fin de la cinématique d'arrivée). Seuls les coureurs de ce départ comptent ; un joueur
-//  arrivé en cours de route n'influence pas la course et ne reçoit ni cinématique, ni message, ni succès.
-//
-//  Présentation (vue, locale à chaque client) : personnage sur son trajet, objets de course,
-//  cinématiques, messages, succès. Le personnage (le pigeon à battre) est placé d'après Elapsed, état
-//  prédit et répliqué : il est au même endroit sur tous les écrans, y compris pour un joueur qui rejoint.
-//  Les cinématiques ne pilotent le gameplay que par leur fin, remontée par l'input du pigeon : à la
-//  MissionStartZone pour le départ, à cette course pour l'arrivée.
-// ─────────────────────────────────────────────────────────────────────────────
 public struct RaceState : IPredictedData<RaceState>
 {
-    public byte Phase;             // (byte)PigeonCharacterRace.RacePhase
-    public float Elapsed;          // secondes de course écoulées (dt cumulé, jamais Time.time)
-    public float StoppedTime;      // durée pendant laquelle un pigeon est arrêté à l'arrivée
-    public float ArrivalRemaining; // délai max restant pour la cinématique d'arrivée
-    public int StartCount;         // départ de la zone qui a lancé cette course (identifie les coureurs)
+    public byte Phase;
+    public float Elapsed;
+    public float StoppedTime;
+    public float ArrivalRemaining;
+    public int StartCount;
 
     public void Dispose() { }
 }
 
+/// <summary>
+/// Course prÃ©dite contre un personnage. LancÃ©e par sa MissionStartZone ; seuls les coureurs de ce dÃ©part comptent.
+/// Ã‰chec (hauteur, temps) ou victoire ramÃ¨nent la course au dÃ©part ; Ã  la victoire, les coureurs restent gelÃ©s
+/// jusqu'Ã  ce que chacun ait fini la cinÃ©matique d'arrivÃ©e. Le personnage suit Elapsed, identique pour tous.
+/// </summary>
 [DisallowMultipleComponent]
 public class PigeonCharacterRace : PredictedIdentity<RaceState>
 {
@@ -109,7 +93,6 @@ public class PigeonCharacterRace : PredictedIdentity<RaceState>
     [field: SerializeField, BoxGroup("Événements")]
     public UnityEvent OnCompleted { get; private set; } = new UnityEvent();
 
-    // Lue depuis la vue : valable pour l'UI et les autres scripts, pas pour la simulation.
     [ShowInInspector, ReadOnly]
     public RacePhase Phase
     {
@@ -123,14 +106,11 @@ public class PigeonCharacterRace : PredictedIdentity<RaceState>
         }
     }
 
-    // ── Événements de simulation (filtrés par PurrDiction) : présentation ponctuelle uniquement ──
-    // Argument : numéro du départ, pour ne présenter qu'aux coureurs.
     private PredictedEvent<int> _cheaterEvent;
     private PredictedEvent<int> _timeoutEvent;
     private PredictedEvent<int> _arrivalEvent;
     private PredictedEvent<int> _completedEvent;
 
-    // ── Présentation locale ──────────────────────────────────────────────────
     private RaceState _viewState;
     private int _presentedPhase = -1;
     private bool _holdCharacter;
@@ -143,11 +123,8 @@ public class PigeonCharacterRace : PredictedIdentity<RaceState>
     private bool _wasRootMotionEnabled;
     private bool _ownsRootMotion;
     private bool _playingDepartureCinematic;
-    private int _playingArrivalStart;   // départ dont la cinématique d'arrivée joue ici (0 = aucune)
+    private int _playingArrivalStart;
 
-    // ─────────────────────────────────────────────────────────────────────────
-    //  Cycle de vie
-    // ─────────────────────────────────────────────────────────────────────────
     protected override void LateAwake()
     {
         if (Character != null)
@@ -157,7 +134,6 @@ public class PigeonCharacterRace : PredictedIdentity<RaceState>
             _characterAnimator = Character.GetComponentInChildren<Animator>();
         }
 
-        // L'arrivée est évaluée dans la simulation : le composant ne sert plus que de configuration.
         if (DestinationStop != null)
             DestinationStop.enabled = false;
 
@@ -198,12 +174,8 @@ public class PigeonCharacterRace : PredictedIdentity<RaceState>
         RestoreRootMotion();
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    //  State
-    // ─────────────────────────────────────────────────────────────────────────
     protected override RaceState GetInitialState() => new RaceState { Phase = (byte)RacePhase.Ready };
 
-    // Cette identité ne dépend d'aucun état Unity.
     protected override void GetUnityState(ref RaceState s) { }
     protected override void SetUnityState(RaceState s) { }
 
@@ -214,9 +186,6 @@ public class PigeonCharacterRace : PredictedIdentity<RaceState>
         return result;
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    //  Simulation
-    // ─────────────────────────────────────────────────────────────────────────
     protected override void Simulate(ref RaceState s, float dt)
     {
         switch ((RacePhase)s.Phase)
@@ -239,7 +208,6 @@ public class PigeonCharacterRace : PredictedIdentity<RaceState>
                 s.ArrivalRemaining -= dt;
                 if (AllRacersFinishedArrival(s.StartCount) || s.ArrivalRemaining <= 0f)
                 {
-                    // Victoire : course rejouable, la zone de départ se rouvre.
                     SetRacersFrozen(false);
                     ResetRace(ref s);
                     _completedEvent.Invoke(s.StartCount);
@@ -252,7 +220,6 @@ public class PigeonCharacterRace : PredictedIdentity<RaceState>
     {
         s.Elapsed += dt;
 
-        // Tous les coureurs ont quitté la partie : la course s'arrête sans message.
         if (!AnyRacer())
         {
             ResetRace(ref s);
@@ -271,8 +238,6 @@ public class PigeonCharacterRace : PredictedIdentity<RaceState>
             return;
         }
 
-        // Le premier coureur qui s'arrête assez longtemps à l'arrivée gagne pour tout le monde.
-        // « stopped » est requis en plus de la durée : avec StopDuration = 0, 0 >= 0 validait l'arrivée dès le départ.
         bool stopped = IsAnyRacerStoppedAtDestination();
         s.StoppedTime = stopped ? s.StoppedTime + dt : 0f;
         if (stopped && s.StoppedTime >= DestinationStop.StopDuration)
@@ -284,7 +249,6 @@ public class PigeonCharacterRace : PredictedIdentity<RaceState>
         }
     }
 
-    // Fin de course (échec ou victoire) : la course revient au départ et la zone se rouvre.
     private void ResetRace(ref RaceState s)
     {
         s.Phase = (byte)RacePhase.Ready;
@@ -293,7 +257,6 @@ public class PigeonCharacterRace : PredictedIdentity<RaceState>
         DepartureZone.ResetToWaiting();
     }
 
-    // Coureurs : pigeons lancés par le départ en cours de la zone (verrouillée pendant la course).
     private bool AnyRacer()
     {
         var pigeons = PigeonController.All;
@@ -303,7 +266,6 @@ public class PigeonCharacterRace : PredictedIdentity<RaceState>
         return false;
     }
 
-    // Coureurs restants (un coureur parti de la partie n'est plus attendu).
     private bool AllRacersFinishedArrival(int startCount)
     {
         var pigeons = PigeonController.All;
@@ -354,9 +316,6 @@ public class PigeonCharacterRace : PredictedIdentity<RaceState>
                 pigeons[i].ForceFreeze(frozen);
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    //  Vue (présentation locale, aucune décision de gameplay)
-    // ─────────────────────────────────────────────────────────────────────────
     protected override void UpdateView(RaceState view, RaceState? verified)
     {
         _viewState = view;
@@ -430,7 +389,6 @@ public class PigeonCharacterRace : PredictedIdentity<RaceState>
         SetRaceObjectsActive(true);
     }
 
-    // ── Réactions aux événements de la zone de départ (présentation) ─────────
     private void HandleDepartureCountdown()
     {
         if (FailureMessage != null)
@@ -443,13 +401,11 @@ public class PigeonCharacterRace : PredictedIdentity<RaceState>
         SetDepartureActive(true);
     }
 
-    // Fin du décompte, sur l'écran d'un participant : sa cinématique, puis le signal « fini » à la zone.
     private void HandleDepartureCinematic()
     {
         if (!HasValidSetup())
         {
             Debug.LogWarning("PigeonCharacterRace : assigner la zone de départ, le personnage, un CharacterRacePath avec des points, une zone d'arrivée, deux cinématiques distinctes, l'objet d'arrivée, la pose finale et le FadingMessage actif avec CanvasGroup et texte TMP. Vérifier les durées positives, la hauteur finie et les hiérarchies des Race Objects.", this);
-            // Sans cinématique jouable, ne pas bloquer les autres joueurs.
             if (DepartureZone != null)
                 DepartureZone.ReportLocalCinematicFinished();
             return;
@@ -469,8 +425,6 @@ public class PigeonCharacterRace : PredictedIdentity<RaceState>
         DepartureZone.ReportLocalCinematicFinished();
     }
 
-    // ── Réactions aux PredictedEvent de la simulation (présentation ponctuelle) ──
-    // Message, cinématique d'arrivée et succès : coureurs seulement. Le personnage, lui, bouge pour tout le monde.
     private bool LocalRaced(int startCount) => DepartureZone != null && DepartureZone.LocalParticipated(startCount);
 
     private void HandleFailed(int startCount, bool cheater)
@@ -489,7 +443,6 @@ public class PigeonCharacterRace : PredictedIdentity<RaceState>
         if (!LocalRaced(startCount))
             return;
 
-        // Fin de la cinématique → accusé par l'input du pigeon : les coureurs sont dégelés quand tous l'ont fini.
         _playingArrivalStart = startCount;
         if (ArrivalCinematic != null)
             ArrivalCinematic.PlayCinematic();
@@ -530,9 +483,6 @@ public class PigeonCharacterRace : PredictedIdentity<RaceState>
         OnCompleted.Invoke();
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    //  Personnage et objets de course
-    // ─────────────────────────────────────────────────────────────────────────
     private bool BuildPath()
     {
         int pointCount = Path != null ? Path.PointCount : Waypoints.Length;

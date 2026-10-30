@@ -5,9 +5,6 @@ using System.Collections.Generic;
 using Unity.Cinemachine;
 using UnityEngine;
 
-// Création de pigeons bots (contrôlés par le serveur, pilotés par un BotControls).
-// Hôte uniquement : la création passe par la simulation du pigeon local (PigeonController.RunInSimulation),
-// puis PurrNet réplique le bot chez les clients comme n'importe quel pigeon.
 public static class BotSpawner
 {
     const string PlayerPrefabPath = "Assets/Pigeon/Player.prefab";
@@ -46,12 +43,10 @@ public static class BotSpawner
 
     public static void Delete(PigeonController bot)
     {
-        // Peut être demandé deux fois (scénario puis nettoyage) : le bot peut être détruit quand la commande passe.
         if (bot != null)
             PigeonController.RunInSimulation(manager => { if (bot != null) manager.hierarchy.Delete(bot.gameObject); });
     }
 
-    // Le bot ne doit ni prendre la caméra, ni l'audio, ni lire le clavier.
     static void MutePresentation(PigeonController bot)
     {
         foreach (CinemachineCamera cam in bot.GetComponentsInChildren<CinemachineCamera>(true))

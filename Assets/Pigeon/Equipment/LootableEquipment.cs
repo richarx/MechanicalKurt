@@ -80,8 +80,6 @@ public class LootableEquipment : MonoBehaviour
             glideSequence.Kill();
             spinSequence.Kill();
 
-            // Les anciens appels de l'événement visaient le PigeonEquipment du pigeon de la scène, qui n'existe plus :
-            // l'équipement est donné directement au pigeon qui ramasse l'objet.
             PigeonEquipment equipment = pigeon.GetComponentInChildren<PigeonEquipment>();
             if (equipment != null)
                 equipment.UnlockItem(_equipment);

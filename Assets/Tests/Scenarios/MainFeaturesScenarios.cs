@@ -5,8 +5,6 @@ using System.Reflection;
 using Unity.Cinemachine;
 using UnityEngine;
 
-// Scénarios des ajouts de main portés dans la branche multijoueur : ballon de plage (support mobile), profondeur
-// maximale sous l'eau, caméras (sous l'eau / précision), lunettes, petits anneaux des égouts (combo de son).
 public partial class ScenarioRunner
 {
     public const string BeachBallScenario = "Ballon de plage : support mobile";
@@ -16,9 +14,6 @@ public partial class ScenarioRunner
     public const string SewerRingsScenario = "Anneaux des égouts : boost et combo";
     public const string CarRideScenario = "Voitures : solides en solo, on roule dessus";
 
-    // ─────────────────────────────────────────────────────────────────────────
-    //  Ballon : se poser dessus (transporté), marcher (il roule), s'envoler (on le quitte).
-    // ─────────────────────────────────────────────────────────────────────────
     IEnumerator RunBeachBall()
     {
         BallRolling ball = FindAnyObjectByType<BallRolling>();
@@ -29,7 +24,6 @@ public partial class ScenarioRunner
         yield return Check("Le ballon a un MovingSupport enregistré", support != null && support.Id != 0
             && MovingSupport.TryGet(support.Id, out _), $"Id {support?.Id}");
 
-        // Lâché juste au-dessus du sommet : de plus haut, le pigeon plane vers l'avant en tombant et rate le ballon.
         Vector3 top = collider.bounds.center + Vector3.up * (collider.bounds.extents.y + 0.15f);
         yield return Teleport(Pigeon, top, Quaternion.Euler(0f, 0f, 0f), "Placement au-dessus du ballon");
         var trace = new System.Text.StringBuilder();
@@ -69,7 +63,6 @@ public partial class ScenarioRunner
             $"{100f * onBall / Mathf.Max(1, samples):0}% du temps sur le ballon");
         yield return Check("Pas de stun en marchant sur le ballon", !Pigeon.IsStun);
 
-        // S'envoler : on quitte le support.
         if (Pigeon.SupportId == support.Id)
         {
             Bot.Flap = true;
@@ -79,9 +72,6 @@ public partial class ScenarioRunner
         }
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    //  Profondeur maximale : un piqué depuis les airs ne descend pas sous le plancher (2 m sous le niveau).
-    // ─────────────────────────────────────────────────────────────────────────
     IEnumerator RunMaxDepth()
     {
         Water water = FindAnyObjectByType<Water>();
@@ -112,10 +102,6 @@ public partial class ScenarioRunner
         yield return Check("Pas de stun sous l'eau", !Pigeon.IsStun);
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    //  Caméras : sous l'eau, la caméra sous-marine ; en vol avec le bouton, la précision ; au sol, l'orbitale.
-    //  Un bot qui plonge ne vole pas la caméra du joueur.
-    // ─────────────────────────────────────────────────────────────────────────
     IEnumerator RunCameras()
     {
         CameraSwapper swapper = Pigeon.GetComponent<CameraSwapper>();
@@ -135,14 +121,12 @@ public partial class ScenarioRunner
             && (Object)brain.ActiveVirtualCamera == underwater, 2f,
             () => $"type {swapper.Current}, active {brain.ActiveVirtualCamera?.Name}");
 
-        // Un bot qui plonge pendant que le joueur est hors de l'eau ne touche pas à la caméra du joueur.
         var bots = new List<SpawnedBot>();
         yield return SpawnBot(lane + direction * 3f, Quaternion.LookRotation(direction), bots);
         Pigeon.RequestRespawn();
         yield return Expect("Revenu à terre : caméra orbitale", () => swapper.Current == CameraSwapper.CameraType.Orbital
             && (Object)brain.ActiveVirtualCamera == swapper.OrbitalCamera, 3f,
             () => $"type {swapper.Current}, active {brain.ActiveVirtualCamera?.Name}");
-        // Garde-fou isOwner : le CameraSwapper du bot (contrôlé par l'hôte, mais pas au joueur local) ne choisit rien.
         CameraSwapper botSwapper = bots[0].Pigeon.GetComponent<CameraSwapper>();
         yield return ExpectStays("Le bot sous l'eau ne vole pas la vue, et son CameraSwapper reste inerte",
             () => (Object)brain.ActiveVirtualCamera == swapper.OrbitalCamera
@@ -150,7 +134,6 @@ public partial class ScenarioRunner
             () => $"active {brain.ActiveVirtualCamera?.Name}, bot sous l'eau {bots[0].Pigeon.IsUndeWater}, choix du bot {botSwapper?.Current}");
         BotSpawner.Delete(bots[0].Pigeon);
 
-        // Précision : en vol, bouton maintenu.
         Vector3 sky = Pigeon.transform.position + Vector3.up * 25f;
         yield return Teleport(Pigeon, sky, Pigeon.transform.rotation, "En l'air");
         Bot.PrecisionCamera = true;
@@ -164,9 +147,6 @@ public partial class ScenarioRunner
             () => $"type {swapper.Current}");
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    //  Lunettes (loot de main) : bit 3 dans l'état, visibles sur le pigeon.
-    // ─────────────────────────────────────────────────────────────────────────
     IEnumerator RunSunglasses()
     {
         LootableEquipment loot = null;
@@ -192,9 +172,6 @@ public partial class ScenarioRunner
         yield return Expect("Fin de la cinématique : commandes rendues", () => controls == null || !controls.AreControlsBlocked, 6f);
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    //  Petits anneaux des égouts : boost, et le son monte d'un anneau à l'autre (combo par pigeon).
-    // ─────────────────────────────────────────────────────────────────────────
     IEnumerator RunSewerRings()
     {
         var rings = new List<BoostRing>();
@@ -210,7 +187,6 @@ public partial class ScenarioRunner
         Pigeon.OnBoosted.AddListener(CountBoost);
         Defer(() => Pigeon.OnBoosted.RemoveListener(CountBoost));
 
-        // Laisser retomber un éventuel combo précédent.
         yield return Wait("Fin d'un combo précédent", BoostRing.ComboWindow + 0.5f);
 
         for (int i = 0; i < 2; i++)
@@ -223,8 +199,6 @@ public partial class ScenarioRunner
                 yield return Teleport(Pigeon, center, Quaternion.LookRotation(axis), $"Dans l'anneau {expected} ({ring.name})");
             else
             {
-                // À pleine vitesse (35 m/s, 1,75 m par tick) à travers un anneau de 0,6 m d'épaisseur : la détection
-                // doit balayer le trajet du tick, un test au seul point d'arrivée le raterait une fois sur deux.
                 yield return Teleport(Pigeon, center - axis * 3f, Quaternion.LookRotation(axis), $"3 m avant l'anneau {expected} ({ring.name})");
                 PigeonController pigeon = Pigeon;
                 PigeonController.RunInSimulation(_ => pigeon.SimState.PendingImpulse += axis * 35f);
@@ -237,10 +211,6 @@ public partial class ScenarioRunner
         }
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    //  Voitures (main) : solides en solo — on se pose sur le toit d'une voiture qui roule et on est transporté.
-    //  (En partie à plusieurs, TrafficCollisionGate les rend traversables : le trafic n'est pas synchronisé.)
-    // ─────────────────────────────────────────────────────────────────────────
     IEnumerator RunCarRide()
     {
         int carLayer = LayerMask.NameToLayer("PigeonOnly"), pigeonLayer = LayerMask.NameToLayer("Player");
@@ -264,7 +234,6 @@ public partial class ScenarioRunner
         }
         yield return Check("Une voiture roule (avec MovingSupport)", car != null);
 
-        // Toit : le haut des colliders de la voiture.
         Bounds roof = default;
         bool any = false;
         foreach (Collider c in car.GetComponentsInChildren<Collider>())
@@ -298,7 +267,6 @@ public partial class ScenarioRunner
         yield return Check("La voiture a bien avancé pendant ce temps", carMoved > 1f, $"{carMoved:0.0} m");
     }
 
-    // ── Outils ──────────────────────────────────────────────────────────────
     static float PrivateFloat(object target, string field)
         => (float)target.GetType().GetField(field, BindingFlags.Instance | BindingFlags.NonPublic).GetValue(target);
 

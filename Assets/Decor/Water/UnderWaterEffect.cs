@@ -19,8 +19,6 @@ public class UnderWaterEffect : MonoBehaviour
 
     private void Update()
     {
-        // Multijoueur : PigeonSFX et les bulles vivent dans le prefab réseau du joueur local, que la scène ne peut pas
-        // référencer : on se recâble dès que le pigeon local change (apparition, recréation).
         PigeonController local = PigeonController.Local;
         if (local != null && local != boundPigeon)
             BindLocalPigeon(local);

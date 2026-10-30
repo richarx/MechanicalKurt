@@ -7,41 +7,33 @@ using UnityEngine.Events;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
 
-// ─────────────────────────────────────────────────────────────────────────────
-//  INPUT : tout ce que le joueur "décide" à un tick. Rejoué à l'identique lors des rollbacks.
-//  Les champs "one-shot" (Barrel*, Interact) sont accumulés dans UpdateInput.
-// ─────────────────────────────────────────────────────────────────────────────
 public struct PigeonInput : IPredictedData
 {
-    public Vector2 Movement;          // déjà tourné par la caméra (PlayerControls)
-    public Vector2 RelativeMovement;  // brut, pour le vol
+    public Vector2 Movement;
+    public Vector2 RelativeMovement;
     public bool Flap;
     public bool Dive;
     public bool Brake;
-    public bool BarrelLeft;           // one-shot
-    public bool BarrelRight;          // one-shot
-    public bool Interact;             // one-shot : bascule WantsStart
-    public bool Respawn;              // one-shot : retour au point d'apparition (fail-safe)
-    public byte EquipmentWear;        // one-shot : équipements à porter (bit = PigeonEquipment.Equipment)
-    public byte EquipmentToggle;      // one-shot : équipements à basculer
-    // Continu (répété à chaque tick, robuste aux pertes) : dernière cinématique de départ finie sur cet écran.
+    public bool BarrelLeft;
+    public bool BarrelRight;
+    public bool Interact;
+    public bool Respawn;
+    public byte EquipmentWear;
+    public byte EquipmentToggle;
+    /// <summary>Dernière cinématique partagée finie sur cet écran (zone ou course, numéro de départ), répétée à chaque tick. 0 = aucune.</summary>
     public PredictedComponentID StartAckZone;
-    public int StartAckCount;         // 0 = aucune
+    public int StartAckCount;
 
     public void Dispose() { }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-//  STATE : uniquement ce qui influence les ticks futurs.
-//  Le visuel (roll, ragdoll, particules) se déduit de ce state dans UpdateView.
-// ─────────────────────────────────────────────────────────────────────────────
 public struct PigeonState : IPredictedData<PigeonState>
 {
     public Vector3 Position;
     public float Yaw;
     public float Pitch;
-    public Vector3 LastVelocity;       // vitesse réellement mesurée après le dernier Move
-    public Vector3 PendingImpulse;     // appliqué au prochain pas de vol
+    public Vector3 LastVelocity;
+    public Vector3 PendingImpulse;
     public bool Grounded;
     public bool PreserveTeleportPitch;
 
@@ -50,32 +42,33 @@ public struct PigeonState : IPredictedData<PigeonState>
     public float StunImmuneRemaining;
     public Vector3 LastHitNormal;
     public Vector3 PreStunVelocity;
-    public Quaternion StunRotation;    // rotation locale du visuel pendant le stun (roulade)
+    public Quaternion StunRotation;
 
     public bool InsideBoostRing;
 
-    // Support mobile (MovingSupport : ballon de plage, voitures) : le pigeon posé dessus est transporté.
-    public int SupportId;              // MovingSupport.Id, 0 = aucun
-    public Vector3 SupportLocalAnchor; // position du pigeon dans le repère du support, en fin de tick
-    public Vector3 SupportVelocity;    // vitesse du support au dernier tick, héritée en le quittant
+    /// <summary>MovingSupport.Id du support sous le pigeon, 0 = aucun.</summary>
+    public int SupportId;
+    /// <summary>Position du pigeon dans le repère du support, en fin de tick.</summary>
+    public Vector3 SupportLocalAnchor;
+    public Vector3 SupportVelocity;
 
-    // ── Posés/lus par des orchestrateurs (zones de départ, courses) pendant leur Simulate ──
-    public bool Frozen;                // mouvement gelé (compte à rebours, cinématique de course)
-    public bool FrozenByZone;          // gel posé par FreezingZone (compte à rebours) : c'est elle qui le lève
+    /// <summary>Gel posé par un orchestrateur (zone de départ, course).</summary>
+    public bool Frozen;
+    /// <summary>Gel posé par FreezingZone pendant son décompte : c'est elle qui le lève.</summary>
+    public bool FrozenByZone;
     public PredictedComponentID FreezingZone;
-    public bool InteractPressed;       // Interact appuyé à ce tick (lu par les zones pendant leur Simulate)
-    public bool HasReadyZone;          // le joueur a validé « je suis prêt » pour ReadyZone
-    public PredictedComponentID ReadyZone;     // zone de départ validée (une seule à la fois)
-    public PredictedComponentID LastStartZone; // dernière MissionStartZone qui a lancé ce pigeon
-    public int LastStartCount;                 // numéro de ce départ dans la zone (distingue deux départs)
-    public PredictedComponentID StartAckZone;  // dernière cinématique de départ finie par ce joueur (zone, numéro)
+    public bool InteractPressed;
+    public bool HasReadyZone;
+    public PredictedComponentID ReadyZone;
+    /// <summary>Dernier départ de MissionStartZone auquel ce pigeon a participé (zone, numéro).</summary>
+    public PredictedComponentID LastStartZone;
+    public int LastStartCount;
+    public PredictedComponentID StartAckZone;
     public int StartAckCount;
 
-    // Équipements portés (bit = PigeonEquipment.Equipment) : dans l'état, donc vus par tous les clients,
-    // y compris ceux qui arrivent en cours de partie.
+    /// <summary>Équipements portés, un bit par PigeonEquipment.Equipment.</summary>
     public byte Equipment;
 
-    // Point de réapparition du fail-safe.
     public Vector3 SpawnPosition;
     public Quaternion SpawnRotation;
 
@@ -151,10 +144,6 @@ public class PigeonController : PredictedIdentity<PigeonInput, PigeonState>
     [Tooltip("Profondeur maximale (m) sous le niveau de l'eau : en dessous, le pigeon ne peut plus descendre.")]
     [SerializeField, Min(0f)] float _maxUnderwaterDepth = 2f;
 
-    // L'ancienne version (calculée à chaque frame) faisait gagner de la vitesse en piquant sous l'eau : la poussée
-    // de l'eau, réorientée par le steering, devenait de la vitesse vers l'avant. Cet effet de bord dépendait des FPS
-    // et a disparu avec la simulation à 20 ticks/s : il est recréé ici, explicitement et identique pour tous.
-    // Valeurs par défaut calées sur l'ancienne version à 144 FPS (20 ticks/s).
     [Header("Sous l'eau : speedway")]
     [Tooltip("Accélération horizontale (m/s²) gagnée sous l'eau en piquant du nez, au piqué maximal du plané. 0 = effet désactivé.")]
     [SerializeField, Min(0f)] float _underwaterThrust = 7.5f;
@@ -176,7 +165,6 @@ public class PigeonController : PredictedIdentity<PigeonInput, PigeonState>
     [field: SerializeField]
     public UnityEvent OnBoosted { get; private set; } = new UnityEvent();
 
-    // ── Références (hors state) ──────────────────────────────────────────────
     CharacterController _controller;
     IPigeonControls _controls;
     PigeonBoostFeedback _boostFeedback;
@@ -184,14 +172,12 @@ public class PigeonController : PredictedIdentity<PigeonInput, PigeonState>
     PigeonRagdollHandler _ragdoll;
     Water _water;
 
-    // ── Événements de simulation : filtrés par PurrDiction (pas de double-fire au replay) ──
     PredictedEvent _takeoffEvent;
     PredictedEvent _stunnedEvent;
     PredictedEvent<bool> _rollEvent;
     PredictedEvent<BoostRing> _boostEvent;
     PredictedEvent<Vector3> _teleportEvent;
 
-    // ── Données écrites par OnControllerColliderHit pendant Move (réinitialisées chaque tick) ──
     bool _simulating;
     bool _stunPossible;
     Vector3 _velocityBeforeMove;
@@ -200,27 +186,23 @@ public class PigeonController : PredictedIdentity<PigeonInput, PigeonState>
     Vector3 _stunHitNormal;
     bool _hasStaticHit;
     Vector3 _staticHitNormal;
-    bool _carrying;                    // Move de transport par le support en cours (pas de stun ni de support)
-    bool _collectSupport;              // Move propre vers le bas : on cherche un support sous le pigeon
+    bool _carrying;
+    bool _collectSupport;
     int _foundSupportId;
     float _foundSupportNormalY;
-    // Assez grand pour contenir aussi les colliders du pigeon (ragdoll) et du décor autour d'un anneau.
     readonly Collider[] _overlapBuffer = new Collider[32];
     readonly RaycastHit[] _castBuffer = new RaycastHit[32];
 
-    // ── Requêtes locales (owner) transformées en input au prochain tick ──────
     bool _respawnRequested;
     byte _equipmentWearRequested;
     byte _equipmentToggleRequested;
-    PredictedComponentID _startAckZone;  // fin de cinématique de départ, répétée dans chaque input
+    PredictedComponentID _startAckZone;
     int _startAckCount;
 
-    // ── Vue ──────────────────────────────────────────────────────────────────
     PigeonState _viewState;
     bool _viewStunned;
     bool _cursorInitialized;
 
-    // ── Registre des pigeons (pour les orchestrateurs) ───────────────────────
     static readonly List<PigeonController> _all = new List<PigeonController>();
     public static IReadOnlyList<PigeonController> All => _all;
     public static PigeonController Local { get; private set; }
@@ -236,14 +218,12 @@ public class PigeonController : PredictedIdentity<PigeonInput, PigeonState>
     }
 
 #if UNITY_EDITOR
-    // Commandes des scénarios de test (ScenarioRunner), exécutées au début de la prochaine simulation d'un pigeon.
-    // Elles ne passent pas par l'input : valables uniquement en hôte solo, où l'hôte ne fait pas de rollback.
     static readonly Queue<Action<PredictionManager>> _debugCommands = new Queue<Action<PredictionManager>>();
 
+    /// <summary>Tests : exécute la commande au début de la prochaine simulation d'un pigeon, sur l'hôte uniquement.</summary>
     public static void RunInSimulation(Action<PredictionManager> command) => _debugCommands.Enqueue(command);
 #endif
 
-    // Accesseurs lus par les autres scripts : ils lisent la VUE, jamais l'état en cours de simulation.
     public float Speed => _viewState.LastVelocity.magnitude;
     public float HorizontalSpeed => new Vector3(_viewState.LastVelocity.x, 0f, _viewState.LastVelocity.z).magnitude;
     /// <summary>Vitesse propre mesurée (relative au support s'il y en a un), lue depuis la vue.</summary>
@@ -264,7 +244,6 @@ public class PigeonController : PredictedIdentity<PigeonInput, PigeonState>
     public bool WantsStart => _viewState.HasReadyZone;
 
     /// <summary>Vrai si ce pigeon a participé au départ numéro <paramref name="count"/> de cette zone.</summary>
-    // L'événement de départ peut arriver avant que la vue ne contienne la marque : on regarde aussi l'état simulé.
     public bool WasStartedBy(PredictedComponentID zone, int count)
         => (_viewState.LastStartCount == count && _viewState.LastStartZone.Equals(zone))
         || (currentState.LastStartCount == count && currentState.LastStartZone.Equals(zone));
@@ -281,11 +260,6 @@ public class PigeonController : PredictedIdentity<PigeonInput, PigeonState>
     public bool HasFinishedStartCinematic(PredictedComponentID zone, int count)
         => (_viewState.StartAckCount == count && _viewState.StartAckZone.Equals(zone))
         || (_startAckCount == count && _startAckZone.Equals(zone));
-
-    // ─────────────────────────────────────────────────────────────────────────
-    //  API locale (owner) : appelable depuis n'importe où, par exemple PositionFailSafe.
-    //  Ne passe QUE par l'input, donc rejouable ; ne transporte aucune position (pas de téléportation arbitraire).
-    // ─────────────────────────────────────────────────────────────────────────
 
     /// <summary>Demande le retour au point d'apparition. Ignorée si ce pigeon n'est pas celui du joueur local.</summary>
     public void RequestRespawn()
@@ -333,11 +307,6 @@ public class PigeonController : PredictedIdentity<PigeonInput, PigeonState>
         _controls = controls ?? GetComponent<IPigeonControls>();
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    //  API pour orchestrateurs (zones de départ, courses).
-    //  À n'appeler que depuis le Simulate d'une autre identité prédite : ça modifie l'état simulé.
-    // ─────────────────────────────────────────────────────────────────────────
-
     /// <summary>État simulé de ce pigeon (lecture/écriture), réservé à la simulation d'une autre identité.</summary>
     public ref PigeonState SimState => ref currentState;
 
@@ -362,9 +331,6 @@ public class PigeonController : PredictedIdentity<PigeonInput, PigeonState>
         TeleportTo(ref currentState, position, rotation);
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    //  Cycle de vie
-    // ─────────────────────────────────────────────────────────────────────────
     protected override void LateAwake()
     {
         _water = FindAnyObjectByType<Water>();
@@ -399,14 +365,10 @@ public class PigeonController : PredictedIdentity<PigeonInput, PigeonState>
             Local = null;
     }
 
-    // override (pas un nouveau Update) : celui de PredictedIdentity appelle UpdateInput, qui accumule les
-    // one-shots (Interact, tonneaux). Le masquer les faisait disparaître.
     protected override void Update()
     {
         base.Update();
 
-        // Les pigeons contrôlés par le serveur (bots) sont aussi « controller » sur l'hôte :
-        // seul celui du joueur local devient Local et capture le curseur.
         if (!isOwner)
             return;
 
@@ -419,9 +381,6 @@ public class PigeonController : PredictedIdentity<PigeonInput, PigeonState>
         UpdateCursorCapture();
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    //  State
-    // ─────────────────────────────────────────────────────────────────────────
     protected override PigeonState GetInitialState()
     {
         return new PigeonState
@@ -429,7 +388,6 @@ public class PigeonController : PredictedIdentity<PigeonInput, PigeonState>
             Position = transform.position,
             Yaw = transform.eulerAngles.y,
             StunRotation = Quaternion.identity,
-            // Ce que le prefab porte au départ (GetInitialState peut précéder LateAwake : pas de champ en cache).
             Equipment = TryGetComponent(out PigeonEquipment equipment) ? equipment.CurrentWornMask() : (byte)0,
             SpawnPosition = transform.position,
             SpawnRotation = transform.rotation
@@ -446,7 +404,6 @@ public class PigeonController : PredictedIdentity<PigeonInput, PigeonState>
         WritePosition(s.Position);
     }
 
-    // La vue interpole la position/les angles ; le reste est pris tel quel sur l'état cible.
     protected override PigeonState Interpolate(PigeonState from, PigeonState to, float t)
     {
         PigeonState result = to;
@@ -457,7 +414,6 @@ public class PigeonController : PredictedIdentity<PigeonInput, PigeonState>
         result.StunRotation = Quaternion.Slerp(from.StunRotation, to.StunRotation, t);
         if (from.SupportId == to.SupportId)
             result.SupportLocalAnchor = Vector3.Lerp(from.SupportLocalAnchor, to.SupportLocalAnchor, t);
-        // Prise ou perte de support : interpoler dans un même repère, sinon la vue saute d'un tick entier.
         else if (to.SupportId != 0 && MovingSupport.TryGet(to.SupportId, out MovingSupport toSupport))
             result.SupportLocalAnchor = Vector3.Lerp(
                 toSupport.ViewTransform.InverseTransformPoint(from.Position), to.SupportLocalAnchor, t);
@@ -467,11 +423,6 @@ public class PigeonController : PredictedIdentity<PigeonInput, PigeonState>
         return result;
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    //  Input
-    // ─────────────────────────────────────────────────────────────────────────
-
-    // Appelé à chaque frame Unity : on accumule les one-shots pour ne pas perdre un appui entre deux ticks.
     protected override void UpdateInput(ref PigeonInput input)
     {
         if (_controls == null)
@@ -482,7 +433,6 @@ public class PigeonController : PredictedIdentity<PigeonInput, PigeonState>
         input.Interact |= _controls.ConsumePredictedInteract;
     }
 
-    // Valeurs continues, échantillonnées au tick.
     protected override void GetFinalInput(ref PigeonInput input)
     {
         input.Respawn = _respawnRequested;
@@ -516,7 +466,6 @@ public class PigeonController : PredictedIdentity<PigeonInput, PigeonState>
         input.EquipmentToggle &= PigeonEquipment.AllBits;
     }
 
-    // Quand le serveur répète le dernier input connu, on ne répète pas les actions ponctuelles.
     protected override void ModifyExtrapolatedInput(ref PigeonInput input)
     {
         input.BarrelLeft = false;
@@ -527,9 +476,6 @@ public class PigeonController : PredictedIdentity<PigeonInput, PigeonState>
         input.EquipmentToggle = 0;
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    //  Simulation (déterministe : n'utilise que input, state, dt)
-    // ─────────────────────────────────────────────────────────────────────────
     protected override void Simulate(PigeonInput input, ref PigeonState s, float dt)
     {
 #if UNITY_EDITOR
@@ -541,10 +487,7 @@ public class PigeonController : PredictedIdentity<PigeonInput, PigeonState>
         if (input.Respawn)
             TeleportTo(ref s, s.SpawnPosition, s.SpawnRotation);
 
-        // Avant le gel : un joueur gelé pendant un compte à rebours peut encore annuler.
-        // La zone concernée interprète l'appui (valider / annuler) dans son propre Simulate.
         s.InteractPressed = input.Interact;
-        // Un input vide (aucun reçu) ne doit pas effacer une fin de cinématique déjà signalée.
         if (input.StartAckCount != 0)
         {
             s.StartAckZone = input.StartAckZone;
@@ -553,8 +496,6 @@ public class PigeonController : PredictedIdentity<PigeonInput, PigeonState>
 
         s.Equipment = (byte)((s.Equipment | input.EquipmentWear) ^ input.EquipmentToggle);
 
-        // Gelé : aucune physique. Pas de Move(0) non plus, qui faisait perdre isGrounded : au dégel le pigeon
-        // retombait d'un cheveu et dépassait le seuil d'arrêt des zones pendant un tick.
         if (s.Frozen)
         {
             s.LastVelocity = Vector3.zero;
@@ -589,7 +530,6 @@ public class PigeonController : PredictedIdentity<PigeonInput, PigeonState>
         if (input.BarrelRight)
             TryBarrelRoll(input, s, false);
 
-        // Sur un support, la vitesse propre (relative au support) peut remonter un peu : on reste en mode sol.
         Vector3 velocity;
         if (s.Grounded && (s.LastVelocity.y <= 0.001f || s.SupportId != 0))
             velocity = GroundMovement(input, ref s);
@@ -604,7 +544,6 @@ public class PigeonController : PredictedIdentity<PigeonInput, PigeonState>
             velocity += UnderwaterThrust(s, velocity) * dt;
         }
 
-        // Profondeur maximale sous l'eau : on ne descend pas plus bas que ce plancher invisible.
         if (_water != null && velocity.y < 0f && dt > 0f)
         {
             float minimumY = _water.transform.position.y - _waterLevelModifier - _maxUnderwaterDepth;
@@ -626,9 +565,6 @@ public class PigeonController : PredictedIdentity<PigeonInput, PigeonState>
         DetectBoostRings(ref s, positionBeforeMove);
     }
 
-    // Déplace le CharacterController. Sur un support mobile : d'abord le transport (le chemin parcouru par le
-    // support depuis le tick précédent), puis le déplacement propre. LastVelocity ne mesure que ce dernier
-    // (vitesse relative au support) ; la vitesse du support est gardée à part et héritée en le quittant.
     void MoveController(ref PigeonState s, Vector3 velocity, float dt, bool allowSupport = true)
     {
         _velocityBeforeMove = s.LastVelocity;
@@ -644,14 +580,12 @@ public class PigeonController : PredictedIdentity<PigeonInput, PigeonState>
         {
             Physics.SyncTransforms();
             Vector3 carry = support.transform.TransformPoint(s.SupportLocalAnchor) - s.Position;
-            // Pendant un replay, le support n'est pas à sa pose historique (figé à sa pose actuelle) : sa vitesse
-            // déduite de la pose serait fausse (nulle, ou plusieurs ticks d'un coup). On propage la vitesse de l'état.
             bool replaying = predictionManager != null && predictionManager.isReplaying;
             departureVelocity = replaying ? s.SupportVelocity : carry / dt;
             if (velocity.y <= 0f && carry.sqrMagnitude > 0f)
             {
                 if (carry.sqrMagnitude > MaxSupportCarry * MaxSupportCarry)
-                    WritePosition(s.Position + carry);   // support très loin (rollback, téléportation du support)
+                    WritePosition(s.Position + carry);
                 else
                 {
                     _carrying = true;
@@ -682,7 +616,6 @@ public class PigeonController : PredictedIdentity<PigeonInput, PigeonState>
         }
         else
         {
-            // Quitter un support : on garde sa vitesse (comme sauter d'une voiture en marche).
             if (previousSupport != 0)
                 s.PendingImpulse += departureVelocity;
             s.SupportId = 0;
@@ -694,14 +627,12 @@ public class PigeonController : PredictedIdentity<PigeonInput, PigeonState>
 
     const float MaxSupportCarry = 1.5f;
 
-    // Téléportation, gel, stun : on lâche le support sans hériter de sa vitesse.
     static void ClearSupport(ref PigeonState s)
     {
         s.SupportId = 0;
         s.SupportVelocity = Vector3.zero;
     }
 
-    // Contact sous le pigeon avec un MovingSupport assez plat : on garde le plus horizontal (règles de main).
     bool TryRegisterSupport(ControllerColliderHit hit)
     {
         float minimumNormalY = Mathf.Cos(_controller.slopeLimit * Mathf.Deg2Rad);
@@ -876,7 +807,6 @@ public class PigeonController : PredictedIdentity<PigeonInput, PigeonState>
             velocity = Vector3.Slerp(velocity.normalized, forward, steeringFactor * dt) * speed;
         }
 
-        // Speedway : en piqué sous l'eau, la traînée de vol est réduite (voir UnderwaterThrust).
         float speedway = UnderwaterDiveFactor(s);
         if (speedway > 0f)
             dragAtMaxSpeed *= Mathf.Lerp(1f, _underwaterDragFactor, speedway);
@@ -885,7 +815,6 @@ public class PigeonController : PredictedIdentity<PigeonInput, PigeonState>
         return velocity;
     }
 
-    // 0 hors de l'eau, effet désactivé ou nez relevé ; 1 au piqué maximal du plané (ou plus, en Dive).
     float UnderwaterDiveFactor(in PigeonState s)
     {
         if (_underwaterThrust <= 0f || !UnderWater(s.Position))
@@ -894,7 +823,6 @@ public class PigeonController : PredictedIdentity<PigeonInput, PigeonState>
         return Mathf.Clamp01(down / Mathf.Sin(_maxPitch * Mathf.Deg2Rad));
     }
 
-    // Poussée horizontale vers l'avant, qui s'éteint en approchant de _underwaterThrustFadeSpeed.
     Vector3 UnderwaterThrust(in PigeonState s, Vector3 velocity)
     {
         float factor = UnderwaterDiveFactor(s);
@@ -909,7 +837,6 @@ public class PigeonController : PredictedIdentity<PigeonInput, PigeonState>
         return flat * (_underwaterThrust * factor * room);
     }
 
-    // ── Stun : chute / glissade / roulade simulées à la main (plus de Rigidbody) ──
     void StunStep(ref PigeonState s, float dt)
     {
         _stunPossible = false;
@@ -924,11 +851,9 @@ public class PigeonController : PredictedIdentity<PigeonInput, PigeonState>
 
         MoveController(ref s, velocity, dt, allowSupport: false);
 
-        // Rebond sur ce qu'on a touché pendant le Move.
         if (_hasStaticHit && -Vector3.Dot(velocity, _staticHitNormal) > _stunBounceMinSpeed)
             s.LastVelocity = Vector3.Reflect(velocity, _staticHitNormal) * _stunBounce;
 
-        // Roulade : vitesse angulaire déduite de la vitesse horizontale (rouler sans glisser).
         Vector3 flat = new Vector3(s.LastVelocity.x, 0f, s.LastVelocity.z);
         if (flat.sqrMagnitude > 0.01f)
         {
@@ -976,7 +901,6 @@ public class PigeonController : PredictedIdentity<PigeonInput, PigeonState>
         _rollEvent.Invoke(isLeft);
     }
 
-    // Utilisé par la réapparition (input.Respawn) et par les orchestrateurs (ForceTeleport).
     void TeleportTo(ref PigeonState s, Vector3 position, Quaternion rotation)
     {
         Vector3 previous = s.Position;
@@ -989,9 +913,7 @@ public class PigeonController : PredictedIdentity<PigeonInput, PigeonState>
             : rotation.eulerAngles.y;
         s.Pitch = Mathf.Asin(Mathf.Clamp(forward.y, -1f, 1f)) * Mathf.Rad2Deg;
         s.PreserveTeleportPitch = true;
-        // L'état « au sol » de l'ancien emplacement ne vaut plus : le prochain Move le recalcule.
         s.Grounded = false;
-        // Une téléportation (respawn, ligne de départ) repart d'un pigeon sain : pas d'étourdissement résiduel.
         s.Stunned = false;
         s.StunRemaining = 0f;
         s.LastVelocity = Vector3.zero;
@@ -1003,16 +925,12 @@ public class PigeonController : PredictedIdentity<PigeonInput, PigeonState>
         _teleportEvent.Invoke(position - previous);
     }
 
-    // Anneaux de boost : détectés par le pigeon pendant la simulation (le trigger Unity serait rejoué à chaque replay).
-    // Balayage sur tout le trajet du tick : à 20 ticks/s le pigeon avance de 1 à 3 m par tick, plus que l'épaisseur
-    // d'un anneau (0,6 m pour les petits des égouts) ; un test au seul point d'arrivée en raterait la moitié.
     void DetectBoostRings(ref PigeonState s, Vector3 start)
     {
         int layers = _boostLayer.value != 0 ? _boostLayer.value : Physics.AllLayers;
         Vector3 center = _controller.center;
         float radius = _controller.radius;
 
-        // Dans un anneau en fin de tick (sert à ne pas rebooster tant qu'on y reste).
         BoostRing insideRing = null;
         int count = Physics.OverlapSphereNonAlloc(
             transform.position + center, radius, _overlapBuffer, layers, QueryTriggerInteraction.Collide);
@@ -1023,7 +941,6 @@ public class PigeonController : PredictedIdentity<PigeonInput, PigeonState>
                 insideRing = col.GetComponentInParent<BoostRing>();
         }
 
-        // Traversé pendant le tick : le premier anneau rencontré sur le trajet.
         BoostRing ring = insideRing;
         Vector3 path = transform.position - start;
         float distance = path.magnitude;
@@ -1057,16 +974,11 @@ public class PigeonController : PredictedIdentity<PigeonInput, PigeonState>
         s.InsideBoostRing = insideRing != null;
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    //  Collisions : appelé par Unity PENDANT CharacterController.Move (donc pendant Simulate).
-    //  On ne fait que collecter ; la décision de stun est prise dans Simulate, juste après le Move.
-    // ─────────────────────────────────────────────────────────────────────────
     void OnControllerColliderHit(ControllerColliderHit hit)
     {
         if (!_simulating)
             return;
 
-        // Autre pigeon : impact calculé sur la vitesse relative, les deux sont étourdis.
         if (hit.collider.TryGetComponent(out PigeonController other) && other != this)
         {
             HandlePigeonHit(hit, other);
@@ -1076,7 +988,6 @@ public class PigeonController : PredictedIdentity<PigeonInput, PigeonState>
         Rigidbody body = hit.collider.attachedRigidbody;
         bool dynamicBody = body != null && !body.isKinematic;
 
-        // Transport par le support : seulement mémoriser un contact statique (rebond), ni stun ni support ni poussée.
         if (_carrying)
         {
             if (!dynamicBody)
@@ -1087,7 +998,6 @@ public class PigeonController : PredictedIdentity<PigeonInput, PigeonState>
             return;
         }
 
-        // Le stun d'abord, quel que soit l'obstacle (sol, mur, support, objet physique), comme sur main.
         if (_stunPossible)
         {
             float impact = ImpactOf(_velocityBeforeMove, hit.normal);
@@ -1099,7 +1009,6 @@ public class PigeonController : PredictedIdentity<PigeonInput, PigeonState>
             }
         }
 
-        // Posé sur un support mobile : il nous transporte, on ne le pousse pas.
         if (TryRegisterSupport(hit))
             return;
 
@@ -1115,7 +1024,6 @@ public class PigeonController : PredictedIdentity<PigeonInput, PigeonState>
 
     void HandlePigeonHit(ControllerColliderHit hit, PigeonController other)
     {
-        // Attention : lit/écrit l'état d'une autre identité. L'ordre de simulation entre pigeons n'est pas garanti.
         ref PigeonState otherState = ref other.currentState;
         Vector3 relativeVelocity = _velocityBeforeMove - otherState.LastVelocity;
         float impact = ImpactOf(relativeVelocity, hit.normal);
@@ -1142,7 +1050,6 @@ public class PigeonController : PredictedIdentity<PigeonInput, PigeonState>
 
         if (body.TryGetComponent(out PredictedRigidbody predictedBody))
             predictedBody.AddForce(pushDir * finalPushPower, ForceMode.Force);
-        // Objet physique local (ballon de plage…) : poussé une seule fois, jamais pendant un replay.
         else if (predictionManager != null && !predictionManager.isReplaying)
             body.AddForce(pushDir * finalPushPower, ForceMode.Force);
     }
@@ -1156,15 +1063,10 @@ public class PigeonController : PredictedIdentity<PigeonInput, PigeonState>
         return speed * alignment * _weight;
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    //  Vue (visuel uniquement : aucune décision de gameplay ici)
-    // ─────────────────────────────────────────────────────────────────────────
     protected override void UpdateView(PigeonState view, PigeonState? verified)
     {
         _viewState = view;
 
-        // Posé sur un support mobile : affiché par rapport à lui, sinon le pigeon (vue interpolée, en léger retard)
-        // glisserait sur une voiture qui avance à chaque frame.
         Vector3 position = view.Position;
         if (view.SupportId != 0 && MovingSupport.TryGet(view.SupportId, out MovingSupport support))
             position = support.ViewTransform.TransformPoint(view.SupportLocalAnchor);
@@ -1212,7 +1114,6 @@ public class PigeonController : PredictedIdentity<PigeonInput, PigeonState>
         _visualRoot.localRotation = Quaternion.Slerp(_visualRoot.localRotation, target, speed * dt);
     }
 
-    // Listeners des PredictedEvent (présentation uniquement).
     void PlayRoll(bool isLeft)
     {
         if (_boostFeedback != null)
@@ -1220,8 +1121,6 @@ public class PigeonController : PredictedIdentity<PigeonInput, PigeonState>
         OnRoll.Invoke();
     }
 
-    // Combo d'anneaux (son qui monte, repris de main) : compté par pigeon dans la vue. Le PredictedEvent ne part
-    // qu'une fois par boost (pas au replay), donc compter ici suffit, et un autre joueur ne fait pas monter le vôtre.
     int _ringCombo;
     float _lastRingTime = float.NegativeInfinity;
 
@@ -1254,14 +1153,10 @@ public class PigeonController : PredictedIdentity<PigeonInput, PigeonState>
             playerControls.SnapCameraBehind();
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    //  Utilitaires
-    // ─────────────────────────────────────────────────────────────────────────
     static Vector3 ForwardOf(float pitch, float yaw) => Quaternion.Euler(-pitch, yaw, 0f) * Vector3.forward;
 
     bool UnderWater(Vector3 position) => _water != null && position.y < _water.transform.position.y - _waterLevelModifier;
 
-    // CharacterController garde sa propre copie de la position : toute écriture directe doit être synchronisée.
     void WritePosition(Vector3 position)
     {
         if ((transform.position - position).sqrMagnitude < 1e-10f)
@@ -1270,7 +1165,6 @@ public class PigeonController : PredictedIdentity<PigeonInput, PigeonState>
         Physics.SyncTransforms();
     }
 
-    // ── Curseur (owner uniquement) ───────────────────────────────────────────
     void OnApplicationFocus(bool hasFocus)
     {
         if (!hasFocus && _cursorInitialized)

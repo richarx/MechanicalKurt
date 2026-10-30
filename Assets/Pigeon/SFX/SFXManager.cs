@@ -59,7 +59,6 @@ public class SFXManager : MonoBehaviour
         source.spatialBlend = spatial ? 1f : 0f;
         if (!spatial)
             return;
-        // Linéaire : un pigeon lointain se tait vraiment (le logarithmique reste audible au-delà de la distance max).
         source.rolloffMode = AudioRolloffMode.Linear;
         source.minDistance = spatialMinDistance;
         source.maxDistance = Mathf.Max(spatialMinDistance + 0.1f, spatialMaxDistance);

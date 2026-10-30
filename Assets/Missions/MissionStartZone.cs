@@ -4,38 +4,32 @@ using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
 
-// Orchestrateur prédit : départ de mission commun à plusieurs joueurs (course).
-//
-// Déroulé :
-//  1. Attente : les pigeons se posent dans la zone, à l'arrêt, et valident (Interact).
-//  2. Décompte (quelques secondes, affiché à l'écran avec le nombre de joueurs) : les participants sont gelés ;
-//     c'est le seul moment où l'on peut encore annuler (Interact) ; quitter la zone annule aussi.
-//  3. Cinématique (facultative, _cinematicTimeout > 0) : chaque participant la joue sur son écran, à son rythme ;
-//     la fin est remontée par l'input du pigeon. On ne peut plus annuler.
-//  4. Départ, quand TOUS les participants ont fini (ou au bout du délai max) : téléportation sur la ligne
-//     de départ et dégel.
-//  5. Sans réarmement, la zone reste verrouillée pendant la mission (personne d'autre ne peut la lancer) :
-//     la mission la rouvre avec ResetToWaiting quand elle se termine (échec ou victoire).
-//
-// Tout se passe dans Simulate à partir des états des pigeons et du dt : tous les pairs prennent la même
-// décision au même tick, et un rollback rejoue la même séquence.
 public struct MissionStartState : IPredictedData<MissionStartState>
 {
-    public byte Phase;       // MissionStartZone.Waiting / CountingDown / Cinematic / Started
-    public float Countdown;  // secondes restantes du décompte ou du délai max de cinématique (dt, jamais Time.time)
-    public int StartCount;   // nombre de départs lancés (identifie les participants de chaque départ)
-    public byte Ready;       // attente / décompte : pigeons prêts ; cinématique : participants qui l'ont finie
-    public byte Total;       // attente / décompte : pigeons de la partie ; cinématique : participants
+    public byte Phase;
+    /// <summary>Secondes restantes du décompte, ou du délai maximal de la cinématique.</summary>
+    public float Countdown;
+    /// <summary>Numéro du dernier départ : identifie ses participants (PigeonState.LastStartCount).</summary>
+    public int StartCount;
+    /// <summary>Attente et décompte : pigeons prêts. Cinématique : participants qui l'ont finie.</summary>
+    public byte Ready;
+    /// <summary>Attente et décompte : pigeons de la partie. Cinématique : participants.</summary>
+    public byte Total;
 
     public void Dispose() { }
 }
 
+/// <summary>
+/// Départ prédit d'une mission commune à plusieurs joueurs : attente des joueurs prêts (Interact), décompte annulable,
+/// cinématique locale à chaque participant, puis départ quand tous l'ont finie. Sans réarmement, la zone reste
+/// verrouillée jusqu'à ce que la mission appelle ResetToWaiting.
+/// </summary>
 public class MissionStartZone : PredictedIdentity<MissionStartState>
 {
     public enum StartRule
     {
-        AllPigeons, // tous les pigeons de la partie doivent être dans la zone, à l'arrêt, et prêts
-        AnyPigeon   // dès qu'un pigeon est prêt ; seuls les pigeons prêts sont gelés et téléportés
+        AllPigeons,
+        AnyPigeon
     }
 
     public const byte Waiting = 0;
@@ -68,16 +62,16 @@ public class MissionStartZone : PredictedIdentity<MissionStartState>
     [Tooltip("Affiché au joueur qui se pose dans la zone pendant un départ ou une course auxquels il ne participe pas.")]
     [SerializeField] string _inProgressText = "Race in progress\n<size=60%>Wait for it to finish</size>";
 
-    // Déclenchés une fois l'occurrence vérifiée (pas à chaque replay), avec un léger retard selon le client :
-    // adaptés à la présentation (cinématique locale, SFX, UI) et au pont vers du réseau classique côté serveur.
-    // Tout ce qui influence la simulation prédite doit lire Phase / SimState depuis un Simulate.
-    [field: SerializeField] public UnityEvent OnCountdownStarted { get; private set; } = new UnityEvent();
-    [field: SerializeField] public UnityEvent OnCancelled { get; private set; } = new UnityEvent();
-    [Tooltip("Fin du décompte, sur le client dont le pigeon participe : jouer la cinématique, puis appeler ReportLocalCinematicFinished.")]
-    [field: SerializeField] public UnityEvent OnCinematicLocal { get; private set; } = new UnityEvent();
-    [field: SerializeField] public UnityEvent OnStarted { get; private set; } = new UnityEvent();
-    [Tooltip("Comme OnStarted, mais seulement sur le client dont le pigeon a participé au départ (achievement…).")]
-    [field: SerializeField] public UnityEvent OnStartedLocal { get; private set; } = new UnityEvent();
+    [field: SerializeField, Tooltip("Présentation uniquement : déclenché une fois l'état vérifié, avec un léger retard chez les clients.")]
+    public UnityEvent OnCountdownStarted { get; private set; } = new UnityEvent();
+    [field: SerializeField, Tooltip("Présentation uniquement : déclenché une fois l'état vérifié, avec un léger retard chez les clients.")]
+    public UnityEvent OnCancelled { get; private set; } = new UnityEvent();
+    [field: SerializeField, Tooltip("Fin du décompte, sur le client dont le pigeon participe : jouer la cinématique, puis appeler ReportLocalCinematicFinished.")]
+    public UnityEvent OnCinematicLocal { get; private set; } = new UnityEvent();
+    [field: SerializeField, Tooltip("Présentation uniquement : déclenché une fois l'état vérifié, avec un léger retard chez les clients.")]
+    public UnityEvent OnStarted { get; private set; } = new UnityEvent();
+    [field: SerializeField, Tooltip("Comme OnStarted, mais seulement sur le client dont le pigeon a participé au départ (achievement…).")]
+    public UnityEvent OnStartedLocal { get; private set; } = new UnityEvent();
 
     PredictedEvent _countdownStartedEvent;
     PredictedEvent _cancelledEvent;
@@ -87,10 +81,9 @@ public class MissionStartZone : PredictedIdentity<MissionStartState>
     MissionStartState _viewState;
     bool _promptShown;
     TMP_Text _hudText;
-    GameObject _hudRoot;   // canvas créé à l'exécution, ou le texte assigné
+    GameObject _hudRoot;
     string _hudContent;
 
-    // Lues depuis la vue : pour l'UI et la présentation, pas pour la simulation.
     public byte Phase => _viewState.Phase;
     public float CountdownRemaining => _viewState.Countdown;
     public int ReadyCount => _viewState.Ready;
@@ -126,7 +119,6 @@ public class MissionStartZone : PredictedIdentity<MissionStartState>
     /// <summary>Fin de cinématique pour un pigeon contrôlé ici (joueur local, ou bot sur l'hôte). Passe par son input.</summary>
     public void ReportCinematicFinished(PigeonController pigeon)
     {
-        // Numéro lu sur le pigeon (marqué au tick de fin du décompte) : la vue de la zone peut encore retarder d'un tick.
         int startCount = pigeon != null ? pigeon.LastStartCountFor(id) : 0;
         if (startCount > 0)
             pigeon.AcknowledgeStartCinematic(id, startCount);
@@ -158,7 +150,6 @@ public class MissionStartZone : PredictedIdentity<MissionStartState>
             OnStartedLocal.Invoke();
     }
 
-    // La vue du pigeon local est en avance sur l'état vérifié : sa marque de départ y est déjà.
     /// <summary>Présentation : le pigeon local a participé au départ numéro <paramref name="startCount"/>.</summary>
     public bool LocalParticipated(int startCount)
     {
@@ -168,7 +159,6 @@ public class MissionStartZone : PredictedIdentity<MissionStartState>
 
     protected override MissionStartState GetInitialState() => new MissionStartState { Phase = Waiting };
 
-    // Cette identité ne dépend d'aucun état Unity.
     protected override void GetUnityState(ref MissionStartState s) { }
     protected override void SetUnityState(MissionStartState s) { }
 
@@ -204,7 +194,6 @@ public class MissionStartZone : PredictedIdentity<MissionStartState>
         {
             if (!_rearm)
                 return;
-            // Les participants ont perdu leur validation au départ : pas de relance immédiate.
             s.Phase = Waiting;
         }
 
@@ -224,8 +213,6 @@ public class MissionStartZone : PredictedIdentity<MissionStartState>
             bool inside = IsInside(ps);
             bool mine = IsReadyHere(ps);
 
-            // Interact dans la zone bascule la validation POUR CETTE ZONE ; quitter la zone l'annule.
-            // Les autres zones ne touchent pas à cette validation (plusieurs zones par scène).
             if (inside && ps.InteractPressed)
             {
                 mine = !mine;
@@ -261,7 +248,6 @@ public class MissionStartZone : PredictedIdentity<MissionStartState>
             return;
         }
 
-        // CountingDown
         if (!canStart)
         {
             s.Phase = Waiting;
@@ -288,7 +274,6 @@ public class MissionStartZone : PredictedIdentity<MissionStartState>
         Launch(ref s);
     }
 
-    // Participants gelés, plus d'annulation : on attend que chacun ait fini sa cinématique (remonté par son input).
     void SimulateCinematic(ref MissionStartState s, float dt)
     {
         var pigeons = PigeonController.All;
@@ -305,7 +290,6 @@ public class MissionStartZone : PredictedIdentity<MissionStartState>
         s.Ready = (byte)Mathf.Min(finished, byte.MaxValue);
         s.Total = (byte)Mathf.Min(participants, byte.MaxValue);
 
-        // Tous les participants ont quitté la partie : rien à lancer.
         if (participants == 0)
         {
             s.Phase = Waiting;
@@ -326,7 +310,6 @@ public class MissionStartZone : PredictedIdentity<MissionStartState>
 
     bool IsStartedHere(in PigeonState ps, int startCount) => ps.LastStartCount == startCount && ps.LastStartZone.Equals(id);
 
-    // Un participant est un pigeon dans la zone, à l'arrêt, qui a validé cette zone.
     bool IsParticipant(in PigeonState ps) => IsReadyHere(ps) && IsInside(ps);
 
     void FreezeParticipants()
@@ -342,8 +325,6 @@ public class MissionStartZone : PredictedIdentity<MissionStartState>
         }
     }
 
-    // Dégèle les pigeons que CETTE zone a gelés, où qu'ils soient (un respawn a pu les sortir de la zone).
-    // Un gel posé ailleurs (course) n'est pas touché.
     void ReleaseFrozen()
     {
         var pigeons = PigeonController.All;
@@ -361,7 +342,6 @@ public class MissionStartZone : PredictedIdentity<MissionStartState>
             pigeon.ForceFreeze(false);
     }
 
-    // Fin du décompte : les participants sont marqués (ils restent gelés jusqu'au départ).
     void MarkParticipants(int startCount)
     {
         var pigeons = PigeonController.All;
@@ -399,7 +379,6 @@ public class MissionStartZone : PredictedIdentity<MissionStartState>
         _startedEvent.Invoke(s.StartCount);
     }
 
-    // Vue : aucune décision de gameplay ici.
     protected override void UpdateView(MissionStartState view, MissionStartState? verified)
     {
         _viewState = view;
@@ -413,7 +392,6 @@ public class MissionStartZone : PredictedIdentity<MissionStartState>
             return;
 
         PigeonController local = PigeonController.Local;
-        // Une fois prêt, c'est le texte du décompte qui prend le relais.
         bool show = view.Phase == Waiting
             && local != null
             && !local.IsReadyFor(id)
@@ -426,7 +404,6 @@ public class MissionStartZone : PredictedIdentity<MissionStartState>
         _prompt.SetActive(show);
     }
 
-    // Décompte et nombre de joueurs, pour le pigeon local seulement (s'il est concerné).
     void UpdateHud(in MissionStartState view)
     {
         PigeonController local = PigeonController.Local;
@@ -454,7 +431,6 @@ public class MissionStartZone : PredictedIdentity<MissionStartState>
                         content = _inProgressText;
                     break;
                 case Started:
-                    // Sans réarmement, la zone reste verrouillée jusqu'à la fin de la course (échec : ResetToWaiting).
                     if (!_rearm && !local.WasStartedBy(id, view.StartCount) && IsLocalInZone(local))
                         content = _inProgressText;
                     break;

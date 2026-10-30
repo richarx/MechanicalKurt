@@ -3,15 +3,12 @@ using System.Collections;
 using System.Reflection;
 using UnityEngine;
 
-// Speedway sous l'eau : dans un couloir d'eau dégagé de la vraie scène, deux passages identiques (départ arrêté
-// sous la surface, joystick vers l'avant pour piquer du nez) avec puis sans l'effet. Avec l'effet, le pigeon doit
-// nettement accélérer (ancienne sensation) ; sans, il reste lent (comportement à 20 ticks/s sans l'effet).
 public partial class ScenarioRunner
 {
     public const string WaterSpeedScenario = "Eau : speedway";
 
-    const float LaneStartDepth = 1.2f;   // sous la surface
-    const float LaneMinFloor = 3.5f;     // profondeur d'eau minimale sous la surface (le pigeon oscille jusqu'à ~2,5 m)
+    const float LaneStartDepth = 1.2f;
+    const float LaneMinFloor = 3.5f;
     const float LaneLength = 100f;
     const float RunSeconds = 4f;
 
@@ -47,7 +44,6 @@ public partial class ScenarioRunner
     {
         Bot.ReleaseAll();
         float yaw = Mathf.Atan2(direction.x, direction.z) * Mathf.Rad2Deg;
-        // Nez à -30°, comme une entrée dans l'eau ; le joystick vers l'avant le fait piquer jusqu'au maximum du plané.
         yield return Teleport(Pigeon, start, Quaternion.Euler(30f, yaw, 0f), $"Départ sous l'eau ({label})");
         Bot.RelativeMovement = new Vector2(0f, 1f);
 
@@ -70,7 +66,6 @@ public partial class ScenarioRunner
         yield return Check($"Passage {label} : pas de choc", !stunned);
     }
 
-    // Cherche, sur une grille couvrant l'eau, le plus long couloir horizontal sans obstacle, avec assez de fond.
     static bool TryFindWaterLane(Water water, float surface, out Vector3 start, out Vector3 direction, out float length)
     {
         start = direction = Vector3.zero;
@@ -98,7 +93,6 @@ public partial class ScenarioRunner
                     Vector3 d = new Vector3(Mathf.Sin(angle), 0f, Mathf.Cos(angle));
                     float clear = Physics.SphereCast(p, 0.8f, d, out RaycastHit hit, LaneLength, Physics.AllLayers, ignoreTriggers)
                         ? hit.distance : LaneLength;
-                    // Le fond doit rester assez bas tout le long du couloir.
                     for (float along = 10f; along < clear; along += 10f)
                         if (!DeepEnough(p + d * along, surface))
                         {
