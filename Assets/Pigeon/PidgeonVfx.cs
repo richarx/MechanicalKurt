@@ -7,19 +7,23 @@ public class PidgeonVfx : MonoBehaviour
     [SerializeField] private TrailRenderer wingTrailRendererRight;
 
     private CharacterController characterController;
+    private PigeonController pigeonController;
 
     private bool isFlyingVfxActive;
 
     private void Start()
     {
         characterController = GetComponent<CharacterController>();
+        pigeonController = GetComponent<PigeonController>();
     }
 
     private void Update()
     {
-        if (characterController.isGrounded == isFlyingVfxActive)
+        bool shouldBeActive = !pigeonController.IsGrounded && !pigeonController.Controls.Brake;
+
+        if (shouldBeActive != isFlyingVfxActive)
         {
-            isFlyingVfxActive = !characterController.isGrounded;
+            isFlyingVfxActive = shouldBeActive;
 
             if (isFlyingVfxActive)
                 windParticles.Play();
