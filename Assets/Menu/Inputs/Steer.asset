@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7bb1e75a1dc49af4e81201164d6cbdcc, type: 3}
+  m_Name: Steer
+  m_EditorClassIdentifier: Assembly-CSharp::InputInfoData
+  label: Steer
+  gamepadSprites:
+  - {fileID: -8016873682913189246, guid: 7e73838ee6c748dfbaa184b01c067271, type: 3}
+  keyboardSprites:
+  - {fileID: 6539619573780045288, guid: 9233523c6c31ced4a8075cee2ff5e57b, type: 3}
+  - {fileID: 1145220741083561907, guid: 77af08fc564a4514b8b85f31db81cda8, type: 3}
+  - {fileID: -3937758826142331281, guid: 465e171979e1dba48b7256dba70dd886, type: 3}
+  - {fileID: -8387302115945079765, guid: 0322e68d47cb08e419a0d55b16efaf47, type: 3}
+  isSmallGamepadIcon: 0
+  isSmallKeyboardIcon: 1
