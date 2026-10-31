@@ -30581,7 +30581,7 @@ MonoBehaviour:
   - <Achievement>k__BackingField: {fileID: 11400000, guid: 6741217f46454adab4e776a0f0eb0184, type: 2}
     <Objective>k__BackingField: Land in a mission circle and stay still to activate it.
     <Commands>k__BackingField: "<color=#F2FA00>V</color>: brake \nStay still in the circle to activate it."
-    <GamepadCommands>k__BackingField: 'Hold <sprite name="xbox_b" tint=0> to brake and land.
+    <GamepadCommands>k__BackingField: 'Hold <sprite name="xbox_rt_0" tint=0> to brake and land.
 
       Stay still in the circle to activate it.'
   <Panel>k__BackingField: {fileID: 1909673042}
@@ -94213,7 +94213,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AchievementProgressResetter
   <ResetProgressOnStart>k__BackingField: 1
-  <LaunchTuto>k__BackingField: 0
+  <LaunchTuto>k__BackingField: 1
 --- !u!1001 &1676392076
 PrefabInstance:
   m_ObjectHideFlags: 0
