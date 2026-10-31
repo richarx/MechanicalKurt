@@ -42337,7 +42337,6 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 7d66870f072495b44a066b4d72c1f5df, type: 2}
   - {fileID: 11400000, guid: 7fe39a371e3248e08c935c2bfb23e9ec, type: 2}
   - {fileID: 11400000, guid: b1b05b81ef2c9784ca7854ad10e4fbd4, type: 2}
-  unlockSfx: {fileID: 8300000, guid: 7bc4eed0430cc414b860c00b12541409, type: 3}
 --- !u!4 &771039945
 Transform:
   m_ObjectHideFlags: 0
