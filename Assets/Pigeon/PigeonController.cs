@@ -294,6 +294,8 @@ public partial class PigeonController : PredictedIdentity<PigeonInput, PigeonSta
             return;
 
         SetLocal(this);
+        if (GameSession.InMenu)
+            return;
         if (!_cursorInitialized)
         {
             _cursorInitialized = true;

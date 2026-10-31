@@ -28,6 +28,8 @@ public partial class ScenarioRunner
         Solo("Équipement : lunettes", r => r.RunSunglasses()),
         Solo("Anneaux des égouts : boost et combo", r => r.RunSewerRings()),
         Solo("Voitures : solides en solo, on roule dessus", r => r.RunCarRide()),
+        Solo("Voitures : toutes créées, visibles et en route", r => r.TrafficIsRunning()),
+        Solo("Voitures : photos d'une voiture et du pigeon posé dessus", r => r.PigeonOnCar()),
         Solo("Sons : 2D pour soi, 3D pour les autres", r => r.RunPigeonAudio()),
         Solo("Pause : le jeu continue, le pigeon reste en l'air", r => r.PauseKeepsGameRunning()),
 

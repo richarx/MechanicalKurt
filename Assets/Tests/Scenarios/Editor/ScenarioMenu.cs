@@ -42,6 +42,13 @@ public static class ScenarioMenu
         RunFromCommandLine(index >= 0 && index + 1 < args.Length ? args[index + 1] : ScenarioRunner.AllSolo);
     }
 
+    public static void RunMenuProbeFromCommandLine()
+    {
+        SessionState.SetBool(MenuProbe.RunKey, true);
+        EditorSceneManager.OpenScene("Assets/Scenes/MainMenu.unity", OpenSceneMode.Single);
+        EditorApplication.EnterPlaymode();
+    }
+
     public static void JoinAsClientFromCommandLine()
     {
         SessionState.SetBool(ScenarioClientAgent.ExitOnFinishKey, true);

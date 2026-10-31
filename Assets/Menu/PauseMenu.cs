@@ -22,6 +22,12 @@ public class PauseMenu : MonoBehaviour
     [Space]
     [SerializeField] private InputActionReference pauseAction;
 
+    [Header("Partie")]
+    [Tooltip("Code de la partie, affiché quand elle a été créée ou rejointe depuis le menu principal.")]
+    [SerializeField] private TextMeshProUGUI sessionCodeText;
+    [SerializeField] private Button copyCodeButton;
+    [SerializeField] private TextMeshProUGUI copyFeedbackText;
+
     private bool isPaused;
 
     private Sequence currentSequence;
@@ -30,11 +36,13 @@ public class PauseMenu : MonoBehaviour
     private void Start()
     {
         pauseAction.action.Enable();
+        if (copyCodeButton != null)
+            copyCodeButton.onClick.AddListener(CopySessionCode);
     }
 
     private void Update()
     {
-        if (pauseAction.action.WasPressedThisFrame())
+        if (pauseAction.action.WasPressedThisFrame() && !GameSession.InMenu)
             SetPaused(!isPaused);
 
         if (isPaused)
@@ -64,6 +72,7 @@ public class PauseMenu : MonoBehaviour
         SetLocalPigeonPaused(true);
 
         achievementListDisplayer.DisplayAchievementList();
+        RefreshSessionCode();
         menuHolder.SetActive(true);
 
         currentSequence.Append(backgroundMaterial.DOColor(Color.white, "_Tint", 0.5f));
@@ -91,6 +100,27 @@ public class PauseMenu : MonoBehaviour
         currentSequence.AppendCallback(() => menuHolder.SetActive(false));
         currentSequence.AppendCallback(() => SetLocalPigeonPaused(false));
         currentSequence.SetUpdate(true);
+    }
+
+    private void RefreshSessionCode()
+    {
+        bool hasCode = GameSession.Code != null;
+        if (sessionCodeText != null)
+        {
+            sessionCodeText.gameObject.SetActive(hasCode);
+            sessionCodeText.text = hasCode ? $"Code de la partie : {GameSession.Code}" : "";
+        }
+        if (copyCodeButton != null)
+            copyCodeButton.gameObject.SetActive(hasCode);
+        if (copyFeedbackText != null)
+            copyFeedbackText.text = "";
+    }
+
+    private void CopySessionCode()
+    {
+        ClipboardBridge.Copy(GameSession.InviteLink ?? GameSession.Code);
+        if (copyFeedbackText != null)
+            copyFeedbackText.text = GameSession.InviteLink != null ? "Lien d'invitation copié !" : "Code copié !";
     }
 
     /// <summary>La pause n'arrête pas le temps (partie partagée) : le pigeon du joueur se met en vol stationnaire.</summary>
