@@ -29,6 +29,10 @@ public class SessionLauncher : MonoBehaviour
     /// <summary>Tests : parties en UDP local au lieu du relais (code affiché mais non utilisé pour se connecter).</summary>
     public static bool UseLocalNetwork { get; set; }
 
+#if UNITY_WEBGL && !UNITY_EDITOR
+    [System.Runtime.InteropServices.DllImport("__Internal")] static extern void PageListenClose(string objectName, string method);
+#endif
+
     NetworkManager _network;
     bool _inGame;
 
@@ -44,11 +48,16 @@ public class SessionLauncher : MonoBehaviour
         GameSession.End();
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
+#if UNITY_WEBGL && !UNITY_EDITOR
+        PageListenClose(gameObject.name, nameof(OnPageClosing));
+#endif
 
         NetworkManager.DisableFlags();
+        SceneManager.sceneLoaded += OnSceneLoaded;
         AsyncOperation load = SceneManager.LoadSceneAsync(_gameScene, LoadSceneMode.Additive);
         if (load == null)
         {
+            SceneManager.sceneLoaded -= OnSceneLoaded;
             NetworkManager.EnableFlags();
             LoadError = $"Scène « {_gameScene} » introuvable (Build Profiles).";
             yield break;
@@ -72,6 +81,18 @@ public class SessionLauncher : MonoBehaviour
 
     readonly List<Canvas> _hiddenCanvases = new List<Canvas>();
 
+    /// <summary>Appelé avant la première image de la ville : sur le web, le chargement dure assez pour voir ses interfaces.</summary>
+    void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        if (scene.name != _gameScene)
+            return;
+        SceneManager.sceneLoaded -= OnSceneLoaded;
+        HideGameInterfaces();
+    }
+
+    /// <summary>Web : l'onglet se ferme. Sans fermeture propre, le relais garde la salle de l'hôte plusieurs minutes.</summary>
+    public void OnPageClosing() => Leave();
+
     /// <summary>Les interfaces de la ville (tuto, HUD…) restent cachées tant que le menu est affiché.</summary>
     void HideGameInterfaces()
     {
@@ -86,6 +107,7 @@ public class SessionLauncher : MonoBehaviour
 
     void OnDestroy()
     {
+        SceneManager.sceneLoaded -= OnSceneLoaded;
         if (_network != null)
             _network.onClientConnectionState -= HandleClientState;
     }
@@ -147,7 +169,7 @@ public class SessionLauncher : MonoBehaviour
         if (!ok)
         {
             Leave();
-            onDone(exists == null ? "Connexion impossible : vérifie le code et ta connexion." : "Connexion à la partie impossible.");
+            onDone(exists == null ? "Connexion impossible : vérifie le code et ta connexion." : "La partie ne répond pas : l'hôte l'a peut-être quittée.");
             yield break;
         }
         GameSession.Begin(code, host: false);
