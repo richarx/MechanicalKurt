@@ -42337,6 +42337,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 7d66870f072495b44a066b4d72c1f5df, type: 2}
   - {fileID: 11400000, guid: 7fe39a371e3248e08c935c2bfb23e9ec, type: 2}
   - {fileID: 11400000, guid: b1b05b81ef2c9784ca7854ad10e4fbd4, type: 2}
+  unlockSfx: {fileID: 8300000, guid: 7bc4eed0430cc414b860c00b12541409, type: 3}
 --- !u!4 &771039945
 Transform:
   m_ObjectHideFlags: 0
@@ -69416,7 +69417,7 @@ MonoBehaviour:
   _hiddenOffset: {x: 0, y: -250}
   _slideSeconds: 0.5
   _holdSeconds: 4
-  _unlockClip: {fileID: 8300000, guid: 26601268cdf496e40baf8b11212472d0, type: 3}
+  _unlockClip: {fileID: 8300000, guid: 7bc4eed0430cc414b860c00b12541409, type: 3}
   defaultSprite: {fileID: 0}
 --- !u!1001 &1246409646
 PrefabInstance:
@@ -106955,6 +106956,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Beach
       objectReference: {fileID: 0}
+    - target: {fileID: 8029093190485281017, guid: d5421b66b51e59e4bb8e187029cdae3b, type: 3}
+      propertyPath: successSfx
+      value: 
+      objectReference: {fileID: 8300000, guid: 1786f53355c150344aa6d17a8379c64d, type: 3}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
