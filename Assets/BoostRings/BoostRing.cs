@@ -47,14 +47,11 @@ public class BoostRing : MonoBehaviour
         Vector3 velocity = characterController.velocity; //pigeon.LastVelocity;
         float speed = velocity.magnitude;
 
-        Debug.Log(characterController.velocity);
-        Debug.Log(pigeon.LastVelocity);
         Vector3 direction = speed > 0.1f ? velocity / speed : pigeon.transform.forward;
 
         float targetSpeed = Mathf.Min(Mathf.Max(speed + _boostAmount, _minExitSpeed), _maxSpeed);
         if (targetSpeed > speed)
             pigeon.AddImpulse(direction * (targetSpeed - speed));
-        Debug.Log(direction * (targetSpeed - speed));
         PigeonBoostFeedback feedback = pigeon.GetComponent<PigeonBoostFeedback>();
         if (feedback != null)
             feedback.Play();
@@ -67,6 +64,8 @@ public class BoostRing : MonoBehaviour
         lastRingUsedTimestamp = Time.time;
 
         PlayRingFeedback();
+
+        pigeon.OnBoost?.Invoke();
     }
 
     void PlayRingFeedback()

@@ -21,9 +21,9 @@ public class PigeonAnimationControl : MonoBehaviour
 
         _animator.SetFloat("VerticalSpeed", _character.velocity.y);
         _animator.SetBool("IsGrounded", _character.isGrounded);
-        _animator.SetBool("Flap", _pigeonControls.Flap && !_pigeonControls.Brake);
-        _animator.SetBool("Dive", _pigeonControls.Dive && !_pigeonControls.Brake);
-        _animator.SetBool("Hover", _pigeonControls.Brake);
+        _animator.SetBool("Flap", _pigeonController.CurrentPigeonState == PigeonController.PigeonState.Flapping);
+        _animator.SetBool("Dive", _pigeonController.CurrentPigeonState == PigeonController.PigeonState.Diving);
+        _animator.SetBool("Hover", _pigeonController.CurrentPigeonState == PigeonController.PigeonState.Braking);
         _animator.SetBool("Dance", _pigeonControls.Flex);
     }
 }

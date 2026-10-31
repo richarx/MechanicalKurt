@@ -90,6 +90,7 @@ GameObject:
   - component: {fileID: 7640124386893371793}
   - component: {fileID: 5357851348377741376}
   - component: {fileID: 3577777248601108592}
+  - component: {fileID: 8875113971220435731}
   m_Layer: 3
   m_Name: Player
   m_TagString: Untagged
@@ -206,6 +207,7 @@ MonoBehaviour:
   _waterLevelModifier: 0.1
   _buoyancyForce: 20
   _activeDebug: 0
+  _useStaminaSystem: 1
   <OnTakeoff>k__BackingField:
     m_PersistentCalls:
       m_Calls: []
@@ -213,6 +215,12 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   <OnStunned>k__BackingField:
+    m_PersistentCalls:
+      m_Calls: []
+  <OnLand>k__BackingField:
+    m_PersistentCalls:
+      m_Calls: []
+  <OnBoost>k__BackingField:
     m_PersistentCalls:
       m_Calls: []
 --- !u!114 &7788707282503470594
@@ -427,6 +435,36 @@ MonoBehaviour:
   orbitalCamera: {fileID: 6749645902862693039}
   underWaterCamera: {fileID: 2776355963912601218}
   precisionCamera: {fileID: 8649118425525724192}
+--- !u!114 &8875113971220435731
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8893443228925278897}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 97b826b2726301f4b8ba1265cb8b782f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PigeonStamina
+  OnBoostStamina:
+    m_PersistentCalls:
+      m_Calls: []
+  OnCannotUseStamina:
+    m_PersistentCalls:
+      m_Calls: []
+  OnUseStamina:
+    m_PersistentCalls:
+      m_Calls: []
+  maxStamina: 100
+  staminaNormalizedThresholdToFlap: 0.3
+  staminaDepletionRate_Flap: 20
+  staminaRecoveryRate_Regular: 5
+  staminaRecoveryRate_Brake: 25
+  staminaRecoveryRate_UnderWater: 25
+  staminaRecoveryRate_Dive: 50
+  staminaInstantRecovery_Roll: 25
+  staminaInstantRecovery_Boost: 50
 --- !u!1001 &902121178248826382
 PrefabInstance:
   m_ObjectHideFlags: 0

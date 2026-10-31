@@ -1,11 +1,10 @@
-using System.Xml;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
 using Unity.Cinemachine;
 using System;
-using Unity.Mathematics;
+using NUnit.Framework;
 
 [DefaultExecutionOrder(50)]
 [RequireComponent(typeof(CharacterController))]
@@ -73,6 +72,7 @@ public class PigeonController : MonoBehaviour
 
     [Header("Debug")]
     [SerializeField] bool _activeDebug = false;
+    [SerializeField] bool _useStaminaSystem = false;
 
     [Header("Events")]
     [field: SerializeField]
@@ -81,6 +81,10 @@ public class PigeonController : MonoBehaviour
     public UnityEvent OnRoll { get; private set; } = new UnityEvent();
     [field: SerializeField]
     public UnityEvent OnStunned { get; private set; } = new UnityEvent();
+    [field: SerializeField]
+    public UnityEvent OnLand { get; private set; } = new UnityEvent();
+    [field: SerializeField]
+    public UnityEvent OnBoost { get; private set; } = new UnityEvent();
 
     Vector3 _velocity;
     Vector3 _lastVelocity;
@@ -94,6 +98,9 @@ public class PigeonController : MonoBehaviour
     bool _stunned;
     float _stunRemaining;
     float _stunImmuneRemaining;
+    bool wasGroundedLastFrame;
+    Vector3 _lastHitNormal;
+    PigeonState _currentPigeonState;
 
     Rigidbody _rigidbody;
     CharacterController _controller;
@@ -101,8 +108,9 @@ public class PigeonController : MonoBehaviour
     public IPigeonControls Controls => _controls;
     PigeonBoostFeedback _boostFeedback;
     PigeonRagdollHandler _pigeonRagdollHandler;
+    PigeonStamina _pigeonStamina;
     PigeonOnMoving _onMoving;
-    Vector3 _lastHitNormal;
+
 
     public float Speed => _lastVelocity.magnitude;
     public float HorizontalSpeed => new Vector3(_lastVelocity.x, 0f, _lastVelocity.z).magnitude;
@@ -110,6 +118,7 @@ public class PigeonController : MonoBehaviour
     public Vector3 Velocity => _velocity;
     public bool IsUndeWater => _water != null && transform.position.y < _water.transform.position.y - _waterLevelModifier;
     public bool IsStun => _stunned;
+    public PigeonState CurrentPigeonState => _currentPigeonState;
 
     public bool IsMovementFrozen { get; private set; }
 
@@ -168,8 +177,10 @@ public class PigeonController : MonoBehaviour
         _controls = GetComponent<IPigeonControls>();
         _boostFeedback = GetComponent<PigeonBoostFeedback>();
         _pigeonRagdollHandler = GetComponent<PigeonRagdollHandler>();
+        _pigeonStamina = GetComponent<PigeonStamina>();
         _onMoving = GetComponent<PigeonOnMoving>();
         _yaw = transform.eulerAngles.y;
+        wasGroundedLastFrame = _controller.isGrounded;
     }
 
     void OnEnable()
@@ -270,7 +281,6 @@ public class PigeonController : MonoBehaviour
 
     public bool IsGroundedWithSphereCast()
     {
-
         float halfHeight = _controller.height * 0.5f;
         Vector3 localSphereCenter = _controller.center + Vector3.down * (halfHeight - _controller.radius);
         Vector3 worldSphereCenter = transform.TransformPoint(localSphereCenter);
@@ -366,7 +376,9 @@ public class PigeonController : MonoBehaviour
 
         _velocity = Vector3.zero;
 
-        if (IsGrounded && (_lastVelocity.y <= 0.001f || (_onMoving != null && _onMoving.HasSupport)))
+
+        _currentPigeonState = ComputeCurrentPigeonState();
+        if (_currentPigeonState == PigeonState.Grounded)
         {
             GroundMovement();
             ResetVisualRotation(dt);
@@ -376,7 +388,6 @@ public class PigeonController : MonoBehaviour
             CalculateFlightPhysics(dt);
             UpdateVisualRotation(dt);
         }
-
 
 
         _velocity = PigeonFan.ApplyUpdrafts(transform.position, _velocity, dt, IsGrounded);
@@ -410,6 +421,9 @@ public class PigeonController : MonoBehaviour
             _lastVelocity.y = 0f;
         }
 
+        if (!wasGroundedLastFrame && IsGrounded)
+            OnLand?.Invoke();
+        wasGroundedLastFrame = IsGrounded;
     }
 
     void GroundMovement()
@@ -448,13 +462,17 @@ public class PigeonController : MonoBehaviour
         _preserveTeleportPitch = false;
         float targetPitch;
 
-        if (_controls.Brake)
+        if (_currentPigeonState == PigeonState.Braking)
         {
             targetPitch = maxPitch;
         }
-        else if (_controls.Flap && !hasVerticalInput)
+        else if (_currentPigeonState == PigeonState.Flapping && !hasVerticalInput)
         {
             targetPitch = maxPitch;
+        }
+        else if (_currentPigeonState == PigeonState.Diving)
+        {
+            targetPitch = -_diveMaxPitch;
         }
         else if (IsUndeWater && !hasVerticalInput)
         {
@@ -521,6 +539,35 @@ public class PigeonController : MonoBehaviour
         }
     }
 
+    public enum PigeonState
+    {
+        Grounded,
+        Braking,
+        Flapping,
+        Diving,
+        Gliding
+    }
+
+    private PigeonState ComputeCurrentPigeonState()
+    {
+        if (IsGrounded && (_lastVelocity.y <= 0.001f || (_onMoving != null && _onMoving.HasSupport)))
+            return PigeonState.Grounded;
+
+        if (_controls.Brake)
+            return PigeonState.Braking;
+
+        bool keepsFlapping = CurrentPigeonState == PigeonState.Flapping && _pigeonStamina.HasStamina;
+        bool hasStamina = keepsFlapping || _pigeonStamina.HasEnoughStaminaToFlap;
+
+        if (_controls.Flap && (hasStamina || !_useStaminaSystem))
+            return PigeonState.Flapping;
+
+        if (_controls.Dive)
+            return PigeonState.Diving;
+
+        return PigeonState.Gliding;
+    }
+
     void CalculateFlightPhysics(float dt)
     {
         float targetSpeed;
@@ -528,7 +575,8 @@ public class PigeonController : MonoBehaviour
         _velocity = _lastVelocity + Physics.gravity * dt + _pendingImpulse;
         _pendingImpulse = Vector3.zero;
 
-        if (_controls.Brake)
+
+        if (_currentPigeonState == PigeonState.Braking)
         {
             targetSpeed = _brakeMaxSpeed;
             dragAtMaxSpeed = _brakeDragAtMaxSpeed;
@@ -541,7 +589,7 @@ public class PigeonController : MonoBehaviour
             ComputePitch(_pitchSpeed, _maxPitch, dt);
             ComputeRotation(dt, _turnSpeed * 2.0f);
         }
-        else if (_controls.Flap)
+        else if (_currentPigeonState == PigeonState.Flapping)
         {
             if (_stunned) // TODO
             {
@@ -555,14 +603,12 @@ public class PigeonController : MonoBehaviour
 
             _velocity += Vector3.up * _flapAccel * dt;
         }
-        else if (_controls.Dive)
+        else if (_currentPigeonState == PigeonState.Diving)
         {
             _preserveTeleportPitch = false;
             targetSpeed = _diveMaxSpeed;
             dragAtMaxSpeed = _diveDragAtMaxSpeed;
-            float targetPitch = -_diveMaxPitch;
-            float deltaPitch = Mathf.Abs(Mathf.DeltaAngle(targetPitch, _currentPitch));
-            _currentPitch = Mathf.MoveTowardsAngle(_currentPitch, targetPitch, Mathf.Max(_divePitchSpeed * dt, deltaPitch * 0.1f * dt));
+            ComputePitch(_divePitchSpeed, _diveMaxPitch, dt);
             ComputeRotation(dt, _turnSpeed);
         }
         else

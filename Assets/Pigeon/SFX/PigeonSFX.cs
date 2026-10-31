@@ -61,7 +61,7 @@ public class PigeonSFX : MonoBehaviour
                 SFXManager.Instance.PlaySFX(exitWater);
         }
 
-        if (!pigeonController.IsGrounded && !controls.Flap && !pigeonController.IsStun)
+        if (pigeonController.CurrentPigeonState == PigeonController.PigeonState.Gliding && !pigeonController.IsStun)
         {
             if (currentAudioSource == null)
             {
