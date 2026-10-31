@@ -5,26 +5,37 @@ using UnityEngine;
 
 public partial class ScenarioRunner
 {
-    IEnumerator RingBoost()
+    /// <summary>Anneau de test, toujours le même d'une exécution à l'autre (plus petit nom, puis plus petit x).</summary>
+    static BoostRing FindTestRing()
     {
         BoostRing ring = null;
         foreach (BoostRing candidate in FindObjectsByType<BoostRing>(FindObjectsInactive.Exclude))
             if (ring == null || string.CompareOrdinal(candidate.name, ring.name) < 0
                 || (candidate.name == ring.name && candidate.transform.position.x < ring.transform.position.x))
                 ring = candidate;
-        yield return Check("Un BoostRing actif existe dans la scène", ring != null, ring != null ? $"« {ring.name} » en {ring.transform.position}" : null);
+        return ring;
+    }
 
+    /// <summary>Point de départ et orientation de plané qui traversent l'anneau.</summary>
+    static void RingApproach(BoostRing ring, out Vector3 start, out Quaternion glide, out Vector3 center)
+    {
         var box = ring.GetComponent<BoxCollider>();
-        Vector3 center = box != null ? ring.transform.TransformPoint(box.center) : ring.transform.position;
+        center = box != null ? ring.transform.TransformPoint(box.center) : ring.transform.position;
         Vector3 normal = ring.transform.forward;
+        start = center - normal * 5f + Vector3.up * 3f;
+        glide = Quaternion.LookRotation(normal) * Quaternion.Euler(30f, 0f, 0f);
+    }
+
+    IEnumerator RingBoost()
+    {
+        BoostRing ring = FindTestRing();
+        yield return Check("Un BoostRing actif existe dans la scène", ring != null, ring != null ? $"« {ring.name} » en {ring.transform.position}" : null);
+        RingApproach(ring, out Vector3 start, out Quaternion glide, out Vector3 center);
 
         int boosts = 0;
         void CountBoost() => boosts++;
         Pigeon.OnBoosted.AddListener(CountBoost);
         Defer(() => Pigeon.OnBoosted.RemoveListener(CountBoost));
-
-        Vector3 start = center - normal * 5f + Vector3.up * 3f;
-        Quaternion glide = Quaternion.LookRotation(normal) * Quaternion.Euler(30f, 0f, 0f);
 
         yield return Teleport(Pigeon, start, glide, "Placement devant l'anneau");
         float speedBefore = Pigeon.Speed;
@@ -90,6 +101,7 @@ public partial class ScenarioRunner
         PigeonCharacterRace race = FindRace();
         yield return Check("Une course avec MissionStartZone existe", race != null);
         Defer(() => CleanupRace(race));
+        yield return UseStartRule(race.DepartureZone, MissionStartZone.StartRule.AllPigeons, withRemote: false);
 
         var bots = new List<SpawnedBot>();
         yield return PlaceTwoPigeonsInDepartureZone(race, bots);
@@ -110,6 +122,7 @@ public partial class ScenarioRunner
             () => $"phase {zone.Phase}, prêts : joueur {Pigeon.WantsStart}, bot {other.WantsStart}");
         yield return Expect("Les deux pigeons sont gelés", () => Pigeon.IsMovementFrozen && other.IsMovementFrozen, 1f);
         yield return Expect("Décompte affiché avec le nombre de joueurs", () => HudContains(zone, "Players: 2/2"), 1f, () => HudState(zone));
+        yield return Check("Le cercle de départ reste affiché pendant le décompte", MarkerShown(race));
         yield return ExpectStays("Pendant le décompte, pas de cinématique", () => !race.DepartureCinematic.IsPlaying,
             Mathf.Min(1f, zone.CountdownSeconds * 0.5f), () => HudState(zone));
 
@@ -125,6 +138,7 @@ public partial class ScenarioRunner
         yield return Expect("Fin du décompte : la cinématique de départ démarre", () => race.DepartureCinematic.IsPlaying,
             zone.CountdownSeconds + 2f, () => $"zone {zone.Phase}, reste {zone.CountdownRemaining:0.0} s");
         yield return Expect("Phase cinématique", () => zone.Phase == MissionStartZone.StartPhase.Cinematic, 1f, zone.Describe);
+        yield return Expect("Fin du décompte : le cercle de départ disparaît", () => race.DepartureMarker == null || !race.DepartureMarker.activeInHierarchy, 1f);
 
         bots[0].Controls.PressInteract();
         yield return ExpectStays("Pendant la cinématique, on ne peut plus annuler ; personne n'est libéré",
@@ -153,6 +167,8 @@ public partial class ScenarioRunner
             () => $"phase {race.Phase} ; distance à l'arrivée : joueur {DistanceToFinish(race, Pigeon):0.0} m, bot {DistanceToFinish(race, other):0.0} m, "
                 + $"rayon d'arrivée {race.DestinationStop.Radius}, seuil de vitesse {race.DestinationStop.StopSpeedThreshold}, durée {race.DestinationStop.StopDuration}");
     }
+
+    static bool MarkerShown(PigeonCharacterRace race) => race.DepartureMarker == null || race.DepartureMarker.activeInHierarchy;
 
     static bool HudContains(MissionStartZone zone, string part) => zone.HudText != null && zone.HudText.Contains(part);
     static string HudState(MissionStartZone zone) => $"zone {zone.Phase}, texte « {zone.HudText?.Replace('\n', ' ') ?? "masqué"} »";
@@ -258,6 +274,7 @@ public partial class ScenarioRunner
         PigeonCharacterRace race = FindRace();
         yield return Check("Une course avec MissionStartZone existe", race != null);
         Defer(() => CleanupRace(race));
+        yield return UseStartRule(race.DepartureZone, MissionStartZone.StartRule.AllPigeons, withRemote: false);
 
         var bots = new List<SpawnedBot>();
         yield return PlaceTwoPigeonsInDepartureZone(race, bots);

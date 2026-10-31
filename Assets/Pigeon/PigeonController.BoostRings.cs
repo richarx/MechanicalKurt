@@ -67,7 +67,7 @@ public partial class PigeonController
         float now = Time.time;
         _ringCombo = now - _lastRingTime <= BoostRing.ComboWindow ? _ringCombo + 1 : 1;
         _lastRingTime = now;
-        ring.PlayRingFeedback(_ringCombo);
+        ring.PlayRingFeedback(_ringCombo, this == Local);
         OnBoosted.Invoke();
     }
 }

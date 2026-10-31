@@ -290,6 +290,14 @@ public class ScenarioClientAgent : MonoBehaviour
                     network.StartClient();
                 return network.clientState.ToString();
 
+            case "start-rule":
+            {
+                var rule = (MissionStartZone.StartRule)Enum.Parse(typeof(MissionStartZone.StartRule), argument);
+                foreach (MissionStartZone zone in FindObjectsByType<MissionStartZone>(FindObjectsInactive.Include))
+                    zone.SetRuleForTests(rule);
+                return rule.ToString();
+            }
+
             case "reset-achievements":
                 if (AchievementManager.Instance != null)
                     AchievementManager.Instance.ResetAll();
@@ -442,6 +450,15 @@ public class ScenarioClientAgent : MonoBehaviour
             others.Append(sources);
         }
         Add(RemoteKeys.OtherSounds, others.ToString());
+
+        var ringSounds = new List<string>();
+        foreach (BoostRing ring in FindObjectsByType<BoostRing>(FindObjectsInactive.Exclude))
+            foreach (AudioSource source in ring.GetComponentsInChildren<AudioSource>())
+                if (!source.loop)
+                    ringSounds.Add(ScenarioLinkProtocol.Format(source.spatialBlend));
+        Add(RemoteKeys.RingSounds, string.Join(ScenarioLinkProtocol.ListSeparator, ringSounds));
+        PigeonBoostFeedback feedback = local != null ? local.GetComponent<PigeonBoostFeedback>() : null;
+        Add(RemoteKeys.ScreenSpeedLines, ScenarioLinkProtocol.Format(feedback != null ? feedback.ScreenEffectAlpha : 0f));
 
         return _snapshot.ToString();
     }

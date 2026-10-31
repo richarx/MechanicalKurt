@@ -13,6 +13,7 @@ public partial class ScenarioRunner
         yield return Check("Une course avec MissionStartZone existe", race != null);
         Defer(() => CleanupRace(race));
         MissionStartZone zone = race.DepartureZone;
+        yield return UseStartRule(zone, MissionStartZone.StartRule.AllPigeons, withRemote: true);
         yield return PlaceHostAndRemoteInDepartureZone(race);
         PigeonController remote = RemotePigeon;
 
@@ -77,6 +78,7 @@ public partial class ScenarioRunner
         yield return Check("Une course avec MissionStartZone existe", race != null);
         Defer(() => CleanupRace(race));
         MissionStartZone zone = race.DepartureZone;
+        yield return UseStartRule(zone, MissionStartZone.StartRule.AllPigeons, withRemote: true);
 
         if (race.CompletionAchievement != null)
         {
@@ -357,6 +359,43 @@ public partial class ScenarioRunner
             if (!source.loop)
                 items.Add($"{(source.clip != null ? source.clip.name : "?")}={ScenarioLinkProtocol.Format(source.spatialBlend)}");
         return items;
+    }
+
+    IEnumerator MultiRingFeedback()
+    {
+        BoostRing ring = FindTestRing();
+        yield return Check("Un BoostRing actif existe dans la scène", ring != null);
+        RingApproach(ring, out Vector3 start, out Quaternion glide, out _);
+        PigeonController remote = RemotePigeon;
+        PigeonBoostFeedback hostFeedback = Pigeon.GetComponent<PigeonBoostFeedback>();
+        yield return Check("Le pigeon de l'hôte a un PigeonBoostFeedback", hostFeedback != null);
+
+        int remoteBoosts = 0, hostBoosts = 0;
+        void CountRemote() => remoteBoosts++;
+        void CountHost() => hostBoosts++;
+        remote.OnBoosted.AddListener(CountRemote);
+        Pigeon.OnBoosted.AddListener(CountHost);
+        Defer(() => { remote.OnBoosted.RemoveListener(CountRemote); Pigeon.OnBoosted.RemoveListener(CountHost); });
+
+        yield return Expect("Aucune ligne de vitesse au départ", () => hostFeedback.ScreenEffectAlpha < 0.01f
+            && RemoteNumber(RemoteKeys.ScreenSpeedLines) < 0.01f, 4f, RemoteState);
+
+        yield return Teleport(remote, start, glide, "Le second joueur plane vers l'anneau");
+        yield return Expect("Il traverse l'anneau (boost vu par l'hôte)", () => remoteBoosts >= 1, 4f,
+            () => $"boosts {remoteBoosts}, vitesse {remote.Speed:0.0}");
+        yield return Expect("Lignes de vitesse sur son écran", () => RemoteNumber(RemoteKeys.ScreenSpeedLines) > 0.3f, 2f, RemoteState);
+        yield return ExpectStays("Pas de lignes de vitesse sur l'écran de l'hôte", () => hostFeedback.ScreenEffectAlpha < 0.01f, 1.5f,
+            () => $"opacité chez l'hôte {hostFeedback.ScreenEffectAlpha:0.00}");
+
+        yield return Expect("Ses lignes de vitesse s'effacent", () => RemoteNumber(RemoteKeys.ScreenSpeedLines) < 0.01f, 4f, RemoteState);
+        yield return Teleport(Pigeon, start, glide, "L'hôte plane vers l'anneau");
+        yield return Expect("L'hôte traverse l'anneau", () => hostBoosts >= 1, 4f, () => $"boosts {hostBoosts}, vitesse {Pigeon.Speed:0.0}");
+        yield return Expect("Lignes de vitesse sur l'écran de l'hôte", () => hostFeedback.ScreenEffectAlpha > 0.3f, 1f,
+            () => $"opacité {hostFeedback.ScreenEffectAlpha:0.00}");
+        yield return Expect("Chez le second joueur, le son de l'anneau est localisé en 3D", () => RemoteList(RemoteKeys.RingSounds).Contains("1"), 2f,
+            () => $"sons d'anneau [{Remote(RemoteKeys.RingSounds)}]");
+        yield return ExpectStays("Pas de lignes de vitesse sur l'écran du second joueur", () => RemoteIs(RemoteKeys.ScreenSpeedLines, "0"), 1.5f,
+            RemoteState);
     }
 
     /// <summary>Commande au second joueur ; l'étape échoue s'il ne l'exécute pas.</summary>

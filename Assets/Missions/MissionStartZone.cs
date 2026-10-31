@@ -83,6 +83,7 @@ public class MissionStartZone : PredictedIdentity<MissionStartState>
     public float CountdownRemaining => _viewState.Countdown;
     public int ReadyCount => _viewState.Ready;
     public int TotalCount => _viewState.Total;
+    public StartRule Rule => _startRule;
     public float Radius => _radius;
     public float StopSpeedThreshold => _stopSpeedThreshold;
     public float CountdownSeconds => _countdownSeconds;
@@ -94,6 +95,11 @@ public class MissionStartZone : PredictedIdentity<MissionStartState>
 
     /// <summary>État simulé de la zone, réservé au Simulate d'une autre identité (ex. PigeonCharacterRace).</summary>
     public ref MissionStartState SimState => ref currentState;
+
+#if UNITY_EDITOR
+    /// <summary>Scénarios : change la règle de départ. À faire sur chaque machine, sinon les prédictions divergent.</summary>
+    public void SetRuleForTests(StartRule rule) => _startRule = rule;
+#endif
 
     /// <summary>Rouvre la zone à la fin de la mission (échec ou victoire). À appeler depuis une simulation.</summary>
     [SimulationOnly]
@@ -297,7 +303,8 @@ public class MissionStartZone : PredictedIdentity<MissionStartState>
     }
 
     bool IsInside(in PigeonState ps) =>
-        (ps.Position - transform.position).sqrMagnitude <= _radius * _radius && ps.LastVelocity.magnitude <= _stopSpeedThreshold;
+        !ps.Stunned && (ps.Position - transform.position).sqrMagnitude <= _radius * _radius
+        && ps.LastVelocity.magnitude <= _stopSpeedThreshold;
 
     bool IsParticipant(in PigeonState ps) => ps.Mission.IsReadyFor(id) && IsInside(ps);
 
@@ -367,7 +374,8 @@ public class MissionStartZone : PredictedIdentity<MissionStartState>
             && local != null
             && !local.IsReadyFor(id)
             && (local.transform.position - transform.position).sqrMagnitude <= _radius * _radius
-            && local.Speed <= _stopSpeedThreshold;
+            && local.Speed <= _stopSpeedThreshold
+            && !local.IsStun;
 
         if (show == _promptShown)
             return;

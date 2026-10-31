@@ -38,7 +38,7 @@ public class PigeonStopZone : MonoBehaviour
         PigeonController pigeon = Pigeon;
 
         // Evaluate after the player has moved in Update, using its actual speed.
-        bool stoppedInside = pigeon != null && pigeon.isActiveAndEnabled &&
+        bool stoppedInside = pigeon != null && pigeon.isActiveAndEnabled && !pigeon.IsStun &&
                              (pigeon.transform.position - transform.position).sqrMagnitude <= Radius * Radius &&
                              pigeon.Speed <= StopSpeedThreshold;
 

@@ -75,6 +75,8 @@ public static class RemoteKeys
     public const string Achievements = "ach";
     public const string OwnSounds = "audio/local";
     public const string OtherSounds = "audio/others";
+    public const string RingSounds = "audio/rings";
+    public const string ScreenSpeedLines = "fx/speedlines";
 
     public const string ZonePrefix = "zone/";
     public const string RacePrefix = "race/";

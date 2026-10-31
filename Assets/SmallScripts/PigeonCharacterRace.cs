@@ -151,7 +151,6 @@ public class PigeonCharacterRace : PredictedIdentity<RaceState>
         if (DepartureZone != null)
         {
             DepartureZone.OnCountdownStarted.AddListener(HandleDepartureCountdown);
-            DepartureZone.OnCancelled.AddListener(HandleDepartureCancelled);
             DepartureZone.OnCinematicLocal.AddListener(HandleDepartureCinematic);
         }
         if (DepartureCinematic != null)
@@ -165,7 +164,6 @@ public class PigeonCharacterRace : PredictedIdentity<RaceState>
         if (DepartureZone != null)
         {
             DepartureZone.OnCountdownStarted.RemoveListener(HandleDepartureCountdown);
-            DepartureZone.OnCancelled.RemoveListener(HandleDepartureCancelled);
             DepartureZone.OnCinematicLocal.RemoveListener(HandleDepartureCinematic);
         }
         if (DepartureCinematic != null)
@@ -289,7 +287,7 @@ public class PigeonCharacterRace : PredictedIdentity<RaceState>
         foreach (PigeonController racer in Racers())
         {
             ref PigeonState ps = ref racer.SimState;
-            if ((ps.Position - center).sqrMagnitude <= radius * radius
+            if (!ps.Stunned && (ps.Position - center).sqrMagnitude <= radius * radius
                 && ps.LastVelocity.magnitude <= stopSpeed)
                 return true;
         }
@@ -308,6 +306,7 @@ public class PigeonCharacterRace : PredictedIdentity<RaceState>
 
         if ((int)view.Phase != _presentedPhase)
             ApplyPhasePresentation(view.Phase);
+        UpdateDepartureMarker(view.Phase);
 
         if (view.Phase == RacePhase.Racing && !_holdCharacter && Character != null)
         {
@@ -336,7 +335,6 @@ public class PigeonCharacterRace : PredictedIdentity<RaceState>
                 SetCharacterGliding(false);
                 SetDestinationActive(false);
                 SetRaceObjectsActive(false);
-                SetDepartureActive(false);
                 RestoreRootMotion();
                 break;
         }
@@ -352,7 +350,6 @@ public class PigeonCharacterRace : PredictedIdentity<RaceState>
             Character.SetPositionAndRotation(_characterHomePosition, _characterHomeRotation);
         SetDestinationActive(false);
         SetRaceObjectsActive(false);
-        SetDepartureActive(true);
     }
 
     private void BeginRacePresentation()
@@ -370,7 +367,6 @@ public class PigeonCharacterRace : PredictedIdentity<RaceState>
 
         BuildPath();
         SetCharacterGliding(true);
-        SetDepartureActive(false);
         SetDestinationActive(true);
         SetRaceObjectsActive(true);
     }
@@ -379,12 +375,6 @@ public class PigeonCharacterRace : PredictedIdentity<RaceState>
     {
         if (FailureMessage != null)
             FailureMessage.Hide();
-        SetDepartureActive(false);
-    }
-
-    private void HandleDepartureCancelled()
-    {
-        SetDepartureActive(true);
     }
 
     private void HandleDepartureCinematic()
@@ -521,10 +511,13 @@ public class PigeonCharacterRace : PredictedIdentity<RaceState>
             _characterAnimator.SetBool(GlideHash, gliding);
     }
 
-    private void SetDepartureActive(bool active)
+    /// <summary>Le cercle de départ reste affiché tant que la course est au repos et que la zone attend ou décompte.</summary>
+    private void UpdateDepartureMarker(RacePhase phase)
     {
-        if (DepartureMarker != null)
-            DepartureMarker.SetActive(active);
+        bool show = phase == RacePhase.Ready && (DepartureZone == null
+            || DepartureZone.Phase is MissionStartZone.StartPhase.Waiting or MissionStartZone.StartPhase.CountingDown);
+        if (DepartureMarker != null && DepartureMarker.activeSelf != show)
+            DepartureMarker.SetActive(show);
     }
 
     private void SetDestinationActive(bool active)

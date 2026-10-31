@@ -80699,7 +80699,7 @@ MonoBehaviour:
   _predictionPolicy: 0
   _radius: 2
   _stopSpeedThreshold: 0.15
-  _startRule: 0
+  _startRule: 1
   _rearm: 0
   _countdownSeconds: 3
   _cinematicTimeout: 90

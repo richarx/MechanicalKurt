@@ -14,6 +14,8 @@ public partial class ScenarioRunner
         Solo("Course : échec de hauteur", r => r.RaceHeightFailure()),
         Solo("Course : une seule à la fois", r => r.RaceLockedWhileRunning()),
         Solo("Course : victoire et course refaite", r => r.RaceWinAndReplay()),
+        Solo("Course : un seul joueur suffit (AnyPigeon)", r => r.RaceAnyPigeon()),
+        Solo("Ragdoll : les zones ne se déclenchent pas", r => r.RagdollIgnoredByZones()),
         Solo("Mission : livraison simple", r => r.RunDeliveryMission()),
         Solo("Mission : collecte (Spidey)", r => r.RunCollectionMission()),
         Solo("Mission : billboards", r => r.RunBillboardMission()),
@@ -32,9 +34,12 @@ public partial class ScenarioRunner
         Multi("Multi : victoire, gel et course refaite", r => r.MultiRaceWin()),
         Multi("Multi : échec de hauteur", r => r.MultiRaceHeight()),
         Multi("Multi : arrivée en pleine course", r => r.MultiLateJoin()),
+        Multi("Multi : un seul suffit, lancé par le second joueur", r => r.MultiAnyStartedByRemote()),
+        Multi("Multi : un seul suffit, lancé par l'hôte", r => r.MultiAnyStartedByHost()),
         Multi("Multi : tuto local au second joueur", r => r.MultiTuto()),
         Multi("Multi : équipement du second joueur", r => r.MultiEquipment()),
         Multi("Multi : sons chez le second joueur", r => r.MultiAudio()),
+        Multi("Multi : effets d'anneau seulement pour celui qui le traverse", r => r.MultiRingFeedback()),
     };
 
     class ScenarioDef

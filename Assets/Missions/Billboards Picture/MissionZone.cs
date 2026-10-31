@@ -67,7 +67,7 @@ public class MissionZone : MonoBehaviour
         IPigeonControls controls = _pigeon != null ? _pigeon.Controls : null;
 
         // Évalué après le déplacement du pigeon dans Update, comme PigeonStopZone.
-        bool inside = _pigeon != null && controls != null && _pigeon.isActiveAndEnabled &&
+        bool inside = _pigeon != null && controls != null && _pigeon.isActiveAndEnabled && !_pigeon.IsStun &&
                       (_pigeon.transform.position - transform.position).sqrMagnitude <= Radius * Radius &&
                       _pigeon.Speed <= StopSpeedThreshold;
 

@@ -38,7 +38,8 @@ public class BoostRing : MonoBehaviour
         GetComponent<Collider>().isTrigger = true;
     }
 
-    public void PlayRingFeedback(int comboCount = 1)
+    /// <param name="local">Traversé par le pigeon du joueur local : son en 2D. Sinon, son localisé sur l'anneau.</param>
+    public void PlayRingFeedback(int comboCount = 1, bool local = true)
     {
         if (_visual != null)
         {
@@ -46,12 +47,13 @@ public class BoostRing : MonoBehaviour
             _punchTween = _visual.DOPunchScale(Vector3.one * _punchScale, _punchDuration, 6, 0.5f);
         }
 
-        if (SFXManager.Instance != null)
-        {
-            float pitch = Mathf.Min(1.0f + comboCount * ComboPitchStep, ComboMaxPitch);
-            SFXManager.Instance.PlayRandomSFX(_mainSfx, _mainSfxVolume, pitch: pitch);
-            SFXManager.Instance.PlayRandomSFX(_secondarySfx, _secondarySfxVolume);
-        }
+        SFXManager sfx = SFXManager.Instance;
+        if (sfx == null)
+            return;
+        float pitch = Mathf.Min(1.0f + comboCount * ComboPitchStep, ComboMaxPitch);
+        Transform at = local ? null : transform;
+        sfx.SetSpatial(sfx.PlayRandomSFXAtLocation(_mainSfx, at, _mainSfxVolume, pitch: pitch), !local);
+        sfx.SetSpatial(sfx.PlayRandomSFXAtLocation(_secondarySfx, at, _secondarySfxVolume), !local);
     }
 
     void OnDestroy()

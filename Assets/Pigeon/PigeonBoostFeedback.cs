@@ -33,15 +33,18 @@ public class PigeonBoostFeedback : MonoBehaviour
     {
         _baseRotation = _rollPivot.localRotation;
         _baseScale = _rollPivot.localScale;
+        pigeonController = GetComponent<PigeonController>();
     }
 
     private void Start()
     {
-        pigeonController = GetComponent<PigeonController>();
         pigeonController.OnStunned.AddListener(CancelParticles);
     }
 
     public bool IsPlaying => _sequence != null && _sequence.IsActive() && _sequence.IsPlaying();
+
+    /// <summary>Opacité actuelle des lignes de vitesse plein écran (matériau partagé par tous les pigeons).</summary>
+    public float ScreenEffectAlpha => speedMaterial != null ? speedMaterial.GetFloat("_Alpha") : 0f;
 
     // restart: false ignores the call while a roll is already playing.
     public void Play(bool restart = true, float duration = -1f, bool isLeft = true, bool playParticleEffect = true)
@@ -53,7 +56,10 @@ public class PigeonBoostFeedback : MonoBehaviour
         {
             smokeParticles.Play();
             speedParticles.Play();
+        }
 
+        if (playParticleEffect && pigeonController != null && pigeonController == PigeonController.Local)
+        {
             materialSequence?.Kill();
             materialSequence = DOTween.Sequence()
                 .Append(speedMaterial.DOFloat(0.7f, "_Alpha", 0.1f))
