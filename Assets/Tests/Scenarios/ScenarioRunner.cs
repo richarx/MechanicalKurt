@@ -2,10 +2,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Globalization;
-using System.IO;
 using System.Text;
-using System.Text.RegularExpressions;
 using UnityEngine;
 
 /// <summary>
@@ -22,11 +19,8 @@ public partial class ScenarioRunner : MonoBehaviour
     public const string AllSolo = "*solo";
     public const string AllMulti = "*multi";
     public const char FilterSeparator = '|';
-    const string ReportPath = "Logs/ScenarioReport.txt";
     const float ScenarioTimeout = 90f;
     const float MultiScenarioTimeout = 150f;
-    const float RemoteWaitInteractive = 45f;
-    const float RemoteWaitCommandLine = 300f;
 
     class StepResult
     {
@@ -37,19 +31,10 @@ public partial class ScenarioRunner : MonoBehaviour
         public string Detail;
     }
 
-    class ScenarioDef
-    {
-        public string Name;
-        public Func<IEnumerator> Body;
-        public bool Multi;
-    }
-
     string _filter = AllSolo;
     readonly List<StepResult> _results = new List<StepResult>();
     readonly List<Action> _cleanups = new List<Action>();
-    readonly Dictionary<string, int> _achievementBackup = new Dictionary<string, int>();
     readonly Dictionary<string, bool?> _scenarioStatus = new Dictionary<string, bool?>();
-    List<ScenarioDef> _scenarios;
 
     string _currentScenario;
     string _currentStep;
@@ -58,12 +43,6 @@ public partial class ScenarioRunner : MonoBehaviour
     bool _scenarioFailed;
     bool _finished;
     bool _commandLine;
-    bool _achievementsRestored = true;
-    Vector2 _scroll;
-
-    ScenarioRemoteLink _link;
-    bool _lastRemoteOk;
-    string _lastRemoteDetail;
 
     protected PigeonController Pigeon { get; private set; }
     protected BotControls Bot { get; private set; }
@@ -97,13 +76,12 @@ public partial class ScenarioRunner : MonoBehaviour
         UnityEditor.SessionState.SetBool(ActiveKey, true);
         _commandLine = UnityEditor.SessionState.GetBool(ExitOnFinishKey, false);
         MissionStartZone.TraceTransitions = true;
-        _scenarios = BuildScenarios();
 
         var selected = new List<ScenarioDef>();
-        foreach (ScenarioDef def in _scenarios)
+        foreach (ScenarioDef def in Catalog)
             if (Selected(def) && !def.Multi)
                 selected.Add(def);
-        foreach (ScenarioDef def in _scenarios)
+        foreach (ScenarioDef def in Catalog)
             if (Selected(def) && def.Multi)
                 selected.Add(def);
         foreach (ScenarioDef def in selected)
@@ -185,7 +163,7 @@ public partial class ScenarioRunner : MonoBehaviour
             yield return RemoteCommand("release");
         }
 
-        yield return Execute(def.Multi && !withRemote ? MissingRemote() : def.Body());
+        yield return Execute(def.Multi && !withRemote ? MissingRemote() : def.Body(this));
 
         _scenarioStatus[def.Name] = !_scenarioFailed;
         Debug.Log($"[Scénario] {(_scenarioFailed ? "✘ ÉCHEC" : "✔ OK")} {def.Name} ({Time.realtimeSinceStartup - _scenarioStart:0.0} s)");
@@ -401,230 +379,6 @@ public partial class ScenarioRunner : MonoBehaviour
         yield return new WaitForSecondsRealtime(0.5f);
     }
 
-    /// <summary>Second joueur relié, en jeu, et son pigeon présent chez l'hôte.</summary>
-    protected bool RemoteReady => _link != null && _link.Connected && _link.Get("net") == "connected"
-        && _link.Get("local") == "1" && RemotePigeon != null;
-
-    /// <summary>Le pigeon du second joueur, tel que l'hôte le simule (null s'il n'est pas en jeu).</summary>
-    protected PigeonController RemotePigeon
-    {
-        get
-        {
-            if (_link == null || !_link.Connected)
-                return null;
-            string id = _link.Get("net/player");
-            if (id == null)
-                return null;
-            foreach (PigeonController pigeon in PigeonController.All)
-                if (pigeon != Pigeon && pigeon.owner.HasValue && !pigeon.owner.Value.isBot
-                    && pigeon.owner.Value.id.value.ToString(CultureInfo.InvariantCulture) == id)
-                    return pigeon;
-            return null;
-        }
-    }
-
-    /// <summary>Un pigeon de joueur autre que celui de l'hôte (les bots n'ont pas de propriétaire).</summary>
-    static bool HasRemotePlayerPigeon()
-    {
-        foreach (PigeonController pigeon in PigeonController.All)
-            if (pigeon != PigeonController.Local && pigeon.owner.HasValue && !pigeon.owner.Value.isBot)
-                return true;
-        return false;
-    }
-
-    static bool MppmVirtualPlayerActive()
-    {
-        try
-        {
-            string path = Path.Combine("Library", "VP", "SystemData.json");
-            if (!File.Exists(path))
-                return false;
-            string json = File.ReadAllText(path);
-            return Regex.IsMatch(json, "\"IsMppmActive\"\\s*:\\s*true")
-                && Regex.IsMatch(json, "\"Active\"\\s*:\\s*true\\s*,\\s*\"Index\"\\s*:\\s*\\d+\\s*,\\s*\"Type\"\\s*:\\s*1\\b");
-        }
-        catch (Exception)
-        {
-            return false;
-        }
-    }
-
-    IEnumerator PrepareRemote(bool required)
-    {
-        bool expected = required || HasRemotePlayerPigeon() || (!_commandLine && MppmVirtualPlayerActive());
-        if (!expected)
-            yield break;
-
-        _currentScenario = "Second joueur";
-        _scenarioStart = Time.realtimeSinceStartup;
-        _link = new ScenarioRemoteLink();
-        if (!_link.Listen())
-        {
-            Record($"Lien de test avec le second joueur impossible (port {ScenarioLinkProtocol.Port})", false, () => _link.ListenError);
-            _link = null;
-            yield break;
-        }
-
-        float timeout = required ? (_commandLine ? RemoteWaitCommandLine : RemoteWaitInteractive) : RemoteWaitInteractive;
-        Debug.Log($"[Scénario] En attente du second joueur (au plus {timeout:0} s)…");
-        float deadline = Time.realtimeSinceStartup + timeout;
-        float nextConnect = 0f;
-        while (Time.realtimeSinceStartup < deadline && !(required ? RemoteReady : _link.Connected))
-        {
-            _lastProgress = Time.realtimeSinceStartup;
-            if (required && _link.Connected && _link.Get("net") == "offline" && Time.realtimeSinceStartup >= nextConnect)
-            {
-                _link.Send("connect");
-                nextConnect = Time.realtimeSinceStartup + 5f;
-            }
-            yield return null;
-        }
-
-        if (_link.Connected)
-            yield return ResetRemoteAchievementsOnce();
-        if (!(required ? RemoteReady : _link.Connected))
-        {
-            Record(required ? "Aucun second joueur : les scénarios multi vont échouer" : "Second joueur annoncé mais jamais relié",
-                false, RemoteMissingReason);
-            yield break;
-        }
-        Record("Second joueur relié (éditeur clone, client PurrNet)", true, RemoteState);
-    }
-
-    bool _remoteAchievementsReset;
-
-    IEnumerator ResetRemoteAchievementsOnce()
-    {
-        if (_remoteAchievementsReset || _link == null || !_link.Connected)
-            yield break;
-        yield return RemoteCommand("reset-achievements");
-        _remoteAchievementsReset = _lastRemoteOk;
-        if (!_lastRemoteOk)
-            Debug.LogWarning($"[Scénario] Achievements du second joueur non remis à zéro : {_lastRemoteDetail}");
-    }
-
-    string RemoteMissingReason()
-    {
-        if (_link == null)
-            return "lien de test non ouvert";
-        if (!_link.Connected)
-            return "aucun éditeur clone relié : activer Player 2 (Window > Multiplayer > Multiplayer Play Mode), "
-                + "ou lancer ScenarioMenu.JoinAsClientFromCommandLine dans le clone";
-        return $"relié mais pas en jeu : réseau {_link.Get("net") ?? "?"}, pigeon local {_link.Get("local") ?? "?"}, "
-            + $"pigeon vu par l'hôte {(RemotePigeon != null ? "oui" : "non")}";
-    }
-
-    IEnumerator MissingRemote()
-    {
-        yield return Check("Second joueur en jeu", false, RemoteMissingReason());
-    }
-
-    IEnumerator EnsureRemoteOffline()
-    {
-        if (_link == null || !_link.Connected)
-        {
-            if (HasRemotePlayerPigeon())
-                Debug.LogWarning("[Scénario] Un autre joueur est en jeu sans agent de test : les scénarios solo peuvent échouer.");
-            yield break;
-        }
-        if (_link.Get("net") == "offline" && !HasRemotePlayerPigeon())
-            yield break;
-
-        yield return RemoteCommand("override", "off");
-        yield return RemoteCommand("disconnect");
-        float deadline = Time.realtimeSinceStartup + 15f;
-        while (Time.realtimeSinceStartup < deadline && (HasRemotePlayerPigeon() || _link.Get("net") != "offline"))
-        {
-            _lastProgress = Time.realtimeSinceStartup;
-            yield return null;
-        }
-        if (HasRemotePlayerPigeon())
-        {
-            string previous = _currentScenario;
-            _currentScenario = "Second joueur";
-            Record("Le second joueur n'a pas quitté la partie : les scénarios solo peuvent échouer", false, RemoteState);
-            _currentScenario = previous;
-        }
-        yield return new WaitForSecondsRealtime(0.5f);
-    }
-
-    IEnumerator EnsureRemoteOnline()
-    {
-        if (_link == null || !_link.Connected)
-            yield break;
-        yield return ResetRemoteAchievementsOnce();
-        if (RemoteReady)
-            yield break;
-
-        yield return RemoteCommand("connect");
-        float deadline = Time.realtimeSinceStartup + 30f;
-        while (Time.realtimeSinceStartup < deadline && !RemoteReady)
-        {
-            _lastProgress = Time.realtimeSinceStartup;
-            yield return null;
-        }
-        if (RemoteReady)
-            yield return new WaitForSecondsRealtime(1f);
-    }
-
-    IEnumerator ReleaseRemote()
-    {
-        if (_link == null || !_link.Connected)
-            yield break;
-        yield return EnsureRemoteOnline();
-        yield return RemoteCommand("override", "off");
-        yield return RemoteCommand(_commandLine ? "quit" : "bye");
-    }
-
-    /// <summary>Commande au second joueur ; résultat dans _lastRemoteOk / _lastRemoteDetail (sans faire échouer).</summary>
-    IEnumerator RemoteCommand(string verb, string argument = "", float timeout = 5f)
-    {
-        _lastRemoteOk = false;
-        _lastRemoteDetail = "pas de second joueur relié";
-        if (_link == null || !_link.Connected)
-            yield break;
-
-        int id = _link.Send(verb, argument);
-        float deadline = Time.realtimeSinceStartup + timeout;
-        while (Time.realtimeSinceStartup < deadline)
-        {
-            if (_link.TryGetReply(id, out bool ok, out string detail))
-            {
-                _lastRemoteOk = ok;
-                _lastRemoteDetail = detail;
-                yield break;
-            }
-            if (!_link.Connected)
-            {
-                _lastRemoteDetail = "lien perdu";
-                yield break;
-            }
-            yield return null;
-        }
-        _lastRemoteDetail = $"pas de réponse en {timeout:0} s";
-    }
-
-    /// <summary>Résumé de ce que voit le second joueur, pour le détail des étapes.</summary>
-    protected string RemoteState()
-    {
-        if (_link == null || !_link.Connected)
-            return "second joueur non relié";
-        var sb = new StringBuilder();
-        sb.Append($"chez le second joueur : réseau {_link.Get("net")}, pigeon {_link.Get("local/pos") ?? "absent"}");
-        sb.Append($", gelé {_link.Get("local/frozen")}, prêt {_link.Get("local/ready")}, piloté {_link.Get("local/driven")}");
-        string dialogs = _link.Get("dialogs");
-        if (!string.IsNullOrEmpty(dialogs))
-            sb.Append($", dialogues [{dialogs}]");
-        foreach (KeyValuePair<string, string> entry in _link.Snapshot)
-            if (entry.Key.StartsWith("zone/", StringComparison.Ordinal) || entry.Key.StartsWith("dialogs/", StringComparison.Ordinal)
-                || (entry.Key.StartsWith("race/", StringComparison.Ordinal)
-                && (entry.Key.EndsWith("/phase", StringComparison.Ordinal) || entry.Key.EndsWith("/departure", StringComparison.Ordinal)
-                    || entry.Key.EndsWith("/arrival", StringComparison.Ordinal))))
-                sb.Append($", {entry.Key} « {entry.Value} »");
-        sb.Append($" (instantané il y a {Time.realtimeSinceStartup - _link.LastSnapshotTime:0.00} s)");
-        return sb.ToString();
-    }
-
     bool SafeEval(Func<bool> condition)
     {
         try { return condition(); }
@@ -668,88 +422,6 @@ public partial class ScenarioRunner : MonoBehaviour
             Debug.LogError(line);
     }
 
-    void Finish()
-    {
-        _finished = true;
-        UnityEditor.SessionState.EraseBool(ActiveKey);
-        _currentScenario = null;
-        RestoreAchievements();
-        _link?.Dispose();
-        _link = null;
-
-        int ok = 0, failed = 0;
-        foreach (bool? status in _scenarioStatus.Values)
-        {
-            if (status == true) ok++;
-            else failed++;
-        }
-
-        var report = new StringBuilder();
-        report.AppendLine($"Scénarios — {DateTime.Now:yyyy-MM-dd HH:mm:ss} — {ok} OK, {failed} en échec");
-        string scenario = null;
-        foreach (StepResult r in _results)
-        {
-            if (r.Scenario != scenario)
-            {
-                scenario = r.Scenario;
-                report.AppendLine();
-                report.AppendLine($"== {scenario}");
-            }
-            report.AppendLine($"  {(r.Ok ? "OK  " : "FAIL")} t={r.Time,6:0.00}s  {r.Step}{(r.Detail != null ? "  — " + r.Detail : "")}");
-        }
-
-        try
-        {
-            Directory.CreateDirectory(Path.GetDirectoryName(ReportPath));
-            File.WriteAllText(ReportPath, report.ToString());
-        }
-        catch (Exception e) { Debug.LogException(e); }
-
-        string summary = $"[Scénario] Terminé : {ok} OK, {failed} en échec. Rapport : {ReportPath}";
-        if (failed > 0)
-            Debug.LogError(summary);
-        else
-            Debug.Log(summary);
-
-        if (UnityEditor.SessionState.GetBool(ExitOnFinishKey, false))
-        {
-            UnityEditor.SessionState.EraseBool(ExitOnFinishKey);
-            UnityEditor.EditorApplication.Exit(failed > 0 ? 1 : 0);
-        }
-    }
-
-    const string AchievementKeyPrefix = "achievement_";
-
-    void BackupAndResetAchievements()
-    {
-        AchievementManager manager = AchievementManager.Instance;
-        if (manager == null || manager.Achievements == null)
-            return;
-        foreach (AchievementData a in manager.Achievements)
-        {
-            if (a == null) continue;
-            string key = AchievementKeyPrefix + a.Id;
-            _achievementBackup[key] = PlayerPrefs.GetInt(key, 0);
-        }
-        _achievementsRestored = false;
-        manager.ResetAll();
-    }
-
-    void RestoreAchievements()
-    {
-        if (_achievementsRestored)
-            return;
-        _achievementsRestored = true;
-        foreach (KeyValuePair<string, int> entry in _achievementBackup)
-        {
-            if (entry.Value != 0)
-                PlayerPrefs.SetInt(entry.Key, entry.Value);
-            else
-                PlayerPrefs.DeleteKey(entry.Key);
-        }
-        PlayerPrefs.Save();
-    }
-
     void OnDestroy()
     {
         if (!_finished)
@@ -786,33 +458,5 @@ public partial class ScenarioRunner : MonoBehaviour
             Finish();
         }
     }
-
-    void OnGUI()
-    {
-        const float width = 460f;
-        GUILayout.BeginArea(new Rect(Screen.width - width - 10f, 10f, width, Screen.height * 0.6f), GUI.skin.box);
-        GUILayout.Label(_finished ? "<b>Scénarios terminés</b>" : "<b>Scénarios en cours…</b>", RichLabel);
-        if (!_finished && _currentScenario != null)
-            GUILayout.Label($"▶ {_currentScenario} — {_currentStep} ({Time.realtimeSinceStartup - _scenarioStart:0.0} s)", RichLabel);
-
-        _scroll = GUILayout.BeginScrollView(_scroll);
-        foreach (KeyValuePair<string, bool?> entry in _scenarioStatus)
-        {
-            string color = entry.Value == null ? "#BBBBBB" : entry.Value == true ? "#66FF66" : "#FF5555";
-            string mark = entry.Value == null ? "…" : entry.Value == true ? "✔" : "✘";
-            GUILayout.Label($"<color={color}>{mark} {entry.Key}</color>", RichLabel);
-            foreach (StepResult r in _results)
-            {
-                if (r.Scenario != entry.Key || r.Ok)
-                    continue;
-                GUILayout.Label($"<color=#FF9999>    ✘ {r.Step} (t={r.Time:0.0} s){(r.Detail != null ? "\n       " + r.Detail : "")}</color>", RichLabel);
-            }
-        }
-        GUILayout.EndScrollView();
-        GUILayout.EndArea();
-    }
-
-    static GUIStyle _richLabel;
-    static GUIStyle RichLabel => _richLabel ??= new GUIStyle(GUI.skin.label) { richText = true, wordWrap = true };
 }
 #endif

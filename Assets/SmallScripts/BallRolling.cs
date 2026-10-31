@@ -5,7 +5,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 
 /// <summary>
-/// Ballon de plage local Ã  chaque client, roulÃ© par les pigeons posÃ©s dessus d'aprÃ¨s leur Ã©tat prÃ©dit.
+/// Ballon de plage local à chaque client, roulé par les pigeons posés dessus d'après leur état prédit.
 /// </summary>
 [RequireComponent(typeof(Rigidbody), typeof(SphereCollider), typeof(MovingSupport))]
 public class BallRolling : MonoBehaviour

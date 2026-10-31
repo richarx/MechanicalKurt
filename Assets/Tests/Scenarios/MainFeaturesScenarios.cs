@@ -7,13 +7,6 @@ using UnityEngine;
 
 public partial class ScenarioRunner
 {
-    public const string BeachBallScenario = "Ballon de plage : support mobile";
-    public const string MaxDepthScenario = "Eau : profondeur maximale";
-    public const string CamerasScenario = "Caméras : sous l'eau et précision";
-    public const string SunglassesScenario = "Équipement : lunettes";
-    public const string SewerRingsScenario = "Anneaux des égouts : boost et combo";
-    public const string CarRideScenario = "Voitures : solides en solo, on roule dessus";
-
     IEnumerator RunBeachBall()
     {
         BallRolling ball = FindAnyObjectByType<BallRolling>();

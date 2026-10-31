@@ -5,73 +5,6 @@ using UnityEngine;
 
 public partial class ScenarioRunner
 {
-    public const string RingScenario = "Anneau de boost";
-    public const string TutoScenario = "Tuto : zone de départ";
-    public const string RaceStartScenario = "Course : départ à 2 pigeons";
-    public const string RaceHeightScenario = "Course : échec de hauteur";
-    public const string RaceLockedScenario = "Course : une seule à la fois";
-    public const string RaceWinScenario = "Course : victoire et course refaite";
-
-    /// <summary>Scénarios joués par l'hôte seul (les autres pigeons sont des bots).</summary>
-    public static readonly string[] SoloScenarioNames =
-    {
-        RingScenario, TutoScenario, RaceStartScenario, RaceHeightScenario, RaceLockedScenario, RaceWinScenario,
-        DeliveryScenario, CollectionScenario, BillboardScenario, PrayerScenario,
-        EquipmentScenario, WaterSpeedScenario,
-        BeachBallScenario, MaxDepthScenario, CamerasScenario, SunglassesScenario, SewerRingsScenario, CarRideScenario,
-        PigeonAudioScenario,
-    };
-
-    /// <summary>Scénarios avec un vrai second joueur (Player 2 de Multiplayer Play Mode).</summary>
-    public static readonly string[] MultiScenarioNames =
-    {
-        MultiRaceStartScenario, MultiRaceWinScenario, MultiRaceHeightScenario, MultiLateJoinScenario,
-        MultiTutoScenario, MultiEquipmentScenario, MultiAudioScenario,
-    };
-
-    public static readonly string[] ScenarioNames = Concat(SoloScenarioNames, MultiScenarioNames);
-
-    public static bool IsMultiScenario(string name) => System.Array.IndexOf(MultiScenarioNames, name) >= 0;
-
-    static string[] Concat(string[] first, string[] second)
-    {
-        var all = new string[first.Length + second.Length];
-        first.CopyTo(all, 0);
-        second.CopyTo(all, first.Length);
-        return all;
-    }
-
-    List<ScenarioDef> BuildScenarios() => new List<ScenarioDef>
-    {
-        new ScenarioDef { Name = RingScenario, Body = RingBoost },
-        new ScenarioDef { Name = TutoScenario, Body = TutoStopZone },
-        new ScenarioDef { Name = RaceStartScenario, Body = RaceStart },
-        new ScenarioDef { Name = RaceHeightScenario, Body = RaceHeightFailure },
-        new ScenarioDef { Name = RaceLockedScenario, Body = RaceLockedWhileRunning },
-        new ScenarioDef { Name = RaceWinScenario, Body = RaceWinAndReplay },
-        new ScenarioDef { Name = DeliveryScenario, Body = RunDeliveryMission },
-        new ScenarioDef { Name = CollectionScenario, Body = RunCollectionMission },
-        new ScenarioDef { Name = BillboardScenario, Body = RunBillboardMission },
-        new ScenarioDef { Name = PrayerScenario, Body = RunPrayerMission },
-        new ScenarioDef { Name = EquipmentScenario, Body = RunEquipmentPickup },
-        new ScenarioDef { Name = WaterSpeedScenario, Body = RunWaterSpeedway },
-        new ScenarioDef { Name = BeachBallScenario, Body = RunBeachBall },
-        new ScenarioDef { Name = MaxDepthScenario, Body = RunMaxDepth },
-        new ScenarioDef { Name = CamerasScenario, Body = RunCameras },
-        new ScenarioDef { Name = SunglassesScenario, Body = RunSunglasses },
-        new ScenarioDef { Name = SewerRingsScenario, Body = RunSewerRings },
-        new ScenarioDef { Name = CarRideScenario, Body = RunCarRide },
-        new ScenarioDef { Name = PigeonAudioScenario, Body = RunPigeonAudio },
-
-        new ScenarioDef { Name = MultiRaceStartScenario, Body = MultiRaceStart, Multi = true },
-        new ScenarioDef { Name = MultiRaceWinScenario, Body = MultiRaceWin, Multi = true },
-        new ScenarioDef { Name = MultiRaceHeightScenario, Body = MultiRaceHeight, Multi = true },
-        new ScenarioDef { Name = MultiLateJoinScenario, Body = MultiLateJoin, Multi = true },
-        new ScenarioDef { Name = MultiTutoScenario, Body = MultiTuto, Multi = true },
-        new ScenarioDef { Name = MultiEquipmentScenario, Body = MultiEquipment, Multi = true },
-        new ScenarioDef { Name = MultiAudioScenario, Body = MultiAudio, Multi = true },
-    };
-
     IEnumerator RingBoost()
     {
         BoostRing ring = null;
@@ -167,13 +100,13 @@ public partial class ScenarioRunner
         yield return Expect("F : le joueur valide", () => Pigeon.WantsStart, 1f,
             () => $"appuis lus {Bot.PredictedInteractConsumed}, vitesse {Pigeon.Speed:0.00}");
         yield return ExpectStays("Un seul pigeon prêt : pas de départ, le joueur reste prêt",
-            () => zone.Phase == MissionStartZone.Waiting && Pigeon.WantsStart, 2f,
+            () => zone.Phase == MissionStartZone.StartPhase.Waiting && Pigeon.WantsStart, 2f,
             () => $"phase {zone.Phase}, joueur prêt {Pigeon.WantsStart}, vitesse {Pigeon.Speed:0.000}, au sol {Pigeon.IsGrounded}");
 
         yield return Expect("Le joueur prêt voit l'attente des autres", () => HudContains(zone, "1/2"), 1f, () => HudState(zone));
 
         bots[0].Controls.PressInteract();
-        yield return Expect("Deux pigeons prêts : décompte", () => zone.Phase == MissionStartZone.CountingDown, 2f,
+        yield return Expect("Deux pigeons prêts : décompte", () => zone.Phase == MissionStartZone.StartPhase.CountingDown, 2f,
             () => $"phase {zone.Phase}, prêts : joueur {Pigeon.WantsStart}, bot {other.WantsStart}");
         yield return Expect("Les deux pigeons sont gelés", () => Pigeon.IsMovementFrozen && other.IsMovementFrozen, 1f);
         yield return Expect("Décompte affiché avec le nombre de joueurs", () => HudContains(zone, "Players: 2/2"), 1f, () => HudState(zone));
@@ -181,21 +114,21 @@ public partial class ScenarioRunner
             Mathf.Min(1f, zone.CountdownSeconds * 0.5f), () => HudState(zone));
 
         bots[0].Controls.PressInteract();
-        yield return Expect("Annulation pendant le décompte : retour en attente", () => zone.Phase == MissionStartZone.Waiting, 2f,
+        yield return Expect("Annulation pendant le décompte : retour en attente", () => zone.Phase == MissionStartZone.StartPhase.Waiting, 2f,
             () => $"phase {zone.Phase}");
         yield return Expect("Annulation : les deux pigeons sont dégelés", () => !Pigeon.IsMovementFrozen && !other.IsMovementFrozen, 1f);
         yield return Check("Annulation : pas de cinématique", !race.DepartureCinematic.IsPlaying);
 
         bots[0].Controls.PressInteract();
-        yield return Expect("Relance : décompte", () => zone.Phase == MissionStartZone.CountingDown, 2f,
+        yield return Expect("Relance : décompte", () => zone.Phase == MissionStartZone.StartPhase.CountingDown, 2f,
             () => $"phase {zone.Phase}, prêts : joueur {Pigeon.WantsStart}, bot {other.WantsStart}");
         yield return Expect("Fin du décompte : la cinématique de départ démarre", () => race.DepartureCinematic.IsPlaying,
             zone.CountdownSeconds + 2f, () => $"zone {zone.Phase}, reste {zone.CountdownRemaining:0.0} s");
-        yield return Expect("Phase cinématique", () => zone.Phase == MissionStartZone.Cinematic, 1f, zone.Describe);
+        yield return Expect("Phase cinématique", () => zone.Phase == MissionStartZone.StartPhase.Cinematic, 1f, zone.Describe);
 
         bots[0].Controls.PressInteract();
         yield return ExpectStays("Pendant la cinématique, on ne peut plus annuler ; personne n'est libéré",
-            () => zone.Phase == MissionStartZone.Cinematic && Pigeon.IsMovementFrozen && other.IsMovementFrozen, 1f,
+            () => zone.Phase == MissionStartZone.StartPhase.Cinematic && Pigeon.IsMovementFrozen && other.IsMovementFrozen, 1f,
             () => $"zone {zone.Phase}, gelés : joueur {Pigeon.IsMovementFrozen}, bot {other.IsMovementFrozen}");
 
         yield return PlayThroughDialogCinematic(race.DepartureCinematic, "dialogue de départ de la course");
@@ -263,7 +196,7 @@ public partial class ScenarioRunner
         yield return Teleport(other, above, other.transform.rotation, "Le bot passe au-dessus de MaximumHeight");
         yield return Expect("La course échoue pour tout le monde", () => race.Phase == PigeonCharacterRace.RacePhase.Ready, 2f,
             () => $"phase {race.Phase}");
-        yield return Expect("La zone de départ est réarmée", () => zone.Phase == MissionStartZone.Waiting, 1f,
+        yield return Expect("La zone de départ est réarmée", () => zone.Phase == MissionStartZone.StartPhase.Waiting, 1f,
             () => $"phase {zone.Phase}");
         yield return Expect("Le message d'échec s'affiche", () => race.FailureMessage != null
             && race.FailureMessage.Group != null && race.FailureMessage.Group.alpha > 0.05f, 2f);
@@ -299,7 +232,7 @@ public partial class ScenarioRunner
         yield return ExpectLanded(late, 4f, zone.StopSpeedThreshold);
         bots[1].Controls.PressInteract();
         yield return ExpectStays("Pendant la course, la zone de départ ne relance rien",
-            () => zone.Phase == MissionStartZone.Started && race.Phase == PigeonCharacterRace.RacePhase.Racing && !late.WantsStart, 1.5f,
+            () => zone.Phase == MissionStartZone.StartPhase.Started && race.Phase == PigeonCharacterRace.RacePhase.Racing && !late.WantsStart, 1.5f,
             () => $"zone {zone.Phase}, course {race.Phase}, retardataire prêt {late.WantsStart} ; {zone.Describe()}");
         yield return Check("Le retardataire n'est ni gelé ni téléporté", !late.IsMovementFrozen
             && Vector3.Distance(late.transform.position, zone.transform.position) <= zone.Radius);
@@ -358,7 +291,7 @@ public partial class ScenarioRunner
 
         race.ReportArrivalCinematicFinished(other);
         yield return Expect("Tout le monde a fini : la course revient au départ", () => race.Phase == PigeonCharacterRace.RacePhase.Ready
-            && zone.Phase == MissionStartZone.Waiting, 2f, () => $"course {race.Phase}, zone {zone.Phase}");
+            && zone.Phase == MissionStartZone.StartPhase.Waiting, 2f, () => $"course {race.Phase}, zone {zone.Phase}");
         yield return Expect("Les coureurs sont dégelés", () => !Pigeon.IsMovementFrozen && !other.IsMovementFrozen, 1f, Frozen);
         yield return Check("Le marqueur de départ est de retour", race.DepartureMarker == null || race.DepartureMarker.activeInHierarchy);
         if (race.CompletionAchievement != null && AchievementManager.Instance != null)
@@ -374,11 +307,11 @@ public partial class ScenarioRunner
         yield return Expect("Le prompt s'affiche de nouveau", () => zone.Prompt == null || PromptVisible(zone.Prompt), 1f);
         Bot.PressInteract();
         bots[0].Controls.PressInteract();
-        yield return Expect("La course peut être refaite : décompte", () => zone.Phase == MissionStartZone.CountingDown, 2f,
+        yield return Expect("La course peut être refaite : décompte", () => zone.Phase == MissionStartZone.StartPhase.CountingDown, 2f,
             () => $"zone {zone.Phase}, prêts : joueur {Pigeon.WantsStart}, bot {other.WantsStart}");
 
         Bot.PressInteract();
-        yield return Expect("Annulation du nouveau départ", () => zone.Phase == MissionStartZone.Waiting, 2f, () => $"zone {zone.Phase}");
+        yield return Expect("Annulation du nouveau départ", () => zone.Phase == MissionStartZone.StartPhase.Waiting, 2f, () => $"zone {zone.Phase}");
     }
 
     PigeonCharacterRace FindRace()
@@ -393,7 +326,7 @@ public partial class ScenarioRunner
     {
         MissionStartZone zone = race.DepartureZone;
         yield return Check("Course au repos", race.Phase == PigeonCharacterRace.RacePhase.Ready
-            && zone.Phase == MissionStartZone.Waiting, $"course {race.Phase}, zone {zone.Phase}");
+            && zone.Phase == MissionStartZone.StartPhase.Waiting, $"course {race.Phase}, zone {zone.Phase}");
 
         Vector3 center = zone.transform.position + Vector3.up * 0.5f;
         Vector3 side = zone.transform.right * Mathf.Min(0.8f, zone.Radius * 0.4f);
@@ -423,7 +356,7 @@ public partial class ScenarioRunner
             race.ArrivalCinematic.CancelCinematic();
         if (_link != null && _link.Connected)
             _link.Send("cancel-dialogs");
-        if (race.DepartureZone != null && race.DepartureZone.Phase == MissionStartZone.Cinematic)
+        if (race.DepartureZone != null && race.DepartureZone.Phase == MissionStartZone.StartPhase.Cinematic)
             foreach (PigeonController pigeon in PigeonController.All)
                 race.DepartureZone.ReportCinematicFinished(pigeon);
         if (race.Phase == PigeonCharacterRace.RacePhase.ArrivalCinematic)
@@ -448,15 +381,15 @@ public partial class ScenarioRunner
         float nextAction = 0f;
         while (Time.realtimeSinceStartup < deadline)
         {
-            if (race.Phase == PigeonCharacterRace.RacePhase.Ready && zone.Phase == MissionStartZone.Waiting)
+            if (race.Phase == PigeonCharacterRace.RacePhase.Ready && zone.Phase == MissionStartZone.StartPhase.Waiting)
                 yield break;
             _lastProgress = Time.realtimeSinceStartup;
             if (Time.realtimeSinceStartup >= nextAction)
             {
                 nextAction = Time.realtimeSinceStartup + 0.5f;
-                if (zone.Phase == MissionStartZone.CountingDown)
+                if (zone.Phase == MissionStartZone.StartPhase.CountingDown)
                     MoveAllPigeons(zone.transform.position + zone.transform.forward * (zone.Radius * 3f + 3f) + Vector3.up * 2f);
-                else if (zone.Phase == MissionStartZone.Cinematic)
+                else if (zone.Phase == MissionStartZone.StartPhase.Cinematic)
                 {
                     CancelIfPlaying(race.DepartureCinematic);
                     zone.ReportCinematicFinished(Pigeon);

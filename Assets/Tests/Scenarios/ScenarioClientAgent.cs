@@ -346,58 +346,56 @@ public class ScenarioClientAgent : MonoBehaviour
     {
         _snapshot.Clear();
         NetworkManager network = NetworkManager.main;
-        Add("net", network == null ? "none"
-            : network.clientState == PurrNet.Transports.ConnectionState.Disconnected ? "offline"
-            : network.clientState == PurrNet.Transports.ConnectionState.Connected && network.isLocalPlayerReady ? "connected" : "connecting");
+        Add(RemoteKeys.Network, network == null ? RemoteKeys.NetworkNone
+            : network.clientState == PurrNet.Transports.ConnectionState.Disconnected ? RemoteKeys.NetworkOffline
+            : network.clientState == PurrNet.Transports.ConnectionState.Connected && network.isLocalPlayerReady ? RemoteKeys.NetworkConnected
+            : RemoteKeys.NetworkConnecting);
         if (network != null && network.isClient && network.isLocalPlayerReady)
-            Add("net/player", network.localPlayer.id.value.ToString(CultureInfo.InvariantCulture));
-        Add("driven", Flag(_overrideWanted));
-        Add("dialogs/auto", Flag(_playDialogs));
+            Add(RemoteKeys.PlayerId, network.localPlayer.id.value.ToString(CultureInfo.InvariantCulture));
+        Add(RemoteKeys.AgentDriving, Flag(_overrideWanted));
+        Add(RemoteKeys.AutoDialogs, Flag(_playDialogs));
 
         PigeonController local = PigeonController.Local;
-        Add("local", Flag(local != null));
+        Add(RemoteKeys.HasPigeon, Flag(local != null));
         if (local != null)
         {
-            Add("local/pos", ScenarioLinkProtocol.Format(local.transform.position));
-            Add("local/frozen", Flag(local.IsMovementFrozen));
-            Add("local/grounded", Flag(local.IsGrounded));
-            Add("local/speed", ScenarioLinkProtocol.Format(local.Speed));
-            Add("local/ready", Flag(local.WantsStart));
-            Add("local/equipment", local.WornEquipment.ToString(CultureInfo.InvariantCulture));
+            Add(RemoteKeys.Position, ScenarioLinkProtocol.Format(local.transform.position));
+            Add(RemoteKeys.Frozen, Flag(local.IsMovementFrozen));
+            Add(RemoteKeys.Grounded, Flag(local.IsGrounded));
+            Add(RemoteKeys.Speed, ScenarioLinkProtocol.Format(local.Speed));
+            Add(RemoteKeys.Ready, Flag(local.WantsStart));
+            Add(RemoteKeys.Equipment, local.WornEquipment.ToString(CultureInfo.InvariantCulture));
             PlayerControls controls = local.GetComponent<PlayerControls>();
-            Add("local/blocked", Flag(controls != null && controls.AreControlsBlocked));
-            Add("local/driven", Flag(ReferenceEquals(local.Controls, _bot)));
+            Add(RemoteKeys.ControlsBlocked, Flag(controls != null && controls.AreControlsBlocked));
+            Add(RemoteKeys.PigeonDriven, Flag(ReferenceEquals(local.Controls, _bot)));
         }
-        Add("pigeons", PigeonController.All.Count.ToString(CultureInfo.InvariantCulture));
+        Add(RemoteKeys.PigeonCount, PigeonController.All.Count.ToString(CultureInfo.InvariantCulture));
 
         foreach (MissionStartZone zone in FindObjectsByType<MissionStartZone>(FindObjectsInactive.Exclude))
         {
-            string key = "zone/" + zone.name;
-            Add(key + "/phase", zone.Phase.ToString(CultureInfo.InvariantCulture));
-            Add(key + "/hud", zone.HudText ?? "");
-            Add(key + "/prompt", Flag(ScenarioRunner.PromptVisible(zone.Prompt)));
+            Add(RemoteKeys.ZonePhase(zone), zone.Phase.ToString());
+            Add(RemoteKeys.ZoneHud(zone), zone.HudText ?? "");
+            Add(RemoteKeys.ZonePrompt(zone), Flag(ScenarioRunner.PromptVisible(zone.Prompt)));
         }
 
         foreach (PigeonCharacterRace race in FindObjectsByType<PigeonCharacterRace>(FindObjectsInactive.Exclude))
         {
-            string key = "race/" + race.name;
-            Add(key + "/phase", race.Phase.ToString());
-            Add(key + "/departure", Flag(race.DepartureCinematic != null && race.DepartureCinematic.IsPlaying));
-            Add(key + "/arrival", Flag(race.ArrivalCinematic != null && race.ArrivalCinematic.IsPlaying));
+            Add(RemoteKeys.RacePhase(race), race.Phase.ToString());
+            Add(RemoteKeys.RaceDeparture(race), Flag(race.DepartureCinematic != null && race.DepartureCinematic.IsPlaying));
+            Add(RemoteKeys.RaceArrival(race), Flag(race.ArrivalCinematic != null && race.ArrivalCinematic.IsPlaying));
             if (race.Character != null)
-                Add(key + "/character", ScenarioLinkProtocol.Format(race.Character.position));
+                Add(RemoteKeys.RaceCharacter(race), ScenarioLinkProtocol.Format(race.Character.position));
             float failure = race.FailureMessage != null && race.FailureMessage.Group != null ? race.FailureMessage.Group.alpha : 0f;
-            Add(key + "/failure", ScenarioLinkProtocol.Format(failure));
-            Add(key + "/marker", Flag(race.DepartureMarker != null && race.DepartureMarker.activeInHierarchy));
+            Add(RemoteKeys.RaceFailure(race), ScenarioLinkProtocol.Format(failure));
+            Add(RemoteKeys.RaceMarker(race), Flag(race.DepartureMarker != null && race.DepartureMarker.activeInHierarchy));
         }
 
         foreach (PigeonStopDialogCinematic tuto in FindObjectsByType<PigeonStopDialogCinematic>(FindObjectsInactive.Exclude))
         {
             if (tuto.StopZone == null)
                 continue;
-            string key = "tuto/" + tuto.name;
-            Add(key + "/consumed", Flag(!tuto.StopZone.enabled));
-            Add(key + "/playing", Flag(tuto.Cinematic != null && tuto.Cinematic.IsPlaying));
+            Add(RemoteKeys.TutoConsumed(tuto), Flag(!tuto.StopZone.enabled));
+            Add(RemoteKeys.TutoPlaying(tuto), Flag(tuto.Cinematic != null && tuto.Cinematic.IsPlaying));
         }
 
         var playing = new List<string>();
@@ -411,16 +409,16 @@ public class ScenarioClientAgent : MonoBehaviour
                 watched.OnCinematicStarted.AddListener(() => _cinematicStarts[watched.name] = StartsOf(watched.name) + 1);
             }
         }
-        Add("dialogs", string.Join(ScenarioLinkProtocol.ListSeparator, playing));
+        Add(RemoteKeys.PlayingDialogs, string.Join(ScenarioLinkProtocol.ListSeparator, playing));
         foreach (KeyValuePair<string, int> entry in _cinematicStarts)
-            Add("dialogs/starts/" + entry.Key, entry.Value.ToString(CultureInfo.InvariantCulture));
+            Add(RemoteKeys.DialogStarts(entry.Key), entry.Value.ToString(CultureInfo.InvariantCulture));
         DialogManager dialogManager = DialogManager.instance;
-        Add("dialogs/open", Flag(dialogManager != null && dialogManager.IsPlaying));
+        Add(RemoteKeys.DialogOpen, Flag(dialogManager != null && dialogManager.IsPlaying));
 
         var loots = new List<string>();
         foreach (LootableEquipment loot in FindObjectsByType<LootableEquipment>(FindObjectsInactive.Exclude))
             loots.Add($"{loot.Equipment}@{ScenarioLinkProtocol.Format(loot.transform.position)}");
-        Add("loots", string.Join(ScenarioLinkProtocol.ListSeparator, loots));
+        Add(RemoteKeys.Loots, string.Join(ScenarioLinkProtocol.ListSeparator, loots));
 
         var unlocked = new List<string>();
         AchievementManager achievements = AchievementManager.Instance;
@@ -428,9 +426,9 @@ public class ScenarioClientAgent : MonoBehaviour
             foreach (AchievementData achievement in achievements.Achievements)
                 if (achievement != null && achievements.IsUnlocked(achievement))
                     unlocked.Add(achievement.Id);
-        Add("ach", string.Join(ScenarioLinkProtocol.ListSeparator, unlocked));
+        Add(RemoteKeys.Achievements, string.Join(ScenarioLinkProtocol.ListSeparator, unlocked));
 
-        Add("audio/local", DescribeSources(local));
+        Add(RemoteKeys.OwnSounds, DescribeSources(local));
         var others = new StringBuilder();
         foreach (PigeonController pigeon in PigeonController.All)
         {
@@ -443,7 +441,7 @@ public class ScenarioClientAgent : MonoBehaviour
                 others.Append(ScenarioLinkProtocol.ListSeparator);
             others.Append(sources);
         }
-        Add("audio/others", others.ToString());
+        Add(RemoteKeys.OtherSounds, others.ToString());
 
         return _snapshot.ToString();
     }

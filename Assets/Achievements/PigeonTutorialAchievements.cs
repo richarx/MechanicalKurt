@@ -32,6 +32,8 @@ public class PigeonTutorialAchievements : MonoBehaviour
     private float _previousYaw;
     private float _steeredAngle;
 
+    private void BindPlayer(PigeonController _) => BindPlayer();
+
     private void BindPlayer()
     {
         _boundPlayer = Player;
@@ -43,20 +45,20 @@ public class PigeonTutorialAchievements : MonoBehaviour
     private void OnEnable()
     {
         BindPlayer();
+        PigeonController.LocalChanged += BindPlayer;
         if (MissionZones != null) MissionZones.OnOfferAccepted.AddListener(HandleMissionActivated);
         if (Manager != null) Manager.OnReset += ResetFlightProgress;
     }
 
     private void OnDisable()
     {
+        PigeonController.LocalChanged -= BindPlayer;
         if (MissionZones != null) MissionZones.OnOfferAccepted.RemoveListener(HandleMissionActivated);
         if (Manager != null) Manager.OnReset -= ResetFlightProgress;
     }
 
     private void LateUpdate()
     {
-        if (Player != _boundPlayer)
-            BindPlayer();
         if (_boundPlayer != null)
             _controls = _boundPlayer.Controls;
 

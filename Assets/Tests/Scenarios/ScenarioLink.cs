@@ -46,6 +46,57 @@ public static class ScenarioLinkProtocol
     }
 }
 
+/// <summary>Clés de l'instantané du second joueur : écrites par ScenarioClientAgent, lues par les scénarios.</summary>
+public static class RemoteKeys
+{
+    public const string Network = "net";
+    public const string NetworkNone = "none";
+    public const string NetworkOffline = "offline";
+    public const string NetworkConnecting = "connecting";
+    public const string NetworkConnected = "connected";
+    public const string PlayerId = "net/player";
+    public const string AgentDriving = "driven";
+    public const string AutoDialogs = "dialogs/auto";
+
+    public const string HasPigeon = "local";
+    public const string Position = "local/pos";
+    public const string Frozen = "local/frozen";
+    public const string Grounded = "local/grounded";
+    public const string Speed = "local/speed";
+    public const string Ready = "local/ready";
+    public const string Equipment = "local/equipment";
+    public const string ControlsBlocked = "local/blocked";
+    public const string PigeonDriven = "local/driven";
+    public const string PigeonCount = "pigeons";
+
+    public const string PlayingDialogs = "dialogs";
+    public const string DialogOpen = "dialogs/open";
+    public const string Loots = "loots";
+    public const string Achievements = "ach";
+    public const string OwnSounds = "audio/local";
+    public const string OtherSounds = "audio/others";
+
+    public const string ZonePrefix = "zone/";
+    public const string RacePrefix = "race/";
+    public const string DialogsPrefix = "dialogs/";
+
+    public static string ZonePhase(MissionStartZone zone) => ZonePrefix + zone.name + "/phase";
+    public static string ZoneHud(MissionStartZone zone) => ZonePrefix + zone.name + "/hud";
+    public static string ZonePrompt(MissionStartZone zone) => ZonePrefix + zone.name + "/prompt";
+
+    public static string RacePhase(PigeonCharacterRace race) => RacePrefix + race.name + "/phase";
+    public static string RaceDeparture(PigeonCharacterRace race) => RacePrefix + race.name + "/departure";
+    public static string RaceArrival(PigeonCharacterRace race) => RacePrefix + race.name + "/arrival";
+    public static string RaceCharacter(PigeonCharacterRace race) => RacePrefix + race.name + "/character";
+    public static string RaceFailure(PigeonCharacterRace race) => RacePrefix + race.name + "/failure";
+    public static string RaceMarker(PigeonCharacterRace race) => RacePrefix + race.name + "/marker";
+
+    public static string TutoConsumed(PigeonStopDialogCinematic tuto) => "tuto/" + tuto.name + "/consumed";
+    public static string TutoPlaying(PigeonStopDialogCinematic tuto) => "tuto/" + tuto.name + "/playing";
+
+    public static string DialogStarts(string cinematic) => DialogsPrefix + "starts/" + cinematic;
+}
+
 /// <summary>Lignes échangées sur un socket, sans bloquer : à appeler depuis Update (thread principal).</summary>
 public sealed class ScenarioLinkConnection : IDisposable
 {

@@ -5,8 +5,6 @@ using UnityEngine;
 
 public partial class ScenarioRunner
 {
-    public const string PigeonAudioScenario = "Sons : 2D pour soi, 3D pour les autres";
-
     IEnumerator RunPigeonAudio()
     {
         yield return Check("SFXManager présent", SFXManager.Instance != null);

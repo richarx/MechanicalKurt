@@ -2,7 +2,7 @@ using Unity.Cinemachine;
 using UnityEngine;
 
 /// <summary>
-/// Choisit la camÃ©ra du joueur local (sous l'eau, prÃ©cision, orbitale) ; ne touche pas aux autres pigeons.
+/// Choisit la caméra du joueur local (sous l'eau, précision, orbitale) ; ne touche pas aux autres pigeons.
 /// </summary>
 public class CameraSwapper : MonoBehaviour
 {

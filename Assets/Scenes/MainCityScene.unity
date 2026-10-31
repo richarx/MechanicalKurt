@@ -80705,7 +80705,7 @@ MonoBehaviour:
   _cinematicTimeout: 90
   _startPose: {fileID: 959949187}
   _prompt: {fileID: 60255020}
-  _countdownText: {fileID: 0}
+  _hudPrefab: {fileID: 2264881009863923130, guid: e350b4dce7aa93d4481ff2641c4fbb71, type: 3}
   _inProgressText: 'Race in progress
 
     <size=60%>Wait for it to finish</size>'

@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.Events;
 
 /// <summary>
-/// Zone locale : surveille le pigeon du joueur local. Pour un dÃ©part commun Ã  plusieurs joueurs, utiliser MissionStartZone.
+/// Zone locale : surveille le pigeon du joueur local. Pour un départ commun à plusieurs joueurs, utiliser MissionStartZone.
 /// </summary>
 public class PigeonStopZone : MonoBehaviour
 {

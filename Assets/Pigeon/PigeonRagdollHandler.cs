@@ -1,7 +1,7 @@
 using UnityEngine;
 
 /// <summary>
-/// Ragdoll purement visuel : la position du pigeon vient de son Ã©tat prÃ©dit.
+/// Ragdoll purement visuel : la position du pigeon vient de son état prédit.
 /// </summary>
 public class PigeonRagdollHandler : MonoBehaviour
 {

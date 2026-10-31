@@ -4,11 +4,6 @@ using UnityEngine;
 
 public partial class ScenarioRunner
 {
-    public const string DeliveryScenario = "Mission : livraison simple";
-    public const string CollectionScenario = "Mission : collecte (Spidey)";
-    public const string BillboardScenario = "Mission : billboards";
-    public const string PrayerScenario = "Mission : prière (Roar)";
-
     IEnumerator RunDeliveryMission()
     {
         PigeonDeliveryRace delivery = FindAnyObjectByType<PigeonDeliveryRace>();

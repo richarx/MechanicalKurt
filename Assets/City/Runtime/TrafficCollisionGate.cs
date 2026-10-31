@@ -2,8 +2,8 @@ using PurrNet;
 using UnityEngine;
 
 /// <summary>
-/// Voitures solides en solo, traversables dÃ¨s qu'un autre joueur est connectÃ© : le trafic n'est pas synchronisÃ©
-/// et ne doit pas entrer dans la simulation prÃ©dite des pigeons.
+/// Voitures solides en solo, traversables dès qu'un autre joueur est connecté : le trafic n'est pas synchronisé
+/// et ne doit pas entrer dans la simulation prédite des pigeons.
 /// </summary>
 public class TrafficCollisionGate : MonoBehaviour
 {

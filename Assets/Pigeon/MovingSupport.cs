@@ -3,8 +3,8 @@ using System.Text;
 using UnityEngine;
 
 /// <summary>
-/// Objet qui transporte le pigeon posÃ© dessus (ballon, voitures). Son Id vient du chemin dans la hiÃ©rarchie,
-/// identique sur chaque machine, pour Ãªtre portÃ© par l'Ã©tat prÃ©dit du pigeon.
+/// Objet qui transporte le pigeon posé dessus (ballon, voitures). Son Id vient du chemin dans la hiérarchie,
+/// identique sur chaque machine, pour être porté par l'état prédit du pigeon.
 /// </summary>
 [DisallowMultipleComponent]
 public class MovingSupport : MonoBehaviour

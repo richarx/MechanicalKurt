@@ -15,14 +15,20 @@ public class UnderWaterEffect : MonoBehaviour
     private Transform bubbleTrigger;
     [SerializeField] private Material fullScreenEffect;
     private bool isUnderWaterEffectActivated;
-    private PigeonController boundPigeon;
+
+    private void OnEnable()
+    {
+        PigeonController.LocalChanged += BindLocalPigeon;
+        BindLocalPigeon(PigeonController.Local);
+    }
+
+    private void OnDisable()
+    {
+        PigeonController.LocalChanged -= BindLocalPigeon;
+    }
 
     private void Update()
     {
-        PigeonController local = PigeonController.Local;
-        if (local != null && local != boundPigeon)
-            BindLocalPigeon(local);
-
         bool isUnderWater = transform.position.y < waterPlane.position.y;
 
         if (isUnderWater != isUnderWaterEffectActivated)
@@ -48,7 +54,8 @@ public class UnderWaterEffect : MonoBehaviour
 
     private void BindLocalPigeon(PigeonController local)
     {
-        boundPigeon = local;
+        if (local == null)
+            return;
         pigeonSFX = local.GetComponentInChildren<PigeonSFX>();
         bubbleParticles = pigeonSFX != null ? pigeonSFX.UnderwaterBubbles : null;
         if (bubbleParticles == null)

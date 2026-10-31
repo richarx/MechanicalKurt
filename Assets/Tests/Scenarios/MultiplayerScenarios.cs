@@ -7,14 +7,6 @@ using UnityEngine;
 
 public partial class ScenarioRunner
 {
-    public const string MultiRaceStartScenario = "Multi : départ de course à 2 joueurs";
-    public const string MultiRaceWinScenario = "Multi : victoire, gel et course refaite";
-    public const string MultiRaceHeightScenario = "Multi : échec de hauteur";
-    public const string MultiLateJoinScenario = "Multi : arrivée en pleine course";
-    public const string MultiTutoScenario = "Multi : tuto local au second joueur";
-    public const string MultiEquipmentScenario = "Multi : équipement du second joueur";
-    public const string MultiAudioScenario = "Multi : sons chez le second joueur";
-
     IEnumerator MultiRaceStart()
     {
         PigeonCharacterRace race = FindRace();
@@ -26,34 +18,34 @@ public partial class ScenarioRunner
 
         yield return RemoteDo("interact");
         yield return Expect("F du second joueur : il est prêt (vu par l'hôte)", () => remote.WantsStart, 2f, RemoteState);
-        yield return ExpectStays("Un seul joueur prêt : pas de départ", () => zone.Phase == MissionStartZone.Waiting && remote.WantsStart,
+        yield return ExpectStays("Un seul joueur prêt : pas de départ", () => zone.Phase == MissionStartZone.StartPhase.Waiting && remote.WantsStart,
             1.5f, () => zone.Describe());
         yield return Expect("Le second joueur voit qu'il attend l'autre joueur", () => RemoteHudContains(zone, "1/2 ready"), 2f, RemoteState);
         yield return Check("L'hôte, pas encore prêt, n'a pas de décompte à l'écran", zone.HudText == null, HudState(zone));
 
         Bot.PressInteract();
-        yield return Expect("Les deux joueurs prêts : décompte", () => zone.Phase == MissionStartZone.CountingDown, 2f, () => zone.Describe());
+        yield return Expect("Les deux joueurs prêts : décompte", () => zone.Phase == MissionStartZone.StartPhase.CountingDown, 2f, () => zone.Describe());
         yield return Expect("Les deux pigeons sont gelés (hôte)", () => Pigeon.IsMovementFrozen && remote.IsMovementFrozen, 1f);
-        yield return Expect("Le second joueur est gelé sur son écran", () => RemoteFlag("local/frozen"), 2f, RemoteState);
+        yield return Expect("Le second joueur est gelé sur son écran", () => RemoteFlag(RemoteKeys.Frozen), 2f, RemoteState);
         yield return Expect("Décompte à l'écran de l'hôte : 2 joueurs", () => HudContains(zone, "Players: 2/2"), 1f, () => HudState(zone));
         yield return Expect("Décompte à l'écran du second joueur : 2 joueurs", () => RemoteHudContains(zone, "Players: 2/2"), 2f, RemoteState);
 
         yield return RemoteDo("interact");
-        yield return Expect("Annulation par le second joueur : retour en attente", () => zone.Phase == MissionStartZone.Waiting, 2f,
+        yield return Expect("Annulation par le second joueur : retour en attente", () => zone.Phase == MissionStartZone.StartPhase.Waiting, 2f,
             () => zone.Describe());
         yield return Expect("Annulation : dégel (hôte)", () => !Pigeon.IsMovementFrozen && !remote.IsMovementFrozen, 1f);
-        yield return Expect("Annulation : dégel chez le second joueur", () => RemoteIs("local/frozen", "0")
-            && Remote(ZoneKey(zone, "phase")) == MissionStartZone.Waiting.ToString(CultureInfo.InvariantCulture), 2f, RemoteState);
+        yield return Expect("Annulation : dégel chez le second joueur", () => RemoteIs(RemoteKeys.Frozen, "0")
+            && Remote(RemoteKeys.ZonePhase(zone)) == MissionStartZone.StartPhase.Waiting.ToString(), 2f, RemoteState);
         yield return Check("Annulation : pas de cinématique chez l'hôte", !race.DepartureCinematic.IsPlaying);
-        yield return Check("Annulation : pas de cinématique chez le second joueur", RemoteIs(RaceKey(race, "departure"), "0"), RemoteState());
+        yield return Check("Annulation : pas de cinématique chez le second joueur", RemoteIs(RemoteKeys.RaceDeparture(race), "0"), RemoteState());
 
         yield return RemoteDo("interact");
-        yield return Expect("Relance : décompte", () => zone.Phase == MissionStartZone.CountingDown, 2f, () => zone.Describe());
+        yield return Expect("Relance : décompte", () => zone.Phase == MissionStartZone.StartPhase.CountingDown, 2f, () => zone.Describe());
         yield return Expect("Fin du décompte : cinématique chez l'hôte", () => race.DepartureCinematic.IsPlaying,
             zone.CountdownSeconds + 3f, () => zone.Describe());
-        yield return Expect("Fin du décompte : cinématique chez le second joueur", () => RemoteFlag(RaceKey(race, "departure")), 3f, RemoteState);
+        yield return Expect("Fin du décompte : cinématique chez le second joueur", () => RemoteFlag(RemoteKeys.RaceDeparture(race)), 3f, RemoteState);
         yield return ExpectStays("Pendant les cinématiques, personne n'est libéré",
-            () => zone.SimState.Phase == MissionStartZone.Cinematic && Pigeon.SimState.Frozen && remote.SimState.Frozen, 1f,
+            () => zone.SimState.Phase == MissionStartZone.StartPhase.Cinematic && Pigeon.SimState.Frozen && remote.SimState.Frozen, 1f,
             () => $"{zone.Describe()} | vue : zone {zone.Phase}, gelés hôte {Pigeon.IsMovementFrozen}, second {remote.IsMovementFrozen}");
 
         yield return PlayThroughDialogCinematic(race.DepartureCinematic, "dialogue de départ (hôte)");
@@ -65,7 +57,7 @@ public partial class ScenarioRunner
         yield return Expect("Le second joueur a fini sa cinématique : course lancée", () => race.Phase == PigeonCharacterRace.RacePhase.Racing,
             40f, () => $"{zone.Describe()} | {RemoteState()}");
         yield return RemoteDo("play-dialogs", "off");
-        yield return Expect("Course lancée sur l'écran du second joueur", () => Remote(RaceKey(race, "phase")) == "Racing", 3f, RemoteState);
+        yield return Expect("Course lancée sur l'écran du second joueur", () => Remote(RemoteKeys.RacePhase(race)) == "Racing", 3f, RemoteState);
 
         if (zone.StartPose != null)
         {
@@ -75,7 +67,7 @@ public partial class ScenarioRunner
                 $"{DistanceXZ(remote, zone.StartPose):0.0} m");
         }
         yield return Expect("Les deux pigeons sont libres (hôte)", () => !Pigeon.IsMovementFrozen && !remote.IsMovementFrozen, 1f);
-        yield return Expect("Le second joueur est libre sur son écran", () => RemoteIs("local/frozen", "0"), 2f, RemoteState);
+        yield return Expect("Le second joueur est libre sur son écran", () => RemoteIs(RemoteKeys.Frozen, "0"), 2f, RemoteState);
         yield return ExpectCharacterInSync(race, "Le personnage à battre est au même endroit chez les deux joueurs");
     }
 
@@ -91,8 +83,8 @@ public partial class ScenarioRunner
             AchievementManager.Instance?.ResetAll();
             yield return RemoteDo("reset-achievements");
             yield return Expect("Ni l'hôte ni le second joueur n'ont l'achievement de la course",
-                () => !IsUnlocked(race.CompletionAchievement) && Remote("ach") != null && !RemoteHas("ach", race.CompletionAchievement.Id), 2f,
-                () => $"hôte {IsUnlocked(race.CompletionAchievement)}, second joueur [{Remote("ach")}]");
+                () => !IsUnlocked(race.CompletionAchievement) && Remote(RemoteKeys.Achievements) != null && !RemoteHas(RemoteKeys.Achievements, race.CompletionAchievement.Id), 2f,
+                () => $"hôte {IsUnlocked(race.CompletionAchievement)}, second joueur [{Remote(RemoteKeys.Achievements)}]");
         }
 
         yield return StartRaceWithRemote(race);
@@ -103,9 +95,9 @@ public partial class ScenarioRunner
         yield return Expect("Arrivée du second joueur : cinématique de fin", () => race.Phase == PigeonCharacterRace.RacePhase.ArrivalCinematic,
             8f, () => $"course {race.Phase}, distance {DistanceToFinish(race, remote):0.0} m, vitesse {remote.Speed:0.00}");
         yield return Expect("Cinématique de fin chez l'hôte", () => race.ArrivalCinematic.IsPlaying, 3f);
-        yield return Expect("Cinématique de fin chez le second joueur", () => RemoteFlag(RaceKey(race, "arrival")), 3f, RemoteState);
+        yield return Expect("Cinématique de fin chez le second joueur", () => RemoteFlag(RemoteKeys.RaceArrival(race)), 3f, RemoteState);
         yield return Expect("Les deux coureurs sont gelés (hôte)", () => Pigeon.IsMovementFrozen && remote.IsMovementFrozen, 1f);
-        yield return Expect("Le second joueur est gelé sur son écran", () => RemoteFlag("local/frozen"), 2f, RemoteState);
+        yield return Expect("Le second joueur est gelé sur son écran", () => RemoteFlag(RemoteKeys.Frozen), 2f, RemoteState);
 
         Bot.Flap = true;
         yield return RemoteDo("flap", "1");
@@ -114,7 +106,7 @@ public partial class ScenarioRunner
             + $"(déplacé de {Vector3.Distance(remote.transform.position, remoteAt):0.00} m) | {RemoteState()}";
         yield return ExpectStays("Pendant la cinématique de fin, personne ne bouge",
             () => race.Phase == PigeonCharacterRace.RacePhase.ArrivalCinematic && Pigeon.IsMovementFrozen && remote.IsMovementFrozen
-                && RemoteFlag("local/frozen") && Vector3.Distance(remote.transform.position, remoteAt) < 0.2f, 6f, Frozen);
+                && RemoteFlag(RemoteKeys.Frozen) && Vector3.Distance(remote.transform.position, remoteAt) < 0.2f, 6f, Frozen);
         Bot.Flap = false;
         yield return RemoteDo("flap", "0");
 
@@ -124,23 +116,23 @@ public partial class ScenarioRunner
 
         yield return RemoteDo("cancel-dialogs");
         yield return Expect("Tout le monde a fini : la course revient au départ", () => race.Phase == PigeonCharacterRace.RacePhase.Ready
-            && zone.Phase == MissionStartZone.Waiting, 15f, () => $"course {race.Phase}, zone {zone.Phase} | {RemoteState()}");
+            && zone.Phase == MissionStartZone.StartPhase.Waiting, 15f, () => $"course {race.Phase}, zone {zone.Phase} | {RemoteState()}");
         yield return Expect("Dégel (hôte)", () => !Pigeon.IsMovementFrozen && !remote.IsMovementFrozen, 1f);
-        yield return Expect("Dégel et course au repos chez le second joueur", () => RemoteIs("local/frozen", "0")
-            && Remote(RaceKey(race, "phase")) == "Ready", 3f, RemoteState);
+        yield return Expect("Dégel et course au repos chez le second joueur", () => RemoteIs(RemoteKeys.Frozen, "0")
+            && Remote(RemoteKeys.RacePhase(race)) == "Ready", 3f, RemoteState);
         if (race.CompletionAchievement != null)
         {
             yield return Check("Achievement de la course chez l'hôte", IsUnlocked(race.CompletionAchievement));
-            yield return Expect("Achievement de la course chez le second joueur", () => RemoteHas("ach", race.CompletionAchievement.Id), 3f,
-                () => $"achievements du second joueur [{Remote("ach")}]");
+            yield return Expect("Achievement de la course chez le second joueur", () => RemoteHas(RemoteKeys.Achievements, race.CompletionAchievement.Id), 3f,
+                () => $"achievements du second joueur [{Remote(RemoteKeys.Achievements)}]");
         }
 
         yield return PlaceHostAndRemoteInDepartureZone(race);
         Bot.PressInteract();
         yield return RemoteDo("interact");
-        yield return Expect("La course peut être refaite : décompte", () => zone.Phase == MissionStartZone.CountingDown, 2f, () => zone.Describe());
+        yield return Expect("La course peut être refaite : décompte", () => zone.Phase == MissionStartZone.StartPhase.CountingDown, 2f, () => zone.Describe());
         Bot.PressInteract();
-        yield return Expect("Annulation du nouveau départ", () => zone.Phase == MissionStartZone.Waiting, 2f, () => zone.Describe());
+        yield return Expect("Annulation du nouveau départ", () => zone.Phase == MissionStartZone.StartPhase.Waiting, 2f, () => zone.Describe());
     }
 
     IEnumerator MultiRaceHeight()
@@ -155,13 +147,13 @@ public partial class ScenarioRunner
 
         yield return Teleport(remote, AboveMaximumHeightAwayFromFinish(race), remote.transform.rotation, "Le second joueur passe au-dessus de MaximumHeight");
         yield return Expect("La course échoue pour les deux", () => race.Phase == PigeonCharacterRace.RacePhase.Ready, 3f, () => $"course {race.Phase}");
-        yield return Expect("La zone de départ est rouverte", () => zone.Phase == MissionStartZone.Waiting, 1f, () => zone.Describe());
+        yield return Expect("La zone de départ est rouverte", () => zone.Phase == MissionStartZone.StartPhase.Waiting, 1f, () => zone.Describe());
         yield return Expect("Message d'échec chez l'hôte", () => race.FailureMessage != null && race.FailureMessage.Group != null
             && race.FailureMessage.Group.alpha > 0.05f, 2f);
-        yield return Expect("Message d'échec et course au repos chez le second joueur", () => Remote(RaceKey(race, "phase")) == "Ready"
-            && RemoteNumber(RaceKey(race, "failure")) > 0.05f, 3f, () => $"message {Remote(RaceKey(race, "failure"))} | {RemoteState()}");
+        yield return Expect("Message d'échec et course au repos chez le second joueur", () => Remote(RemoteKeys.RacePhase(race)) == "Ready"
+            && RemoteNumber(RemoteKeys.RaceFailure(race)) > 0.05f, 3f, () => $"message {Remote(RemoteKeys.RaceFailure(race))} | {RemoteState()}");
         yield return Check("Personne n'est gelé (hôte)", !Pigeon.IsMovementFrozen && !remote.IsMovementFrozen);
-        yield return Expect("Le second joueur n'est pas gelé", () => RemoteIs("local/frozen", "0"), 2f, RemoteState);
+        yield return Expect("Le second joueur n'est pas gelé", () => RemoteIs(RemoteKeys.Frozen, "0"), 2f, RemoteState);
     }
 
     IEnumerator MultiLateJoin()
@@ -170,11 +162,11 @@ public partial class ScenarioRunner
         yield return Check("Une course avec MissionStartZone existe", race != null);
         Defer(() => CleanupRace(race));
         MissionStartZone zone = race.DepartureZone;
-        yield return Check("Course au repos", race.Phase == PigeonCharacterRace.RacePhase.Ready && zone.Phase == MissionStartZone.Waiting,
+        yield return Check("Course au repos", race.Phase == PigeonCharacterRace.RacePhase.Ready && zone.Phase == MissionStartZone.StartPhase.Waiting,
             $"course {race.Phase}, zone {zone.Phase}");
 
         yield return RemoteDo("disconnect");
-        yield return Expect("Le second joueur quitte la partie", () => !HasRemotePlayerPigeon() && Remote("net") == "offline", 10f, RemoteState);
+        yield return Expect("Le second joueur quitte la partie", () => !HasRemotePlayerPigeon() && Remote(RemoteKeys.Network) == RemoteKeys.NetworkOffline, 10f, RemoteState);
         yield return Check("L'hôte est seul dans la partie", PigeonController.All.Count == 1, $"{PigeonController.All.Count} pigeons");
 
         Vector3 center = zone.transform.position + Vector3.up * 0.5f;
@@ -182,7 +174,7 @@ public partial class ScenarioRunner
         yield return Teleport(Pigeon, center, rotation, "L'hôte se pose dans la zone de départ");
         yield return ExpectLanded(Pigeon, 4f, zone.StopSpeedThreshold);
         Bot.PressInteract();
-        yield return Expect("Seul joueur prêt : décompte", () => zone.Phase == MissionStartZone.CountingDown, 2f, () => zone.Describe());
+        yield return Expect("Seul joueur prêt : décompte", () => zone.Phase == MissionStartZone.StartPhase.CountingDown, 2f, () => zone.Describe());
         yield return Expect("Cinématique de départ de l'hôte", () => race.DepartureCinematic.IsPlaying, zone.CountdownSeconds + 3f, () => zone.Describe());
         CancelIfPlaying(race.DepartureCinematic);
         yield return Expect("Course lancée, l'hôte seul", () => race.Phase == PigeonCharacterRace.RacePhase.Racing, 4f, () => zone.Describe());
@@ -190,16 +182,16 @@ public partial class ScenarioRunner
         yield return RemoteDo("connect");
         yield return Expect("Le second joueur rejoint la partie en pleine course", () => RemoteReady, 30f, RemoteMissingReason);
         PigeonController late = RemotePigeon;
-        yield return Expect("Il voit la course en cours", () => Remote(RaceKey(race, "phase")) == "Racing", 5f, RemoteState);
+        yield return Expect("Il voit la course en cours", () => Remote(RemoteKeys.RacePhase(race)) == "Racing", 5f, RemoteState);
         yield return ExpectCharacterInSync(race, "Il voit le personnage à battre au même endroit que l'hôte");
 
         Vector3 side = zone.transform.right * Mathf.Min(0.8f, zone.Radius * 0.4f);
         yield return Teleport(late, center + side, rotation, "Le retardataire se pose dans la zone de départ");
         yield return ExpectLanded(late, 4f, zone.StopSpeedThreshold);
         yield return Expect("Il voit « Race in progress » à l'écran", () => RemoteHudContains(zone, "Race in progress"), 3f, RemoteState);
-        yield return Check("Pas de prompt « F » pour lui", RemoteIs(ZoneKey(zone, "prompt"), "0"), RemoteState());
+        yield return Check("Pas de prompt « F » pour lui", RemoteIs(RemoteKeys.ZonePrompt(zone), "0"), RemoteState());
         yield return RemoteDo("interact");
-        yield return ExpectStays("Son F ne relance pas la course", () => zone.Phase == MissionStartZone.Started
+        yield return ExpectStays("Son F ne relance pas la course", () => zone.Phase == MissionStartZone.StartPhase.Started
             && race.Phase == PigeonCharacterRace.RacePhase.Racing && !late.WantsStart, 1.5f, () => $"{zone.Describe()} | {RemoteState()}");
         yield return Check("Le retardataire n'est pas gelé", !late.IsMovementFrozen);
 
@@ -224,8 +216,7 @@ public partial class ScenarioRunner
 
         PigeonController remote = RemotePigeon;
         PigeonStopZone zone = tuto.StopZone;
-        string key = "tuto/" + tuto.name;
-        yield return Check("Le tuto du second joueur n'est pas encore fait", Remote(key + "/consumed") == "0", RemoteState());
+        yield return Check("Le tuto du second joueur n'est pas encore fait", Remote(RemoteKeys.TutoConsumed(tuto)) == "0", RemoteState());
         Defer(() => { if (tuto.Cinematic.IsPlaying) tuto.Cinematic.CancelCinematic(); });
 
         byte hostEquipmentBefore = Pigeon.WornEquipment;
@@ -247,33 +238,33 @@ public partial class ScenarioRunner
 
         yield return Teleport(remote, zone.transform.position + Vector3.up * 0.5f, zone.transform.rotation, "Le second joueur se pose dans le cercle du tuto");
         yield return ExpectLanded(remote, 4f, zone.StopSpeedThreshold);
-        yield return Expect("Sa cinématique du tuto démarre chez lui", () => RemoteFlag(key + "/playing"), 5f, RemoteState);
+        yield return Expect("Sa cinématique du tuto démarre chez lui", () => RemoteFlag(RemoteKeys.TutoPlaying(tuto)), 5f, RemoteState);
         yield return Check("Rien chez l'hôte : pas de cinématique", !tuto.Cinematic.IsPlaying && (hostControls == null || !hostControls.AreControlsBlocked));
         yield return Check("Le cercle de l'hôte ne réagit pas au pigeon de l'autre joueur", !hostZoneFired && zone.enabled,
             $"déclenché {hostZoneFired}, zone active {zone.enabled}");
-        yield return Expect("Le tuto est consommé pour le second joueur", () => RemoteFlag(key + "/consumed"), 2f, RemoteState);
+        yield return Expect("Le tuto est consommé pour le second joueur", () => RemoteFlag(RemoteKeys.TutoConsumed(tuto)), 2f, RemoteState);
         if (tuto.CompletionAchievement != null)
-            yield return Expect("Achievement du tuto chez le second joueur", () => RemoteHas("ach", tuto.CompletionAchievement.Id), 2f,
-                () => $"achievements du second joueur [{Remote("ach")}]");
+            yield return Expect("Achievement du tuto chez le second joueur", () => RemoteHas(RemoteKeys.Achievements, tuto.CompletionAchievement.Id), 2f,
+                () => $"achievements du second joueur [{Remote(RemoteKeys.Achievements)}]");
 
         yield return RemoteDo("cancel-dialogs");
-        yield return Expect("Fin de sa cinématique", () => RemoteIs(key + "/playing", "0"), 4f, RemoteState);
+        yield return Expect("Fin de sa cinématique", () => RemoteIs(RemoteKeys.TutoPlaying(tuto), "0"), 4f, RemoteState);
         if (tuto.GivesEquipmentReward)
         {
             byte bit = PigeonEquipment.Bit(tuto.RewardEquipment);
             yield return Expect($"Récompense ({tuto.RewardEquipment}) portée par le second joueur, vue par l'hôte",
                 () => (remote.WornEquipment & bit) != 0, 6f, () => $"état {Convert.ToString(remote.WornEquipment, 2)}");
-            yield return Expect("… et sur son propre écran", () => (RemoteByte("local/equipment") & bit) != 0, 3f, RemoteState);
+            yield return Expect("… et sur son propre écran", () => (RemoteByte(RemoteKeys.Equipment) & bit) != 0, 3f, RemoteState);
             yield return Check("L'hôte n'a rien reçu", Pigeon.WornEquipment == hostEquipmentBefore,
                 $"hôte {Convert.ToString(Pigeon.WornEquipment, 2)}, avant {Convert.ToString(hostEquipmentBefore, 2)}");
         }
-        yield return Expect("Commandes rendues au second joueur", () => RemoteIs("local/blocked", "0"), 8f, RemoteState);
+        yield return Expect("Commandes rendues au second joueur", () => RemoteIs(RemoteKeys.ControlsBlocked, "0"), 8f, RemoteState);
 
         yield return Teleport(remote, zone.transform.position + zone.transform.forward * (zone.Radius + 4f) + Vector3.up * 2f,
             zone.transform.rotation, "Il ressort du cercle");
         yield return Teleport(remote, zone.transform.position + Vector3.up * 0.5f, zone.transform.rotation, "Il revient dans le cercle");
         yield return ExpectLanded(remote, 4f, zone.StopSpeedThreshold);
-        yield return ExpectStays("Le tuto ne se rejoue pas pour lui", () => RemoteIs(key + "/playing", "0"), 2f, RemoteState);
+        yield return ExpectStays("Le tuto ne se rejoue pas pour lui", () => RemoteIs(RemoteKeys.TutoPlaying(tuto), "0"), 2f, RemoteState);
     }
 
     IEnumerator MultiEquipment()
@@ -283,31 +274,31 @@ public partial class ScenarioRunner
         yield return Check("Le pigeon du second joueur a un PigeonEquipment", remoteEquipment != null);
 
         bool found = TryPickRemoteLoot(remote.WornEquipment, out PigeonEquipment.Equipment kind, out Vector3 spot, out bool hostCanDetect);
-        yield return Check("Un objet à ramasser existe chez le second joueur", found, $"objets [{Remote("loots")}]");
+        yield return Check("Un objet à ramasser existe chez le second joueur", found, $"objets [{Remote(RemoteKeys.Loots)}]");
         if (!hostCanDetect)
             Debug.LogWarning($"[Scénario] {kind} : l'hôte l'a déjà ramassé ou le porte, « rien ne change chez l'hôte » est moins probant.");
         byte bit = PigeonEquipment.Bit(kind);
         byte hostBefore = Pigeon.WornEquipment;
         PlayerControls hostControls = Pigeon.GetComponent<PlayerControls>();
-        int lootsBefore = RemoteList("loots").Count;
+        int lootsBefore = RemoteList(RemoteKeys.Loots).Count;
         int hostLootsBefore = HostLootsAt(kind, spot);
 
         yield return HoldRemoteStillAt(remote, spot, LootableRadius(kind, spot), 0.15f, $"objet {kind}");
-        yield return Expect("Il ramasse l'objet (il disparaît chez lui)", () => RemoteList("loots").Count < lootsBefore, 4f,
-            () => $"objets [{Remote("loots")}]");
+        yield return Expect("Il ramasse l'objet (il disparaît chez lui)", () => RemoteList(RemoteKeys.Loots).Count < lootsBefore, 4f,
+            () => $"objets [{Remote(RemoteKeys.Loots)}]");
         yield return RemoteDo("flap", "0");
         yield return RemoteDo("brake", "0");
-        yield return Expect("Cinématique d'équipement chez lui (commandes bloquées)", () => RemoteFlag("local/blocked"), 2f, RemoteState);
+        yield return Expect("Cinématique d'équipement chez lui (commandes bloquées)", () => RemoteFlag(RemoteKeys.ControlsBlocked), 2f, RemoteState);
         yield return Check("Pas de cinématique chez l'hôte", hostControls == null || !hostControls.AreControlsBlocked);
         yield return Expect($"{kind} porté par le second joueur, vu par l'hôte (état répliqué)", () => (remote.WornEquipment & bit) != 0, 6f,
             () => $"état {Convert.ToString(remote.WornEquipment, 2)}");
         yield return Expect($"{kind} visible sur son pigeon chez l'hôte", () => remoteEquipment.IsWorn(kind), 2f);
-        yield return Expect("… et sur son propre écran", () => (RemoteByte("local/equipment") & bit) != 0, 3f, RemoteState);
+        yield return Expect("… et sur son propre écran", () => (RemoteByte(RemoteKeys.Equipment) & bit) != 0, 3f, RemoteState);
         yield return Check("L'équipement de l'hôte n'a pas changé", Pigeon.WornEquipment == hostBefore,
             $"hôte {Convert.ToString(Pigeon.WornEquipment, 2)}, avant {Convert.ToString(hostBefore, 2)}");
         yield return Check("L'objet de l'hôte est toujours là pour lui", HostLootsAt(kind, spot) == hostLootsBefore,
             $"{HostLootsAt(kind, spot)} objet(s), avant {hostLootsBefore}");
-        yield return Expect("Fin de sa cinématique : commandes rendues", () => RemoteIs("local/blocked", "0"), 8f, RemoteState);
+        yield return Expect("Fin de sa cinématique : commandes rendues", () => RemoteIs(RemoteKeys.ControlsBlocked, "0"), 8f, RemoteState);
     }
 
     static int HostLootsAt(PigeonEquipment.Equipment kind, Vector3 spot)
@@ -341,8 +332,8 @@ public partial class ScenarioRunner
         yield return RemoteDo("flap", "1");
         yield return Expect("Les sons de décollage sont joués des deux côtés", () =>
         {
-            remoteOwn ??= NonEmpty(RemoteList("audio/local"));
-            remoteOther ??= NonEmpty(RemoteList("audio/others"));
+            remoteOwn ??= NonEmpty(RemoteList(RemoteKeys.OwnSounds));
+            remoteOther ??= NonEmpty(RemoteList(RemoteKeys.OtherSounds));
             hostOwn ??= NonEmpty(OneShotBlends(Pigeon));
             hostOther ??= NonEmpty(OneShotBlends(remote));
             return remoteOwn != null && remoteOther != null && hostOwn != null && hostOther != null;
@@ -402,13 +393,9 @@ public partial class ScenarioRunner
 
     bool RemoteHas(string key, string item) => RemoteList(key).Contains(item);
 
-    static string ZoneKey(MissionStartZone zone, string field) => $"zone/{zone.name}/{field}";
-
-    static string RaceKey(PigeonCharacterRace race, string field) => $"race/{race.name}/{field}";
-
     bool RemoteHudContains(MissionStartZone zone, string part)
     {
-        string hud = Remote(ZoneKey(zone, "hud"));
+        string hud = Remote(RemoteKeys.ZoneHud(zone));
         return hud != null && hud.Contains(part);
     }
 
@@ -429,7 +416,7 @@ public partial class ScenarioRunner
         spot = default;
         hostCanDetect = false;
         bool found = false;
-        foreach (string item in RemoteList("loots"))
+        foreach (string item in RemoteList(RemoteKeys.Loots))
         {
             int at = item.IndexOf('@');
             if (at <= 0 || !Enum.TryParse(item.Substring(0, at), out PigeonEquipment.Equipment candidate)
@@ -486,7 +473,7 @@ public partial class ScenarioRunner
     IEnumerator PlaceHostAndRemoteInDepartureZone(PigeonCharacterRace race)
     {
         MissionStartZone zone = race.DepartureZone;
-        yield return Check("Course au repos", race.Phase == PigeonCharacterRace.RacePhase.Ready && zone.Phase == MissionStartZone.Waiting,
+        yield return Check("Course au repos", race.Phase == PigeonCharacterRace.RacePhase.Ready && zone.Phase == MissionStartZone.StartPhase.Waiting,
             $"course {race.Phase}, zone {zone.Phase}");
         PigeonController remote = RemotePigeon;
         yield return Check("Second joueur en jeu", remote != null, RemoteMissingReason());
@@ -500,8 +487,8 @@ public partial class ScenarioRunner
         yield return ExpectLanded(Pigeon, 4f, zone.StopSpeedThreshold);
         yield return ExpectLanded(remote, 4f, zone.StopSpeedThreshold);
         yield return Expect("Le prompt s'affiche chez l'hôte", () => zone.Prompt == null || PromptVisible(zone.Prompt), 1f);
-        yield return Expect("Le prompt s'affiche chez le second joueur", () => zone.Prompt == null || RemoteFlag(ZoneKey(zone, "prompt")), 2f, RemoteState);
-        yield return Check("Personne n'est encore prêt", !Pigeon.WantsStart && !remote.WantsStart && Remote("local/ready") == "0", RemoteState());
+        yield return Expect("Le prompt s'affiche chez le second joueur", () => zone.Prompt == null || RemoteFlag(RemoteKeys.ZonePrompt(zone)), 2f, RemoteState);
+        yield return Check("Personne n'est encore prêt", !Pigeon.WantsStart && !remote.WantsStart && Remote(RemoteKeys.Ready) == "0", RemoteState());
     }
 
     IEnumerator StartRaceWithRemote(PigeonCharacterRace race)
@@ -510,13 +497,13 @@ public partial class ScenarioRunner
         yield return PlaceHostAndRemoteInDepartureZone(race);
         Bot.PressInteract();
         yield return RemoteDo("interact");
-        yield return Expect("Les deux joueurs prêts : décompte", () => zone.Phase == MissionStartZone.CountingDown, 2f, () => zone.Describe());
+        yield return Expect("Les deux joueurs prêts : décompte", () => zone.Phase == MissionStartZone.StartPhase.CountingDown, 2f, () => zone.Describe());
         yield return Expect("Cinématique de départ chez l'hôte", () => race.DepartureCinematic.IsPlaying, zone.CountdownSeconds + 3f, () => zone.Describe());
-        yield return Expect("Cinématique de départ chez le second joueur", () => RemoteFlag(RaceKey(race, "departure")), 3f, RemoteState);
+        yield return Expect("Cinématique de départ chez le second joueur", () => RemoteFlag(RemoteKeys.RaceDeparture(race)), 3f, RemoteState);
         CancelIfPlaying(race.DepartureCinematic);
         yield return RemoteDo("cancel-dialogs");
         yield return Expect("Course lancée", () => race.Phase == PigeonCharacterRace.RacePhase.Racing, 5f, () => $"{zone.Describe()} | {RemoteState()}");
-        yield return Expect("Course lancée chez le second joueur", () => Remote(RaceKey(race, "phase")) == "Racing", 3f, RemoteState);
+        yield return Expect("Course lancée chez le second joueur", () => Remote(RemoteKeys.RacePhase(race)) == "Racing", 3f, RemoteState);
     }
 
     IEnumerator ExpectCharacterInSync(PigeonCharacterRace race, string step)
@@ -525,12 +512,12 @@ public partial class ScenarioRunner
         yield return Wait("Mesure de la vitesse du personnage", 1f);
         float speed = Vector3.Distance(race.Character.position, before);
         float tolerance = speed * 0.6f + 1.5f;
-        float Gap() => ScenarioLinkProtocol.TryParse(Remote(RaceKey(race, "character")), out Vector3 seen)
+        float Gap() => ScenarioLinkProtocol.TryParse(Remote(RemoteKeys.RaceCharacter(race)), out Vector3 seen)
             ? Vector3.Distance(seen, race.Character.position) : float.PositiveInfinity;
         yield return Check("Le personnage avance chez l'hôte", speed > 0.05f, $"{speed:0.00} m/s");
         yield return Expect(step, () => Gap() <= tolerance, 3f,
             () => $"écart {Gap():0.00} m (tolérance {tolerance:0.00} m, vitesse {speed:0.00} m/s), chez l'hôte {race.Character.position}, "
-                + $"chez le second joueur {Remote(RaceKey(race, "character"))}");
+                + $"chez le second joueur {Remote(RemoteKeys.RaceCharacter(race))}");
     }
 }
 #endif

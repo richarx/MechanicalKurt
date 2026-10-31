@@ -1,15 +1,13 @@
 using PurrNet.Prediction;
-using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
-using UnityEngine.UI;
 
 public struct MissionStartState : IPredictedData<MissionStartState>
 {
-    public byte Phase;
+    public MissionStartZone.StartPhase Phase;
     /// <summary>Secondes restantes du décompte, ou du délai maximal de la cinématique.</summary>
     public float Countdown;
-    /// <summary>Numéro du dernier départ : identifie ses participants (PigeonState.LastStartCount).</summary>
+    /// <summary>Numéro du dernier départ : identifie ses participants (PigeonMissionState.LastStartCount).</summary>
     public int StartCount;
     /// <summary>Attente et décompte : pigeons prêts. Cinématique : participants qui l'ont finie.</summary>
     public byte Ready;
@@ -26,16 +24,14 @@ public struct MissionStartState : IPredictedData<MissionStartState>
 /// </summary>
 public class MissionStartZone : PredictedIdentity<MissionStartState>
 {
+    public enum StartPhase : byte { Waiting, CountingDown, Started, Cinematic }
+
     public enum StartRule
     {
         AllPigeons,
         AnyPigeon
     }
 
-    public const byte Waiting = 0;
-    public const byte CountingDown = 1;
-    public const byte Started = 2;
-    public const byte Cinematic = 3;
 
     [Header("Zone")]
     [SerializeField] float _radius = 3f;
@@ -57,8 +53,8 @@ public class MissionStartZone : PredictedIdentity<MissionStartState>
     [Header("UI locale")]
     [Tooltip("Texte d'instruction partagé (« Appuyer sur Y / F »), affiché au pigeon local uniquement.")]
     [SerializeField] GameObject _prompt;
-    [Tooltip("Facultatif : texte du décompte. Vide = un texte centré est créé à l'exécution (police du prompt).")]
-    [SerializeField] TMP_Text _countdownText;
+    [Tooltip("Texte du décompte et de l'attente des joueurs, instancié au premier affichage. Vide = aucun texte.")]
+    [SerializeField] MissionCountdownHud _hudPrefab;
     [Tooltip("Affiché au joueur qui se pose dans la zone pendant un départ ou une course auxquels il ne participe pas.")]
     [SerializeField] string _inProgressText = "Race in progress\n<size=60%>Wait for it to finish</size>";
 
@@ -80,11 +76,10 @@ public class MissionStartZone : PredictedIdentity<MissionStartState>
 
     MissionStartState _viewState;
     bool _promptShown;
-    TMP_Text _hudText;
-    GameObject _hudRoot;
+    MissionCountdownHud _hud;
     string _hudContent;
 
-    public byte Phase => _viewState.Phase;
+    public StartPhase Phase => _viewState.Phase;
     public float CountdownRemaining => _viewState.Countdown;
     public int ReadyCount => _viewState.Ready;
     public int TotalCount => _viewState.Total;
@@ -95,7 +90,7 @@ public class MissionStartZone : PredictedIdentity<MissionStartState>
     public Transform StartPose => _startPose;
     public GameObject Prompt => _prompt;
     /// <summary>Texte du décompte actuellement affiché (null si masqué).</summary>
-    public string HudText => _hudRoot != null && _hudRoot.activeInHierarchy ? _hudContent : null;
+    public string HudText => _hud != null && _hud.gameObject.activeInHierarchy ? _hudContent : null;
 
     /// <summary>État simulé de la zone, réservé au Simulate d'une autre identité (ex. PigeonCharacterRace).</summary>
     public ref MissionStartState SimState => ref currentState;
@@ -105,13 +100,13 @@ public class MissionStartZone : PredictedIdentity<MissionStartState>
     public void ResetToWaiting()
     {
         ref MissionStartState s = ref currentState;
-        s.Phase = Waiting;
+        s.Phase = StartPhase.Waiting;
         s.Countdown = 0f;
     }
 
     /// <summary>Ce pigeon fait partie du dernier départ lancé par cette zone (simulation : réservé à un Simulate).</summary>
     public bool IsInCurrentStart(PigeonController pigeon)
-        => pigeon != null && currentState.StartCount > 0 && IsStartedHere(pigeon.SimState, currentState.StartCount);
+        => pigeon != null && currentState.StartCount > 0 && pigeon.SimState.Mission.IsInStart(id, currentState.StartCount);
 
     /// <summary>Le joueur local a fini la cinématique de départ. Le départ partira quand tous les participants l'auront finie.</summary>
     public void ReportLocalCinematicFinished() => ReportCinematicFinished(PigeonController.Local);
@@ -121,7 +116,7 @@ public class MissionStartZone : PredictedIdentity<MissionStartState>
     {
         int startCount = pigeon != null ? pigeon.LastStartCountFor(id) : 0;
         if (startCount > 0)
-            pigeon.AcknowledgeStartCinematic(id, startCount);
+            pigeon.AcknowledgeCinematic(id, startCount);
     }
 
     protected override void LateAwake()
@@ -157,7 +152,7 @@ public class MissionStartZone : PredictedIdentity<MissionStartState>
         return local != null && local.WasStartedBy(id, startCount);
     }
 
-    protected override MissionStartState GetInitialState() => new MissionStartState { Phase = Waiting };
+    protected override MissionStartState GetInitialState() => new MissionStartState { Phase = StartPhase.Waiting };
 
     protected override void GetUnityState(ref MissionStartState s) { }
     protected override void SetUnityState(MissionStartState s) { }
@@ -167,7 +162,7 @@ public class MissionStartZone : PredictedIdentity<MissionStartState>
 
     protected override void Simulate(ref MissionStartState s, float dt)
     {
-        byte before = s.Phase;
+        StartPhase before = s.Phase;
         SimulatePhases(ref s, dt);
         if (TraceTransitions && s.Phase != before && !predictionManager.isReplaying)
             Debug.Log($"[MissionStartZone] {name} : {before} → {s.Phase} (départ n°{s.StartCount}, {s.Ready}/{s.Total}, reste {s.Countdown:0.00}) — {Describe()}");
@@ -181,23 +176,23 @@ public class MissionStartZone : PredictedIdentity<MissionStartState>
         foreach (PigeonController pigeon in PigeonController.All)
         {
             ref PigeonState ps = ref pigeon.SimState;
-            sb.Append($" | {pigeon.name} : prêt {IsReadyHere(ps)}, dedans {IsInside(ps)}, vitesse {ps.LastVelocity.magnitude:0.00}, "
-                + $"gelé {ps.Frozen}, départ {(ps.LastStartZone.Equals(id) ? ps.LastStartCount : -1)}, "
-                + $"fini {(ps.StartAckZone.Equals(id) ? ps.StartAckCount : -1)}");
+            sb.Append($" | {pigeon.name} : prêt {ps.Mission.IsReadyFor(id)}, dedans {IsInside(ps)}, vitesse {ps.LastVelocity.magnitude:0.00}, "
+                + $"gelé {ps.Frozen}, départ {ps.Mission.StartCountFor(id)}, "
+                + $"fini {(ps.Mission.CinematicAckZone.Equals(id) ? ps.Mission.CinematicAckCount : -1)}");
         }
         return sb.ToString();
     }
 
     void SimulatePhases(ref MissionStartState s, float dt)
     {
-        if (s.Phase == Started)
+        if (s.Phase == StartPhase.Started)
         {
             if (!_rearm)
                 return;
-            s.Phase = Waiting;
+            s.Phase = StartPhase.Waiting;
         }
 
-        if (s.Phase == Cinematic)
+        if (s.Phase == StartPhase.Cinematic)
         {
             SimulateCinematic(ref s, dt);
             return;
@@ -211,22 +206,11 @@ public class MissionStartZone : PredictedIdentity<MissionStartState>
         {
             ref PigeonState ps = ref pigeons[i].SimState;
             bool inside = IsInside(ps);
-            bool mine = IsReadyHere(ps);
-
-            if (inside && ps.InteractPressed)
-            {
-                mine = !mine;
-                ps.HasReadyZone = mine;
-                if (mine)
-                    ps.ReadyZone = id;
-            }
-            else if (mine && !inside)
-            {
-                mine = false;
-                ps.HasReadyZone = false;
-            }
-
-            if (mine)
+            bool wasReady = ps.Mission.IsReadyFor(id);
+            bool isReady = inside && (ps.Mission.InteractPressed ? !wasReady : wasReady);
+            if (isReady != wasReady)
+                ps.Mission.SetReady(id, isReady);
+            if (isReady)
                 ready++;
         }
         s.Ready = (byte)Mathf.Min(ready, byte.MaxValue);
@@ -236,11 +220,11 @@ public class MissionStartZone : PredictedIdentity<MissionStartState>
             ? ready >= 1
             : total >= 1 && ready == total;
 
-        if (s.Phase == Waiting)
+        if (s.Phase == StartPhase.Waiting)
         {
             if (canStart)
             {
-                s.Phase = CountingDown;
+                s.Phase = StartPhase.CountingDown;
                 s.Countdown = _countdownSeconds;
                 FreezeParticipants();
                 _countdownStartedEvent.Invoke();
@@ -250,7 +234,7 @@ public class MissionStartZone : PredictedIdentity<MissionStartState>
 
         if (!canStart)
         {
-            s.Phase = Waiting;
+            s.Phase = StartPhase.Waiting;
             ReleaseFrozen();
             _cancelledEvent.Invoke();
             return;
@@ -264,7 +248,7 @@ public class MissionStartZone : PredictedIdentity<MissionStartState>
         MarkParticipants(s.StartCount);
         if (_cinematicTimeout > 0f)
         {
-            s.Phase = Cinematic;
+            s.Phase = StartPhase.Cinematic;
             s.Countdown = _cinematicTimeout;
             s.Ready = 0;
             s.Total = (byte)Mathf.Min(ready, byte.MaxValue);
@@ -274,25 +258,34 @@ public class MissionStartZone : PredictedIdentity<MissionStartState>
         Launch(ref s);
     }
 
-    void SimulateCinematic(ref MissionStartState s, float dt)
+    /// <summary>
+    /// Participants du départ numéro <paramref name="startCount"/> et, parmi eux, ceux qui ont fini la cinématique
+    /// partagée de <paramref name="owner"/> : cette zone (départ) ou la course qui la suit (arrivée). Simulation.
+    /// </summary>
+    public void CountCinematicProgress(PredictedComponentID owner, int startCount, out int participants, out int finished)
     {
+        participants = finished = 0;
         var pigeons = PigeonController.All;
-        int participants = 0, finished = 0;
         for (int i = 0; i < pigeons.Count; i++)
         {
-            ref PigeonState ps = ref pigeons[i].SimState;
-            if (!IsStartedHere(ps, s.StartCount))
+            ref PigeonMissionState mission = ref pigeons[i].SimState.Mission;
+            if (!mission.IsInStart(id, startCount))
                 continue;
             participants++;
-            if (ps.StartAckCount == s.StartCount && ps.StartAckZone.Equals(id))
+            if (mission.HasFinishedCinematic(owner, startCount))
                 finished++;
         }
+    }
+
+    void SimulateCinematic(ref MissionStartState s, float dt)
+    {
+        CountCinematicProgress(id, s.StartCount, out int participants, out int finished);
         s.Ready = (byte)Mathf.Min(finished, byte.MaxValue);
         s.Total = (byte)Mathf.Min(participants, byte.MaxValue);
 
         if (participants == 0)
         {
-            s.Phase = Waiting;
+            s.Phase = StartPhase.Waiting;
             s.Countdown = 0f;
             return;
         }
@@ -306,40 +299,21 @@ public class MissionStartZone : PredictedIdentity<MissionStartState>
     bool IsInside(in PigeonState ps) =>
         (ps.Position - transform.position).sqrMagnitude <= _radius * _radius && ps.LastVelocity.magnitude <= _stopSpeedThreshold;
 
-    bool IsReadyHere(in PigeonState ps) => ps.HasReadyZone && ps.ReadyZone.Equals(id);
-
-    bool IsStartedHere(in PigeonState ps, int startCount) => ps.LastStartCount == startCount && ps.LastStartZone.Equals(id);
-
-    bool IsParticipant(in PigeonState ps) => IsReadyHere(ps) && IsInside(ps);
+    bool IsParticipant(in PigeonState ps) => ps.Mission.IsReadyFor(id) && IsInside(ps);
 
     void FreezeParticipants()
     {
         var pigeons = PigeonController.All;
         for (int i = 0; i < pigeons.Count; i++)
-        {
-            if (!IsParticipant(pigeons[i].SimState))
-                continue;
-            pigeons[i].ForceFreeze(true);
-            pigeons[i].SimState.FrozenByZone = true;
-            pigeons[i].SimState.FreezingZone = id;
-        }
+            if (IsParticipant(pigeons[i].SimState))
+                pigeons[i].FreezeFor(id);
     }
 
     void ReleaseFrozen()
     {
         var pigeons = PigeonController.All;
         for (int i = 0; i < pigeons.Count; i++)
-            ReleaseIfMine(pigeons[i]);
-    }
-
-    void ReleaseIfMine(PigeonController pigeon)
-    {
-        ref PigeonState ps = ref pigeon.SimState;
-        if (!ps.FrozenByZone || !ps.FreezingZone.Equals(id))
-            return;
-        ps.FrozenByZone = false;
-        if (ps.Frozen)
-            pigeon.ForceFreeze(false);
+            pigeons[i].ReleaseFrom(id);
     }
 
     void MarkParticipants(int startCount)
@@ -348,11 +322,8 @@ public class MissionStartZone : PredictedIdentity<MissionStartState>
         for (int i = 0; i < pigeons.Count; i++)
         {
             ref PigeonState ps = ref pigeons[i].SimState;
-            if (!IsParticipant(ps))
-                continue;
-            ps.HasReadyZone = false;
-            ps.LastStartZone = id;
-            ps.LastStartCount = startCount;
+            if (IsParticipant(ps))
+                ps.Mission.MarkStarted(id, startCount);
         }
     }
 
@@ -364,17 +335,17 @@ public class MissionStartZone : PredictedIdentity<MissionStartState>
         for (int i = 0; i < pigeons.Count; i++)
         {
             PigeonController pigeon = pigeons[i];
-            if (!IsStartedHere(pigeon.SimState, s.StartCount))
+            if (!pigeon.SimState.Mission.IsInStart(id, s.StartCount))
                 continue;
             Vector3 offset = pigeon.SimState.Position - center;
             offset.y = 0f;
 
-            ReleaseIfMine(pigeon);
+            pigeon.ReleaseFrom(id);
             if (_startPose != null)
                 pigeon.ForceTeleport(_startPose.position + offset, _startPose.rotation);
         }
 
-        s.Phase = Started;
+        s.Phase = StartPhase.Started;
         s.Countdown = 0f;
         _startedEvent.Invoke(s.StartCount);
     }
@@ -392,7 +363,7 @@ public class MissionStartZone : PredictedIdentity<MissionStartState>
             return;
 
         PigeonController local = PigeonController.Local;
-        bool show = view.Phase == Waiting
+        bool show = view.Phase == StartPhase.Waiting
             && local != null
             && !local.IsReadyFor(id)
             && (local.transform.position - transform.position).sqrMagnitude <= _radius * _radius
@@ -412,25 +383,25 @@ public class MissionStartZone : PredictedIdentity<MissionStartState>
         {
             switch (view.Phase)
             {
-                case Waiting:
+                case StartPhase.Waiting:
                     if (local.IsReadyFor(id))
                         content = $"Waiting for players: {view.Ready}/{view.Total} ready\n<size=60%>F / Y: cancel</size>";
                     break;
-                case CountingDown:
+                case StartPhase.CountingDown:
                     if (local.IsReadyFor(id))
                         content = $"<size=250%>{Mathf.Max(1, Mathf.CeilToInt(view.Countdown))}</size>\n"
                             + $"Players: {view.Ready}/{view.Total}\n<size=60%>F / Y: cancel</size>";
                     break;
-                case Cinematic:
+                case StartPhase.Cinematic:
                     if (local.WasStartedBy(id, view.StartCount))
                     {
-                        if (local.HasFinishedStartCinematic(id, view.StartCount))
+                        if (local.HasFinishedCinematic(id, view.StartCount))
                             content = $"Waiting for players: {view.Ready}/{view.Total}";
                     }
                     else if (IsLocalInZone(local))
                         content = _inProgressText;
                     break;
-                case Started:
+                case StartPhase.Started:
                     if (!_rearm && !local.WasStartedBy(id, view.StartCount) && IsLocalInZone(local))
                         content = _inProgressText;
                     break;
@@ -440,62 +411,20 @@ public class MissionStartZone : PredictedIdentity<MissionStartState>
         if (content == _hudContent)
             return;
         _hudContent = content;
-        if (content != null)
-            EnsureHud();
-        if (_hudText == null)
+        if (content == null)
+        {
+            if (_hud != null)
+                _hud.Hide();
             return;
-        if (content != null)
-            _hudText.text = content;
-        _hudRoot.SetActive(content != null);
+        }
+        if (_hud == null && _hudPrefab != null)
+            _hud = Instantiate(_hudPrefab, transform);
+        if (_hud != null)
+            _hud.Show(content);
     }
 
     bool IsLocalInZone(PigeonController local)
         => (local.transform.position - transform.position).sqrMagnitude <= _radius * _radius;
-
-    void EnsureHud()
-    {
-        if (_hudText != null)
-            return;
-        if (_countdownText != null)
-        {
-            _hudText = _countdownText;
-            _hudRoot = _countdownText.gameObject;
-            return;
-        }
-
-        var root = new GameObject($"{name} — décompte", typeof(Canvas), typeof(CanvasScaler));
-        root.transform.SetParent(transform, false);
-        var canvas = root.GetComponent<Canvas>();
-        canvas.renderMode = RenderMode.ScreenSpaceOverlay;
-        canvas.sortingOrder = 50;
-        var scaler = root.GetComponent<CanvasScaler>();
-        scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
-        scaler.referenceResolution = new Vector2(1920f, 1080f);
-        scaler.matchWidthOrHeight = 0.5f;
-
-        var textObject = new GameObject("Text", typeof(RectTransform));
-        textObject.transform.SetParent(root.transform, false);
-        var rect = (RectTransform)textObject.transform;
-        rect.anchorMin = new Vector2(0.5f, 0.5f);
-        rect.anchorMax = new Vector2(0.5f, 0.5f);
-        rect.anchoredPosition = new Vector2(0f, 220f);
-        rect.sizeDelta = new Vector2(1400f, 400f);
-
-        var text = textObject.AddComponent<TextMeshProUGUI>();
-        TMP_Text promptText = _prompt != null ? _prompt.GetComponentInChildren<TMP_Text>(true) : null;
-        if (promptText != null)
-        {
-            text.font = promptText.font;
-            text.fontSharedMaterial = promptText.fontSharedMaterial;
-            text.color = promptText.color;
-        }
-        text.fontSize = 56f;
-        text.alignment = TextAlignmentOptions.Center;
-        text.raycastTarget = false;
-        _hudText = text;
-        _hudRoot = root;
-        root.SetActive(false);
-    }
 
     void OnDrawGizmosSelected()
     {

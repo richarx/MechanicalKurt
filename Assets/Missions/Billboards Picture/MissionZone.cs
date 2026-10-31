@@ -49,6 +49,14 @@ public class MissionZone : MonoBehaviour
     private void OnEnable()
     {
         isValidated = false;
+        PigeonController.LocalChanged += BindPigeon;
+        BindPigeon(PigeonController.Local);
+    }
+
+    private void BindPigeon(PigeonController pigeon)
+    {
+        _pigeon = pigeon;
+        _blockableControls = pigeon != null ? pigeon.GetComponentInChildren<PlayerControls>() : null;
     }
 
     private void LateUpdate()
@@ -56,11 +64,6 @@ public class MissionZone : MonoBehaviour
         if (isValidated)
             return;
 
-        if (PigeonController.Local != _pigeon)
-        {
-            _pigeon = PigeonController.Local;
-            _blockableControls = _pigeon != null ? _pigeon.GetComponentInChildren<PlayerControls>() : null;
-        }
         IPigeonControls controls = _pigeon != null ? _pigeon.Controls : null;
 
         // Évalué après le déplacement du pigeon dans Update, comme PigeonStopZone.
@@ -135,6 +138,7 @@ public class MissionZone : MonoBehaviour
 
     private void OnDisable()
     {
+        PigeonController.LocalChanged -= BindPigeon;
         HidePrompt();
         _isInside = false;
     }

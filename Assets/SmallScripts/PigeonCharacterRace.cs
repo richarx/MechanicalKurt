@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using PurrNet.Prediction;
 using Sirenix.OdinInspector;
 using UnityEngine;
@@ -5,7 +6,7 @@ using UnityEngine.Events;
 
 public struct RaceState : IPredictedData<RaceState>
 {
-    public byte Phase;
+    public PigeonCharacterRace.RacePhase Phase;
     public float Elapsed;
     public float StoppedTime;
     public float ArrivalRemaining;
@@ -15,16 +16,16 @@ public struct RaceState : IPredictedData<RaceState>
 }
 
 /// <summary>
-/// Course prÃ©dite contre un personnage. LancÃ©e par sa MissionStartZone ; seuls les coureurs de ce dÃ©part comptent.
-/// Ã‰chec (hauteur, temps) ou victoire ramÃ¨nent la course au dÃ©part ; Ã  la victoire, les coureurs restent gelÃ©s
-/// jusqu'Ã  ce que chacun ait fini la cinÃ©matique d'arrivÃ©e. Le personnage suit Elapsed, identique pour tous.
+/// Course prédite contre un personnage. Lancée par sa MissionStartZone ; seuls les coureurs de ce départ comptent.
+/// Échec (hauteur, temps) ou victoire ramènent la course au départ ; à la victoire, les coureurs restent gelés
+/// jusqu'à ce que chacun ait fini la cinématique d'arrivée. Le personnage suit Elapsed, identique pour tous.
 /// </summary>
 [DisallowMultipleComponent]
 public class PigeonCharacterRace : PredictedIdentity<RaceState>
 {
     private static readonly int GlideHash = Animator.StringToHash("Glide");
 
-    public enum RacePhase { Ready, DepartureCinematic, Racing, ArrivalCinematic }
+    public enum RacePhase : byte { Ready, DepartureCinematic, Racing, ArrivalCinematic }
 
     [field: SerializeField, BoxGroup("Départ"), Required]
     [field: Tooltip("Zone de départ multijoueur. Son StartPose remplace l'ancien PlayerDeparturePose : l'y régler à la même pose. Régler son Cinematic Timeout (> 0) pour attendre la cinématique de départ.")]
@@ -98,9 +99,9 @@ public class PigeonCharacterRace : PredictedIdentity<RaceState>
     {
         get
         {
-            RacePhase phase = (RacePhase)_viewState.Phase;
+            RacePhase phase = _viewState.Phase;
             if (phase == RacePhase.Ready && DepartureZone != null
-                && DepartureZone.Phase == MissionStartZone.Cinematic)
+                && DepartureZone.Phase == MissionStartZone.StartPhase.Cinematic)
                 return RacePhase.DepartureCinematic;
             return phase;
         }
@@ -174,7 +175,7 @@ public class PigeonCharacterRace : PredictedIdentity<RaceState>
         RestoreRootMotion();
     }
 
-    protected override RaceState GetInitialState() => new RaceState { Phase = (byte)RacePhase.Ready };
+    protected override RaceState GetInitialState() => new RaceState { Phase = RacePhase.Ready };
 
     protected override void GetUnityState(ref RaceState s) { }
     protected override void SetUnityState(RaceState s) { }
@@ -188,12 +189,12 @@ public class PigeonCharacterRace : PredictedIdentity<RaceState>
 
     protected override void Simulate(ref RaceState s, float dt)
     {
-        switch ((RacePhase)s.Phase)
+        switch (s.Phase)
         {
             case RacePhase.Ready:
-                if (DepartureZone != null && DepartureZone.SimState.Phase == MissionStartZone.Started)
+                if (DepartureZone != null && DepartureZone.SimState.Phase == MissionStartZone.StartPhase.Started)
                 {
-                    s.Phase = (byte)RacePhase.Racing;
+                    s.Phase = RacePhase.Racing;
                     s.Elapsed = 0f;
                     s.StoppedTime = 0f;
                     s.StartCount = DepartureZone.SimState.StartCount;
@@ -206,7 +207,8 @@ public class PigeonCharacterRace : PredictedIdentity<RaceState>
 
             case RacePhase.ArrivalCinematic:
                 s.ArrivalRemaining -= dt;
-                if (AllRacersFinishedArrival(s.StartCount) || s.ArrivalRemaining <= 0f)
+                DepartureZone.CountCinematicProgress(id, s.StartCount, out int racers, out int finished);
+                if (finished >= racers || s.ArrivalRemaining <= 0f)
                 {
                     SetRacersFrozen(false);
                     ResetRace(ref s);
@@ -220,7 +222,7 @@ public class PigeonCharacterRace : PredictedIdentity<RaceState>
     {
         s.Elapsed += dt;
 
-        if (!AnyRacer())
+        if (Racers().Count == 0)
         {
             ResetRace(ref s);
             return;
@@ -242,7 +244,7 @@ public class PigeonCharacterRace : PredictedIdentity<RaceState>
         s.StoppedTime = stopped ? s.StoppedTime + dt : 0f;
         if (stopped && s.StoppedTime >= DestinationStop.StopDuration)
         {
-            s.Phase = (byte)RacePhase.ArrivalCinematic;
+            s.Phase = RacePhase.ArrivalCinematic;
             s.ArrivalRemaining = ArrivalCinematicTimeout;
             SetRacersFrozen(true);
             _arrivalEvent.Invoke(s.StartCount);
@@ -251,40 +253,29 @@ public class PigeonCharacterRace : PredictedIdentity<RaceState>
 
     private void ResetRace(ref RaceState s)
     {
-        s.Phase = (byte)RacePhase.Ready;
+        s.Phase = RacePhase.Ready;
         s.Elapsed = 0f;
         s.StoppedTime = 0f;
         DepartureZone.ResetToWaiting();
     }
 
-    private bool AnyRacer()
+    private readonly List<PigeonController> _racers = new List<PigeonController>();
+
+    /// <summary>Pigeons du départ en cours (état simulé). Liste réutilisée à chaque appel.</summary>
+    private List<PigeonController> Racers()
     {
+        _racers.Clear();
         var pigeons = PigeonController.All;
         for (int i = 0; i < pigeons.Count; i++)
             if (DepartureZone.IsInCurrentStart(pigeons[i]))
-                return true;
-        return false;
-    }
-
-    private bool AllRacersFinishedArrival(int startCount)
-    {
-        var pigeons = PigeonController.All;
-        for (int i = 0; i < pigeons.Count; i++)
-        {
-            if (!DepartureZone.IsInCurrentStart(pigeons[i]))
-                continue;
-            ref PigeonState ps = ref pigeons[i].SimState;
-            if (ps.StartAckCount != startCount || !ps.StartAckZone.Equals(id))
-                return false;
-        }
-        return true;
+                _racers.Add(pigeons[i]);
+        return _racers;
     }
 
     private bool IsAnyRacerAboveMaxHeight()
     {
-        var pigeons = PigeonController.All;
-        for (int i = 0; i < pigeons.Count; i++)
-            if (DepartureZone.IsInCurrentStart(pigeons[i]) && pigeons[i].SimState.Position.y > MaximumHeight)
+        foreach (PigeonController racer in Racers())
+            if (racer.SimState.Position.y > MaximumHeight)
                 return true;
         return false;
     }
@@ -295,12 +286,9 @@ public class PigeonCharacterRace : PredictedIdentity<RaceState>
         float radius = DestinationStop.Radius;
         float stopSpeed = DestinationStop.StopSpeedThreshold;
 
-        var pigeons = PigeonController.All;
-        for (int i = 0; i < pigeons.Count; i++)
+        foreach (PigeonController racer in Racers())
         {
-            if (!DepartureZone.IsInCurrentStart(pigeons[i]))
-                continue;
-            ref PigeonState ps = ref pigeons[i].SimState;
+            ref PigeonState ps = ref racer.SimState;
             if ((ps.Position - center).sqrMagnitude <= radius * radius
                 && ps.LastVelocity.magnitude <= stopSpeed)
                 return true;
@@ -310,20 +298,18 @@ public class PigeonCharacterRace : PredictedIdentity<RaceState>
 
     private void SetRacersFrozen(bool frozen)
     {
-        var pigeons = PigeonController.All;
-        for (int i = 0; i < pigeons.Count; i++)
-            if (DepartureZone.IsInCurrentStart(pigeons[i]))
-                pigeons[i].ForceFreeze(frozen);
+        foreach (PigeonController racer in Racers())
+            racer.ForceFreeze(frozen);
     }
 
     protected override void UpdateView(RaceState view, RaceState? verified)
     {
         _viewState = view;
 
-        if (view.Phase != _presentedPhase)
-            ApplyPhasePresentation((RacePhase)view.Phase);
+        if ((int)view.Phase != _presentedPhase)
+            ApplyPhasePresentation(view.Phase);
 
-        if ((RacePhase)view.Phase == RacePhase.Racing && !_holdCharacter && Character != null)
+        if (view.Phase == RacePhase.Racing && !_holdCharacter && Character != null)
         {
             if (_path == null)
                 BuildPath();
@@ -462,7 +448,7 @@ public class PigeonCharacterRace : PredictedIdentity<RaceState>
     public void ReportArrivalCinematicFinished(PigeonController pigeon, int startCount)
     {
         if (pigeon != null && startCount > 0)
-            pigeon.AcknowledgeStartCinematic(id, startCount);
+            pigeon.AcknowledgeCinematic(id, startCount);
     }
 
     /// <summary>Scénarios : fin de la cinématique d'arrivée pour ce pigeon, sur son dernier départ de cette course.</summary>

@@ -3,8 +3,8 @@ using Unity.Cinemachine;
 using UnityEngine;
 
 /// <summary>
-/// Ã‰quipement portÃ© : stockÃ© dans l'Ã©tat prÃ©dit du pigeon (vu par tous), changÃ© par requÃªte d'input.
-/// La cinÃ©matique de ramassage reste locale au joueur qui ramasse.
+/// Équipement porté : stocké dans l'état prédit du pigeon (vu par tous), changé par requête d'input.
+/// La cinématique de ramassage reste locale au joueur qui ramasse.
 /// </summary>
 public class PigeonEquipment : MonoBehaviour
 {
@@ -22,7 +22,7 @@ public class PigeonEquipment : MonoBehaviour
     [SerializeField] private GameObject equipVFX;
 
     /// <summary>
-    /// Valeur = numÃ©ro de bit dans l'Ã©tat rÃ©seau, et sÃ©rialisÃ©e dans les prefabs de loot : n'ajouter qu'Ã  la fin.
+    /// Valeur = numéro de bit dans l'état réseau, et sérialisée dans les prefabs de loot : n'ajouter qu'à la fin.
     /// </summary>
     public enum Equipment
     {

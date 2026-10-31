@@ -5,8 +5,6 @@ using UnityEngine;
 
 public partial class ScenarioRunner
 {
-    public const string EquipmentScenario = "Équipement : ramassage";
-
     IEnumerator RunEquipmentPickup()
     {
         LootableEquipment loot = null;

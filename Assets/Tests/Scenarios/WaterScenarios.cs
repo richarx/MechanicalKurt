@@ -5,8 +5,6 @@ using UnityEngine;
 
 public partial class ScenarioRunner
 {
-    public const string WaterSpeedScenario = "Eau : speedway";
-
     const float LaneStartDepth = 1.2f;
     const float LaneMinFloor = 3.5f;
     const float LaneLength = 100f;

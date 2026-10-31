@@ -4,7 +4,7 @@ using UnityEngine;
 
 // Fly through to get a one-shot speed kick along the pigeon's direction of travel (works from both sides).
 /// <summary>
-/// ParamÃ¨tres et feedback d'un anneau ; le boost lui-mÃªme est dÃ©tectÃ© et appliquÃ© par PigeonController.Simulate.
+/// Paramètres et feedback d'un anneau ; le boost lui-même est détecté et appliqué par PigeonController.Simulate.
 /// </summary>
 [RequireComponent(typeof(Collider))]
 public class BoostRing : MonoBehaviour
