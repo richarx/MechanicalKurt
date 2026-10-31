@@ -33,6 +33,8 @@ public struct PigeonState : IPredictedData<PigeonState>
     public Vector3 PendingImpulse;
     public bool Grounded;
     public bool PreserveTeleportPitch;
+    /// <summary>Temps passé en vol stationnaire : phase de l'oscillation verticale, identique sur chaque machine.</summary>
+    public float HoverTime;
 
     public bool Stunned;
     public float StunRemaining;
@@ -104,7 +106,9 @@ public partial class PigeonController : PredictedIdentity<PigeonInput, PigeonSta
     [Header("Brake")]
     [SerializeField] float _brakeMaxSpeed = 1f;
     [SerializeField] float _brakeDragAtMaxSpeed = 0.1f;
-    [SerializeField] float _minHoverPitch = 30f;
+    [SerializeField] float _hoverWobbleFrequency = 1f;
+    [SerializeField] float _hoverWobbleAmplitude = 1f;
+    [SerializeField] float _hoverMoveSpeed = 1f;
 
     [Header("Flapping")]
     [SerializeField] float _takeoffSpeed = 3f;
@@ -216,6 +220,11 @@ public partial class PigeonController : PredictedIdentity<PigeonInput, PigeonSta
     /// <summary>MovingSupport.Id du support sous le pigeon (0 = aucun), lu depuis la vue.</summary>
     public int SupportId => _viewState.SupportId;
     public bool IsMovementFrozen => _viewState.Frozen;
+    /// <summary>Input simulé de ce pigeon (le sien ou celui reçu du réseau) : à utiliser pour l'animation des autres joueurs.</summary>
+    public bool IsFlapping => currentInput.Flap;
+    public bool IsDiving => currentInput.Dive;
+    /// <summary>Frein tenu : vol stationnaire en l'air.</summary>
+    public bool IsHovering => currentInput.Brake;
     /// <summary>Équipements portés, lus depuis la vue (bit = PigeonEquipment.Equipment).</summary>
     public byte WornEquipment => _viewState.Equipment;
 

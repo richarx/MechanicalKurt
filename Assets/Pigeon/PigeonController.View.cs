@@ -47,7 +47,7 @@ public partial class PigeonController
         }
 
         bool groundMode = view.Grounded && (view.LastVelocity.y <= 0.001f || view.SupportId != 0);
-        Quaternion target = groundMode
+        Quaternion target = groundMode || currentInput.Brake
             ? Quaternion.identity
             : Quaternion.Euler(0f, 0f, -currentInput.RelativeMovement.x * _visualRollAmount);
         float speed = groundMode ? 10f : _rollSpeed;

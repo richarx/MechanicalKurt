@@ -19,8 +19,10 @@ public class PigeonAnimationControl : MonoBehaviour
         _animator.SetBool("IsGrounded", _pigeonController.IsGrounded);
 
         IPigeonControls controls = _pigeonController.Controls;
-        _animator.SetBool("Flap", controls != null && controls.Flap);
-        _animator.SetBool("Dive", controls != null && controls.Dive);
+        bool hovering = _pigeonController.IsHovering;
+        _animator.SetBool("Flap", _pigeonController.IsFlapping && !hovering);
+        _animator.SetBool("Dive", _pigeonController.IsDiving && !hovering);
+        _animator.SetBool("Hover", hovering);
         _animator.SetBool("Dance", controls != null && controls.Flex);
     }
 }

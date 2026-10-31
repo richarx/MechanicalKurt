@@ -24,7 +24,11 @@ public class PlayerControls : MonoBehaviour, IPigeonControls
     [ShowInInspector, ReadOnly]
     public bool AreControlsBlocked { get; private set; }
 
-    private bool CanReadControls => isActiveAndEnabled && !AreControlsBlocked;
+    /// <summary>Menu pause ouvert : plus aucune commande, et le pigeon se met en vol stationnaire. Le jeu continue pour les autres.</summary>
+    [ShowInInspector, ReadOnly]
+    public bool IsPaused { get; private set; }
+
+    private bool CanReadControls => isActiveAndEnabled && !AreControlsBlocked && !IsPaused;
 
     void Awake()
     {
@@ -34,7 +38,7 @@ public class PlayerControls : MonoBehaviour, IPigeonControls
     void OnEnable()
     {
         _controls.Enable();
-        if (AreControlsBlocked)
+        if (AreControlsBlocked || IsPaused)
             _controls.Player.Disable();
     }
 
@@ -66,11 +70,22 @@ public class PlayerControls : MonoBehaviour, IPigeonControls
     public void SetControlsBlocked(bool blocked)
     {
         AreControlsBlocked = blocked;
+        ApplyActionMap();
+    }
+
+    public void SetPaused(bool paused)
+    {
+        IsPaused = paused;
+        ApplyActionMap();
+    }
+
+    void ApplyActionMap()
+    {
         ClearPendingActions();
         if (_controls == null)
             return;
 
-        if (blocked || !isActiveAndEnabled)
+        if (AreControlsBlocked || IsPaused || !isActiveAndEnabled)
             _controls.Player.Disable();
         else
             _controls.Player.Enable();
@@ -141,7 +156,7 @@ public class PlayerControls : MonoBehaviour, IPigeonControls
     bool IPigeonControls.Flap => CanReadControls && _controls.Player.Flap.IsPressed();
     bool IPigeonControls.Dive => CanReadControls && _controls.Player.Dive.IsPressed();
 
-    public bool Brake => CanReadControls && _controls.Player.Brake.IsPressed();
+    public bool Brake => (isActiveAndEnabled && IsPaused) || (CanReadControls && _controls.Player.Brake.IsPressed());
 
     public bool Flex => (CanReadControls && (_controls.Player.LeftFlex.IsPressed() || _controls.Player.RightFlex.IsPressed())) || _forceFlex;
 

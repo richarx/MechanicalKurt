@@ -100,7 +100,7 @@ public partial class PigeonController
 
     void UpdateCursorCapture()
     {
-        if (_controls is PlayerControls playerControls && playerControls.AreControlsBlocked)
+        if (_controls is PlayerControls playerControls && (playerControls.AreControlsBlocked || playerControls.IsPaused))
             return;
 
         if (!Application.isFocused)

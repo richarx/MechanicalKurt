@@ -290,6 +290,15 @@ public class ScenarioClientAgent : MonoBehaviour
                     network.StartClient();
                 return network.clientState.ToString();
 
+            case "pause":
+            {
+                PauseMenu menu = FindAnyObjectByType<PauseMenu>(FindObjectsInactive.Include);
+                if (menu == null)
+                    throw new InvalidOperationException("pas de PauseMenu");
+                menu.SetPaused(argument == "on");
+                return menu.IsPaused ? "en pause" : "reprise";
+            }
+
             case "start-rule":
             {
                 var rule = (MissionStartZone.StartRule)Enum.Parse(typeof(MissionStartZone.StartRule), argument);
@@ -459,6 +468,11 @@ public class ScenarioClientAgent : MonoBehaviour
         Add(RemoteKeys.RingSounds, string.Join(ScenarioLinkProtocol.ListSeparator, ringSounds));
         PigeonBoostFeedback feedback = local != null ? local.GetComponent<PigeonBoostFeedback>() : null;
         Add(RemoteKeys.ScreenSpeedLines, ScenarioLinkProtocol.Format(feedback != null ? feedback.ScreenEffectAlpha : 0f));
+        DayNightCycle cycle = FindAnyObjectByType<DayNightCycle>();
+        if (cycle != null)
+            Add(RemoteKeys.DayNightClock, ScenarioLinkProtocol.Format(cycle.Clock));
+        PlayerControls playerControls = local != null ? local.GetComponent<PlayerControls>() : null;
+        Add(RemoteKeys.Paused, Flag(playerControls != null && playerControls.IsPaused));
 
         return _snapshot.ToString();
     }

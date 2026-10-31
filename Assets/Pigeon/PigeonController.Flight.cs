@@ -19,7 +19,6 @@ public partial class PigeonController
         Vector3 velocity;
         if (input.Flap)
         {
-            s.Pitch = _maxPitch;
             velocity = forward * _flapMinSpeed;
             velocity.y = _takeoffSpeed;
             _takeoffEvent.Invoke();
@@ -34,21 +33,26 @@ public partial class PigeonController
 
     void ComputePitch(in PigeonInput input, ref PigeonState s, float pitchSpeed, float maxPitch, float dt)
     {
+        bool hasVerticalInput = Mathf.Abs(input.RelativeMovement.y) >= 0.001f;
+
         // Un départ incliné vers l'eau reste orienté jusqu'à une commande de tangage.
-        if (s.PreserveTeleportPitch && Mathf.Abs(input.RelativeMovement.y) < 0.001f)
+        if (s.PreserveTeleportPitch && !hasVerticalInput)
             return;
         s.PreserveTeleportPitch = false;
-        float targetPitch = Mathf.Clamp(
-            s.Pitch - input.RelativeMovement.y * pitchSpeed * dt,
-            -maxPitch,
-            maxPitch);
+        float targetPitch;
+        if (input.Brake || (input.Flap && !hasVerticalInput))
+            targetPitch = maxPitch;
+        else if (UnderWater(s.Position) && !hasVerticalInput)
+            targetPitch = -maxPitch;
+        else
+            targetPitch = Mathf.Clamp(s.Pitch - input.RelativeMovement.y * pitchSpeed * dt, -maxPitch, maxPitch);
         float deltaPitch = Mathf.Abs(Mathf.DeltaAngle(targetPitch, s.Pitch));
         s.Pitch = Mathf.MoveTowardsAngle(s.Pitch, targetPitch, Mathf.Max(pitchSpeed * dt, deltaPitch * 0.1f * dt));
     }
 
-    void ComputeYaw(in PigeonInput input, ref PigeonState s, float dt)
+    void ComputeYaw(in PigeonInput input, ref PigeonState s, float dt, float turnSpeed)
     {
-        s.Yaw += input.RelativeMovement.x * _turnSpeed * dt;
+        s.Yaw += input.RelativeMovement.x * turnSpeed * dt;
     }
 
     static void ComputeDrag(ref Vector3 velocity, float targetSpeed, float dragAtMaxSpeed, float dt)
@@ -94,22 +98,26 @@ public partial class PigeonController
         Vector3 velocity = s.LastVelocity + Physics.gravity * dt + s.PendingImpulse;
         s.PendingImpulse = Vector3.zero;
 
-        float hoverFactor = 0f;
-        if (input.Flap && input.Brake)
+        if (input.Brake)
         {
-            float pitchRange = _maxPitch - _minHoverPitch;
-            if (pitchRange > 0.01f)
-                hoverFactor = Mathf.Clamp01((s.Pitch - _minHoverPitch) / pitchRange);
-            else if (s.Pitch >= _minHoverPitch)
-                hoverFactor = 1f;
-        }
+            targetSpeed = _brakeMaxSpeed;
+            dragAtMaxSpeed = _brakeDragAtMaxSpeed;
 
-        if (input.Flap)
+            s.HoverTime += dt;
+            float targetVerticalVelocity = Mathf.Sin(s.HoverTime * _hoverWobbleFrequency) * _hoverWobbleAmplitude;
+            velocity.y = Mathf.MoveTowards(velocity.y, targetVerticalVelocity, 15f * dt);
+            velocity = Vector3.MoveTowards(velocity, Vector3.zero, 5f * dt);
+            velocity += ForwardOf(s.Pitch, s.Yaw) * input.RelativeMovement.y * _hoverMoveSpeed * dt;
+
+            ComputePitch(input, ref s, _pitchSpeed, _maxPitch, dt);
+            ComputeYaw(input, ref s, dt, _turnSpeed * 2f);
+        }
+        else if (input.Flap)
         {
             targetSpeed = _flapMaxSpeed;
             dragAtMaxSpeed = _flapDragAtMaxSpeed;
             ComputePitch(input, ref s, _pitchSpeed, _maxPitch, dt);
-            ComputeYaw(input, ref s, dt);
+            ComputeYaw(input, ref s, dt, _turnSpeed);
             velocity += Vector3.up * _flapAccel * dt;
         }
         else if (input.Dive)
@@ -120,35 +128,22 @@ public partial class PigeonController
             float targetPitch = -_diveMaxPitch;
             float deltaPitch = Mathf.Abs(Mathf.DeltaAngle(targetPitch, s.Pitch));
             s.Pitch = Mathf.MoveTowardsAngle(s.Pitch, targetPitch, Mathf.Max(_divePitchSpeed * dt, deltaPitch * 0.1f * dt));
-            ComputeYaw(input, ref s, dt);
+            ComputeYaw(input, ref s, dt, _turnSpeed);
         }
         else
         {
             targetSpeed = _maxSpeed;
             dragAtMaxSpeed = _dragAtMaxSpeed;
             ComputePitch(input, ref s, _pitchSpeed, _maxPitch, dt);
-            ComputeYaw(input, ref s, dt);
+            ComputeYaw(input, ref s, dt, _turnSpeed);
             ApplyFlightForces(ref s, ref velocity, dt);
-        }
-
-        if (!input.Dive && input.Brake)
-        {
-            targetSpeed = _brakeMaxSpeed;
-            dragAtMaxSpeed = _brakeDragAtMaxSpeed;
-        }
-
-        if (hoverFactor > 0f)
-        {
-            velocity -= Physics.gravity * dt;
-            velocity.y = Mathf.MoveTowards(velocity.y, 0f, 15f * dt);
-            velocity = Vector3.Lerp(velocity, Vector3.zero, hoverFactor * 10f * dt);
         }
 
         float speed = velocity.magnitude;
         Vector3 forward = ForwardOf(s.Pitch, s.Yaw);
         float forwardSpeed = Vector3.Dot(velocity, forward);
 
-        if (!input.Dive && speed > 0.1f)
+        if (!input.Dive && !input.Brake && speed > 0.1f)
         {
             float steeringFactor = 4f;
             if (!input.Flap && forward.y > 0.1f && forwardSpeed < _stallSpeed * 1.3f)

@@ -25,6 +25,7 @@ public class PauseMenu : MonoBehaviour
     private bool isPaused;
 
     private Sequence currentSequence;
+    private PlayerControls pausedControls;
 
     private void Start()
     {
@@ -34,17 +35,23 @@ public class PauseMenu : MonoBehaviour
     private void Update()
     {
         if (pauseAction.action.WasPressedThisFrame())
-        {
-            isPaused = !isPaused;
-
-            if (isPaused)
-                OpenMenu();
-            else
-                CloseMenu();
-        }
+            SetPaused(!isPaused);
 
         if (isPaused)
             backgroundMaterial.SetFloat("_UnscaledTime", Time.unscaledTime);
+    }
+
+    public bool IsPaused => isPaused;
+
+    public void SetPaused(bool paused)
+    {
+        if (paused == isPaused)
+            return;
+        isPaused = paused;
+        if (paused)
+            OpenMenu();
+        else
+            CloseMenu();
     }
 
     private void OpenMenu()
@@ -54,7 +61,7 @@ public class PauseMenu : MonoBehaviour
 
         currentSequence = DOTween.Sequence();
 
-        Time.timeScale = 0.0f;
+        SetLocalPigeonPaused(true);
 
         achievementListDisplayer.DisplayAchievementList();
         menuHolder.SetActive(true);
@@ -82,8 +89,19 @@ public class PauseMenu : MonoBehaviour
         currentSequence.Join(title.DOFade(0.0f, 0.1f));
         currentSequence.Append(backgroundMaterial.DOColor(Color.clear, "_Tint", 0.3f));
         currentSequence.AppendCallback(() => menuHolder.SetActive(false));
-        currentSequence.AppendCallback(() => Time.timeScale = 1.0f);
+        currentSequence.AppendCallback(() => SetLocalPigeonPaused(false));
         currentSequence.SetUpdate(true);
+    }
+
+    /// <summary>La pause n'arrête pas le temps (partie partagée) : le pigeon du joueur se met en vol stationnaire.</summary>
+    private void SetLocalPigeonPaused(bool paused)
+    {
+        if (paused)
+            pausedControls = PigeonController.Local != null ? PigeonController.Local.GetComponent<PlayerControls>() : null;
+        if (pausedControls != null)
+            pausedControls.SetPaused(paused);
+        if (!paused)
+            pausedControls = null;
     }
 
     private void SetCursorState(bool state)

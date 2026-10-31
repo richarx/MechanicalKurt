@@ -29,6 +29,7 @@ public partial class ScenarioRunner
         Solo("Anneaux des égouts : boost et combo", r => r.RunSewerRings()),
         Solo("Voitures : solides en solo, on roule dessus", r => r.RunCarRide()),
         Solo("Sons : 2D pour soi, 3D pour les autres", r => r.RunPigeonAudio()),
+        Solo("Pause : le jeu continue, le pigeon reste en l'air", r => r.PauseKeepsGameRunning()),
 
         Multi("Multi : départ de course à 2 joueurs", r => r.MultiRaceStart()),
         Multi("Multi : victoire, gel et course refaite", r => r.MultiRaceWin()),
@@ -40,6 +41,7 @@ public partial class ScenarioRunner
         Multi("Multi : équipement du second joueur", r => r.MultiEquipment()),
         Multi("Multi : sons chez le second joueur", r => r.MultiAudio()),
         Multi("Multi : effets d'anneau seulement pour celui qui le traverse", r => r.MultiRingFeedback()),
+        Multi("Multi : pause sans arrêt de la partie, même heure du jour", r => r.MultiPauseAndDayNight()),
     };
 
     class ScenarioDef

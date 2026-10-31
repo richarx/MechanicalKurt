@@ -40,7 +40,7 @@ public partial class ScenarioRunner
         Vector3 ballStart = body.position;
         float angularMax = 0f;
         int samples = 0, onBall = 0;
-        Bot.Movement = new Vector2(0f, 1f);
+        Bot.Movement = new Vector2(0f, 0.4f);
         float end = Time.realtimeSinceStartup + 3f;
         while (Time.realtimeSinceStartup < end)
         {
