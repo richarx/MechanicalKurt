@@ -15,7 +15,7 @@ public class PigeonAnimationSFX : MonoBehaviour
 
     public void PlayFootStepSound()
     {
-        SFXManager.Instance.PlayRandomSFX(footstepSounds, 0.15f);
+        SFXManager.Instance.PlayRandomSFX(footstepSounds, 0.05f);
     }
 
     public void PlayLandingSound()
