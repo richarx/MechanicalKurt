@@ -427,7 +427,6 @@ public class PigeonController : MonoBehaviour
         transform.rotation = Quaternion.Euler(0f, _yaw, 0f);
         if (_controls.Flap)
         {
-            _currentPitch = _maxPitch;
             _velocity = transform.forward * _flapMinSpeed;
             _velocity.y = _takeoffSpeed;
             OnTakeoff?.Invoke();
@@ -441,13 +440,23 @@ public class PigeonController : MonoBehaviour
 
     void ComputePitch(float pitchSpeed, float maxPitch, float dt)
     {
+        bool hasVerticalInput = Mathf.Abs(_controls.RelativeMovement.y) >= 0.001f;
+
         // Un départ incliné vers l'eau reste orienté jusqu'à une commande de tangage.
-        if (_preserveTeleportPitch && Mathf.Abs(_controls.RelativeMovement.y) < 0.001f)
+        if (_preserveTeleportPitch && !hasVerticalInput)
             return;
         _preserveTeleportPitch = false;
         float targetPitch;
 
-        if (IsUndeWater && Mathf.Abs(_controls.RelativeMovement.y) < 0.1f)
+        if (_controls.Brake)
+        {
+            targetPitch = maxPitch;
+        }
+        else if (_controls.Flap && !hasVerticalInput)
+        {
+            targetPitch = maxPitch;
+        }
+        else if (IsUndeWater && !hasVerticalInput)
         {
             targetPitch = -maxPitch;
         }
@@ -459,7 +468,6 @@ public class PigeonController : MonoBehaviour
                 maxPitch
             );
         }
-
 
         float deltaPitch = Mathf.Abs(Mathf.DeltaAngle(targetPitch, _currentPitch));
         _currentPitch = Mathf.MoveTowardsAngle(_currentPitch, targetPitch, Mathf.Max(pitchSpeed * dt, deltaPitch * 0.1f * dt));
@@ -530,9 +538,7 @@ public class PigeonController : MonoBehaviour
             _velocity = Vector3.MoveTowards(_velocity, Vector3.zero, 5f * dt);
             _velocity += transform.forward * _controls.RelativeMovement.y * _hoverMoveSpeed * dt;
 
-            float targetPitch = 45.0f;
-            float deltaPitch = Mathf.Abs(Mathf.DeltaAngle(targetPitch, _currentPitch));
-            _currentPitch = Mathf.MoveTowardsAngle(_currentPitch, targetPitch, Mathf.Max(_pitchSpeed * dt, deltaPitch * 0.1f * dt));
+            ComputePitch(_pitchSpeed, _maxPitch, dt);
             ComputeRotation(dt, _turnSpeed * 2.0f);
         }
         else if (_controls.Flap)
