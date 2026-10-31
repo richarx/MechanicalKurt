@@ -581,10 +581,17 @@ public class PigeonController : MonoBehaviour
             targetSpeed = _brakeMaxSpeed;
             dragAtMaxSpeed = _brakeDragAtMaxSpeed;
 
-            float targetVerticalVelocity = Mathf.Sin(Time.time * _hoverWobbleFrequency) * _hoverWobbleAmplitude;
-            _velocity.y = Mathf.MoveTowards(_velocity.y, targetVerticalVelocity, 15f * dt);
             _velocity = Vector3.MoveTowards(_velocity, Vector3.zero, 5f * dt);
-            _velocity += transform.forward * _controls.RelativeMovement.y * _hoverMoveSpeed * dt;
+
+            if (_controls.Flap)
+                _velocity.y = Mathf.MoveTowards(_velocity.y, 2.0f, 25f * dt);
+            else if (_controls.RelativeMovement.y < -0.0001f)
+                _velocity.y = Mathf.MoveTowards(_velocity.y, -2.0f, 15f * dt);
+            else
+                _velocity.y = Mathf.MoveTowards(_velocity.y, Mathf.Sin(Time.time * _hoverWobbleFrequency) * _hoverWobbleAmplitude, 15f * dt);
+
+            if (_controls.RelativeMovement.y > 0.0001f)
+                _velocity += transform.forward * _controls.RelativeMovement.y * _hoverMoveSpeed * dt;
 
             ComputePitch(_pitchSpeed, _maxPitch, dt);
             ComputeRotation(dt, _turnSpeed * 2.0f);
