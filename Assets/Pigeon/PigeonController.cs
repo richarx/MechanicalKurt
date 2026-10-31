@@ -445,11 +445,22 @@ public class PigeonController : MonoBehaviour
         if (_preserveTeleportPitch && Mathf.Abs(_controls.RelativeMovement.y) < 0.001f)
             return;
         _preserveTeleportPitch = false;
-        float targetPitch = Mathf.Clamp(
+        float targetPitch;
+
+        if (IsUndeWater && Mathf.Abs(_controls.RelativeMovement.y) < 0.1f)
+        {
+            targetPitch = -maxPitch;
+        }
+        else
+        {
+            targetPitch = Mathf.Clamp(
                 _currentPitch - _controls.RelativeMovement.y * pitchSpeed * dt,
                 -maxPitch,
                 maxPitch
             );
+        }
+
+
         float deltaPitch = Mathf.Abs(Mathf.DeltaAngle(targetPitch, _currentPitch));
         _currentPitch = Mathf.MoveTowardsAngle(_currentPitch, targetPitch, Mathf.Max(pitchSpeed * dt, deltaPitch * 0.1f * dt));
     }
