@@ -73886,11 +73886,6 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 1278074370572284612, guid: 0307f01c474aae141b9c2573f88d7e06, type: 3}
   m_PrefabInstance: {fileID: 1318791393}
   m_PrefabAsset: {fileID: 0}
---- !u!1 &1319265526 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 8893443228925278897, guid: 013420fdddab85a48be5b875e08e2729, type: 3}
-  m_PrefabInstance: {fileID: 1769670839}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1322252241
 GameObject:
   m_ObjectHideFlags: 0
@@ -99836,10 +99831,6 @@ PrefabInstance:
       propertyPath: HorizontalAxis.Center
       value: 122.69217
       objectReference: {fileID: 0}
-    - target: {fileID: 2514600447504455624, guid: 013420fdddab85a48be5b875e08e2729, type: 3}
-      propertyPath: _useStaminaSystem
-      value: 1
-      objectReference: {fileID: 0}
     - target: {fileID: 3577777248601108592, guid: 013420fdddab85a48be5b875e08e2729, type: 3}
       propertyPath: waterPlane
       value: 
@@ -99895,10 +99886,7 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 8893443228925278897, guid: 013420fdddab85a48be5b875e08e2729, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 1769670867}
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 013420fdddab85a48be5b875e08e2729, type: 3}
 --- !u!4 &1769670840 stripped
 Transform:
@@ -99910,7 +99898,7 @@ MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 2514600447504455624, guid: 013420fdddab85a48be5b875e08e2729, type: 3}
   m_PrefabInstance: {fileID: 1769670839}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1319265526}
+  m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 220a88b6c93f5b24e898fee231663b01, type: 3}
@@ -99921,7 +99909,7 @@ MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 5917408735170155768, guid: 013420fdddab85a48be5b875e08e2729, type: 3}
   m_PrefabInstance: {fileID: 1769670839}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1319265526}
+  m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 8f7305da3f13b6d48b104f2618e72a20, type: 3}
@@ -99932,7 +99920,7 @@ MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 612529284508758725, guid: 013420fdddab85a48be5b875e08e2729, type: 3}
   m_PrefabInstance: {fileID: 1769670839}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1319265526}
+  m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 1737bba54d0415b4cbee35e0c4466df4, type: 3}
@@ -99943,42 +99931,23 @@ MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 5357851348377741376, guid: 013420fdddab85a48be5b875e08e2729, type: 3}
   m_PrefabInstance: {fileID: 1769670839}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1319265526}
+  m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 1e448efc9d02a664c9b17914eadc1537, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PigeonOnMoving
---- !u!114 &1769670867
+--- !u!114 &1769670867 stripped
 MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
+  m_CorrespondingSourceObject: {fileID: 8875113971220435731, guid: 013420fdddab85a48be5b875e08e2729, type: 3}
+  m_PrefabInstance: {fileID: 1769670839}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1319265526}
+  m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 97b826b2726301f4b8ba1265cb8b782f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PigeonStamina
-  OnBoostStamina:
-    m_PersistentCalls:
-      m_Calls: []
-  OnCannotUseStamina:
-    m_PersistentCalls:
-      m_Calls: []
-  OnUseStamina:
-    m_PersistentCalls:
-      m_Calls: []
-  maxStamina: 100
-  staminaNormalizedThresholdToFlap: 0.3
-  staminaDepletionRate_Flap: 20
-  staminaRecoveryRate_Regular: 5
-  staminaRecoveryRate_Brake: 25
-  staminaRecoveryRate_UnderWater: 25
-  staminaRecoveryRate_Dive: 50
-  staminaInstantRecovery_Roll: 25
-  staminaInstantRecovery_Boost: 50
 --- !u!1 &1770822444
 GameObject:
   m_ObjectHideFlags: 0
@@ -101132,7 +101101,6 @@ MonoBehaviour:
   timeBeforeHide: 2
   barAnimationSmoothSpeed: 0.3
   positionOffset: {x: 120, y: 100, z: 0}
-  followSmoothSpeed: 0.3
 --- !u!225 &1794590533
 CanvasGroup:
   m_ObjectHideFlags: 0
