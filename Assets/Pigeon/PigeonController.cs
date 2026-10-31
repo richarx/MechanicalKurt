@@ -23,6 +23,8 @@ public class PigeonController : MonoBehaviour
 
     [Header("Ground Movement")]
     [SerializeField] float _groundSpeed = 1f;
+    [SerializeField] float _groundMovementAcceleration = 1f;
+    [SerializeField] float _groundMovementDeceleration = 1f;
 
     [Header("Rotation")]
     [SerializeField] float _turnSpeed = 90f;
@@ -376,7 +378,6 @@ public class PigeonController : MonoBehaviour
 
         _velocity = Vector3.zero;
 
-
         _currentPigeonState = ComputeCurrentPigeonState();
         if (_currentPigeonState == PigeonState.Grounded)
         {
@@ -447,7 +448,15 @@ public class PigeonController : MonoBehaviour
         }
         else
         {
-            _velocity = transform.forward * directionMagnitude * _groundSpeed;
+            if (directionMagnitude > 0.0001f)
+            {
+                Vector3 targetVelocity = transform.forward * directionMagnitude * _groundSpeed;
+                _velocity = Vector3.MoveTowards(_lastVelocity, targetVelocity, _groundMovementAcceleration * Time.deltaTime);
+            }
+            else
+            {
+                _velocity = Vector3.MoveTowards(_velocity, Vector3.zero, _groundMovementDeceleration * Time.deltaTime);
+            }
             _velocity.y = -1f;
         }
     }

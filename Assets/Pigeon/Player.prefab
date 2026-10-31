@@ -177,6 +177,8 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 1
   _groundSpeed: 2.5
+  _groundMovementAcceleration: 15
+  _groundMovementDeceleration: 35
   _turnSpeed: 90
   _pitchSpeed: 60
   _visualRollAmount: 90
