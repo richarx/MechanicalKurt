@@ -225,6 +225,11 @@ public class ScenarioClientAgent : MonoBehaviour
                 _bot.PressInteract();
                 return "";
 
+            case "coo":
+                RequireDriven(local);
+                _bot.PressCoo();
+                return "";
+
             case "flap":
                 RequireDriven(local);
                 _bot.Flap = argument == "1";
@@ -473,6 +478,12 @@ public class ScenarioClientAgent : MonoBehaviour
             Add(RemoteKeys.DayNightClock, ScenarioLinkProtocol.Format(cycle.Clock));
         PlayerControls playerControls = local != null ? local.GetComponent<PlayerControls>() : null;
         Add(RemoteKeys.Paused, Flag(playerControls != null && playerControls.IsPaused));
+
+        var bubbles = new List<string>();
+        foreach (PigeonController pigeon in PigeonController.All)
+            if (pigeon.TryGetComponent(out PigeonCooBeacon beacon) && beacon.Indicator != null && beacon.Indicator.IsShowing)
+                bubbles.Add((pigeon == local ? "moi:" : "") + ColorUtility.ToHtmlStringRGB(beacon.Indicator.Color));
+        Add(RemoteKeys.CooBubbles, string.Join(ScenarioLinkProtocol.ListSeparator, bubbles));
 
         return _snapshot.ToString();
     }

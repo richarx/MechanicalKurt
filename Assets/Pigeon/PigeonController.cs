@@ -14,6 +14,7 @@ public struct PigeonInput : IPredictedData
     public bool BarrelLeft;
     public bool BarrelRight;
     public bool Interact;
+    public bool Coo;
     public bool Respawn;
     public byte EquipmentWear;
     public byte EquipmentToggle;
@@ -57,6 +58,8 @@ public struct PigeonState : IPredictedData<PigeonState>
 
     /// <summary>Équipements portés, un bit par PigeonEquipment.Equipment.</summary>
     public byte Equipment;
+    /// <summary>Nombre de roucoulements (modulo 256) : la vue de chaque machine joue OnCoo quand il avance.</summary>
+    public byte CooCount;
 
     public Vector3 SpawnPosition;
     public Quaternion SpawnRotation;
@@ -155,6 +158,9 @@ public partial class PigeonController : PredictedIdentity<PigeonInput, PigeonSta
     public UnityEvent OnStunned { get; private set; } = new UnityEvent();
     [field: SerializeField]
     public UnityEvent OnBoosted { get; private set; } = new UnityEvent();
+    /// <summary>Roucoulement, déclenché sur chaque machine (son, bulle chez les autres joueurs).</summary>
+    [field: SerializeField]
+    public UnityEvent OnCoo { get; private set; } = new UnityEvent();
 
     CharacterController _controller;
     IPigeonControls _controls;
@@ -225,6 +231,8 @@ public partial class PigeonController : PredictedIdentity<PigeonInput, PigeonSta
     public bool IsDiving => currentInput.Dive;
     /// <summary>Frein tenu : vol stationnaire en l'air.</summary>
     public bool IsHovering => currentInput.Brake;
+    /// <summary>Couleur du joueur qui contrôle ce pigeon (bulle de roucoulement…), la même sur chaque machine.</summary>
+    public Color PlayerColor => PlayerColors.For(owner);
     /// <summary>Équipements portés, lus depuis la vue (bit = PigeonEquipment.Equipment).</summary>
     public byte WornEquipment => _viewState.Equipment;
 
@@ -358,6 +366,9 @@ public partial class PigeonController : PredictedIdentity<PigeonInput, PigeonSta
             TeleportTo(ref s, s.SpawnPosition, s.SpawnRotation);
 
         ApplyMissionInput(input, ref s.Mission);
+        // Un appui d'un seul tick n'arrive pas toujours aux autres clients : le compteur, lui, fait partie de l'état.
+        if (input.Coo)
+            s.CooCount++;
         s.Equipment = (byte)((s.Equipment | input.EquipmentWear) ^ input.EquipmentToggle);
 
         if (s.Frozen)

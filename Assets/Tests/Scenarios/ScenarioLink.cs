@@ -79,6 +79,8 @@ public static class RemoteKeys
     public const string ScreenSpeedLines = "fx/speedlines";
     public const string DayNightClock = "daynight/clock";
     public const string Paused = "local/paused";
+    /// <summary>Bulles de roucoulement visibles : couleur de chacune, préfixée « moi: » pour celle de son propre pigeon.</summary>
+    public const string CooBubbles = "coo/bubbles";
 
     public const string ZonePrefix = "zone/";
     public const string RacePrefix = "race/";

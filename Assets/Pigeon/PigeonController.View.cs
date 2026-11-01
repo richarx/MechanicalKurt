@@ -19,6 +19,29 @@ public partial class PigeonController
         UpdateVisualRotation(view, Time.deltaTime);
         if (_equipment != null)
             _equipment.ApplyWorn(view.Equipment);
+        UpdateCooView(view.CooCount);
+    }
+
+    byte _viewCooCount;
+    bool _viewCooKnown;
+
+    /// <summary>
+    /// OnCoo quand le compteur avance. Rien à la première vue (arrivée en cours de partie), et un retour en arrière
+    /// (correction de prédiction) ne rejoue rien.
+    /// </summary>
+    void UpdateCooView(byte count)
+    {
+        if (!_viewCooKnown)
+        {
+            _viewCooKnown = true;
+            _viewCooCount = count;
+            return;
+        }
+        byte ahead = (byte)(count - _viewCooCount);
+        if (ahead == 0 || ahead >= 128)
+            return;
+        _viewCooCount = count;
+        OnCoo.Invoke();
     }
 
     void UpdateRagdollView(in PigeonState view)

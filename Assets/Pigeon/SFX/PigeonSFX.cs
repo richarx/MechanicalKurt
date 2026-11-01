@@ -48,6 +48,7 @@ public class PigeonSFX : MonoBehaviour
             ? pigeonController.Controls : GetComponent<IPigeonControls>();
         buttHoleManager = GetComponent<ButtHoleManager>();
 
+        pigeonController.OnCoo.AddListener(() => PlayRandom(coohClips, 1.0f));
         pigeonController.OnTakeoff.AddListener(() => Play(takeOffClip));
         pigeonController.OnRoll.AddListener(() => PlayRandom(rollClips));
         pigeonController.OnStunned.AddListener(() => Play(hurtClip));
@@ -71,9 +72,6 @@ public class PigeonSFX : MonoBehaviour
 
     private void Update()
     {
-        if (controls.ConsumeCooing)
-            PlayRandom(coohClips, 1.0f);
-
         if (pigeonController != null && pigeonController.Controls != null)
             controls = pigeonController.Controls;
 

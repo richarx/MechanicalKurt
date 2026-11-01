@@ -25,7 +25,7 @@ public class BotControls : IPigeonControls
     {
         Movement = RelativeMovement = Vector2.zero;
         Flap = Dive = Brake = PrecisionCamera = false;
-        _interact = _predictedInteract = false;
+        _interact = _predictedInteract = _cooing = false;
     }
 
     public bool ConsumeInteract
@@ -48,7 +48,15 @@ public class BotControls : IPigeonControls
     public int PredictedInteractConsumed { get; private set; }
     public bool HasPendingInteract => _predictedInteract;
 
-    public bool ConsumeCooing => false;
+    bool _cooing;
+
+    /// <summary>Un appui sur la touche de roucoulement.</summary>
+    public void PressCoo() => _cooing = true;
+
+    public bool ConsumeCooing
+    {
+        get { bool v = _cooing; _cooing = false; return v; }
+    }
     public bool ConsumeShit => false;
     public bool ConsumeLeftFlex => false;
     public bool ConsumeRightFlex => false;

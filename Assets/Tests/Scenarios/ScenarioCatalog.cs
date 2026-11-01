@@ -32,6 +32,7 @@ public partial class ScenarioRunner
         Solo("Voitures : photos d'une voiture et du pigeon posé dessus", r => r.PigeonOnCar()),
         Solo("Sons : 2D pour soi, 3D pour les autres", r => r.RunPigeonAudio()),
         Solo("Pause : le jeu continue, le pigeon reste en l'air", r => r.PauseKeepsGameRunning()),
+        Solo("Roucoulement : bulle pour les autres, au bord de l'écran si loin", r => r.CooBubbles()),
 
         Multi("Multi : départ de course à 2 joueurs", r => r.MultiRaceStart()),
         Multi("Multi : victoire, gel et course refaite", r => r.MultiRaceWin()),
@@ -44,6 +45,7 @@ public partial class ScenarioRunner
         Multi("Multi : sons chez le second joueur", r => r.MultiAudio()),
         Multi("Multi : effets d'anneau seulement pour celui qui le traverse", r => r.MultiRingFeedback()),
         Multi("Multi : pause sans arrêt de la partie, même heure du jour", r => r.MultiPauseAndDayNight()),
+        Multi("Multi : roucoulement vu par l'autre joueur, à sa couleur", r => r.MultiCoo()),
     };
 
     class ScenarioDef

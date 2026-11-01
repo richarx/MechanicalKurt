@@ -90,6 +90,7 @@ GameObject:
   - component: {fileID: 8209984083396803717}
   - component: {fileID: 7843387565400470936}
   - component: {fileID: 3510523586792754108}
+  - component: {fileID: 1777378049009701218}
   m_Layer: 3
   m_Name: Player
   m_TagString: Untagged
@@ -230,6 +231,9 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   <OnBoosted>k__BackingField:
+    m_PersistentCalls:
+      m_Calls: []
+  <OnCoo>k__BackingField:
     m_PersistentCalls:
       m_Calls: []
 --- !u!114 &7788707282503470594
@@ -473,6 +477,19 @@ MonoBehaviour:
   _ownerAuth: 1
   _autoSyncParameters: 1
   _dontSyncParameters: []
+--- !u!114 &1777378049009701218
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8893443228925278897}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e81d3a86c0c00354aa6985d7c465fc2c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PigeonCooBeacon
+  _indicatorPrefab: {fileID: 4243052217629217934, guid: 01c7297f005f2274893c6eae4af0a229, type: 3}
 --- !u!1001 &902121178248826382
 PrefabInstance:
   m_ObjectHideFlags: 0

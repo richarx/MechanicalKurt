@@ -48,6 +48,7 @@ public partial class PigeonController
         input.BarrelLeft |= _controls.ConsumeLeftFlex;
         input.BarrelRight |= _controls.ConsumeRightFlex;
         input.Interact |= _controls.ConsumePredictedInteract;
+        input.Coo |= _controls.ConsumeCooing;
     }
 
     protected override void GetFinalInput(ref PigeonInput input)
@@ -87,6 +88,7 @@ public partial class PigeonController
         input.BarrelLeft = false;
         input.BarrelRight = false;
         input.Interact = false;
+        input.Coo = false;
         input.Respawn = false;
         input.EquipmentWear = 0;
         input.EquipmentToggle = 0;
