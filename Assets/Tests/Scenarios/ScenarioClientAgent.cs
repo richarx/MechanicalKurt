@@ -485,6 +485,12 @@ public class ScenarioClientAgent : MonoBehaviour
                 bubbles.Add((pigeon == local ? "moi:" : "") + ColorUtility.ToHtmlStringRGB(beacon.Indicator.Color));
         Add(RemoteKeys.CooBubbles, string.Join(ScenarioLinkProtocol.ListSeparator, bubbles));
 
+        TrafficNetwork traffic = FindAnyObjectByType<TrafficNetwork>();
+        if (traffic != null && TrafficNetwork.IsRunning)
+            Add(RemoteKeys.TrafficCars, ScenarioRunner.DescribeTraffic(traffic));
+        Add(RemoteKeys.CarsGhosts, Flag(TrafficCollisionGate.CarsAreGhosts));
+        Add(RemoteKeys.SupportId, local != null ? local.SupportId.ToString(CultureInfo.InvariantCulture) : "0");
+
         return _snapshot.ToString();
     }
 

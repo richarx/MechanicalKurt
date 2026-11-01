@@ -37,6 +37,13 @@ public class TrafficSpawner : MonoBehaviour
     private void Start()
     {
         if (SpawnOnStart)
+            EnsureSpawned();
+    }
+
+    /// <summary>Crée les voitures si ce n'est pas déjà fait (le trafic synchronisé peut les demander avant Start).</summary>
+    public void EnsureSpawned()
+    {
+        if (_spawnRoot == null)
             SpawnCars();
     }
 
@@ -64,7 +71,8 @@ public class TrafficSpawner : MonoBehaviour
         if (CarCount == 0)
             return;
 
-        var random = new System.Random(UnityEngine.Random.Range(0, int.MaxValue));
+        // Graine tirée de la place du spawner dans la scène : mêmes voitures, mêmes places sur chaque machine.
+        var random = new System.Random(StableSeed());
         AmbientCar[] selected = new AmbientCar[CarCount];
         float[] lengths = new float[CarCount];
         float[] minimumGaps = new float[CarCount];
@@ -101,7 +109,8 @@ public class TrafficSpawner : MonoBehaviour
                 continue;
 
             AmbientCar car = Instantiate(prefab, Path.GetPosition(distances[i]), Quaternion.identity, _spawnRoot.transform);
-            car.MaxSpeed = UnityEngine.Random.Range(_minMaxVelocity.x, _minMaxVelocity.y);
+            car.MaxSpeed = Mathf.Lerp(_minMaxVelocity.x, _minMaxVelocity.y, (float)random.NextDouble());
+            car.SetRandomSeed((uint)random.Next());
             car.Initialize(Path, distances[i]);
             car.enabled = true;
             car.gameObject.SetActive(true);
@@ -125,6 +134,20 @@ public class TrafficSpawner : MonoBehaviour
             _spawnRoot = null;
         }
         SpawnedCount = 0;
+    }
+
+    private int StableSeed()
+    {
+        var path = new System.Text.StringBuilder(gameObject.scene.name);
+        for (Transform t = transform; t != null; t = t.parent)
+            path.Append('/').Append(t.name).Append('#').Append(t.GetSiblingIndex());
+        unchecked
+        {
+            int hash = (int)2166136261;
+            foreach (char c in path.ToString())
+                hash = (hash ^ c) * 16777619;
+            return hash & 0x7FFFFFFF;
+        }
     }
 
     private void OnValidate()

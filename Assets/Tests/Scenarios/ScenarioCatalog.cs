@@ -16,6 +16,7 @@ public partial class ScenarioRunner
         Solo("Course : victoire et course refaite", r => r.RaceWinAndReplay()),
         Solo("Course : un seul joueur suffit (AnyPigeon)", r => r.RaceAnyPigeon()),
         Solo("Ragdoll : les zones ne se déclenchent pas", r => r.RagdollIgnoredByZones()),
+        Solo("Ragdoll : le pigeon retrouve sa forme en se relevant", r => r.RagdollRecovers()),
         Solo("Mission : livraison simple", r => r.RunDeliveryMission()),
         Solo("Mission : collecte (Spidey)", r => r.RunCollectionMission()),
         Solo("Mission : billboards", r => r.RunBillboardMission()),
@@ -29,6 +30,7 @@ public partial class ScenarioRunner
         Solo("Anneaux des égouts : boost et combo", r => r.RunSewerRings()),
         Solo("Voitures : solides en solo, on roule dessus", r => r.RunCarRide()),
         Solo("Voitures : toutes créées, visibles et en route", r => r.TrafficIsRunning()),
+        Solo("Voitures : mouvement fluide entre deux ticks réseau", r => r.TrafficIsSmooth()),
         Solo("Voitures : photos d'une voiture et du pigeon posé dessus", r => r.PigeonOnCar()),
         Solo("Sons : 2D pour soi, 3D pour les autres", r => r.RunPigeonAudio()),
         Solo("Pause : le jeu continue, le pigeon reste en l'air", r => r.PauseKeepsGameRunning()),
@@ -46,6 +48,7 @@ public partial class ScenarioRunner
         Multi("Multi : effets d'anneau seulement pour celui qui le traverse", r => r.MultiRingFeedback()),
         Multi("Multi : pause sans arrêt de la partie, même heure du jour", r => r.MultiPauseAndDayNight()),
         Multi("Multi : roucoulement vu par l'autre joueur, à sa couleur", r => r.MultiCoo()),
+        Multi("Multi : mêmes voitures chez tous, solides, on roule dessus", r => r.MultiTrafficShared()),
     };
 
     class ScenarioDef

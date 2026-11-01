@@ -38,7 +38,23 @@ public class CityPathPoint
     public bool HasTrafficLight => Type == CityPathPointType.TrafficLight || Type == CityPathPointType.StopAndTrafficLight;
 
     [ShowInInspector, ReadOnly, ShowIf(nameof(HasStop))]
-    public bool IsInCooldown => Application.isPlaying && Time.timeAsDouble < _cooldownEndTime;
+    public bool IsInCooldown => Application.isPlaying && CityClock.Now < _cooldownEndTime
+        && _cooldownEndTime - CityClock.Now <= Mathf.Max(0f, Cooldown);
+
+    /// <summary>Fin du délai entre deux arrêts, en temps <see cref="CityClock"/> (fait partie de l'état du trafic).</summary>
+    public double CooldownEnd
+    {
+        get
+        {
+            EnsureRuntimeState();
+            return _cooldownEndTime;
+        }
+        set
+        {
+            EnsureRuntimeState();
+            _cooldownEndTime = value;
+        }
+    }
 
     [ShowInInspector, ReadOnly, ShowIf(nameof(HasTrafficLight))]
     public bool IsStop
@@ -87,22 +103,33 @@ public class CityPathPoint
     public void ResetRuntimeState()
     {
         _initialized = true;
-        _cooldownEndTime = 0d;
-        _lightStartTime = Time.timeAsDouble;
-        // Preserve the random phase offset of the original traffic lights.
-        if (HasTrafficLight)
-            _lightStartTime -= UnityEngine.Random.Range(0f, Mathf.Max(0.01f, PhaseDuration));
+        _cooldownEndTime = double.NegativeInfinity;
+        // Décalage de phase tiré de la position du feu : le même sur chaque machine.
+        _lightStartTime = HasTrafficLight ? -PhaseOffset() * Mathf.Max(0.01f, PhaseDuration) : 0d;
     }
 
-    public float RollWaitDuration()
+    /// <param name="random01">Tirage dans [0, 1) qui choisit la durée entre le minimum et le maximum.</param>
+    public float RollWaitDuration(float random01)
     {
         EnsureRuntimeState();
         if (!HasStop || IsInCooldown)
             return 0f;
 
         float minimum = Mathf.Max(0f, MinWaitDuration);
-        _cooldownEndTime = Time.timeAsDouble + Mathf.Max(0f, Cooldown);
-        return UnityEngine.Random.Range(minimum, Mathf.Max(minimum, MaxWaitDuration));
+        _cooldownEndTime = CityClock.Now + Mathf.Max(0f, Cooldown);
+        return Mathf.Lerp(minimum, Mathf.Max(minimum, MaxWaitDuration), random01);
+    }
+
+    double PhaseOffset()
+    {
+        unchecked
+        {
+            uint hash = 2166136261;
+            hash = (hash ^ (uint)Mathf.RoundToInt(Position.x * 100f)) * 16777619;
+            hash = (hash ^ (uint)Mathf.RoundToInt(Position.y * 100f)) * 16777619;
+            hash = (hash ^ (uint)Mathf.RoundToInt(Position.z * 100f)) * 16777619;
+            return (hash & 0xFFFF) / 65536d;
+        }
     }
 
     public float GetWaitDuration() => IsStop ? RemainingDuration : 0f;
@@ -124,7 +151,7 @@ public class CityPathPoint
         }
 
         EnsureRuntimeState();
-        TrafficLightCycle.Evaluate(Time.timeAsDouble - _lightStartTime, PhaseDuration, StartWithStop,
+        TrafficLightCycle.Evaluate(CityClock.Now - _lightStartTime, PhaseDuration, StartWithStop,
             out isStop, out elapsed, out remaining);
     }
 

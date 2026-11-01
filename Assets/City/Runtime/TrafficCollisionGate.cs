@@ -2,8 +2,9 @@ using PurrNet;
 using UnityEngine;
 
 /// <summary>
-/// Voitures solides en solo, traversables dès qu'un autre joueur est connecté : le trafic n'est pas synchronisé
-/// et ne doit pas entrer dans la simulation prédite des pigeons.
+/// Voitures solides en solo, et à plusieurs quand le trafic est synchronisé (<see cref="TrafficNetwork"/>).
+/// Sans lui, elles deviennent traversables dès qu'un autre joueur est connecté : un trafic propre à chaque machine
+/// ne doit pas entrer dans la simulation prédite des pigeons.
 /// </summary>
 public class TrafficCollisionGate : MonoBehaviour
 {
@@ -43,7 +44,7 @@ public class TrafficCollisionGate : MonoBehaviour
         if (_carLayer < 0 || _pigeonLayer < 0)
             return;
         NetworkManager network = NetworkManager.main;
-        bool multiplayer = network != null && network.playerCount > 1;
+        bool multiplayer = network != null && network.playerCount > 1 && !TrafficNetwork.IsRunning;
         bool ignore = _initialIgnore || multiplayer;
         if (_applied && ignore == _ignoring)
             return;

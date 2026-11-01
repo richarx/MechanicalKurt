@@ -143,7 +143,7 @@ public class AmbientWalker : MonoBehaviour
             if (!_arrivedAtTarget)
             {
                 _arrivedAtTarget = true;
-                _pauseRemaining = Random.Range(_pauseRange.x, _pauseRange.y) + point.RollWaitDuration();
+                _pauseRemaining = Random.Range(_pauseRange.x, _pauseRange.y) + point.RollWaitDuration(Random.value);
             }
             if (_pauseRemaining > 0f)
             {

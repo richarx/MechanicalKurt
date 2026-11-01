@@ -17,7 +17,11 @@ public class MovingSupport : MonoBehaviour
     /// <summary>Identifiant stable (jamais 0) tant que le support est actif.</summary>
     public int Id { get; private set; }
 
-    public Transform ViewTransform => _viewTransform != null ? _viewTransform : transform;
+    public Transform ViewTransform
+    {
+        get => _viewTransform != null ? _viewTransform : transform;
+        set => _viewTransform = value;
+    }
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
     static void ResetStatics() => _byId.Clear();

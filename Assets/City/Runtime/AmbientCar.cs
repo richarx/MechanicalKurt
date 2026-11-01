@@ -2,6 +2,19 @@ using Sirenix.OdinInspector;
 using UnityEngine;
 using UnityEngine.Serialization;
 
+/// <summary>État d'une voiture porté par le trafic synchronisé (<see cref="TrafficNetwork"/>).</summary>
+public struct CarSimState
+{
+    public float Distance;
+    public float Speed;
+    public float MaxSpeed;
+    public float StopTimeRemaining;
+    public float DistanceToStop;
+    public int NextStop;
+    public uint Random;
+    public Quaternion Rotation;
+}
+
 public class AmbientCar : MonoBehaviour
 {
     [field: SerializeField, BoxGroup("Circuit"), Required]
@@ -49,10 +62,13 @@ public class AmbientCar : MonoBehaviour
     private float _plannedTravel;
     private float _plannedSpeed;
     private CityPathPoint _nextStop;
+    private int _nextStopIndex = -1;
     private float _distanceToStop = float.PositiveInfinity;
     private float? _initialDistance;
     private CityPathPoint _nextLight;
     private float _distanceToLight = float.PositiveInfinity;
+    private uint _random = 1;
+    private Transform _view;
 
     private void OnEnable()
     {
@@ -109,6 +125,7 @@ public class AmbientCar : MonoBehaviour
         _distanceToLight = float.PositiveInfinity;
         StopTimeRemaining = 0f;
         _nextStop = null;
+        _nextStopIndex = -1;
         _distanceToStop = float.PositiveInfinity;
     }
 
@@ -156,14 +173,81 @@ public class AmbientCar : MonoBehaviour
         if (_distanceToStop <= 0.0001f)
         {
             CurrentSpeed = 0f;
-            StopTimeRemaining = _nextStop.RollWaitDuration();
+            StopTimeRemaining = _nextStop.RollWaitDuration(NextRandom01());
             SelectNextStop(false);
         }
     }
 
     private void SelectNextStop(bool includeCurrent)
     {
-        _registeredPath.TryGetNextStop(Distance, includeCurrent, out _nextStop, out _distanceToStop);
+        _registeredPath.TryGetNextStop(Distance, includeCurrent, out _nextStopIndex, out _distanceToStop);
+        _nextStop = _nextStopIndex >= 0 ? _registeredPath.GetPoint(_nextStopIndex) : null;
+    }
+
+    /// <summary>Graine des tirages de la voiture (durées d'arrêt), pour qu'ils soient les mêmes sur chaque machine.</summary>
+    public void SetRandomSeed(uint seed) => _random = seed == 0 ? 1u : seed;
+
+    private float NextRandom01()
+    {
+        // xorshift32 : même suite partout, et la graine fait partie de l'état synchronisé.
+        _random ^= _random << 13;
+        _random ^= _random >> 17;
+        _random ^= _random << 5;
+        return (_random >> 8) / 16777216f;
+    }
+
+    public CarSimState CaptureSimState() => new CarSimState
+    {
+        Distance = Distance,
+        Speed = CurrentSpeed,
+        MaxSpeed = MaxSpeed,
+        StopTimeRemaining = StopTimeRemaining,
+        DistanceToStop = _distanceToStop,
+        NextStop = _nextStopIndex,
+        Random = _random,
+        Rotation = transform.rotation,
+    };
+
+    public void ApplySimState(in CarSimState state)
+    {
+        Distance = state.Distance;
+        CurrentSpeed = state.Speed;
+        MaxSpeed = state.MaxSpeed;
+        StopTimeRemaining = state.StopTimeRemaining;
+        _distanceToStop = state.DistanceToStop;
+        _random = state.Random;
+        if (_registeredPath == null)
+            return;
+        _nextStopIndex = state.NextStop >= 0 && state.NextStop < _registeredPath.PointCount ? state.NextStop : -1;
+        _nextStop = _nextStopIndex >= 0 ? _registeredPath.GetPoint(_nextStopIndex) : null;
+        transform.SetPositionAndRotation(_registeredPath.GetPosition(Distance), state.Rotation);
+    }
+
+    /// <summary>
+    /// Affiche la voiture à une pose lissée entre deux ticks, sans bouger ses colliders qui restent à la pose simulée.
+    /// </summary>
+    public void ShowView(float distance, Quaternion rotation)
+    {
+        if (_registeredPath == null)
+            return;
+        EnsureViewPivot();
+        _view.SetPositionAndRotation(_registeredPath.GetPosition(distance), rotation);
+    }
+
+    private void EnsureViewPivot()
+    {
+        if (_view != null)
+            return;
+        _view = new GameObject("Vue").transform;
+        _view.SetParent(transform, false);
+        for (int i = transform.childCount - 1; i >= 0; i--)
+        {
+            Transform child = transform.GetChild(i);
+            if (child != _view && child.GetComponentInChildren<Collider>(true) == null)
+                child.SetParent(_view, true);
+        }
+        if (TryGetComponent(out MovingSupport support))
+            support.ViewTransform = _view;
     }
 
     private Quaternion GetTargetRotation()

@@ -84,7 +84,14 @@ public class TrafficPath : CityPath
 
     public bool TryGetNextStop(float distance, bool includeCurrent, out CityPathPoint stop, out float remainingDistance)
     {
-        stop = null;
+        bool found = TryGetNextStop(distance, includeCurrent, out int index, out remainingDistance);
+        stop = found ? GetPoint(index) : null;
+        return found;
+    }
+
+    public bool TryGetNextStop(float distance, bool includeCurrent, out int stopIndex, out float remainingDistance)
+    {
+        stopIndex = -1;
         remainingDistance = float.PositiveInfinity;
         if (!IsValid)
             return false;
@@ -99,10 +106,10 @@ public class TrafficPath : CityPath
             if (forwardDistance >= remainingDistance)
                 continue;
 
-            stop = candidate;
+            stopIndex = i;
             remainingDistance = forwardDistance;
         }
-        return stop != null;
+        return stopIndex >= 0;
     }
 
     public bool TryGetNextRedLight(float distance, out CityPathPoint light, out float remainingDistance)
@@ -128,9 +135,20 @@ public class TrafficPath : CityPath
         return light != null;
     }
 
+    /// <summary>Voitures inscrites sur ce circuit.</summary>
+    public IReadOnlyList<AmbientCar> Cars => _cars;
+
+    /// <summary>Vrai quand <see cref="TrafficNetwork"/> avance les voitures au rythme des ticks réseau.</summary>
+    public bool DrivenByNetwork { get; set; }
+
     private void Update()
     {
-        float deltaTime = Time.deltaTime;
+        if (!DrivenByNetwork)
+            Step(Time.deltaTime);
+    }
+
+    public void Step(float deltaTime)
+    {
         if (deltaTime <= 0f || !IsValid)
             return;
 

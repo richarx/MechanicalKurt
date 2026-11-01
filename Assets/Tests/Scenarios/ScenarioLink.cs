@@ -81,6 +81,11 @@ public static class RemoteKeys
     public const string Paused = "local/paused";
     /// <summary>Bulles de roucoulement visibles : couleur de chacune, préfixée « moi: » pour celle de son propre pigeon.</summary>
     public const string CooBubbles = "coo/bubbles";
+    /// <summary>Trafic synchronisé : « heure|distance de chaque voiture » (voir ScenarioRunner.DescribeTraffic).</summary>
+    public const string TrafficCars = "traffic/cars";
+    public const string CarsGhosts = "traffic/ghosts";
+    /// <summary>MovingSupport.Id du support sous son pigeon (0 = aucun).</summary>
+    public const string SupportId = "local/support";
 
     public const string ZonePrefix = "zone/";
     public const string RacePrefix = "race/";

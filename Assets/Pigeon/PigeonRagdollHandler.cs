@@ -13,6 +13,10 @@ public class PigeonRagdollHandler : MonoBehaviour
 
     private Rigidbody[] _ragdollRigidbodies;
     private Collider[] _ragdollColliders;
+    private Transform[] _bones;
+    private Vector3[] _restPositions;
+    private Quaternion[] _restRotations;
+    private Vector3[] _restScales;
     private bool _isRagdoll = false;
 
     public bool IsRagdoll => _isRagdoll;
@@ -21,6 +25,7 @@ public class PigeonRagdollHandler : MonoBehaviour
     {
         _ragdollRigidbodies = GetComponentsInChildren<Rigidbody>();
         _ragdollColliders = GetComponentsInChildren<Collider>();
+        RecordRestPose();
 
         if (_characterController != null)
         {
@@ -63,6 +68,7 @@ public class PigeonRagdollHandler : MonoBehaviour
         if (!_isRagdoll) return;
 
         SetRagdollState(false);
+        RestoreRestPose();
 
         if (_visualRoot != null)
             _visualRoot.localRotation = Quaternion.identity;
@@ -75,4 +81,34 @@ public class PigeonRagdollHandler : MonoBehaviour
     }
 
     public void AlignAndGetUp() => EndRagdoll();
+
+    /// <summary>
+    /// Les articulations étirent les os pendant le ragdoll, et l'animation ne réécrit pas leurs positions :
+    /// sans cette pose de repos, Rebind reprendrait la pose déformée.
+    /// </summary>
+    void RecordRestPose()
+    {
+        Transform root = _animator != null ? _animator.transform : transform;
+        _bones = root.GetComponentsInChildren<Transform>(true);
+        _restPositions = new Vector3[_bones.Length];
+        _restRotations = new Quaternion[_bones.Length];
+        _restScales = new Vector3[_bones.Length];
+        for (int i = 0; i < _bones.Length; i++)
+        {
+            _bones[i].GetLocalPositionAndRotation(out _restPositions[i], out _restRotations[i]);
+            _restScales[i] = _bones[i].localScale;
+        }
+    }
+
+    void RestoreRestPose()
+    {
+        for (int i = 0; i < _bones.Length; i++)
+        {
+            Transform bone = _bones[i];
+            if (bone == null || bone == _visualRoot || bone == transform)
+                continue;
+            bone.SetLocalPositionAndRotation(_restPositions[i], _restRotations[i]);
+            bone.localScale = _restScales[i];
+        }
+    }
 }
