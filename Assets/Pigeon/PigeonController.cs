@@ -594,7 +594,7 @@ public class PigeonController : MonoBehaviour
 
             if (_controls.Flap)
                 _velocity.y = Mathf.MoveTowards(_velocity.y, 2.0f, 25f * dt);
-            else if (_controls.RelativeMovement.y < -0.0001f)
+            else if (_controls.RelativeMovement.y < -0.15f)
                 _velocity.y = Mathf.MoveTowards(_velocity.y, -2.0f, 15f * dt);
             else
                 _velocity.y = Mathf.MoveTowards(_velocity.y, Mathf.Sin(Time.time * _hoverWobbleFrequency) * _hoverWobbleAmplitude, 15f * dt);
