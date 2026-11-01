@@ -53,6 +53,9 @@ public class MissionStartZone : PredictedIdentity<MissionStartState>
     [Header("UI locale")]
     [Tooltip("Texte d'instruction partagé (« Appuyer sur Y / F »), affiché au pigeon local uniquement.")]
     [SerializeField] GameObject _prompt;
+    [Tooltip("Texte de l'invite pour cette zone (clavier, puis manette). Vide : texte habituel du popup.")]
+    [SerializeField, TextArea] string _promptKeyboardText;
+    [SerializeField, TextArea] string _promptJoypadText;
     [Tooltip("Texte du décompte et de l'attente des joueurs, instancié au premier affichage. Vide = aucun texte.")]
     [SerializeField] MissionCountdownHud _hudPrefab;
     [Tooltip("Affiché au joueur qui se pose dans la zone pendant un départ ou une course auxquels il ne participe pas.")]
@@ -380,6 +383,13 @@ public class MissionStartZone : PredictedIdentity<MissionStartState>
         if (show == _promptShown)
             return;
         _promptShown = show;
+        if (!string.IsNullOrEmpty(_promptKeyboardText) && _prompt.TryGetComponent(out Popup popup))
+        {
+            if (show)
+                popup.SetTexts(_promptKeyboardText, _promptJoypadText);
+            else
+                popup.ClearTexts();
+        }
         _prompt.SetActive(show);
     }
 

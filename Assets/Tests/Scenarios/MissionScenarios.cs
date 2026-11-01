@@ -174,6 +174,8 @@ public partial class ScenarioRunner
             while (Time.realtimeSinceStartup < landDeadline && !Pigeon.IsGrounded)
                 yield return null;
             Bot.RelativeMovement = Vector2.zero;
+            // Frein lâché : sinon l'oscillation du vol stationnaire le refait décoller dès qu'il touche.
+            Bot.Brake = false;
             yield return ExpectStill(Pigeon, 4f, stopSpeed);
         }
         yield return Check($"Dans le rayon : {label}", Vector3.Distance(Pigeon.transform.position, spot) <= radius,

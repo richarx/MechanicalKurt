@@ -51,9 +51,26 @@ public class Popup : MonoBehaviour
         _inputMethodChanged -= RefreshCommands;
     }
 
+    private string _keyboardOverride;
+    private string _joypadOverride;
+
+    /// <summary>Remplace le texte le temps d'un affichage (ex. une zone de course) ; ClearTexts revient aux textes réglés.</summary>
+    public void SetTexts(string keyboard, string joypad)
+    {
+        _keyboardOverride = keyboard;
+        _joypadOverride = joypad;
+        RefreshCommands();
+    }
+
+    public void ClearTexts() => SetTexts(null, null);
+
+    /// <summary>Texte affiché pour le clavier et pour la manette (avec un éventuel remplacement).</summary>
+    public string KeyboardText => string.IsNullOrEmpty(_keyboardOverride) ? _keyboardText : _keyboardOverride;
+    public string JoypadText => string.IsNullOrEmpty(_joypadOverride) ? _joypadText : _joypadOverride;
+
     private void RefreshCommands()
     {
         if (_textBox != null)
-            _textBox.text = _usingGamepad ? _joypadText : _keyboardText;
+            _textBox.text = _usingGamepad ? JoypadText : KeyboardText;
     }
 }

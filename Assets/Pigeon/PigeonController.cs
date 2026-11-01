@@ -55,6 +55,8 @@ public struct PigeonState : IPredictedData<PigeonState>
     /// <summary>Gel posé par un orchestrateur (zone de départ, course).</summary>
     public bool Frozen;
     public PigeonMissionState Mission;
+    /// <summary>Progression dans la dernière course chronométrée (TimedRace) courue par ce pigeon.</summary>
+    public RaceProgress Race;
 
     /// <summary>Équipements portés, un bit par PigeonEquipment.Equipment.</summary>
     public byte Equipment;
@@ -262,6 +264,8 @@ public partial class PigeonController : PredictedIdentity<PigeonInput, PigeonSta
     public bool UsesStamina => _useStaminaSystem && _stamina != null;
     /// <summary>Couleur du joueur qui contrôle ce pigeon (bulle de roucoulement…), la même sur chaque machine.</summary>
     public Color PlayerColor => PlayerColors.For(owner);
+    /// <summary>Progression dans la course chronométrée, lue depuis la vue.</summary>
+    public RaceProgress RaceProgress => _viewState.Race;
     /// <summary>Équipements portés, lus depuis la vue (bit = PigeonEquipment.Equipment).</summary>
     public byte WornEquipment => _viewState.Equipment;
 

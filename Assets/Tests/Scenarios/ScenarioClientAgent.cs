@@ -490,6 +490,9 @@ public class ScenarioClientAgent : MonoBehaviour
             Add(RemoteKeys.TrafficCars, ScenarioRunner.DescribeTraffic(traffic));
         Add(RemoteKeys.CarsGhosts, Flag(TrafficCollisionGate.CarsAreGhosts));
         Add(RemoteKeys.SupportId, local != null ? local.SupportId.ToString(CultureInfo.InvariantCulture) : "0");
+        TimedRace timedRace = FindAnyObjectByType<TimedRace>();
+        Add(RemoteKeys.TimedRaceHud, (timedRace != null ? timedRace.HudText : null) ?? "");
+        Add(RemoteKeys.TimedRaceResults, (timedRace != null ? timedRace.ResultsText : null) ?? "");
 
         return _snapshot.ToString();
     }

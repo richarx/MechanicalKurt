@@ -86,6 +86,9 @@ public static class RemoteKeys
     public const string CarsGhosts = "traffic/ghosts";
     /// <summary>MovingSupport.Id du support sous son pigeon (0 = aucun).</summary>
     public const string SupportId = "local/support";
+    /// <summary>Course chronométrée : textes du HUD (chrono, place) et du classement, vides si masqués.</summary>
+    public const string TimedRaceHud = "timedrace/hud";
+    public const string TimedRaceResults = "timedrace/results";
 
     public const string ZonePrefix = "zone/";
     public const string RacePrefix = "race/";

@@ -80,7 +80,47 @@ public class DeliveryCompassArrow : MonoBehaviour
         if (_manualTarget != target) return;
         _manualTarget = null;
         _manualPlayer = null;
+        ClearColors();
         RefreshVisual(false);
+    }
+
+    /// <summary>Cible actuelle (destination de livraison ou cible posée par SetTarget).</summary>
+    public Transform CurrentTarget => Target;
+
+    static readonly int TopColorId = Shader.PropertyToID("_TopColor");
+    static readonly int BottomColorId = Shader.PropertyToID("_BottomColor");
+    private MaterialPropertyBlock _colorBlock;
+
+    /// <summary>Teinte la flèche (ex. rouge pour une course) ; ClearColors (ou ClearTarget) rend ses couleurs.</summary>
+    public void SetColors(Color top, Color bottom)
+    {
+        _colorBlock ??= new MaterialPropertyBlock();
+        foreach (Renderer r in GetComponentsInChildren<Renderer>(true))
+        {
+            r.GetPropertyBlock(_colorBlock);
+            _colorBlock.SetColor(TopColorId, top);
+            _colorBlock.SetColor(BottomColorId, bottom);
+            r.SetPropertyBlock(_colorBlock);
+        }
+    }
+
+    public void ClearColors()
+    {
+        foreach (Renderer r in GetComponentsInChildren<Renderer>(true))
+            r.SetPropertyBlock(null);
+    }
+
+    /// <summary>Couleur du haut actuellement affichée (teinte posée, sinon celle du matériau).</summary>
+    public Color DisplayedTopColor
+    {
+        get
+        {
+            Renderer r = GetComponentInChildren<Renderer>(true);
+            if (r == null) return Color.clear;
+            var block = new MaterialPropertyBlock();
+            r.GetPropertyBlock(block);
+            return block.isEmpty ? r.sharedMaterial.GetColor(TopColorId) : block.GetColor(TopColorId);
+        }
     }
 
     /// <summary>
