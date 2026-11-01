@@ -62,6 +62,8 @@ public class PigeonController : MonoBehaviour
     [SerializeField] float _diveMaxPitch = 80f;
     [SerializeField] float _diveMaxSpeed = 40f;
     [SerializeField] float _diveDragAtMaxSpeed = 1.5f;
+    [SerializeField] float _divePower = 1.5f;
+    [SerializeField] float _diveReleasePitchSpeed = 120f;
 
     [Header("Barrel Roll")]
     [Tooltip("Minimum speed to barrel roll. Keep above ~4 or the pigeon can roll while walking or taking off.")]
@@ -100,6 +102,7 @@ public class PigeonController : MonoBehaviour
     bool _stunned;
     float _stunRemaining;
     float _stunImmuneRemaining;
+    float _lastDiveTimestamp;
     bool wasGroundedLastFrame;
     Vector3 _lastHitNormal;
     PigeonState _currentPigeonState;
@@ -626,12 +629,16 @@ public class PigeonController : MonoBehaviour
             dragAtMaxSpeed = _diveDragAtMaxSpeed;
             ComputePitch(_divePitchSpeed, _diveMaxPitch, dt);
             ComputeRotation(dt, _turnSpeed);
+            float diveAcceleration = -transform.forward.y * Physics.gravity.magnitude * _divePower;
+            _velocity += transform.forward * diveAcceleration * dt;
+            _lastDiveTimestamp = Time.time;
         }
         else
         {
             targetSpeed = _maxSpeed;
             dragAtMaxSpeed = _dragAtMaxSpeed;
-            ComputePitch(_pitchSpeed, _maxPitch, dt);
+            float pitchSpeed = Time.time - _lastDiveTimestamp <= 0.5f ? _diveReleasePitchSpeed : _pitchSpeed;
+            ComputePitch(pitchSpeed, _maxPitch, dt);
             ComputeRotation(dt, _turnSpeed);
             ApplyFlightForces(dt);
         }

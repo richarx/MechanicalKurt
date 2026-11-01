@@ -721,102 +721,6 @@ AnimationClip:
       m_Curve:
       - serializedVersion: 3
         time: 0
-        value: {x: 0.36503282, y: 0.33992255, z: -0.53226817, w: 0.68402797}
-        inSlope: {x: 0, y: 0, z: 0, w: 0}
-        outSlope: {x: 0, y: 0, z: 0, w: 0}
-        tangentMode: 0
-        weightedMode: 0
-        inWeight: {x: 0.33333334, y: 0.33333334, z: 0.33333334, w: 0.33333334}
-        outWeight: {x: 0.33333334, y: 0.33333334, z: 0.33333334, w: 0.33333334}
-      m_PreInfinity: 2
-      m_PostInfinity: 2
-      m_RotationOrder: 4
-    path: Sketchfab_model/root/GLTF_SceneRootNode/Realistic Animated Rock Pigeon Low-poly 3D model_123/RootNode_122/Pigeon_121/root_120/Skeleton_119/GLTF_created_0/GLTF_created_0_rootJoint/hip_01_115/spine1_03_59/spine2_04_58/spine3_00_55/L_w_main_j1_023_36
-  - curve:
-      serializedVersion: 2
-      m_Curve:
-      - serializedVersion: 3
-        time: 0
-        value: {x: 0.054022845, y: -0.37167686, z: -0.15836363, w: 0.9131587}
-        inSlope: {x: 0, y: 0, z: 0, w: 0}
-        outSlope: {x: 0, y: 0, z: 0, w: 0}
-        tangentMode: 0
-        weightedMode: 0
-        inWeight: {x: 0.33333334, y: 0.33333334, z: 0.33333334, w: 0.33333334}
-        outWeight: {x: 0.33333334, y: 0.33333334, z: 0.33333334, w: 0.33333334}
-      m_PreInfinity: 2
-      m_PostInfinity: 2
-      m_RotationOrder: 4
-    path: Sketchfab_model/root/GLTF_SceneRootNode/Realistic Animated Rock Pigeon Low-poly 3D model_123/RootNode_122/Pigeon_121/root_120/Skeleton_119/GLTF_created_0/GLTF_created_0_rootJoint/hip_01_115/spine1_03_59/spine2_04_58/spine3_00_55/L_w_main_j1_023_36/L_w_main_j2_024_34
-  - curve:
-      serializedVersion: 2
-      m_Curve:
-      - serializedVersion: 3
-        time: 0
-        value: {x: 0.15544912, y: -0.110612355, z: -0.036951188, w: 0.9809359}
-        inSlope: {x: 0, y: 0, z: 0, w: 0}
-        outSlope: {x: 0, y: 0, z: 0, w: 0}
-        tangentMode: 0
-        weightedMode: 0
-        inWeight: {x: 0.33333334, y: 0.33333334, z: 0.33333334, w: 0.33333334}
-        outWeight: {x: 0.33333334, y: 0.33333334, z: 0.33333334, w: 0.33333334}
-      m_PreInfinity: 2
-      m_PostInfinity: 2
-      m_RotationOrder: 4
-    path: Sketchfab_model/root/GLTF_SceneRootNode/Realistic Animated Rock Pigeon Low-poly 3D model_123/RootNode_122/Pigeon_121/root_120/Skeleton_119/GLTF_created_0/GLTF_created_0_rootJoint/hip_01_115/spine1_03_59/spine2_04_58/spine3_00_55/L_w_main_j1_023_36/L_w_main_j2_024_34/L_w_main_j3_025_32
-  - curve:
-      serializedVersion: 2
-      m_Curve:
-      - serializedVersion: 3
-        time: 0
-        value: {x: 0.06994294, y: -0.13722862, z: 0.0145654995, w: 0.9879595}
-        inSlope: {x: 0, y: 0, z: 0, w: 0}
-        outSlope: {x: 0, y: 0, z: 0, w: 0}
-        tangentMode: 0
-        weightedMode: 0
-        inWeight: {x: 0.33333334, y: 0.33333334, z: 0.33333334, w: 0.33333334}
-        outWeight: {x: 0.33333334, y: 0.33333334, z: 0.33333334, w: 0.33333334}
-      m_PreInfinity: 2
-      m_PostInfinity: 2
-      m_RotationOrder: 4
-    path: Sketchfab_model/root/GLTF_SceneRootNode/Realistic Animated Rock Pigeon Low-poly 3D model_123/RootNode_122/Pigeon_121/root_120/Skeleton_119/GLTF_created_0/GLTF_created_0_rootJoint/hip_01_115/spine1_03_59/spine2_04_58/spine3_00_55/L_w_main_j1_023_36/L_w_main_j2_024_34/L_w_main_j3_025_32/L_w_main_j4_026_30
-  - curve:
-      serializedVersion: 2
-      m_Curve:
-      - serializedVersion: 3
-        time: 0
-        value: {x: -0.20620653, y: -0.5538616, z: -0.0767833, w: 0.8030072}
-        inSlope: {x: 0, y: 0, z: 0, w: 0}
-        outSlope: {x: 0, y: 0, z: 0, w: 0}
-        tangentMode: 0
-        weightedMode: 0
-        inWeight: {x: 0.33333334, y: 0.33333334, z: 0.33333334, w: 0.33333334}
-        outWeight: {x: 0.33333334, y: 0.33333334, z: 0.33333334, w: 0.33333334}
-      m_PreInfinity: 2
-      m_PostInfinity: 2
-      m_RotationOrder: 4
-    path: Sketchfab_model/root/GLTF_SceneRootNode/Realistic Animated Rock Pigeon Low-poly 3D model_123/RootNode_122/Pigeon_121/root_120/Skeleton_119/GLTF_created_0/GLTF_created_0_rootJoint/hip_01_115/spine1_03_59/spine2_04_58/spine3_00_55/L_w_main_j1_023_36/L_w_main_j2_024_34/L_w_main_j3_025_32/L_w_main_j4_026_30/L_w_main_j5_027_28
-  - curve:
-      serializedVersion: 2
-      m_Curve:
-      - serializedVersion: 3
-        time: 0
-        value: {x: -0.11851896, y: -0.22486234, z: -0.0594619, w: 0.9653261}
-        inSlope: {x: 0, y: 0, z: 0, w: 0}
-        outSlope: {x: 0, y: 0, z: 0, w: 0}
-        tangentMode: 0
-        weightedMode: 0
-        inWeight: {x: 0.33333334, y: 0.33333334, z: 0.33333334, w: 0.33333334}
-        outWeight: {x: 0.33333334, y: 0.33333334, z: 0.33333334, w: 0.33333334}
-      m_PreInfinity: 2
-      m_PostInfinity: 2
-      m_RotationOrder: 4
-    path: Sketchfab_model/root/GLTF_SceneRootNode/Realistic Animated Rock Pigeon Low-poly 3D model_123/RootNode_122/Pigeon_121/root_120/Skeleton_119/GLTF_created_0/GLTF_created_0_rootJoint/hip_01_115/spine1_03_59/spine2_04_58/spine3_00_55/L_w_main_j1_023_36/L_w_main_j2_024_34/L_w_main_j3_025_32/L_w_main_j4_026_30/L_w_main_j5_027_28/L_w_main_j6_028_22
-  - curve:
-      serializedVersion: 2
-      m_Curve:
-      - serializedVersion: 3
-        time: 0
         value: {x: -0.071522556, y: 0.055710685, z: -0.000036427286, w: 0.99588203}
         inSlope: {x: 0, y: 0, z: 0, w: 0}
         outSlope: {x: 0, y: 0, z: 0, w: 0}
@@ -1004,102 +908,6 @@ AnimationClip:
       m_PostInfinity: 2
       m_RotationOrder: 4
     path: Sketchfab_model/root/GLTF_SceneRootNode/Realistic Animated Rock Pigeon Low-poly 3D model_123/RootNode_122/Pigeon_121/root_120/Skeleton_119/GLTF_created_0/GLTF_created_0_rootJoint/hip_01_115/spine1_03_59/spine2_04_58/spine3_00_55/L_w_main_j1_023_36/L_w_sub_j_a_040_35
-  - curve:
-      serializedVersion: 2
-      m_Curve:
-      - serializedVersion: 3
-        time: 0
-        value: {x: 0.58787876, y: 0.39401937, z: -0.26638436, w: 0.6543598}
-        inSlope: {x: 0, y: 0, z: 0, w: 0}
-        outSlope: {x: 0, y: 0, z: 0, w: 0}
-        tangentMode: 0
-        weightedMode: 0
-        inWeight: {x: 0.33333334, y: 0.33333334, z: 0.33333334, w: 0.33333334}
-        outWeight: {x: 0.33333334, y: 0.33333334, z: 0.33333334, w: 0.33333334}
-      m_PreInfinity: 2
-      m_PostInfinity: 2
-      m_RotationOrder: 4
-    path: Sketchfab_model/root/GLTF_SceneRootNode/Realistic Animated Rock Pigeon Low-poly 3D model_123/RootNode_122/Pigeon_121/root_120/Skeleton_119/GLTF_created_0/GLTF_created_0_rootJoint/hip_01_115/spine1_03_59/spine2_04_58/spine3_00_55/R_w_main_j1_041_54
-  - curve:
-      serializedVersion: 2
-      m_Curve:
-      - serializedVersion: 3
-        time: 0
-        value: {x: 0.14667349, y: 0.037920758, z: 0.08052051, w: 0.9851728}
-        inSlope: {x: 0, y: 0, z: 0, w: 0}
-        outSlope: {x: 0, y: 0, z: 0, w: 0}
-        tangentMode: 0
-        weightedMode: 0
-        inWeight: {x: 0.33333334, y: 0.33333334, z: 0.33333334, w: 0.33333334}
-        outWeight: {x: 0.33333334, y: 0.33333334, z: 0.33333334, w: 0.33333334}
-      m_PreInfinity: 2
-      m_PostInfinity: 2
-      m_RotationOrder: 4
-    path: Sketchfab_model/root/GLTF_SceneRootNode/Realistic Animated Rock Pigeon Low-poly 3D model_123/RootNode_122/Pigeon_121/root_120/Skeleton_119/GLTF_created_0/GLTF_created_0_rootJoint/hip_01_115/spine1_03_59/spine2_04_58/spine3_00_55/R_w_main_j1_041_54/R_w_main_j2_042_52
-  - curve:
-      serializedVersion: 2
-      m_Curve:
-      - serializedVersion: 3
-        time: 0
-        value: {x: 0.123748764, y: 0.27481633, z: -0.101070836, w: 0.94812804}
-        inSlope: {x: 0, y: 0, z: 0, w: 0}
-        outSlope: {x: 0, y: 0, z: 0, w: 0}
-        tangentMode: 0
-        weightedMode: 0
-        inWeight: {x: 0.33333334, y: 0.33333334, z: 0.33333334, w: 0.33333334}
-        outWeight: {x: 0.33333334, y: 0.33333334, z: 0.33333334, w: 0.33333334}
-      m_PreInfinity: 2
-      m_PostInfinity: 2
-      m_RotationOrder: 4
-    path: Sketchfab_model/root/GLTF_SceneRootNode/Realistic Animated Rock Pigeon Low-poly 3D model_123/RootNode_122/Pigeon_121/root_120/Skeleton_119/GLTF_created_0/GLTF_created_0_rootJoint/hip_01_115/spine1_03_59/spine2_04_58/spine3_00_55/R_w_main_j1_041_54/R_w_main_j2_042_52/R_w_main_j3_043_50
-  - curve:
-      serializedVersion: 2
-      m_Curve:
-      - serializedVersion: 3
-        time: 0
-        value: {x: 0.03317378, y: 0.0037946058, z: -0.063275605, w: 0.99743736}
-        inSlope: {x: 0, y: 0, z: 0, w: 0}
-        outSlope: {x: 0, y: 0, z: 0, w: 0}
-        tangentMode: 0
-        weightedMode: 0
-        inWeight: {x: 0.33333334, y: 0.33333334, z: 0.33333334, w: 0.33333334}
-        outWeight: {x: 0.33333334, y: 0.33333334, z: 0.33333334, w: 0.33333334}
-      m_PreInfinity: 2
-      m_PostInfinity: 2
-      m_RotationOrder: 4
-    path: Sketchfab_model/root/GLTF_SceneRootNode/Realistic Animated Rock Pigeon Low-poly 3D model_123/RootNode_122/Pigeon_121/root_120/Skeleton_119/GLTF_created_0/GLTF_created_0_rootJoint/hip_01_115/spine1_03_59/spine2_04_58/spine3_00_55/R_w_main_j1_041_54/R_w_main_j2_042_52/R_w_main_j3_043_50/R_w_main_j4_044_48
-  - curve:
-      serializedVersion: 2
-      m_Curve:
-      - serializedVersion: 3
-        time: 0
-        value: {x: 0.072315514, y: 0.069593646, z: 0.207815, w: 0.9730057}
-        inSlope: {x: 0, y: 0, z: 0, w: 0}
-        outSlope: {x: 0, y: 0, z: 0, w: 0}
-        tangentMode: 0
-        weightedMode: 0
-        inWeight: {x: 0.33333334, y: 0.33333334, z: 0.33333334, w: 0.33333334}
-        outWeight: {x: 0.33333334, y: 0.33333334, z: 0.33333334, w: 0.33333334}
-      m_PreInfinity: 2
-      m_PostInfinity: 2
-      m_RotationOrder: 4
-    path: Sketchfab_model/root/GLTF_SceneRootNode/Realistic Animated Rock Pigeon Low-poly 3D model_123/RootNode_122/Pigeon_121/root_120/Skeleton_119/GLTF_created_0/GLTF_created_0_rootJoint/hip_01_115/spine1_03_59/spine2_04_58/spine3_00_55/R_w_main_j1_041_54/R_w_main_j2_042_52/R_w_main_j3_043_50/R_w_main_j4_044_48/R_w_main_j5_045_46
-  - curve:
-      serializedVersion: 2
-      m_Curve:
-      - serializedVersion: 3
-        time: 0
-        value: {x: 0.12614739, y: -0.05229013, z: 0.040873826, w: 0.9897889}
-        inSlope: {x: 0, y: 0, z: 0, w: 0}
-        outSlope: {x: 0, y: 0, z: 0, w: 0}
-        tangentMode: 0
-        weightedMode: 0
-        inWeight: {x: 0.33333334, y: 0.33333334, z: 0.33333334, w: 0.33333334}
-        outWeight: {x: 0.33333334, y: 0.33333334, z: 0.33333334, w: 0.33333334}
-      m_PreInfinity: 2
-      m_PostInfinity: 2
-      m_RotationOrder: 4
-    path: Sketchfab_model/root/GLTF_SceneRootNode/Realistic Animated Rock Pigeon Low-poly 3D model_123/RootNode_122/Pigeon_121/root_120/Skeleton_119/GLTF_created_0/GLTF_created_0_rootJoint/hip_01_115/spine1_03_59/spine2_04_58/spine3_00_55/R_w_main_j1_041_54/R_w_main_j2_042_52/R_w_main_j3_043_50/R_w_main_j4_044_48/R_w_main_j5_045_46/R_w_main_j6_046_40
   - curve:
       serializedVersion: 2
       m_Curve:
@@ -1756,6 +1564,198 @@ AnimationClip:
       m_PostInfinity: 2
       m_RotationOrder: 4
     path: Sketchfab_model/root/GLTF_SceneRootNode/Realistic Animated Rock Pigeon Low-poly 3D model_123/RootNode_122/Pigeon_121/root_120/Skeleton_119/GLTF_created_0/GLTF_created_0_rootJoint/hip_01_115
+  - curve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: {x: 0.42849195, y: 0.25206876, z: -0.48265207, w: 0.721043}
+        inSlope: {x: 0, y: 0, z: 0, w: 0}
+        outSlope: {x: 0, y: 0, z: 0, w: 0}
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: {x: 0.33333334, y: 0.33333334, z: 0.33333334, w: 0.33333334}
+        outWeight: {x: 0.33333334, y: 0.33333334, z: 0.33333334, w: 0.33333334}
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    path: Sketchfab_model/root/GLTF_SceneRootNode/Realistic Animated Rock Pigeon Low-poly 3D model_123/RootNode_122/Pigeon_121/root_120/Skeleton_119/GLTF_created_0/GLTF_created_0_rootJoint/hip_01_115/spine1_03_59/spine2_04_58/spine3_00_55/L_w_main_j1_023_36
+  - curve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: {x: 0.060593575, y: -0.40951252, z: -0.15596768, w: 0.8968288}
+        inSlope: {x: 0, y: 0, z: 0, w: 0}
+        outSlope: {x: 0, y: 0, z: 0, w: 0}
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: {x: 0.33333334, y: 0.33333334, z: 0.33333334, w: 0.33333334}
+        outWeight: {x: 0.33333334, y: 0.33333334, z: 0.33333334, w: 0.33333334}
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    path: Sketchfab_model/root/GLTF_SceneRootNode/Realistic Animated Rock Pigeon Low-poly 3D model_123/RootNode_122/Pigeon_121/root_120/Skeleton_119/GLTF_created_0/GLTF_created_0_rootJoint/hip_01_115/spine1_03_59/spine2_04_58/spine3_00_55/L_w_main_j1_023_36/L_w_main_j2_024_34
+  - curve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: {x: 0.15971375, y: -0.36117834, z: 0.0046193264, w: 0.9187059}
+        inSlope: {x: 0, y: 0, z: 0, w: 0}
+        outSlope: {x: 0, y: 0, z: 0, w: 0}
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: {x: 0.33333334, y: 0.33333334, z: 0.33333334, w: 0.33333334}
+        outWeight: {x: 0.33333334, y: 0.33333334, z: 0.33333334, w: 0.33333334}
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    path: Sketchfab_model/root/GLTF_SceneRootNode/Realistic Animated Rock Pigeon Low-poly 3D model_123/RootNode_122/Pigeon_121/root_120/Skeleton_119/GLTF_created_0/GLTF_created_0_rootJoint/hip_01_115/spine1_03_59/spine2_04_58/spine3_00_55/L_w_main_j1_023_36/L_w_main_j2_024_34/L_w_main_j3_025_32
+  - curve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: {x: 0.054946095, y: -0.5844486, z: 0.045661382, w: 0.80827963}
+        inSlope: {x: 0, y: 0, z: 0, w: 0}
+        outSlope: {x: 0, y: 0, z: 0, w: 0}
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: {x: 0.33333334, y: 0.33333334, z: 0.33333334, w: 0.33333334}
+        outWeight: {x: 0.33333334, y: 0.33333334, z: 0.33333334, w: 0.33333334}
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    path: Sketchfab_model/root/GLTF_SceneRootNode/Realistic Animated Rock Pigeon Low-poly 3D model_123/RootNode_122/Pigeon_121/root_120/Skeleton_119/GLTF_created_0/GLTF_created_0_rootJoint/hip_01_115/spine1_03_59/spine2_04_58/spine3_00_55/L_w_main_j1_023_36/L_w_main_j2_024_34/L_w_main_j3_025_32/L_w_main_j4_026_30
+  - curve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: {x: -0.19851433, y: -0.62344897, z: -0.094915025, w: 0.75026304}
+        inSlope: {x: 0, y: 0, z: 0, w: 0}
+        outSlope: {x: 0, y: 0, z: 0, w: 0}
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: {x: 0.33333334, y: 0.33333334, z: 0.33333334, w: 0.33333334}
+        outWeight: {x: 0.33333334, y: 0.33333334, z: 0.33333334, w: 0.33333334}
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    path: Sketchfab_model/root/GLTF_SceneRootNode/Realistic Animated Rock Pigeon Low-poly 3D model_123/RootNode_122/Pigeon_121/root_120/Skeleton_119/GLTF_created_0/GLTF_created_0_rootJoint/hip_01_115/spine1_03_59/spine2_04_58/spine3_00_55/L_w_main_j1_023_36/L_w_main_j2_024_34/L_w_main_j3_025_32/L_w_main_j4_026_30/L_w_main_j5_027_28
+  - curve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: {x: -0.04214713, y: -0.83998173, z: -0.12572378, w: 0.5261634}
+        inSlope: {x: 0, y: 0, z: 0, w: 0}
+        outSlope: {x: 0, y: 0, z: 0, w: 0}
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: {x: 0.33333334, y: 0.33333334, z: 0.33333334, w: 0.33333334}
+        outWeight: {x: 0.33333334, y: 0.33333334, z: 0.33333334, w: 0.33333334}
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    path: Sketchfab_model/root/GLTF_SceneRootNode/Realistic Animated Rock Pigeon Low-poly 3D model_123/RootNode_122/Pigeon_121/root_120/Skeleton_119/GLTF_created_0/GLTF_created_0_rootJoint/hip_01_115/spine1_03_59/spine2_04_58/spine3_00_55/L_w_main_j1_023_36/L_w_main_j2_024_34/L_w_main_j3_025_32/L_w_main_j4_026_30/L_w_main_j5_027_28/L_w_main_j6_028_22
+  - curve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: {x: 0.5675739, y: 0.43948808, z: -0.31048852, w: 0.62314296}
+        inSlope: {x: 0, y: 0, z: 0, w: 0}
+        outSlope: {x: 0, y: 0, z: 0, w: 0}
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: {x: 0.33333334, y: 0.33333334, z: 0.33333334, w: 0.33333334}
+        outWeight: {x: 0.33333334, y: 0.33333334, z: 0.33333334, w: 0.33333334}
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    path: Sketchfab_model/root/GLTF_SceneRootNode/Realistic Animated Rock Pigeon Low-poly 3D model_123/RootNode_122/Pigeon_121/root_120/Skeleton_119/GLTF_created_0/GLTF_created_0_rootJoint/hip_01_115/spine1_03_59/spine2_04_58/spine3_00_55/R_w_main_j1_041_54
+  - curve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: {x: 0.15317161, y: 0.124198064, z: 0.06734327, w: 0.97804815}
+        inSlope: {x: 0, y: 0, z: 0, w: 0}
+        outSlope: {x: 0, y: 0, z: 0, w: 0}
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: {x: 0.33333334, y: 0.33333334, z: 0.33333334, w: 0.33333334}
+        outWeight: {x: 0.33333334, y: 0.33333334, z: 0.33333334, w: 0.33333334}
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    path: Sketchfab_model/root/GLTF_SceneRootNode/Realistic Animated Rock Pigeon Low-poly 3D model_123/RootNode_122/Pigeon_121/root_120/Skeleton_119/GLTF_created_0/GLTF_created_0_rootJoint/hip_01_115/spine1_03_59/spine2_04_58/spine3_00_55/R_w_main_j1_041_54/R_w_main_j2_042_52
+  - curve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: {x: 0.11689841, y: 0.33602592, z: -0.10892123, w: 0.9282012}
+        inSlope: {x: 0, y: 0, z: 0, w: 0}
+        outSlope: {x: 0, y: 0, z: 0, w: 0}
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: {x: 0.33333334, y: 0.33333334, z: 0.33333334, w: 0.33333334}
+        outWeight: {x: 0.33333334, y: 0.33333334, z: 0.33333334, w: 0.33333334}
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    path: Sketchfab_model/root/GLTF_SceneRootNode/Realistic Animated Rock Pigeon Low-poly 3D model_123/RootNode_122/Pigeon_121/root_120/Skeleton_119/GLTF_created_0/GLTF_created_0_rootJoint/hip_01_115/spine1_03_59/spine2_04_58/spine3_00_55/R_w_main_j1_041_54/R_w_main_j2_042_52/R_w_main_j3_043_50
+  - curve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: {x: -0.006334016, y: 0.5428263, z: -0.071163066, w: 0.83680063}
+        inSlope: {x: 0, y: 0, z: 0, w: 0}
+        outSlope: {x: 0, y: 0, z: 0, w: 0}
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: {x: 0.33333334, y: 0.33333334, z: 0.33333334, w: 0.33333334}
+        outWeight: {x: 0.33333334, y: 0.33333334, z: 0.33333334, w: 0.33333334}
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    path: Sketchfab_model/root/GLTF_SceneRootNode/Realistic Animated Rock Pigeon Low-poly 3D model_123/RootNode_122/Pigeon_121/root_120/Skeleton_119/GLTF_created_0/GLTF_created_0_rootJoint/hip_01_115/spine1_03_59/spine2_04_58/spine3_00_55/R_w_main_j1_041_54/R_w_main_j2_042_52/R_w_main_j3_043_50/R_w_main_j4_044_48
+  - curve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: {x: 0.10411033, y: 0.22180939, z: 0.19384958, w: 0.94993895}
+        inSlope: {x: 0, y: 0, z: 0, w: 0}
+        outSlope: {x: 0, y: 0, z: 0, w: 0}
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: {x: 0.33333334, y: 0.33333334, z: 0.33333334, w: 0.33333334}
+        outWeight: {x: 0.33333334, y: 0.33333334, z: 0.33333334, w: 0.33333334}
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    path: Sketchfab_model/root/GLTF_SceneRootNode/Realistic Animated Rock Pigeon Low-poly 3D model_123/RootNode_122/Pigeon_121/root_120/Skeleton_119/GLTF_created_0/GLTF_created_0_rootJoint/hip_01_115/spine1_03_59/spine2_04_58/spine3_00_55/R_w_main_j1_041_54/R_w_main_j2_042_52/R_w_main_j3_043_50/R_w_main_j4_044_48/R_w_main_j5_045_46
+  - curve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: {x: 0.13257578, y: 0.23551475, z: 0.002738567, w: 0.9627819}
+        inSlope: {x: 0, y: 0, z: 0, w: 0}
+        outSlope: {x: 0, y: 0, z: 0, w: 0}
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: {x: 0.33333334, y: 0.33333334, z: 0.33333334, w: 0.33333334}
+        outWeight: {x: 0.33333334, y: 0.33333334, z: 0.33333334, w: 0.33333334}
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    path: Sketchfab_model/root/GLTF_SceneRootNode/Realistic Animated Rock Pigeon Low-poly 3D model_123/RootNode_122/Pigeon_121/root_120/Skeleton_119/GLTF_created_0/GLTF_created_0_rootJoint/hip_01_115/spine1_03_59/spine2_04_58/spine3_00_55/R_w_main_j1_041_54/R_w_main_j2_042_52/R_w_main_j3_043_50/R_w_main_j4_044_48/R_w_main_j5_045_46/R_w_main_j6_046_40
   m_CompressedRotationCurves: []
   m_EulerCurves: []
   m_PositionCurves:
@@ -3662,66 +3662,6 @@ AnimationClip:
       isSerializeReferenceCurve: 0
       metaData: 0
     - serializedVersion: 2
-      path: 570087505
-      attribute: 2
-      script: {fileID: 0}
-      typeID: 4
-      customType: 0
-      isPPtrCurve: 0
-      isIntCurve: 0
-      isSerializeReferenceCurve: 0
-      metaData: 0
-    - serializedVersion: 2
-      path: 1112733691
-      attribute: 2
-      script: {fileID: 0}
-      typeID: 4
-      customType: 0
-      isPPtrCurve: 0
-      isIntCurve: 0
-      isSerializeReferenceCurve: 0
-      metaData: 0
-    - serializedVersion: 2
-      path: 3609727908
-      attribute: 2
-      script: {fileID: 0}
-      typeID: 4
-      customType: 0
-      isPPtrCurve: 0
-      isIntCurve: 0
-      isSerializeReferenceCurve: 0
-      metaData: 0
-    - serializedVersion: 2
-      path: 3901780754
-      attribute: 2
-      script: {fileID: 0}
-      typeID: 4
-      customType: 0
-      isPPtrCurve: 0
-      isIntCurve: 0
-      isSerializeReferenceCurve: 0
-      metaData: 0
-    - serializedVersion: 2
-      path: 1142617791
-      attribute: 2
-      script: {fileID: 0}
-      typeID: 4
-      customType: 0
-      isPPtrCurve: 0
-      isIntCurve: 0
-      isSerializeReferenceCurve: 0
-      metaData: 0
-    - serializedVersion: 2
-      path: 3612139769
-      attribute: 2
-      script: {fileID: 0}
-      typeID: 4
-      customType: 0
-      isPPtrCurve: 0
-      isIntCurve: 0
-      isSerializeReferenceCurve: 0
-      metaData: 0
-    - serializedVersion: 2
       path: 4095842674
       attribute: 2
       script: {fileID: 0}
@@ -3833,66 +3773,6 @@ AnimationClip:
       metaData: 0
     - serializedVersion: 2
       path: 1162020908
-      attribute: 2
-      script: {fileID: 0}
-      typeID: 4
-      customType: 0
-      isPPtrCurve: 0
-      isIntCurve: 0
-      isSerializeReferenceCurve: 0
-      metaData: 0
-    - serializedVersion: 2
-      path: 2338942273
-      attribute: 2
-      script: {fileID: 0}
-      typeID: 4
-      customType: 0
-      isPPtrCurve: 0
-      isIntCurve: 0
-      isSerializeReferenceCurve: 0
-      metaData: 0
-    - serializedVersion: 2
-      path: 198077525
-      attribute: 2
-      script: {fileID: 0}
-      typeID: 4
-      customType: 0
-      isPPtrCurve: 0
-      isIntCurve: 0
-      isSerializeReferenceCurve: 0
-      metaData: 0
-    - serializedVersion: 2
-      path: 1827570214
-      attribute: 2
-      script: {fileID: 0}
-      typeID: 4
-      customType: 0
-      isPPtrCurve: 0
-      isIntCurve: 0
-      isSerializeReferenceCurve: 0
-      metaData: 0
-    - serializedVersion: 2
-      path: 2368886330
-      attribute: 2
-      script: {fileID: 0}
-      typeID: 4
-      customType: 0
-      isPPtrCurve: 0
-      isIntCurve: 0
-      isSerializeReferenceCurve: 0
-      metaData: 0
-    - serializedVersion: 2
-      path: 1923974278
-      attribute: 2
-      script: {fileID: 0}
-      typeID: 4
-      customType: 0
-      isPPtrCurve: 0
-      isIntCurve: 0
-      isSerializeReferenceCurve: 0
-      metaData: 0
-    - serializedVersion: 2
-      path: 290846074
       attribute: 2
       script: {fileID: 0}
       typeID: 4
@@ -4303,6 +4183,126 @@ AnimationClip:
       metaData: 0
     - serializedVersion: 2
       path: 727599137
+      attribute: 2
+      script: {fileID: 0}
+      typeID: 4
+      customType: 0
+      isPPtrCurve: 0
+      isIntCurve: 0
+      isSerializeReferenceCurve: 0
+      metaData: 0
+    - serializedVersion: 2
+      path: 570087505
+      attribute: 2
+      script: {fileID: 0}
+      typeID: 4
+      customType: 0
+      isPPtrCurve: 0
+      isIntCurve: 0
+      isSerializeReferenceCurve: 0
+      metaData: 0
+    - serializedVersion: 2
+      path: 1112733691
+      attribute: 2
+      script: {fileID: 0}
+      typeID: 4
+      customType: 0
+      isPPtrCurve: 0
+      isIntCurve: 0
+      isSerializeReferenceCurve: 0
+      metaData: 0
+    - serializedVersion: 2
+      path: 3609727908
+      attribute: 2
+      script: {fileID: 0}
+      typeID: 4
+      customType: 0
+      isPPtrCurve: 0
+      isIntCurve: 0
+      isSerializeReferenceCurve: 0
+      metaData: 0
+    - serializedVersion: 2
+      path: 3901780754
+      attribute: 2
+      script: {fileID: 0}
+      typeID: 4
+      customType: 0
+      isPPtrCurve: 0
+      isIntCurve: 0
+      isSerializeReferenceCurve: 0
+      metaData: 0
+    - serializedVersion: 2
+      path: 1142617791
+      attribute: 2
+      script: {fileID: 0}
+      typeID: 4
+      customType: 0
+      isPPtrCurve: 0
+      isIntCurve: 0
+      isSerializeReferenceCurve: 0
+      metaData: 0
+    - serializedVersion: 2
+      path: 3612139769
+      attribute: 2
+      script: {fileID: 0}
+      typeID: 4
+      customType: 0
+      isPPtrCurve: 0
+      isIntCurve: 0
+      isSerializeReferenceCurve: 0
+      metaData: 0
+    - serializedVersion: 2
+      path: 2338942273
+      attribute: 2
+      script: {fileID: 0}
+      typeID: 4
+      customType: 0
+      isPPtrCurve: 0
+      isIntCurve: 0
+      isSerializeReferenceCurve: 0
+      metaData: 0
+    - serializedVersion: 2
+      path: 198077525
+      attribute: 2
+      script: {fileID: 0}
+      typeID: 4
+      customType: 0
+      isPPtrCurve: 0
+      isIntCurve: 0
+      isSerializeReferenceCurve: 0
+      metaData: 0
+    - serializedVersion: 2
+      path: 1827570214
+      attribute: 2
+      script: {fileID: 0}
+      typeID: 4
+      customType: 0
+      isPPtrCurve: 0
+      isIntCurve: 0
+      isSerializeReferenceCurve: 0
+      metaData: 0
+    - serializedVersion: 2
+      path: 2368886330
+      attribute: 2
+      script: {fileID: 0}
+      typeID: 4
+      customType: 0
+      isPPtrCurve: 0
+      isIntCurve: 0
+      isSerializeReferenceCurve: 0
+      metaData: 0
+    - serializedVersion: 2
+      path: 1923974278
+      attribute: 2
+      script: {fileID: 0}
+      typeID: 4
+      customType: 0
+      isPPtrCurve: 0
+      isIntCurve: 0
+      isSerializeReferenceCurve: 0
+      metaData: 0
+    - serializedVersion: 2
+      path: 290846074
       attribute: 2
       script: {fileID: 0}
       typeID: 4
@@ -11656,510 +11656,6 @@ AnimationClip:
       m_Curve:
       - serializedVersion: 3
         time: 0
-        value: 0.36503282
-        inSlope: 0
-        outSlope: 0
-        tangentMode: 0
-        weightedMode: 0
-        inWeight: 0.33333334
-        outWeight: 0.33333334
-      m_PreInfinity: 2
-      m_PostInfinity: 2
-      m_RotationOrder: 4
-    attribute: m_LocalRotation.x
-    path: Sketchfab_model/root/GLTF_SceneRootNode/Realistic Animated Rock Pigeon Low-poly 3D model_123/RootNode_122/Pigeon_121/root_120/Skeleton_119/GLTF_created_0/GLTF_created_0_rootJoint/hip_01_115/spine1_03_59/spine2_04_58/spine3_00_55/L_w_main_j1_023_36
-    classID: 4
-    script: {fileID: 0}
-    flags: 0
-  - serializedVersion: 2
-    curve:
-      serializedVersion: 2
-      m_Curve:
-      - serializedVersion: 3
-        time: 0
-        value: 0.33992255
-        inSlope: 0
-        outSlope: 0
-        tangentMode: 0
-        weightedMode: 0
-        inWeight: 0.33333334
-        outWeight: 0.33333334
-      m_PreInfinity: 2
-      m_PostInfinity: 2
-      m_RotationOrder: 4
-    attribute: m_LocalRotation.y
-    path: Sketchfab_model/root/GLTF_SceneRootNode/Realistic Animated Rock Pigeon Low-poly 3D model_123/RootNode_122/Pigeon_121/root_120/Skeleton_119/GLTF_created_0/GLTF_created_0_rootJoint/hip_01_115/spine1_03_59/spine2_04_58/spine3_00_55/L_w_main_j1_023_36
-    classID: 4
-    script: {fileID: 0}
-    flags: 0
-  - serializedVersion: 2
-    curve:
-      serializedVersion: 2
-      m_Curve:
-      - serializedVersion: 3
-        time: 0
-        value: -0.53226817
-        inSlope: 0
-        outSlope: 0
-        tangentMode: 0
-        weightedMode: 0
-        inWeight: 0.33333334
-        outWeight: 0.33333334
-      m_PreInfinity: 2
-      m_PostInfinity: 2
-      m_RotationOrder: 4
-    attribute: m_LocalRotation.z
-    path: Sketchfab_model/root/GLTF_SceneRootNode/Realistic Animated Rock Pigeon Low-poly 3D model_123/RootNode_122/Pigeon_121/root_120/Skeleton_119/GLTF_created_0/GLTF_created_0_rootJoint/hip_01_115/spine1_03_59/spine2_04_58/spine3_00_55/L_w_main_j1_023_36
-    classID: 4
-    script: {fileID: 0}
-    flags: 0
-  - serializedVersion: 2
-    curve:
-      serializedVersion: 2
-      m_Curve:
-      - serializedVersion: 3
-        time: 0
-        value: 0.68402797
-        inSlope: 0
-        outSlope: 0
-        tangentMode: 0
-        weightedMode: 0
-        inWeight: 0.33333334
-        outWeight: 0.33333334
-      m_PreInfinity: 2
-      m_PostInfinity: 2
-      m_RotationOrder: 4
-    attribute: m_LocalRotation.w
-    path: Sketchfab_model/root/GLTF_SceneRootNode/Realistic Animated Rock Pigeon Low-poly 3D model_123/RootNode_122/Pigeon_121/root_120/Skeleton_119/GLTF_created_0/GLTF_created_0_rootJoint/hip_01_115/spine1_03_59/spine2_04_58/spine3_00_55/L_w_main_j1_023_36
-    classID: 4
-    script: {fileID: 0}
-    flags: 0
-  - serializedVersion: 2
-    curve:
-      serializedVersion: 2
-      m_Curve:
-      - serializedVersion: 3
-        time: 0
-        value: 0.054022845
-        inSlope: 0
-        outSlope: 0
-        tangentMode: 0
-        weightedMode: 0
-        inWeight: 0.33333334
-        outWeight: 0.33333334
-      m_PreInfinity: 2
-      m_PostInfinity: 2
-      m_RotationOrder: 4
-    attribute: m_LocalRotation.x
-    path: Sketchfab_model/root/GLTF_SceneRootNode/Realistic Animated Rock Pigeon Low-poly 3D model_123/RootNode_122/Pigeon_121/root_120/Skeleton_119/GLTF_created_0/GLTF_created_0_rootJoint/hip_01_115/spine1_03_59/spine2_04_58/spine3_00_55/L_w_main_j1_023_36/L_w_main_j2_024_34
-    classID: 4
-    script: {fileID: 0}
-    flags: 0
-  - serializedVersion: 2
-    curve:
-      serializedVersion: 2
-      m_Curve:
-      - serializedVersion: 3
-        time: 0
-        value: -0.37167686
-        inSlope: 0
-        outSlope: 0
-        tangentMode: 0
-        weightedMode: 0
-        inWeight: 0.33333334
-        outWeight: 0.33333334
-      m_PreInfinity: 2
-      m_PostInfinity: 2
-      m_RotationOrder: 4
-    attribute: m_LocalRotation.y
-    path: Sketchfab_model/root/GLTF_SceneRootNode/Realistic Animated Rock Pigeon Low-poly 3D model_123/RootNode_122/Pigeon_121/root_120/Skeleton_119/GLTF_created_0/GLTF_created_0_rootJoint/hip_01_115/spine1_03_59/spine2_04_58/spine3_00_55/L_w_main_j1_023_36/L_w_main_j2_024_34
-    classID: 4
-    script: {fileID: 0}
-    flags: 0
-  - serializedVersion: 2
-    curve:
-      serializedVersion: 2
-      m_Curve:
-      - serializedVersion: 3
-        time: 0
-        value: -0.15836363
-        inSlope: 0
-        outSlope: 0
-        tangentMode: 0
-        weightedMode: 0
-        inWeight: 0.33333334
-        outWeight: 0.33333334
-      m_PreInfinity: 2
-      m_PostInfinity: 2
-      m_RotationOrder: 4
-    attribute: m_LocalRotation.z
-    path: Sketchfab_model/root/GLTF_SceneRootNode/Realistic Animated Rock Pigeon Low-poly 3D model_123/RootNode_122/Pigeon_121/root_120/Skeleton_119/GLTF_created_0/GLTF_created_0_rootJoint/hip_01_115/spine1_03_59/spine2_04_58/spine3_00_55/L_w_main_j1_023_36/L_w_main_j2_024_34
-    classID: 4
-    script: {fileID: 0}
-    flags: 0
-  - serializedVersion: 2
-    curve:
-      serializedVersion: 2
-      m_Curve:
-      - serializedVersion: 3
-        time: 0
-        value: 0.9131587
-        inSlope: 0
-        outSlope: 0
-        tangentMode: 0
-        weightedMode: 0
-        inWeight: 0.33333334
-        outWeight: 0.33333334
-      m_PreInfinity: 2
-      m_PostInfinity: 2
-      m_RotationOrder: 4
-    attribute: m_LocalRotation.w
-    path: Sketchfab_model/root/GLTF_SceneRootNode/Realistic Animated Rock Pigeon Low-poly 3D model_123/RootNode_122/Pigeon_121/root_120/Skeleton_119/GLTF_created_0/GLTF_created_0_rootJoint/hip_01_115/spine1_03_59/spine2_04_58/spine3_00_55/L_w_main_j1_023_36/L_w_main_j2_024_34
-    classID: 4
-    script: {fileID: 0}
-    flags: 0
-  - serializedVersion: 2
-    curve:
-      serializedVersion: 2
-      m_Curve:
-      - serializedVersion: 3
-        time: 0
-        value: 0.15544912
-        inSlope: 0
-        outSlope: 0
-        tangentMode: 0
-        weightedMode: 0
-        inWeight: 0.33333334
-        outWeight: 0.33333334
-      m_PreInfinity: 2
-      m_PostInfinity: 2
-      m_RotationOrder: 4
-    attribute: m_LocalRotation.x
-    path: Sketchfab_model/root/GLTF_SceneRootNode/Realistic Animated Rock Pigeon Low-poly 3D model_123/RootNode_122/Pigeon_121/root_120/Skeleton_119/GLTF_created_0/GLTF_created_0_rootJoint/hip_01_115/spine1_03_59/spine2_04_58/spine3_00_55/L_w_main_j1_023_36/L_w_main_j2_024_34/L_w_main_j3_025_32
-    classID: 4
-    script: {fileID: 0}
-    flags: 0
-  - serializedVersion: 2
-    curve:
-      serializedVersion: 2
-      m_Curve:
-      - serializedVersion: 3
-        time: 0
-        value: -0.110612355
-        inSlope: 0
-        outSlope: 0
-        tangentMode: 0
-        weightedMode: 0
-        inWeight: 0.33333334
-        outWeight: 0.33333334
-      m_PreInfinity: 2
-      m_PostInfinity: 2
-      m_RotationOrder: 4
-    attribute: m_LocalRotation.y
-    path: Sketchfab_model/root/GLTF_SceneRootNode/Realistic Animated Rock Pigeon Low-poly 3D model_123/RootNode_122/Pigeon_121/root_120/Skeleton_119/GLTF_created_0/GLTF_created_0_rootJoint/hip_01_115/spine1_03_59/spine2_04_58/spine3_00_55/L_w_main_j1_023_36/L_w_main_j2_024_34/L_w_main_j3_025_32
-    classID: 4
-    script: {fileID: 0}
-    flags: 0
-  - serializedVersion: 2
-    curve:
-      serializedVersion: 2
-      m_Curve:
-      - serializedVersion: 3
-        time: 0
-        value: -0.036951188
-        inSlope: 0
-        outSlope: 0
-        tangentMode: 0
-        weightedMode: 0
-        inWeight: 0.33333334
-        outWeight: 0.33333334
-      m_PreInfinity: 2
-      m_PostInfinity: 2
-      m_RotationOrder: 4
-    attribute: m_LocalRotation.z
-    path: Sketchfab_model/root/GLTF_SceneRootNode/Realistic Animated Rock Pigeon Low-poly 3D model_123/RootNode_122/Pigeon_121/root_120/Skeleton_119/GLTF_created_0/GLTF_created_0_rootJoint/hip_01_115/spine1_03_59/spine2_04_58/spine3_00_55/L_w_main_j1_023_36/L_w_main_j2_024_34/L_w_main_j3_025_32
-    classID: 4
-    script: {fileID: 0}
-    flags: 0
-  - serializedVersion: 2
-    curve:
-      serializedVersion: 2
-      m_Curve:
-      - serializedVersion: 3
-        time: 0
-        value: 0.9809359
-        inSlope: 0
-        outSlope: 0
-        tangentMode: 0
-        weightedMode: 0
-        inWeight: 0.33333334
-        outWeight: 0.33333334
-      m_PreInfinity: 2
-      m_PostInfinity: 2
-      m_RotationOrder: 4
-    attribute: m_LocalRotation.w
-    path: Sketchfab_model/root/GLTF_SceneRootNode/Realistic Animated Rock Pigeon Low-poly 3D model_123/RootNode_122/Pigeon_121/root_120/Skeleton_119/GLTF_created_0/GLTF_created_0_rootJoint/hip_01_115/spine1_03_59/spine2_04_58/spine3_00_55/L_w_main_j1_023_36/L_w_main_j2_024_34/L_w_main_j3_025_32
-    classID: 4
-    script: {fileID: 0}
-    flags: 0
-  - serializedVersion: 2
-    curve:
-      serializedVersion: 2
-      m_Curve:
-      - serializedVersion: 3
-        time: 0
-        value: 0.06994294
-        inSlope: 0
-        outSlope: 0
-        tangentMode: 0
-        weightedMode: 0
-        inWeight: 0.33333334
-        outWeight: 0.33333334
-      m_PreInfinity: 2
-      m_PostInfinity: 2
-      m_RotationOrder: 4
-    attribute: m_LocalRotation.x
-    path: Sketchfab_model/root/GLTF_SceneRootNode/Realistic Animated Rock Pigeon Low-poly 3D model_123/RootNode_122/Pigeon_121/root_120/Skeleton_119/GLTF_created_0/GLTF_created_0_rootJoint/hip_01_115/spine1_03_59/spine2_04_58/spine3_00_55/L_w_main_j1_023_36/L_w_main_j2_024_34/L_w_main_j3_025_32/L_w_main_j4_026_30
-    classID: 4
-    script: {fileID: 0}
-    flags: 0
-  - serializedVersion: 2
-    curve:
-      serializedVersion: 2
-      m_Curve:
-      - serializedVersion: 3
-        time: 0
-        value: -0.13722862
-        inSlope: 0
-        outSlope: 0
-        tangentMode: 0
-        weightedMode: 0
-        inWeight: 0.33333334
-        outWeight: 0.33333334
-      m_PreInfinity: 2
-      m_PostInfinity: 2
-      m_RotationOrder: 4
-    attribute: m_LocalRotation.y
-    path: Sketchfab_model/root/GLTF_SceneRootNode/Realistic Animated Rock Pigeon Low-poly 3D model_123/RootNode_122/Pigeon_121/root_120/Skeleton_119/GLTF_created_0/GLTF_created_0_rootJoint/hip_01_115/spine1_03_59/spine2_04_58/spine3_00_55/L_w_main_j1_023_36/L_w_main_j2_024_34/L_w_main_j3_025_32/L_w_main_j4_026_30
-    classID: 4
-    script: {fileID: 0}
-    flags: 0
-  - serializedVersion: 2
-    curve:
-      serializedVersion: 2
-      m_Curve:
-      - serializedVersion: 3
-        time: 0
-        value: 0.0145654995
-        inSlope: 0
-        outSlope: 0
-        tangentMode: 0
-        weightedMode: 0
-        inWeight: 0.33333334
-        outWeight: 0.33333334
-      m_PreInfinity: 2
-      m_PostInfinity: 2
-      m_RotationOrder: 4
-    attribute: m_LocalRotation.z
-    path: Sketchfab_model/root/GLTF_SceneRootNode/Realistic Animated Rock Pigeon Low-poly 3D model_123/RootNode_122/Pigeon_121/root_120/Skeleton_119/GLTF_created_0/GLTF_created_0_rootJoint/hip_01_115/spine1_03_59/spine2_04_58/spine3_00_55/L_w_main_j1_023_36/L_w_main_j2_024_34/L_w_main_j3_025_32/L_w_main_j4_026_30
-    classID: 4
-    script: {fileID: 0}
-    flags: 0
-  - serializedVersion: 2
-    curve:
-      serializedVersion: 2
-      m_Curve:
-      - serializedVersion: 3
-        time: 0
-        value: 0.9879595
-        inSlope: 0
-        outSlope: 0
-        tangentMode: 0
-        weightedMode: 0
-        inWeight: 0.33333334
-        outWeight: 0.33333334
-      m_PreInfinity: 2
-      m_PostInfinity: 2
-      m_RotationOrder: 4
-    attribute: m_LocalRotation.w
-    path: Sketchfab_model/root/GLTF_SceneRootNode/Realistic Animated Rock Pigeon Low-poly 3D model_123/RootNode_122/Pigeon_121/root_120/Skeleton_119/GLTF_created_0/GLTF_created_0_rootJoint/hip_01_115/spine1_03_59/spine2_04_58/spine3_00_55/L_w_main_j1_023_36/L_w_main_j2_024_34/L_w_main_j3_025_32/L_w_main_j4_026_30
-    classID: 4
-    script: {fileID: 0}
-    flags: 0
-  - serializedVersion: 2
-    curve:
-      serializedVersion: 2
-      m_Curve:
-      - serializedVersion: 3
-        time: 0
-        value: -0.20620653
-        inSlope: 0
-        outSlope: 0
-        tangentMode: 0
-        weightedMode: 0
-        inWeight: 0.33333334
-        outWeight: 0.33333334
-      m_PreInfinity: 2
-      m_PostInfinity: 2
-      m_RotationOrder: 4
-    attribute: m_LocalRotation.x
-    path: Sketchfab_model/root/GLTF_SceneRootNode/Realistic Animated Rock Pigeon Low-poly 3D model_123/RootNode_122/Pigeon_121/root_120/Skeleton_119/GLTF_created_0/GLTF_created_0_rootJoint/hip_01_115/spine1_03_59/spine2_04_58/spine3_00_55/L_w_main_j1_023_36/L_w_main_j2_024_34/L_w_main_j3_025_32/L_w_main_j4_026_30/L_w_main_j5_027_28
-    classID: 4
-    script: {fileID: 0}
-    flags: 0
-  - serializedVersion: 2
-    curve:
-      serializedVersion: 2
-      m_Curve:
-      - serializedVersion: 3
-        time: 0
-        value: -0.5538616
-        inSlope: 0
-        outSlope: 0
-        tangentMode: 0
-        weightedMode: 0
-        inWeight: 0.33333334
-        outWeight: 0.33333334
-      m_PreInfinity: 2
-      m_PostInfinity: 2
-      m_RotationOrder: 4
-    attribute: m_LocalRotation.y
-    path: Sketchfab_model/root/GLTF_SceneRootNode/Realistic Animated Rock Pigeon Low-poly 3D model_123/RootNode_122/Pigeon_121/root_120/Skeleton_119/GLTF_created_0/GLTF_created_0_rootJoint/hip_01_115/spine1_03_59/spine2_04_58/spine3_00_55/L_w_main_j1_023_36/L_w_main_j2_024_34/L_w_main_j3_025_32/L_w_main_j4_026_30/L_w_main_j5_027_28
-    classID: 4
-    script: {fileID: 0}
-    flags: 0
-  - serializedVersion: 2
-    curve:
-      serializedVersion: 2
-      m_Curve:
-      - serializedVersion: 3
-        time: 0
-        value: -0.0767833
-        inSlope: 0
-        outSlope: 0
-        tangentMode: 0
-        weightedMode: 0
-        inWeight: 0.33333334
-        outWeight: 0.33333334
-      m_PreInfinity: 2
-      m_PostInfinity: 2
-      m_RotationOrder: 4
-    attribute: m_LocalRotation.z
-    path: Sketchfab_model/root/GLTF_SceneRootNode/Realistic Animated Rock Pigeon Low-poly 3D model_123/RootNode_122/Pigeon_121/root_120/Skeleton_119/GLTF_created_0/GLTF_created_0_rootJoint/hip_01_115/spine1_03_59/spine2_04_58/spine3_00_55/L_w_main_j1_023_36/L_w_main_j2_024_34/L_w_main_j3_025_32/L_w_main_j4_026_30/L_w_main_j5_027_28
-    classID: 4
-    script: {fileID: 0}
-    flags: 0
-  - serializedVersion: 2
-    curve:
-      serializedVersion: 2
-      m_Curve:
-      - serializedVersion: 3
-        time: 0
-        value: 0.8030072
-        inSlope: 0
-        outSlope: 0
-        tangentMode: 0
-        weightedMode: 0
-        inWeight: 0.33333334
-        outWeight: 0.33333334
-      m_PreInfinity: 2
-      m_PostInfinity: 2
-      m_RotationOrder: 4
-    attribute: m_LocalRotation.w
-    path: Sketchfab_model/root/GLTF_SceneRootNode/Realistic Animated Rock Pigeon Low-poly 3D model_123/RootNode_122/Pigeon_121/root_120/Skeleton_119/GLTF_created_0/GLTF_created_0_rootJoint/hip_01_115/spine1_03_59/spine2_04_58/spine3_00_55/L_w_main_j1_023_36/L_w_main_j2_024_34/L_w_main_j3_025_32/L_w_main_j4_026_30/L_w_main_j5_027_28
-    classID: 4
-    script: {fileID: 0}
-    flags: 0
-  - serializedVersion: 2
-    curve:
-      serializedVersion: 2
-      m_Curve:
-      - serializedVersion: 3
-        time: 0
-        value: -0.11851896
-        inSlope: 0
-        outSlope: 0
-        tangentMode: 0
-        weightedMode: 0
-        inWeight: 0.33333334
-        outWeight: 0.33333334
-      m_PreInfinity: 2
-      m_PostInfinity: 2
-      m_RotationOrder: 4
-    attribute: m_LocalRotation.x
-    path: Sketchfab_model/root/GLTF_SceneRootNode/Realistic Animated Rock Pigeon Low-poly 3D model_123/RootNode_122/Pigeon_121/root_120/Skeleton_119/GLTF_created_0/GLTF_created_0_rootJoint/hip_01_115/spine1_03_59/spine2_04_58/spine3_00_55/L_w_main_j1_023_36/L_w_main_j2_024_34/L_w_main_j3_025_32/L_w_main_j4_026_30/L_w_main_j5_027_28/L_w_main_j6_028_22
-    classID: 4
-    script: {fileID: 0}
-    flags: 0
-  - serializedVersion: 2
-    curve:
-      serializedVersion: 2
-      m_Curve:
-      - serializedVersion: 3
-        time: 0
-        value: -0.22486234
-        inSlope: 0
-        outSlope: 0
-        tangentMode: 0
-        weightedMode: 0
-        inWeight: 0.33333334
-        outWeight: 0.33333334
-      m_PreInfinity: 2
-      m_PostInfinity: 2
-      m_RotationOrder: 4
-    attribute: m_LocalRotation.y
-    path: Sketchfab_model/root/GLTF_SceneRootNode/Realistic Animated Rock Pigeon Low-poly 3D model_123/RootNode_122/Pigeon_121/root_120/Skeleton_119/GLTF_created_0/GLTF_created_0_rootJoint/hip_01_115/spine1_03_59/spine2_04_58/spine3_00_55/L_w_main_j1_023_36/L_w_main_j2_024_34/L_w_main_j3_025_32/L_w_main_j4_026_30/L_w_main_j5_027_28/L_w_main_j6_028_22
-    classID: 4
-    script: {fileID: 0}
-    flags: 0
-  - serializedVersion: 2
-    curve:
-      serializedVersion: 2
-      m_Curve:
-      - serializedVersion: 3
-        time: 0
-        value: -0.0594619
-        inSlope: 0
-        outSlope: 0
-        tangentMode: 0
-        weightedMode: 0
-        inWeight: 0.33333334
-        outWeight: 0.33333334
-      m_PreInfinity: 2
-      m_PostInfinity: 2
-      m_RotationOrder: 4
-    attribute: m_LocalRotation.z
-    path: Sketchfab_model/root/GLTF_SceneRootNode/Realistic Animated Rock Pigeon Low-poly 3D model_123/RootNode_122/Pigeon_121/root_120/Skeleton_119/GLTF_created_0/GLTF_created_0_rootJoint/hip_01_115/spine1_03_59/spine2_04_58/spine3_00_55/L_w_main_j1_023_36/L_w_main_j2_024_34/L_w_main_j3_025_32/L_w_main_j4_026_30/L_w_main_j5_027_28/L_w_main_j6_028_22
-    classID: 4
-    script: {fileID: 0}
-    flags: 0
-  - serializedVersion: 2
-    curve:
-      serializedVersion: 2
-      m_Curve:
-      - serializedVersion: 3
-        time: 0
-        value: 0.9653261
-        inSlope: 0
-        outSlope: 0
-        tangentMode: 0
-        weightedMode: 0
-        inWeight: 0.33333334
-        outWeight: 0.33333334
-      m_PreInfinity: 2
-      m_PostInfinity: 2
-      m_RotationOrder: 4
-    attribute: m_LocalRotation.w
-    path: Sketchfab_model/root/GLTF_SceneRootNode/Realistic Animated Rock Pigeon Low-poly 3D model_123/RootNode_122/Pigeon_121/root_120/Skeleton_119/GLTF_created_0/GLTF_created_0_rootJoint/hip_01_115/spine1_03_59/spine2_04_58/spine3_00_55/L_w_main_j1_023_36/L_w_main_j2_024_34/L_w_main_j3_025_32/L_w_main_j4_026_30/L_w_main_j5_027_28/L_w_main_j6_028_22
-    classID: 4
-    script: {fileID: 0}
-    flags: 0
-  - serializedVersion: 2
-    curve:
-      serializedVersion: 2
-      m_Curve:
-      - serializedVersion: 3
-        time: 0
         value: -0.071522556
         inSlope: 0
         outSlope: 0
@@ -13159,510 +12655,6 @@ AnimationClip:
       m_RotationOrder: 4
     attribute: m_LocalRotation.w
     path: Sketchfab_model/root/GLTF_SceneRootNode/Realistic Animated Rock Pigeon Low-poly 3D model_123/RootNode_122/Pigeon_121/root_120/Skeleton_119/GLTF_created_0/GLTF_created_0_rootJoint/hip_01_115/spine1_03_59/spine2_04_58/spine3_00_55/L_w_main_j1_023_36/L_w_sub_j_a_040_35
-    classID: 4
-    script: {fileID: 0}
-    flags: 0
-  - serializedVersion: 2
-    curve:
-      serializedVersion: 2
-      m_Curve:
-      - serializedVersion: 3
-        time: 0
-        value: 0.58787876
-        inSlope: 0
-        outSlope: 0
-        tangentMode: 0
-        weightedMode: 0
-        inWeight: 0.33333334
-        outWeight: 0.33333334
-      m_PreInfinity: 2
-      m_PostInfinity: 2
-      m_RotationOrder: 4
-    attribute: m_LocalRotation.x
-    path: Sketchfab_model/root/GLTF_SceneRootNode/Realistic Animated Rock Pigeon Low-poly 3D model_123/RootNode_122/Pigeon_121/root_120/Skeleton_119/GLTF_created_0/GLTF_created_0_rootJoint/hip_01_115/spine1_03_59/spine2_04_58/spine3_00_55/R_w_main_j1_041_54
-    classID: 4
-    script: {fileID: 0}
-    flags: 0
-  - serializedVersion: 2
-    curve:
-      serializedVersion: 2
-      m_Curve:
-      - serializedVersion: 3
-        time: 0
-        value: 0.39401937
-        inSlope: 0
-        outSlope: 0
-        tangentMode: 0
-        weightedMode: 0
-        inWeight: 0.33333334
-        outWeight: 0.33333334
-      m_PreInfinity: 2
-      m_PostInfinity: 2
-      m_RotationOrder: 4
-    attribute: m_LocalRotation.y
-    path: Sketchfab_model/root/GLTF_SceneRootNode/Realistic Animated Rock Pigeon Low-poly 3D model_123/RootNode_122/Pigeon_121/root_120/Skeleton_119/GLTF_created_0/GLTF_created_0_rootJoint/hip_01_115/spine1_03_59/spine2_04_58/spine3_00_55/R_w_main_j1_041_54
-    classID: 4
-    script: {fileID: 0}
-    flags: 0
-  - serializedVersion: 2
-    curve:
-      serializedVersion: 2
-      m_Curve:
-      - serializedVersion: 3
-        time: 0
-        value: -0.26638436
-        inSlope: 0
-        outSlope: 0
-        tangentMode: 0
-        weightedMode: 0
-        inWeight: 0.33333334
-        outWeight: 0.33333334
-      m_PreInfinity: 2
-      m_PostInfinity: 2
-      m_RotationOrder: 4
-    attribute: m_LocalRotation.z
-    path: Sketchfab_model/root/GLTF_SceneRootNode/Realistic Animated Rock Pigeon Low-poly 3D model_123/RootNode_122/Pigeon_121/root_120/Skeleton_119/GLTF_created_0/GLTF_created_0_rootJoint/hip_01_115/spine1_03_59/spine2_04_58/spine3_00_55/R_w_main_j1_041_54
-    classID: 4
-    script: {fileID: 0}
-    flags: 0
-  - serializedVersion: 2
-    curve:
-      serializedVersion: 2
-      m_Curve:
-      - serializedVersion: 3
-        time: 0
-        value: 0.6543598
-        inSlope: 0
-        outSlope: 0
-        tangentMode: 0
-        weightedMode: 0
-        inWeight: 0.33333334
-        outWeight: 0.33333334
-      m_PreInfinity: 2
-      m_PostInfinity: 2
-      m_RotationOrder: 4
-    attribute: m_LocalRotation.w
-    path: Sketchfab_model/root/GLTF_SceneRootNode/Realistic Animated Rock Pigeon Low-poly 3D model_123/RootNode_122/Pigeon_121/root_120/Skeleton_119/GLTF_created_0/GLTF_created_0_rootJoint/hip_01_115/spine1_03_59/spine2_04_58/spine3_00_55/R_w_main_j1_041_54
-    classID: 4
-    script: {fileID: 0}
-    flags: 0
-  - serializedVersion: 2
-    curve:
-      serializedVersion: 2
-      m_Curve:
-      - serializedVersion: 3
-        time: 0
-        value: 0.14667349
-        inSlope: 0
-        outSlope: 0
-        tangentMode: 0
-        weightedMode: 0
-        inWeight: 0.33333334
-        outWeight: 0.33333334
-      m_PreInfinity: 2
-      m_PostInfinity: 2
-      m_RotationOrder: 4
-    attribute: m_LocalRotation.x
-    path: Sketchfab_model/root/GLTF_SceneRootNode/Realistic Animated Rock Pigeon Low-poly 3D model_123/RootNode_122/Pigeon_121/root_120/Skeleton_119/GLTF_created_0/GLTF_created_0_rootJoint/hip_01_115/spine1_03_59/spine2_04_58/spine3_00_55/R_w_main_j1_041_54/R_w_main_j2_042_52
-    classID: 4
-    script: {fileID: 0}
-    flags: 0
-  - serializedVersion: 2
-    curve:
-      serializedVersion: 2
-      m_Curve:
-      - serializedVersion: 3
-        time: 0
-        value: 0.037920758
-        inSlope: 0
-        outSlope: 0
-        tangentMode: 0
-        weightedMode: 0
-        inWeight: 0.33333334
-        outWeight: 0.33333334
-      m_PreInfinity: 2
-      m_PostInfinity: 2
-      m_RotationOrder: 4
-    attribute: m_LocalRotation.y
-    path: Sketchfab_model/root/GLTF_SceneRootNode/Realistic Animated Rock Pigeon Low-poly 3D model_123/RootNode_122/Pigeon_121/root_120/Skeleton_119/GLTF_created_0/GLTF_created_0_rootJoint/hip_01_115/spine1_03_59/spine2_04_58/spine3_00_55/R_w_main_j1_041_54/R_w_main_j2_042_52
-    classID: 4
-    script: {fileID: 0}
-    flags: 0
-  - serializedVersion: 2
-    curve:
-      serializedVersion: 2
-      m_Curve:
-      - serializedVersion: 3
-        time: 0
-        value: 0.08052051
-        inSlope: 0
-        outSlope: 0
-        tangentMode: 0
-        weightedMode: 0
-        inWeight: 0.33333334
-        outWeight: 0.33333334
-      m_PreInfinity: 2
-      m_PostInfinity: 2
-      m_RotationOrder: 4
-    attribute: m_LocalRotation.z
-    path: Sketchfab_model/root/GLTF_SceneRootNode/Realistic Animated Rock Pigeon Low-poly 3D model_123/RootNode_122/Pigeon_121/root_120/Skeleton_119/GLTF_created_0/GLTF_created_0_rootJoint/hip_01_115/spine1_03_59/spine2_04_58/spine3_00_55/R_w_main_j1_041_54/R_w_main_j2_042_52
-    classID: 4
-    script: {fileID: 0}
-    flags: 0
-  - serializedVersion: 2
-    curve:
-      serializedVersion: 2
-      m_Curve:
-      - serializedVersion: 3
-        time: 0
-        value: 0.9851728
-        inSlope: 0
-        outSlope: 0
-        tangentMode: 0
-        weightedMode: 0
-        inWeight: 0.33333334
-        outWeight: 0.33333334
-      m_PreInfinity: 2
-      m_PostInfinity: 2
-      m_RotationOrder: 4
-    attribute: m_LocalRotation.w
-    path: Sketchfab_model/root/GLTF_SceneRootNode/Realistic Animated Rock Pigeon Low-poly 3D model_123/RootNode_122/Pigeon_121/root_120/Skeleton_119/GLTF_created_0/GLTF_created_0_rootJoint/hip_01_115/spine1_03_59/spine2_04_58/spine3_00_55/R_w_main_j1_041_54/R_w_main_j2_042_52
-    classID: 4
-    script: {fileID: 0}
-    flags: 0
-  - serializedVersion: 2
-    curve:
-      serializedVersion: 2
-      m_Curve:
-      - serializedVersion: 3
-        time: 0
-        value: 0.123748764
-        inSlope: 0
-        outSlope: 0
-        tangentMode: 0
-        weightedMode: 0
-        inWeight: 0.33333334
-        outWeight: 0.33333334
-      m_PreInfinity: 2
-      m_PostInfinity: 2
-      m_RotationOrder: 4
-    attribute: m_LocalRotation.x
-    path: Sketchfab_model/root/GLTF_SceneRootNode/Realistic Animated Rock Pigeon Low-poly 3D model_123/RootNode_122/Pigeon_121/root_120/Skeleton_119/GLTF_created_0/GLTF_created_0_rootJoint/hip_01_115/spine1_03_59/spine2_04_58/spine3_00_55/R_w_main_j1_041_54/R_w_main_j2_042_52/R_w_main_j3_043_50
-    classID: 4
-    script: {fileID: 0}
-    flags: 0
-  - serializedVersion: 2
-    curve:
-      serializedVersion: 2
-      m_Curve:
-      - serializedVersion: 3
-        time: 0
-        value: 0.27481633
-        inSlope: 0
-        outSlope: 0
-        tangentMode: 0
-        weightedMode: 0
-        inWeight: 0.33333334
-        outWeight: 0.33333334
-      m_PreInfinity: 2
-      m_PostInfinity: 2
-      m_RotationOrder: 4
-    attribute: m_LocalRotation.y
-    path: Sketchfab_model/root/GLTF_SceneRootNode/Realistic Animated Rock Pigeon Low-poly 3D model_123/RootNode_122/Pigeon_121/root_120/Skeleton_119/GLTF_created_0/GLTF_created_0_rootJoint/hip_01_115/spine1_03_59/spine2_04_58/spine3_00_55/R_w_main_j1_041_54/R_w_main_j2_042_52/R_w_main_j3_043_50
-    classID: 4
-    script: {fileID: 0}
-    flags: 0
-  - serializedVersion: 2
-    curve:
-      serializedVersion: 2
-      m_Curve:
-      - serializedVersion: 3
-        time: 0
-        value: -0.101070836
-        inSlope: 0
-        outSlope: 0
-        tangentMode: 0
-        weightedMode: 0
-        inWeight: 0.33333334
-        outWeight: 0.33333334
-      m_PreInfinity: 2
-      m_PostInfinity: 2
-      m_RotationOrder: 4
-    attribute: m_LocalRotation.z
-    path: Sketchfab_model/root/GLTF_SceneRootNode/Realistic Animated Rock Pigeon Low-poly 3D model_123/RootNode_122/Pigeon_121/root_120/Skeleton_119/GLTF_created_0/GLTF_created_0_rootJoint/hip_01_115/spine1_03_59/spine2_04_58/spine3_00_55/R_w_main_j1_041_54/R_w_main_j2_042_52/R_w_main_j3_043_50
-    classID: 4
-    script: {fileID: 0}
-    flags: 0
-  - serializedVersion: 2
-    curve:
-      serializedVersion: 2
-      m_Curve:
-      - serializedVersion: 3
-        time: 0
-        value: 0.94812804
-        inSlope: 0
-        outSlope: 0
-        tangentMode: 0
-        weightedMode: 0
-        inWeight: 0.33333334
-        outWeight: 0.33333334
-      m_PreInfinity: 2
-      m_PostInfinity: 2
-      m_RotationOrder: 4
-    attribute: m_LocalRotation.w
-    path: Sketchfab_model/root/GLTF_SceneRootNode/Realistic Animated Rock Pigeon Low-poly 3D model_123/RootNode_122/Pigeon_121/root_120/Skeleton_119/GLTF_created_0/GLTF_created_0_rootJoint/hip_01_115/spine1_03_59/spine2_04_58/spine3_00_55/R_w_main_j1_041_54/R_w_main_j2_042_52/R_w_main_j3_043_50
-    classID: 4
-    script: {fileID: 0}
-    flags: 0
-  - serializedVersion: 2
-    curve:
-      serializedVersion: 2
-      m_Curve:
-      - serializedVersion: 3
-        time: 0
-        value: 0.03317378
-        inSlope: 0
-        outSlope: 0
-        tangentMode: 0
-        weightedMode: 0
-        inWeight: 0.33333334
-        outWeight: 0.33333334
-      m_PreInfinity: 2
-      m_PostInfinity: 2
-      m_RotationOrder: 4
-    attribute: m_LocalRotation.x
-    path: Sketchfab_model/root/GLTF_SceneRootNode/Realistic Animated Rock Pigeon Low-poly 3D model_123/RootNode_122/Pigeon_121/root_120/Skeleton_119/GLTF_created_0/GLTF_created_0_rootJoint/hip_01_115/spine1_03_59/spine2_04_58/spine3_00_55/R_w_main_j1_041_54/R_w_main_j2_042_52/R_w_main_j3_043_50/R_w_main_j4_044_48
-    classID: 4
-    script: {fileID: 0}
-    flags: 0
-  - serializedVersion: 2
-    curve:
-      serializedVersion: 2
-      m_Curve:
-      - serializedVersion: 3
-        time: 0
-        value: 0.0037946058
-        inSlope: 0
-        outSlope: 0
-        tangentMode: 0
-        weightedMode: 0
-        inWeight: 0.33333334
-        outWeight: 0.33333334
-      m_PreInfinity: 2
-      m_PostInfinity: 2
-      m_RotationOrder: 4
-    attribute: m_LocalRotation.y
-    path: Sketchfab_model/root/GLTF_SceneRootNode/Realistic Animated Rock Pigeon Low-poly 3D model_123/RootNode_122/Pigeon_121/root_120/Skeleton_119/GLTF_created_0/GLTF_created_0_rootJoint/hip_01_115/spine1_03_59/spine2_04_58/spine3_00_55/R_w_main_j1_041_54/R_w_main_j2_042_52/R_w_main_j3_043_50/R_w_main_j4_044_48
-    classID: 4
-    script: {fileID: 0}
-    flags: 0
-  - serializedVersion: 2
-    curve:
-      serializedVersion: 2
-      m_Curve:
-      - serializedVersion: 3
-        time: 0
-        value: -0.063275605
-        inSlope: 0
-        outSlope: 0
-        tangentMode: 0
-        weightedMode: 0
-        inWeight: 0.33333334
-        outWeight: 0.33333334
-      m_PreInfinity: 2
-      m_PostInfinity: 2
-      m_RotationOrder: 4
-    attribute: m_LocalRotation.z
-    path: Sketchfab_model/root/GLTF_SceneRootNode/Realistic Animated Rock Pigeon Low-poly 3D model_123/RootNode_122/Pigeon_121/root_120/Skeleton_119/GLTF_created_0/GLTF_created_0_rootJoint/hip_01_115/spine1_03_59/spine2_04_58/spine3_00_55/R_w_main_j1_041_54/R_w_main_j2_042_52/R_w_main_j3_043_50/R_w_main_j4_044_48
-    classID: 4
-    script: {fileID: 0}
-    flags: 0
-  - serializedVersion: 2
-    curve:
-      serializedVersion: 2
-      m_Curve:
-      - serializedVersion: 3
-        time: 0
-        value: 0.99743736
-        inSlope: 0
-        outSlope: 0
-        tangentMode: 0
-        weightedMode: 0
-        inWeight: 0.33333334
-        outWeight: 0.33333334
-      m_PreInfinity: 2
-      m_PostInfinity: 2
-      m_RotationOrder: 4
-    attribute: m_LocalRotation.w
-    path: Sketchfab_model/root/GLTF_SceneRootNode/Realistic Animated Rock Pigeon Low-poly 3D model_123/RootNode_122/Pigeon_121/root_120/Skeleton_119/GLTF_created_0/GLTF_created_0_rootJoint/hip_01_115/spine1_03_59/spine2_04_58/spine3_00_55/R_w_main_j1_041_54/R_w_main_j2_042_52/R_w_main_j3_043_50/R_w_main_j4_044_48
-    classID: 4
-    script: {fileID: 0}
-    flags: 0
-  - serializedVersion: 2
-    curve:
-      serializedVersion: 2
-      m_Curve:
-      - serializedVersion: 3
-        time: 0
-        value: 0.072315514
-        inSlope: 0
-        outSlope: 0
-        tangentMode: 0
-        weightedMode: 0
-        inWeight: 0.33333334
-        outWeight: 0.33333334
-      m_PreInfinity: 2
-      m_PostInfinity: 2
-      m_RotationOrder: 4
-    attribute: m_LocalRotation.x
-    path: Sketchfab_model/root/GLTF_SceneRootNode/Realistic Animated Rock Pigeon Low-poly 3D model_123/RootNode_122/Pigeon_121/root_120/Skeleton_119/GLTF_created_0/GLTF_created_0_rootJoint/hip_01_115/spine1_03_59/spine2_04_58/spine3_00_55/R_w_main_j1_041_54/R_w_main_j2_042_52/R_w_main_j3_043_50/R_w_main_j4_044_48/R_w_main_j5_045_46
-    classID: 4
-    script: {fileID: 0}
-    flags: 0
-  - serializedVersion: 2
-    curve:
-      serializedVersion: 2
-      m_Curve:
-      - serializedVersion: 3
-        time: 0
-        value: 0.069593646
-        inSlope: 0
-        outSlope: 0
-        tangentMode: 0
-        weightedMode: 0
-        inWeight: 0.33333334
-        outWeight: 0.33333334
-      m_PreInfinity: 2
-      m_PostInfinity: 2
-      m_RotationOrder: 4
-    attribute: m_LocalRotation.y
-    path: Sketchfab_model/root/GLTF_SceneRootNode/Realistic Animated Rock Pigeon Low-poly 3D model_123/RootNode_122/Pigeon_121/root_120/Skeleton_119/GLTF_created_0/GLTF_created_0_rootJoint/hip_01_115/spine1_03_59/spine2_04_58/spine3_00_55/R_w_main_j1_041_54/R_w_main_j2_042_52/R_w_main_j3_043_50/R_w_main_j4_044_48/R_w_main_j5_045_46
-    classID: 4
-    script: {fileID: 0}
-    flags: 0
-  - serializedVersion: 2
-    curve:
-      serializedVersion: 2
-      m_Curve:
-      - serializedVersion: 3
-        time: 0
-        value: 0.207815
-        inSlope: 0
-        outSlope: 0
-        tangentMode: 0
-        weightedMode: 0
-        inWeight: 0.33333334
-        outWeight: 0.33333334
-      m_PreInfinity: 2
-      m_PostInfinity: 2
-      m_RotationOrder: 4
-    attribute: m_LocalRotation.z
-    path: Sketchfab_model/root/GLTF_SceneRootNode/Realistic Animated Rock Pigeon Low-poly 3D model_123/RootNode_122/Pigeon_121/root_120/Skeleton_119/GLTF_created_0/GLTF_created_0_rootJoint/hip_01_115/spine1_03_59/spine2_04_58/spine3_00_55/R_w_main_j1_041_54/R_w_main_j2_042_52/R_w_main_j3_043_50/R_w_main_j4_044_48/R_w_main_j5_045_46
-    classID: 4
-    script: {fileID: 0}
-    flags: 0
-  - serializedVersion: 2
-    curve:
-      serializedVersion: 2
-      m_Curve:
-      - serializedVersion: 3
-        time: 0
-        value: 0.9730057
-        inSlope: 0
-        outSlope: 0
-        tangentMode: 0
-        weightedMode: 0
-        inWeight: 0.33333334
-        outWeight: 0.33333334
-      m_PreInfinity: 2
-      m_PostInfinity: 2
-      m_RotationOrder: 4
-    attribute: m_LocalRotation.w
-    path: Sketchfab_model/root/GLTF_SceneRootNode/Realistic Animated Rock Pigeon Low-poly 3D model_123/RootNode_122/Pigeon_121/root_120/Skeleton_119/GLTF_created_0/GLTF_created_0_rootJoint/hip_01_115/spine1_03_59/spine2_04_58/spine3_00_55/R_w_main_j1_041_54/R_w_main_j2_042_52/R_w_main_j3_043_50/R_w_main_j4_044_48/R_w_main_j5_045_46
-    classID: 4
-    script: {fileID: 0}
-    flags: 0
-  - serializedVersion: 2
-    curve:
-      serializedVersion: 2
-      m_Curve:
-      - serializedVersion: 3
-        time: 0
-        value: 0.12614739
-        inSlope: 0
-        outSlope: 0
-        tangentMode: 0
-        weightedMode: 0
-        inWeight: 0.33333334
-        outWeight: 0.33333334
-      m_PreInfinity: 2
-      m_PostInfinity: 2
-      m_RotationOrder: 4
-    attribute: m_LocalRotation.x
-    path: Sketchfab_model/root/GLTF_SceneRootNode/Realistic Animated Rock Pigeon Low-poly 3D model_123/RootNode_122/Pigeon_121/root_120/Skeleton_119/GLTF_created_0/GLTF_created_0_rootJoint/hip_01_115/spine1_03_59/spine2_04_58/spine3_00_55/R_w_main_j1_041_54/R_w_main_j2_042_52/R_w_main_j3_043_50/R_w_main_j4_044_48/R_w_main_j5_045_46/R_w_main_j6_046_40
-    classID: 4
-    script: {fileID: 0}
-    flags: 0
-  - serializedVersion: 2
-    curve:
-      serializedVersion: 2
-      m_Curve:
-      - serializedVersion: 3
-        time: 0
-        value: -0.05229013
-        inSlope: 0
-        outSlope: 0
-        tangentMode: 0
-        weightedMode: 0
-        inWeight: 0.33333334
-        outWeight: 0.33333334
-      m_PreInfinity: 2
-      m_PostInfinity: 2
-      m_RotationOrder: 4
-    attribute: m_LocalRotation.y
-    path: Sketchfab_model/root/GLTF_SceneRootNode/Realistic Animated Rock Pigeon Low-poly 3D model_123/RootNode_122/Pigeon_121/root_120/Skeleton_119/GLTF_created_0/GLTF_created_0_rootJoint/hip_01_115/spine1_03_59/spine2_04_58/spine3_00_55/R_w_main_j1_041_54/R_w_main_j2_042_52/R_w_main_j3_043_50/R_w_main_j4_044_48/R_w_main_j5_045_46/R_w_main_j6_046_40
-    classID: 4
-    script: {fileID: 0}
-    flags: 0
-  - serializedVersion: 2
-    curve:
-      serializedVersion: 2
-      m_Curve:
-      - serializedVersion: 3
-        time: 0
-        value: 0.040873826
-        inSlope: 0
-        outSlope: 0
-        tangentMode: 0
-        weightedMode: 0
-        inWeight: 0.33333334
-        outWeight: 0.33333334
-      m_PreInfinity: 2
-      m_PostInfinity: 2
-      m_RotationOrder: 4
-    attribute: m_LocalRotation.z
-    path: Sketchfab_model/root/GLTF_SceneRootNode/Realistic Animated Rock Pigeon Low-poly 3D model_123/RootNode_122/Pigeon_121/root_120/Skeleton_119/GLTF_created_0/GLTF_created_0_rootJoint/hip_01_115/spine1_03_59/spine2_04_58/spine3_00_55/R_w_main_j1_041_54/R_w_main_j2_042_52/R_w_main_j3_043_50/R_w_main_j4_044_48/R_w_main_j5_045_46/R_w_main_j6_046_40
-    classID: 4
-    script: {fileID: 0}
-    flags: 0
-  - serializedVersion: 2
-    curve:
-      serializedVersion: 2
-      m_Curve:
-      - serializedVersion: 3
-        time: 0
-        value: 0.9897889
-        inSlope: 0
-        outSlope: 0
-        tangentMode: 0
-        weightedMode: 0
-        inWeight: 0.33333334
-        outWeight: 0.33333334
-      m_PreInfinity: 2
-      m_PostInfinity: 2
-      m_RotationOrder: 4
-    attribute: m_LocalRotation.w
-    path: Sketchfab_model/root/GLTF_SceneRootNode/Realistic Animated Rock Pigeon Low-poly 3D model_123/RootNode_122/Pigeon_121/root_120/Skeleton_119/GLTF_created_0/GLTF_created_0_rootJoint/hip_01_115/spine1_03_59/spine2_04_58/spine3_00_55/R_w_main_j1_041_54/R_w_main_j2_042_52/R_w_main_j3_043_50/R_w_main_j4_044_48/R_w_main_j5_045_46/R_w_main_j6_046_40
     classID: 4
     script: {fileID: 0}
     flags: 0
@@ -17110,6 +16102,1014 @@ AnimationClip:
     classID: 4
     script: {fileID: 0}
     flags: 0
+  - serializedVersion: 2
+    curve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0.42849195
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    attribute: m_LocalRotation.x
+    path: Sketchfab_model/root/GLTF_SceneRootNode/Realistic Animated Rock Pigeon Low-poly 3D model_123/RootNode_122/Pigeon_121/root_120/Skeleton_119/GLTF_created_0/GLTF_created_0_rootJoint/hip_01_115/spine1_03_59/spine2_04_58/spine3_00_55/L_w_main_j1_023_36
+    classID: 4
+    script: {fileID: 0}
+    flags: 0
+  - serializedVersion: 2
+    curve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0.25206876
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    attribute: m_LocalRotation.y
+    path: Sketchfab_model/root/GLTF_SceneRootNode/Realistic Animated Rock Pigeon Low-poly 3D model_123/RootNode_122/Pigeon_121/root_120/Skeleton_119/GLTF_created_0/GLTF_created_0_rootJoint/hip_01_115/spine1_03_59/spine2_04_58/spine3_00_55/L_w_main_j1_023_36
+    classID: 4
+    script: {fileID: 0}
+    flags: 0
+  - serializedVersion: 2
+    curve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: -0.48265207
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    attribute: m_LocalRotation.z
+    path: Sketchfab_model/root/GLTF_SceneRootNode/Realistic Animated Rock Pigeon Low-poly 3D model_123/RootNode_122/Pigeon_121/root_120/Skeleton_119/GLTF_created_0/GLTF_created_0_rootJoint/hip_01_115/spine1_03_59/spine2_04_58/spine3_00_55/L_w_main_j1_023_36
+    classID: 4
+    script: {fileID: 0}
+    flags: 0
+  - serializedVersion: 2
+    curve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0.721043
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    attribute: m_LocalRotation.w
+    path: Sketchfab_model/root/GLTF_SceneRootNode/Realistic Animated Rock Pigeon Low-poly 3D model_123/RootNode_122/Pigeon_121/root_120/Skeleton_119/GLTF_created_0/GLTF_created_0_rootJoint/hip_01_115/spine1_03_59/spine2_04_58/spine3_00_55/L_w_main_j1_023_36
+    classID: 4
+    script: {fileID: 0}
+    flags: 0
+  - serializedVersion: 2
+    curve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0.060593575
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    attribute: m_LocalRotation.x
+    path: Sketchfab_model/root/GLTF_SceneRootNode/Realistic Animated Rock Pigeon Low-poly 3D model_123/RootNode_122/Pigeon_121/root_120/Skeleton_119/GLTF_created_0/GLTF_created_0_rootJoint/hip_01_115/spine1_03_59/spine2_04_58/spine3_00_55/L_w_main_j1_023_36/L_w_main_j2_024_34
+    classID: 4
+    script: {fileID: 0}
+    flags: 0
+  - serializedVersion: 2
+    curve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: -0.40951252
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    attribute: m_LocalRotation.y
+    path: Sketchfab_model/root/GLTF_SceneRootNode/Realistic Animated Rock Pigeon Low-poly 3D model_123/RootNode_122/Pigeon_121/root_120/Skeleton_119/GLTF_created_0/GLTF_created_0_rootJoint/hip_01_115/spine1_03_59/spine2_04_58/spine3_00_55/L_w_main_j1_023_36/L_w_main_j2_024_34
+    classID: 4
+    script: {fileID: 0}
+    flags: 0
+  - serializedVersion: 2
+    curve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: -0.15596768
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    attribute: m_LocalRotation.z
+    path: Sketchfab_model/root/GLTF_SceneRootNode/Realistic Animated Rock Pigeon Low-poly 3D model_123/RootNode_122/Pigeon_121/root_120/Skeleton_119/GLTF_created_0/GLTF_created_0_rootJoint/hip_01_115/spine1_03_59/spine2_04_58/spine3_00_55/L_w_main_j1_023_36/L_w_main_j2_024_34
+    classID: 4
+    script: {fileID: 0}
+    flags: 0
+  - serializedVersion: 2
+    curve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0.8968288
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    attribute: m_LocalRotation.w
+    path: Sketchfab_model/root/GLTF_SceneRootNode/Realistic Animated Rock Pigeon Low-poly 3D model_123/RootNode_122/Pigeon_121/root_120/Skeleton_119/GLTF_created_0/GLTF_created_0_rootJoint/hip_01_115/spine1_03_59/spine2_04_58/spine3_00_55/L_w_main_j1_023_36/L_w_main_j2_024_34
+    classID: 4
+    script: {fileID: 0}
+    flags: 0
+  - serializedVersion: 2
+    curve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0.15971375
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    attribute: m_LocalRotation.x
+    path: Sketchfab_model/root/GLTF_SceneRootNode/Realistic Animated Rock Pigeon Low-poly 3D model_123/RootNode_122/Pigeon_121/root_120/Skeleton_119/GLTF_created_0/GLTF_created_0_rootJoint/hip_01_115/spine1_03_59/spine2_04_58/spine3_00_55/L_w_main_j1_023_36/L_w_main_j2_024_34/L_w_main_j3_025_32
+    classID: 4
+    script: {fileID: 0}
+    flags: 0
+  - serializedVersion: 2
+    curve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: -0.36117834
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    attribute: m_LocalRotation.y
+    path: Sketchfab_model/root/GLTF_SceneRootNode/Realistic Animated Rock Pigeon Low-poly 3D model_123/RootNode_122/Pigeon_121/root_120/Skeleton_119/GLTF_created_0/GLTF_created_0_rootJoint/hip_01_115/spine1_03_59/spine2_04_58/spine3_00_55/L_w_main_j1_023_36/L_w_main_j2_024_34/L_w_main_j3_025_32
+    classID: 4
+    script: {fileID: 0}
+    flags: 0
+  - serializedVersion: 2
+    curve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0.0046193264
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    attribute: m_LocalRotation.z
+    path: Sketchfab_model/root/GLTF_SceneRootNode/Realistic Animated Rock Pigeon Low-poly 3D model_123/RootNode_122/Pigeon_121/root_120/Skeleton_119/GLTF_created_0/GLTF_created_0_rootJoint/hip_01_115/spine1_03_59/spine2_04_58/spine3_00_55/L_w_main_j1_023_36/L_w_main_j2_024_34/L_w_main_j3_025_32
+    classID: 4
+    script: {fileID: 0}
+    flags: 0
+  - serializedVersion: 2
+    curve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0.9187059
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    attribute: m_LocalRotation.w
+    path: Sketchfab_model/root/GLTF_SceneRootNode/Realistic Animated Rock Pigeon Low-poly 3D model_123/RootNode_122/Pigeon_121/root_120/Skeleton_119/GLTF_created_0/GLTF_created_0_rootJoint/hip_01_115/spine1_03_59/spine2_04_58/spine3_00_55/L_w_main_j1_023_36/L_w_main_j2_024_34/L_w_main_j3_025_32
+    classID: 4
+    script: {fileID: 0}
+    flags: 0
+  - serializedVersion: 2
+    curve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0.054946095
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    attribute: m_LocalRotation.x
+    path: Sketchfab_model/root/GLTF_SceneRootNode/Realistic Animated Rock Pigeon Low-poly 3D model_123/RootNode_122/Pigeon_121/root_120/Skeleton_119/GLTF_created_0/GLTF_created_0_rootJoint/hip_01_115/spine1_03_59/spine2_04_58/spine3_00_55/L_w_main_j1_023_36/L_w_main_j2_024_34/L_w_main_j3_025_32/L_w_main_j4_026_30
+    classID: 4
+    script: {fileID: 0}
+    flags: 0
+  - serializedVersion: 2
+    curve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: -0.5844486
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    attribute: m_LocalRotation.y
+    path: Sketchfab_model/root/GLTF_SceneRootNode/Realistic Animated Rock Pigeon Low-poly 3D model_123/RootNode_122/Pigeon_121/root_120/Skeleton_119/GLTF_created_0/GLTF_created_0_rootJoint/hip_01_115/spine1_03_59/spine2_04_58/spine3_00_55/L_w_main_j1_023_36/L_w_main_j2_024_34/L_w_main_j3_025_32/L_w_main_j4_026_30
+    classID: 4
+    script: {fileID: 0}
+    flags: 0
+  - serializedVersion: 2
+    curve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0.045661382
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    attribute: m_LocalRotation.z
+    path: Sketchfab_model/root/GLTF_SceneRootNode/Realistic Animated Rock Pigeon Low-poly 3D model_123/RootNode_122/Pigeon_121/root_120/Skeleton_119/GLTF_created_0/GLTF_created_0_rootJoint/hip_01_115/spine1_03_59/spine2_04_58/spine3_00_55/L_w_main_j1_023_36/L_w_main_j2_024_34/L_w_main_j3_025_32/L_w_main_j4_026_30
+    classID: 4
+    script: {fileID: 0}
+    flags: 0
+  - serializedVersion: 2
+    curve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0.80827963
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    attribute: m_LocalRotation.w
+    path: Sketchfab_model/root/GLTF_SceneRootNode/Realistic Animated Rock Pigeon Low-poly 3D model_123/RootNode_122/Pigeon_121/root_120/Skeleton_119/GLTF_created_0/GLTF_created_0_rootJoint/hip_01_115/spine1_03_59/spine2_04_58/spine3_00_55/L_w_main_j1_023_36/L_w_main_j2_024_34/L_w_main_j3_025_32/L_w_main_j4_026_30
+    classID: 4
+    script: {fileID: 0}
+    flags: 0
+  - serializedVersion: 2
+    curve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: -0.19851433
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    attribute: m_LocalRotation.x
+    path: Sketchfab_model/root/GLTF_SceneRootNode/Realistic Animated Rock Pigeon Low-poly 3D model_123/RootNode_122/Pigeon_121/root_120/Skeleton_119/GLTF_created_0/GLTF_created_0_rootJoint/hip_01_115/spine1_03_59/spine2_04_58/spine3_00_55/L_w_main_j1_023_36/L_w_main_j2_024_34/L_w_main_j3_025_32/L_w_main_j4_026_30/L_w_main_j5_027_28
+    classID: 4
+    script: {fileID: 0}
+    flags: 0
+  - serializedVersion: 2
+    curve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: -0.62344897
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    attribute: m_LocalRotation.y
+    path: Sketchfab_model/root/GLTF_SceneRootNode/Realistic Animated Rock Pigeon Low-poly 3D model_123/RootNode_122/Pigeon_121/root_120/Skeleton_119/GLTF_created_0/GLTF_created_0_rootJoint/hip_01_115/spine1_03_59/spine2_04_58/spine3_00_55/L_w_main_j1_023_36/L_w_main_j2_024_34/L_w_main_j3_025_32/L_w_main_j4_026_30/L_w_main_j5_027_28
+    classID: 4
+    script: {fileID: 0}
+    flags: 0
+  - serializedVersion: 2
+    curve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: -0.094915025
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    attribute: m_LocalRotation.z
+    path: Sketchfab_model/root/GLTF_SceneRootNode/Realistic Animated Rock Pigeon Low-poly 3D model_123/RootNode_122/Pigeon_121/root_120/Skeleton_119/GLTF_created_0/GLTF_created_0_rootJoint/hip_01_115/spine1_03_59/spine2_04_58/spine3_00_55/L_w_main_j1_023_36/L_w_main_j2_024_34/L_w_main_j3_025_32/L_w_main_j4_026_30/L_w_main_j5_027_28
+    classID: 4
+    script: {fileID: 0}
+    flags: 0
+  - serializedVersion: 2
+    curve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0.75026304
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    attribute: m_LocalRotation.w
+    path: Sketchfab_model/root/GLTF_SceneRootNode/Realistic Animated Rock Pigeon Low-poly 3D model_123/RootNode_122/Pigeon_121/root_120/Skeleton_119/GLTF_created_0/GLTF_created_0_rootJoint/hip_01_115/spine1_03_59/spine2_04_58/spine3_00_55/L_w_main_j1_023_36/L_w_main_j2_024_34/L_w_main_j3_025_32/L_w_main_j4_026_30/L_w_main_j5_027_28
+    classID: 4
+    script: {fileID: 0}
+    flags: 0
+  - serializedVersion: 2
+    curve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: -0.04214713
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    attribute: m_LocalRotation.x
+    path: Sketchfab_model/root/GLTF_SceneRootNode/Realistic Animated Rock Pigeon Low-poly 3D model_123/RootNode_122/Pigeon_121/root_120/Skeleton_119/GLTF_created_0/GLTF_created_0_rootJoint/hip_01_115/spine1_03_59/spine2_04_58/spine3_00_55/L_w_main_j1_023_36/L_w_main_j2_024_34/L_w_main_j3_025_32/L_w_main_j4_026_30/L_w_main_j5_027_28/L_w_main_j6_028_22
+    classID: 4
+    script: {fileID: 0}
+    flags: 0
+  - serializedVersion: 2
+    curve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: -0.83998173
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    attribute: m_LocalRotation.y
+    path: Sketchfab_model/root/GLTF_SceneRootNode/Realistic Animated Rock Pigeon Low-poly 3D model_123/RootNode_122/Pigeon_121/root_120/Skeleton_119/GLTF_created_0/GLTF_created_0_rootJoint/hip_01_115/spine1_03_59/spine2_04_58/spine3_00_55/L_w_main_j1_023_36/L_w_main_j2_024_34/L_w_main_j3_025_32/L_w_main_j4_026_30/L_w_main_j5_027_28/L_w_main_j6_028_22
+    classID: 4
+    script: {fileID: 0}
+    flags: 0
+  - serializedVersion: 2
+    curve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: -0.12572378
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    attribute: m_LocalRotation.z
+    path: Sketchfab_model/root/GLTF_SceneRootNode/Realistic Animated Rock Pigeon Low-poly 3D model_123/RootNode_122/Pigeon_121/root_120/Skeleton_119/GLTF_created_0/GLTF_created_0_rootJoint/hip_01_115/spine1_03_59/spine2_04_58/spine3_00_55/L_w_main_j1_023_36/L_w_main_j2_024_34/L_w_main_j3_025_32/L_w_main_j4_026_30/L_w_main_j5_027_28/L_w_main_j6_028_22
+    classID: 4
+    script: {fileID: 0}
+    flags: 0
+  - serializedVersion: 2
+    curve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0.5261634
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    attribute: m_LocalRotation.w
+    path: Sketchfab_model/root/GLTF_SceneRootNode/Realistic Animated Rock Pigeon Low-poly 3D model_123/RootNode_122/Pigeon_121/root_120/Skeleton_119/GLTF_created_0/GLTF_created_0_rootJoint/hip_01_115/spine1_03_59/spine2_04_58/spine3_00_55/L_w_main_j1_023_36/L_w_main_j2_024_34/L_w_main_j3_025_32/L_w_main_j4_026_30/L_w_main_j5_027_28/L_w_main_j6_028_22
+    classID: 4
+    script: {fileID: 0}
+    flags: 0
+  - serializedVersion: 2
+    curve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0.5675739
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    attribute: m_LocalRotation.x
+    path: Sketchfab_model/root/GLTF_SceneRootNode/Realistic Animated Rock Pigeon Low-poly 3D model_123/RootNode_122/Pigeon_121/root_120/Skeleton_119/GLTF_created_0/GLTF_created_0_rootJoint/hip_01_115/spine1_03_59/spine2_04_58/spine3_00_55/R_w_main_j1_041_54
+    classID: 4
+    script: {fileID: 0}
+    flags: 0
+  - serializedVersion: 2
+    curve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0.43948808
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    attribute: m_LocalRotation.y
+    path: Sketchfab_model/root/GLTF_SceneRootNode/Realistic Animated Rock Pigeon Low-poly 3D model_123/RootNode_122/Pigeon_121/root_120/Skeleton_119/GLTF_created_0/GLTF_created_0_rootJoint/hip_01_115/spine1_03_59/spine2_04_58/spine3_00_55/R_w_main_j1_041_54
+    classID: 4
+    script: {fileID: 0}
+    flags: 0
+  - serializedVersion: 2
+    curve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: -0.31048852
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    attribute: m_LocalRotation.z
+    path: Sketchfab_model/root/GLTF_SceneRootNode/Realistic Animated Rock Pigeon Low-poly 3D model_123/RootNode_122/Pigeon_121/root_120/Skeleton_119/GLTF_created_0/GLTF_created_0_rootJoint/hip_01_115/spine1_03_59/spine2_04_58/spine3_00_55/R_w_main_j1_041_54
+    classID: 4
+    script: {fileID: 0}
+    flags: 0
+  - serializedVersion: 2
+    curve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0.62314296
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    attribute: m_LocalRotation.w
+    path: Sketchfab_model/root/GLTF_SceneRootNode/Realistic Animated Rock Pigeon Low-poly 3D model_123/RootNode_122/Pigeon_121/root_120/Skeleton_119/GLTF_created_0/GLTF_created_0_rootJoint/hip_01_115/spine1_03_59/spine2_04_58/spine3_00_55/R_w_main_j1_041_54
+    classID: 4
+    script: {fileID: 0}
+    flags: 0
+  - serializedVersion: 2
+    curve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0.15317161
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    attribute: m_LocalRotation.x
+    path: Sketchfab_model/root/GLTF_SceneRootNode/Realistic Animated Rock Pigeon Low-poly 3D model_123/RootNode_122/Pigeon_121/root_120/Skeleton_119/GLTF_created_0/GLTF_created_0_rootJoint/hip_01_115/spine1_03_59/spine2_04_58/spine3_00_55/R_w_main_j1_041_54/R_w_main_j2_042_52
+    classID: 4
+    script: {fileID: 0}
+    flags: 0
+  - serializedVersion: 2
+    curve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0.124198064
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    attribute: m_LocalRotation.y
+    path: Sketchfab_model/root/GLTF_SceneRootNode/Realistic Animated Rock Pigeon Low-poly 3D model_123/RootNode_122/Pigeon_121/root_120/Skeleton_119/GLTF_created_0/GLTF_created_0_rootJoint/hip_01_115/spine1_03_59/spine2_04_58/spine3_00_55/R_w_main_j1_041_54/R_w_main_j2_042_52
+    classID: 4
+    script: {fileID: 0}
+    flags: 0
+  - serializedVersion: 2
+    curve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0.06734327
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    attribute: m_LocalRotation.z
+    path: Sketchfab_model/root/GLTF_SceneRootNode/Realistic Animated Rock Pigeon Low-poly 3D model_123/RootNode_122/Pigeon_121/root_120/Skeleton_119/GLTF_created_0/GLTF_created_0_rootJoint/hip_01_115/spine1_03_59/spine2_04_58/spine3_00_55/R_w_main_j1_041_54/R_w_main_j2_042_52
+    classID: 4
+    script: {fileID: 0}
+    flags: 0
+  - serializedVersion: 2
+    curve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0.97804815
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    attribute: m_LocalRotation.w
+    path: Sketchfab_model/root/GLTF_SceneRootNode/Realistic Animated Rock Pigeon Low-poly 3D model_123/RootNode_122/Pigeon_121/root_120/Skeleton_119/GLTF_created_0/GLTF_created_0_rootJoint/hip_01_115/spine1_03_59/spine2_04_58/spine3_00_55/R_w_main_j1_041_54/R_w_main_j2_042_52
+    classID: 4
+    script: {fileID: 0}
+    flags: 0
+  - serializedVersion: 2
+    curve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0.11689841
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    attribute: m_LocalRotation.x
+    path: Sketchfab_model/root/GLTF_SceneRootNode/Realistic Animated Rock Pigeon Low-poly 3D model_123/RootNode_122/Pigeon_121/root_120/Skeleton_119/GLTF_created_0/GLTF_created_0_rootJoint/hip_01_115/spine1_03_59/spine2_04_58/spine3_00_55/R_w_main_j1_041_54/R_w_main_j2_042_52/R_w_main_j3_043_50
+    classID: 4
+    script: {fileID: 0}
+    flags: 0
+  - serializedVersion: 2
+    curve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0.33602592
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    attribute: m_LocalRotation.y
+    path: Sketchfab_model/root/GLTF_SceneRootNode/Realistic Animated Rock Pigeon Low-poly 3D model_123/RootNode_122/Pigeon_121/root_120/Skeleton_119/GLTF_created_0/GLTF_created_0_rootJoint/hip_01_115/spine1_03_59/spine2_04_58/spine3_00_55/R_w_main_j1_041_54/R_w_main_j2_042_52/R_w_main_j3_043_50
+    classID: 4
+    script: {fileID: 0}
+    flags: 0
+  - serializedVersion: 2
+    curve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: -0.10892123
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    attribute: m_LocalRotation.z
+    path: Sketchfab_model/root/GLTF_SceneRootNode/Realistic Animated Rock Pigeon Low-poly 3D model_123/RootNode_122/Pigeon_121/root_120/Skeleton_119/GLTF_created_0/GLTF_created_0_rootJoint/hip_01_115/spine1_03_59/spine2_04_58/spine3_00_55/R_w_main_j1_041_54/R_w_main_j2_042_52/R_w_main_j3_043_50
+    classID: 4
+    script: {fileID: 0}
+    flags: 0
+  - serializedVersion: 2
+    curve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0.9282012
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    attribute: m_LocalRotation.w
+    path: Sketchfab_model/root/GLTF_SceneRootNode/Realistic Animated Rock Pigeon Low-poly 3D model_123/RootNode_122/Pigeon_121/root_120/Skeleton_119/GLTF_created_0/GLTF_created_0_rootJoint/hip_01_115/spine1_03_59/spine2_04_58/spine3_00_55/R_w_main_j1_041_54/R_w_main_j2_042_52/R_w_main_j3_043_50
+    classID: 4
+    script: {fileID: 0}
+    flags: 0
+  - serializedVersion: 2
+    curve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: -0.006334016
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    attribute: m_LocalRotation.x
+    path: Sketchfab_model/root/GLTF_SceneRootNode/Realistic Animated Rock Pigeon Low-poly 3D model_123/RootNode_122/Pigeon_121/root_120/Skeleton_119/GLTF_created_0/GLTF_created_0_rootJoint/hip_01_115/spine1_03_59/spine2_04_58/spine3_00_55/R_w_main_j1_041_54/R_w_main_j2_042_52/R_w_main_j3_043_50/R_w_main_j4_044_48
+    classID: 4
+    script: {fileID: 0}
+    flags: 0
+  - serializedVersion: 2
+    curve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0.5428263
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    attribute: m_LocalRotation.y
+    path: Sketchfab_model/root/GLTF_SceneRootNode/Realistic Animated Rock Pigeon Low-poly 3D model_123/RootNode_122/Pigeon_121/root_120/Skeleton_119/GLTF_created_0/GLTF_created_0_rootJoint/hip_01_115/spine1_03_59/spine2_04_58/spine3_00_55/R_w_main_j1_041_54/R_w_main_j2_042_52/R_w_main_j3_043_50/R_w_main_j4_044_48
+    classID: 4
+    script: {fileID: 0}
+    flags: 0
+  - serializedVersion: 2
+    curve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: -0.071163066
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    attribute: m_LocalRotation.z
+    path: Sketchfab_model/root/GLTF_SceneRootNode/Realistic Animated Rock Pigeon Low-poly 3D model_123/RootNode_122/Pigeon_121/root_120/Skeleton_119/GLTF_created_0/GLTF_created_0_rootJoint/hip_01_115/spine1_03_59/spine2_04_58/spine3_00_55/R_w_main_j1_041_54/R_w_main_j2_042_52/R_w_main_j3_043_50/R_w_main_j4_044_48
+    classID: 4
+    script: {fileID: 0}
+    flags: 0
+  - serializedVersion: 2
+    curve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0.83680063
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    attribute: m_LocalRotation.w
+    path: Sketchfab_model/root/GLTF_SceneRootNode/Realistic Animated Rock Pigeon Low-poly 3D model_123/RootNode_122/Pigeon_121/root_120/Skeleton_119/GLTF_created_0/GLTF_created_0_rootJoint/hip_01_115/spine1_03_59/spine2_04_58/spine3_00_55/R_w_main_j1_041_54/R_w_main_j2_042_52/R_w_main_j3_043_50/R_w_main_j4_044_48
+    classID: 4
+    script: {fileID: 0}
+    flags: 0
+  - serializedVersion: 2
+    curve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0.10411033
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    attribute: m_LocalRotation.x
+    path: Sketchfab_model/root/GLTF_SceneRootNode/Realistic Animated Rock Pigeon Low-poly 3D model_123/RootNode_122/Pigeon_121/root_120/Skeleton_119/GLTF_created_0/GLTF_created_0_rootJoint/hip_01_115/spine1_03_59/spine2_04_58/spine3_00_55/R_w_main_j1_041_54/R_w_main_j2_042_52/R_w_main_j3_043_50/R_w_main_j4_044_48/R_w_main_j5_045_46
+    classID: 4
+    script: {fileID: 0}
+    flags: 0
+  - serializedVersion: 2
+    curve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0.22180939
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    attribute: m_LocalRotation.y
+    path: Sketchfab_model/root/GLTF_SceneRootNode/Realistic Animated Rock Pigeon Low-poly 3D model_123/RootNode_122/Pigeon_121/root_120/Skeleton_119/GLTF_created_0/GLTF_created_0_rootJoint/hip_01_115/spine1_03_59/spine2_04_58/spine3_00_55/R_w_main_j1_041_54/R_w_main_j2_042_52/R_w_main_j3_043_50/R_w_main_j4_044_48/R_w_main_j5_045_46
+    classID: 4
+    script: {fileID: 0}
+    flags: 0
+  - serializedVersion: 2
+    curve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0.19384958
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    attribute: m_LocalRotation.z
+    path: Sketchfab_model/root/GLTF_SceneRootNode/Realistic Animated Rock Pigeon Low-poly 3D model_123/RootNode_122/Pigeon_121/root_120/Skeleton_119/GLTF_created_0/GLTF_created_0_rootJoint/hip_01_115/spine1_03_59/spine2_04_58/spine3_00_55/R_w_main_j1_041_54/R_w_main_j2_042_52/R_w_main_j3_043_50/R_w_main_j4_044_48/R_w_main_j5_045_46
+    classID: 4
+    script: {fileID: 0}
+    flags: 0
+  - serializedVersion: 2
+    curve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0.94993895
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    attribute: m_LocalRotation.w
+    path: Sketchfab_model/root/GLTF_SceneRootNode/Realistic Animated Rock Pigeon Low-poly 3D model_123/RootNode_122/Pigeon_121/root_120/Skeleton_119/GLTF_created_0/GLTF_created_0_rootJoint/hip_01_115/spine1_03_59/spine2_04_58/spine3_00_55/R_w_main_j1_041_54/R_w_main_j2_042_52/R_w_main_j3_043_50/R_w_main_j4_044_48/R_w_main_j5_045_46
+    classID: 4
+    script: {fileID: 0}
+    flags: 0
+  - serializedVersion: 2
+    curve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0.13257578
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    attribute: m_LocalRotation.x
+    path: Sketchfab_model/root/GLTF_SceneRootNode/Realistic Animated Rock Pigeon Low-poly 3D model_123/RootNode_122/Pigeon_121/root_120/Skeleton_119/GLTF_created_0/GLTF_created_0_rootJoint/hip_01_115/spine1_03_59/spine2_04_58/spine3_00_55/R_w_main_j1_041_54/R_w_main_j2_042_52/R_w_main_j3_043_50/R_w_main_j4_044_48/R_w_main_j5_045_46/R_w_main_j6_046_40
+    classID: 4
+    script: {fileID: 0}
+    flags: 0
+  - serializedVersion: 2
+    curve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0.23551475
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    attribute: m_LocalRotation.y
+    path: Sketchfab_model/root/GLTF_SceneRootNode/Realistic Animated Rock Pigeon Low-poly 3D model_123/RootNode_122/Pigeon_121/root_120/Skeleton_119/GLTF_created_0/GLTF_created_0_rootJoint/hip_01_115/spine1_03_59/spine2_04_58/spine3_00_55/R_w_main_j1_041_54/R_w_main_j2_042_52/R_w_main_j3_043_50/R_w_main_j4_044_48/R_w_main_j5_045_46/R_w_main_j6_046_40
+    classID: 4
+    script: {fileID: 0}
+    flags: 0
+  - serializedVersion: 2
+    curve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0.002738567
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    attribute: m_LocalRotation.z
+    path: Sketchfab_model/root/GLTF_SceneRootNode/Realistic Animated Rock Pigeon Low-poly 3D model_123/RootNode_122/Pigeon_121/root_120/Skeleton_119/GLTF_created_0/GLTF_created_0_rootJoint/hip_01_115/spine1_03_59/spine2_04_58/spine3_00_55/R_w_main_j1_041_54/R_w_main_j2_042_52/R_w_main_j3_043_50/R_w_main_j4_044_48/R_w_main_j5_045_46/R_w_main_j6_046_40
+    classID: 4
+    script: {fileID: 0}
+    flags: 0
+  - serializedVersion: 2
+    curve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0.9627819
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    attribute: m_LocalRotation.w
+    path: Sketchfab_model/root/GLTF_SceneRootNode/Realistic Animated Rock Pigeon Low-poly 3D model_123/RootNode_122/Pigeon_121/root_120/Skeleton_119/GLTF_created_0/GLTF_created_0_rootJoint/hip_01_115/spine1_03_59/spine2_04_58/spine3_00_55/R_w_main_j1_041_54/R_w_main_j2_042_52/R_w_main_j3_043_50/R_w_main_j4_044_48/R_w_main_j5_045_46/R_w_main_j6_046_40
+    classID: 4
+    script: {fileID: 0}
+    flags: 0
   m_EulerEditorCurves:
   - serializedVersion: 2
     curve:
@@ -17327,7 +17327,7 @@ AnimationClip:
       m_Curve:
       - serializedVersion: 3
         time: 0
-        value: 8.651323
+        value: -5.66
         inSlope: -12.798014
         outSlope: -12.798014
         tangentMode: 0
@@ -17390,7 +17390,7 @@ AnimationClip:
       m_Curve:
       - serializedVersion: 3
         time: 0
-        value: -44.109894
+        value: -48.9
         inSlope: -30.898811
         outSlope: -30.898811
         tangentMode: 0
@@ -17453,7 +17453,7 @@ AnimationClip:
       m_Curve:
       - serializedVersion: 3
         time: 0
-        value: -13.843868
+        value: -43.9
         inSlope: -32.274563
         outSlope: -32.274563
         tangentMode: 0
@@ -17495,7 +17495,7 @@ AnimationClip:
       m_Curve:
       - serializedVersion: 3
         time: 0
-        value: 8.175123
+        value: 8.175
         inSlope: 101.967865
         outSlope: 101.967865
         tangentMode: 0
@@ -17516,7 +17516,7 @@ AnimationClip:
       m_Curve:
       - serializedVersion: 3
         time: 0
-        value: -15.776048
+        value: -71.7
         inSlope: -197.33595
         outSlope: -197.33595
         tangentMode: 0
@@ -17537,7 +17537,7 @@ AnimationClip:
       m_Curve:
       - serializedVersion: 3
         time: 0
-        value: 0.55476296
+        value: 0.555
         inSlope: -83.29435
         outSlope: -83.29435
         tangentMode: 0
@@ -17579,7 +17579,7 @@ AnimationClip:
       m_Curve:
       - serializedVersion: 3
         time: 0
-        value: -70.639336
+        value: -80.9
         inSlope: -316.41483
         outSlope: -316.41483
         tangentMode: 0
@@ -17621,7 +17621,7 @@ AnimationClip:
       m_Curve:
       - serializedVersion: 3
         time: 0
-        value: -14.806792
+        value: -14.807
         inSlope: 1.9005516
         outSlope: 1.9005516
         tangentMode: 0
@@ -17642,7 +17642,7 @@ AnimationClip:
       m_Curve:
       - serializedVersion: 3
         time: 0
-        value: -25.751154
+        value: -115.4
         inSlope: -167.20885
         outSlope: -167.20885
         tangentMode: 0
@@ -17663,7 +17663,7 @@ AnimationClip:
       m_Curve:
       - serializedVersion: 3
         time: 0
-        value: -3.6471431
+        value: -3.647
         inSlope: -8.648183
         outSlope: -8.648183
         tangentMode: 0
@@ -18440,7 +18440,7 @@ AnimationClip:
       m_Curve:
       - serializedVersion: 3
         time: 0
-        value: 78.31888
+        value: 78.6
         inSlope: -7.521183
         outSlope: -7.521183
         tangentMode: 0
@@ -18461,7 +18461,7 @@ AnimationClip:
       m_Curve:
       - serializedVersion: 3
         time: 0
-        value: 90.48257
+        value: 98.9
         inSlope: 64.887505
         outSlope: 64.887505
         tangentMode: 0
@@ -18524,7 +18524,7 @@ AnimationClip:
       m_Curve:
       - serializedVersion: 3
         time: 0
-        value: 5.8846107
+        value: 15.95
         inSlope: 29.037914
         outSlope: 29.037914
         tangentMode: 0
@@ -18587,7 +18587,7 @@ AnimationClip:
       m_Curve:
       - serializedVersion: 3
         time: 0
-        value: 31.22625
+        value: 38.7
         inSlope: 27.962738
         outSlope: 27.962738
         tangentMode: 0
@@ -18650,7 +18650,7 @@ AnimationClip:
       m_Curve:
       - serializedVersion: 3
         time: 0
-        value: 0.19360834
+        value: 65.7
         inSlope: 180.8618
         outSlope: 180.8618
         tangentMode: 0
@@ -18713,7 +18713,7 @@ AnimationClip:
       m_Curve:
       - serializedVersion: 3
         time: 0
-        value: 9.58616
+        value: 27.69
         inSlope: 358.5805
         outSlope: 358.5805
         tangentMode: 0
@@ -18776,7 +18776,7 @@ AnimationClip:
       m_Curve:
       - serializedVersion: 3
         time: 0
-        value: -5.529609
+        value: 28.01
         inSlope: 167.2573
         outSlope: 167.2573
         tangentMode: 0

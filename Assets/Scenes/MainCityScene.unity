@@ -99694,6 +99694,10 @@ PrefabInstance:
       propertyPath: HorizontalAxis.Center
       value: 122.69217
       objectReference: {fileID: 0}
+    - target: {fileID: 1463698839511121865, guid: 013420fdddab85a48be5b875e08e2729, type: 3}
+      propertyPath: m_DynamicOccludee
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 3577777248601108592, guid: 013420fdddab85a48be5b875e08e2729, type: 3}
       propertyPath: waterPlane
       value: 
