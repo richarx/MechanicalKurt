@@ -1,5 +1,6 @@
 #if UNITY_EDITOR
 using System.Collections;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -75,6 +76,33 @@ public class MenuProbe : MonoBehaviour
         yield return new WaitForSecondsRealtime(3f);
         DescribeCanvases("choix");
         Capture("choice");
+        int seen = 0;
+        foreach (AmbientPigeon pigeon in FindObjectsByType<AmbientPigeon>(FindObjectsInactive.Exclude, FindObjectsSortMode.None))
+        {
+            DescribeOnScreen(pigeon, out bool visible);
+            if (visible) seen++;
+        }
+        Check("Pigeons d'ambiance bien visibles depuis la caméra du menu (au moins 2)", seen >= 2, $"{seen} visible(s)");
+
+        // Chaque pigeon doit vivre : changer d'activité et se déplacer pendant qu'on regarde le menu.
+        var ambient = FindObjectsByType<AmbientPigeon>(FindObjectsInactive.Exclude, FindObjectsSortMode.None).OrderBy(p => p.name).ToList();
+        var activities = ambient.ToDictionary(p => p, p => new HashSet<string> { p.Activity });
+        var travelled = ambient.ToDictionary(p => p, p => 0f);
+        var last = ambient.ToDictionary(p => p, p => p.transform.position);
+        float observeEnd = Time.realtimeSinceStartup + 20f;
+        while (Time.realtimeSinceStartup < observeEnd)
+        {
+            yield return null;
+            foreach (AmbientPigeon p in ambient)
+            {
+                activities[p].Add(p.Activity);
+                travelled[p] += Vector3.Distance(last[p], p.transform.position);
+                last[p] = p.transform.position;
+            }
+        }
+        foreach (AmbientPigeon p in ambient)
+            Check($"{p.name} bouge pendant 20 s", activities[p].Count >= 2 && (travelled[p] > 0.3f || activities[p].Contains("Turn")),
+                $"{string.Join(", ", activities[p])} ; {travelled[p]:0.0} m parcourus");
 
         ui.OnCreate();
         yield return Until(() => ui.IsCreateShown, 25f);
@@ -177,7 +205,7 @@ public class MenuProbe : MonoBehaviour
     void DescribeCanvases(string label)
     {
         foreach (AmbientPigeon pigeon in FindObjectsByType<AmbientPigeon>(FindObjectsInactive.Exclude, FindObjectsSortMode.None))
-            _report.AppendLine($"     {pigeon.name} en {pigeon.transform.position}, échelle {pigeon.transform.lossyScale}");
+            _report.AppendLine($"     {pigeon.name} : {DescribeOnScreen(pigeon, out _)}");
         _report.Append($"     canvas visibles ({label}) :");
         foreach (Canvas canvas in FindObjectsByType<Canvas>(FindObjectsInactive.Exclude, FindObjectsSortMode.None))
             if (canvas.isRootCanvas && canvas.enabled)
@@ -187,6 +215,30 @@ public class MenuProbe : MonoBehaviour
                 _report.Append($" [{canvas.name} : {texts}]");
             }
         _report.AppendLine();
+    }
+
+    /// <summary>
+    /// Pigeon d'ambiance réellement visible : dans l'image, assez grand (25 px de haut sur 720), et aucun collider
+    /// entre la caméra et sa tête.
+    /// </summary>
+    static string DescribeOnScreen(AmbientPigeon pigeon, out bool visible)
+    {
+        visible = false;
+        Camera camera = Camera.main;
+        if (camera == null)
+            return "pas de caméra";
+        Renderer body = pigeon.GetComponentsInChildren<SkinnedMeshRenderer>().OrderByDescending(r => r.bounds.size.sqrMagnitude).FirstOrDefault();
+        if (body == null)
+            return "pas de corps";
+        Vector3 viewport = camera.WorldToViewportPoint(body.bounds.center);
+        Vector3 top = camera.WorldToViewportPoint(body.bounds.center + Vector3.up * body.bounds.extents.y);
+        Vector3 bottom = camera.WorldToViewportPoint(body.bounds.center - Vector3.up * body.bounds.extents.y);
+        float pixels = Mathf.Abs(top.y - bottom.y) * 720f;
+        Vector3 head = body.bounds.center + Vector3.up * body.bounds.extents.y * 0.8f;
+        bool clear = !Physics.Linecast(camera.transform.position, head, ~(1 << pigeon.gameObject.layer), QueryTriggerInteraction.Ignore);
+        bool inFrame = viewport.z > 0f && viewport.x > 0f && viewport.x < 1f && viewport.y > 0f && viewport.y < 1f;
+        visible = inFrame && clear && pixels >= 25f;
+        return $"écran ({viewport.x:0.00}, {viewport.y:0.00}) à {viewport.z:0.0} m, {pixels:0} px de haut, {(clear ? "dégagé" : "caché")}";
     }
 
     void Capture(string label)
