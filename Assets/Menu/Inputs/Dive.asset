@@ -1,0 +1,20 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7bb1e75a1dc49af4e81201164d6cbdcc, type: 3}
+  m_Name: Dive
+  m_EditorClassIdentifier: Assembly-CSharp::InputInfoData
+  label: Steer
+  gamepadSprites:
+  - {fileID: 5517859457217657291, guid: c83f03db7b6756448adde9e365140da4, type: 3}
+  keyboardSprites:
+  - {fileID: -465843913026089529, guid: c19a59d792554e6459684c97e27da6ff, type: 3}
+  isSmallIcon: 0

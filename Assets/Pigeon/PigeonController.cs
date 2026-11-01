@@ -61,6 +61,13 @@ public struct PigeonState : IPredictedData<PigeonState>
     /// <summary>Nombre de roucoulements (modulo 256) : la vue de chaque machine joue OnCoo quand il avance.</summary>
     public byte CooCount;
 
+    /// <summary>PigeonController.MovementState du dernier tick.</summary>
+    public byte Mode;
+    /// <summary>Endurance : battre des ailes en vol la consomme (voir PigeonStamina).</summary>
+    public float Stamina;
+    /// <summary>Regains instantanés d'endurance (modulo 256), pour l'animation de la jauge sur chaque machine.</summary>
+    public byte StaminaBoosts;
+
     public Vector3 SpawnPosition;
     public Quaternion SpawnRotation;
 
@@ -89,6 +96,8 @@ public partial class PigeonController : PredictedIdentity<PigeonInput, PigeonSta
 
     [Header("Ground Movement")]
     [SerializeField] float _groundSpeed = 1f;
+    [SerializeField] float _groundMovementAcceleration = 1f;
+    [SerializeField] float _groundMovementDeceleration = 1f;
 
     [Header("Rotation")]
     [SerializeField] float _turnSpeed = 90f;
@@ -148,6 +157,7 @@ public partial class PigeonController : PredictedIdentity<PigeonInput, PigeonSta
 
     [Header("Debug")]
     [SerializeField] bool _activeDebug = false;
+    [SerializeField] bool _useStaminaSystem = false;
 
     [Header("Events")]
     [field: SerializeField]
@@ -158,6 +168,9 @@ public partial class PigeonController : PredictedIdentity<PigeonInput, PigeonSta
     public UnityEvent OnStunned { get; private set; } = new UnityEvent();
     [field: SerializeField]
     public UnityEvent OnBoosted { get; private set; } = new UnityEvent();
+    /// <summary>Le pigeon touche le sol (ou un support) après avoir été en l'air.</summary>
+    [field: SerializeField]
+    public UnityEvent OnLand { get; private set; } = new UnityEvent();
     /// <summary>Roucoulement, déclenché sur chaque machine (son, bulle chez les autres joueurs).</summary>
     [field: SerializeField]
     public UnityEvent OnCoo { get; private set; } = new UnityEvent();
@@ -167,9 +180,11 @@ public partial class PigeonController : PredictedIdentity<PigeonInput, PigeonSta
     PigeonBoostFeedback _boostFeedback;
     PigeonEquipment _equipment;
     PigeonRagdollHandler _ragdoll;
+    PigeonStamina _stamina;
     Water _water;
 
     PredictedEvent _takeoffEvent;
+    PredictedEvent _landEvent;
     PredictedEvent _stunnedEvent;
     PredictedEvent<bool> _rollEvent;
     PredictedEvent<BoostRing> _boostEvent;
@@ -226,11 +241,25 @@ public partial class PigeonController : PredictedIdentity<PigeonInput, PigeonSta
     /// <summary>MovingSupport.Id du support sous le pigeon (0 = aucun), lu depuis la vue.</summary>
     public int SupportId => _viewState.SupportId;
     public bool IsMovementFrozen => _viewState.Frozen;
-    /// <summary>Input simulé de ce pigeon (le sien ou celui reçu du réseau) : à utiliser pour l'animation des autres joueurs.</summary>
-    public bool IsFlapping => currentInput.Flap;
-    public bool IsDiving => currentInput.Dive;
+    public enum MovementState : byte
+    {
+        Grounded,
+        Braking,
+        Flapping,
+        Diving,
+        Gliding
+    }
+
+    /// <summary>Ce que fait le pigeon (au sol, vol stationnaire, battements…), lu depuis la vue : le même sur chaque machine.</summary>
+    public MovementState CurrentPigeonState => (MovementState)_viewState.Mode;
+    public bool IsFlapping => CurrentPigeonState == MovementState.Flapping;
+    public bool IsDiving => CurrentPigeonState == MovementState.Diving;
     /// <summary>Frein tenu : vol stationnaire en l'air.</summary>
-    public bool IsHovering => currentInput.Brake;
+    public bool IsHovering => CurrentPigeonState == MovementState.Braking;
+    /// <summary>Endurance lue depuis la vue (0 sans PigeonStamina).</summary>
+    public float Stamina => _viewState.Stamina;
+    public byte StaminaBoosts => _viewState.StaminaBoosts;
+    public bool UsesStamina => _useStaminaSystem && _stamina != null;
     /// <summary>Couleur du joueur qui contrôle ce pigeon (bulle de roucoulement…), la même sur chaque machine.</summary>
     public Color PlayerColor => PlayerColors.For(owner);
     /// <summary>Équipements portés, lus depuis la vue (bit = PigeonEquipment.Equipment).</summary>
@@ -268,14 +297,17 @@ public partial class PigeonController : PredictedIdentity<PigeonInput, PigeonSta
         _boostFeedback = GetComponent<PigeonBoostFeedback>();
         _equipment = GetComponent<PigeonEquipment>();
         _ragdoll = GetComponent<PigeonRagdollHandler>();
+        _stamina = GetComponent<PigeonStamina>();
 
         _takeoffEvent = new PredictedEvent(predictionManager, this);
+        _landEvent = new PredictedEvent(predictionManager, this);
         _stunnedEvent = new PredictedEvent(predictionManager, this);
         _rollEvent = new PredictedEvent<bool>(predictionManager, this);
         _boostEvent = new PredictedEvent<BoostRing>(predictionManager, this);
         _teleportEvent = new PredictedEvent<Vector3>(predictionManager, this);
 
         _takeoffEvent.AddListener(() => OnTakeoff.Invoke());
+        _landEvent.AddListener(() => OnLand.Invoke());
         _stunnedEvent.AddListener(() => OnStunned.Invoke());
         _rollEvent.AddListener(PlayRoll);
         _boostEvent.AddListener(PlayBoost);
@@ -320,6 +352,7 @@ public partial class PigeonController : PredictedIdentity<PigeonInput, PigeonSta
             Yaw = transform.eulerAngles.y,
             StunRotation = Quaternion.identity,
             Equipment = TryGetComponent(out PigeonEquipment equipment) ? equipment.CurrentWornMask() : (byte)0,
+            Stamina = TryGetComponent(out PigeonStamina stamina) ? stamina.MaxStamina : 0f,
             SpawnPosition = transform.position,
             SpawnRotation = transform.rotation
         };
@@ -401,15 +434,15 @@ public partial class PigeonController : PredictedIdentity<PigeonInput, PigeonSta
         }
 
         if (input.BarrelLeft)
-            TryBarrelRoll(input, s, true);
+            TryBarrelRoll(input, ref s, true);
         if (input.BarrelRight)
-            TryBarrelRoll(input, s, false);
+            TryBarrelRoll(input, ref s, false);
 
-        Vector3 velocity;
-        if (s.Grounded && (s.LastVelocity.y <= 0.001f || s.SupportId != 0))
-            velocity = GroundMovement(input, ref s);
-        else
-            velocity = CalculateFlightPhysics(input, ref s, dt);
+        MovementState mode = ComputeMovementState(input, s);
+        s.Mode = (byte)mode;
+        Vector3 velocity = mode == MovementState.Grounded
+            ? GroundMovement(input, ref s, dt)
+            : CalculateFlightPhysics(input, ref s, mode, dt);
 
         velocity = PigeonFan.ApplyUpdrafts(s.Position, velocity, dt, s.Grounded);
         if (UnderWater(s.Position))
@@ -432,7 +465,16 @@ public partial class PigeonController : PredictedIdentity<PigeonInput, PigeonSta
 
         Vector3 velocityBeforeStun = s.LastVelocity;
         Vector3 positionBeforeMove = s.Position;
+        bool groundedBeforeMove = s.Grounded;
         MoveController(ref s, velocity, dt);
+
+        UpdateStamina(ref s, mode, dt);
+        if (!groundedBeforeMove && s.Grounded)
+        {
+            _landEvent.Invoke();
+            if (_stamina != null)
+                AddStaminaBoost(ref s, _stamina.MaxStamina);
+        }
 
         if (_hasStunHit)
             Stun(ref s, _stunHitNormal, velocityBeforeStun);

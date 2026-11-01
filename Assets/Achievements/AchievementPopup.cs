@@ -89,7 +89,7 @@ public sealed class AchievementPopup : MonoBehaviour
         _panel.anchoredPosition = _shownPosition + _hiddenOffset;
 
         if (_unlockClip != null && SFXManager.Instance != null)
-            SFXManager.Instance.PlaySFX(_unlockClip);
+            SFXManager.Instance.PlaySFX(_unlockClip, 0.5f);
 
         _sequence = DOTween.Sequence()
             .Append(_panel.DOAnchorPos(_shownPosition, _slideSeconds).SetEase(Ease.OutBack))

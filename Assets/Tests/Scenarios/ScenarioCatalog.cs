@@ -34,6 +34,7 @@ public partial class ScenarioRunner
         Solo("Voitures : photos d'une voiture et du pigeon posé dessus", r => r.PigeonOnCar()),
         Solo("Sons : 2D pour soi, 3D pour les autres", r => r.RunPigeonAudio()),
         Solo("Pause : le jeu continue, le pigeon reste en l'air", r => r.PauseKeepsGameRunning()),
+        Solo("Endurance et vol stationnaire (monter, descendre)", r => r.StaminaAndHover()),
         Solo("Roucoulement : bulle pour les autres, au bord de l'écran si loin", r => r.CooBubbles()),
 
         Multi("Multi : départ de course à 2 joueurs", r => r.MultiRaceStart()),

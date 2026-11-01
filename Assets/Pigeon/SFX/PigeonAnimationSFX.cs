@@ -26,7 +26,7 @@ public class PigeonAnimationSFX : MonoBehaviour
     public void PlayFootStepSound()
     {
         if (footstepSounds != null && footstepSounds.Count > 0)
-            Play(footstepSounds[Random.Range(0, footstepSounds.Count)], 0.15f);
+            Play(footstepSounds[Random.Range(0, footstepSounds.Count)], 0.05f);
     }
 
     public void PlayLandingSound()

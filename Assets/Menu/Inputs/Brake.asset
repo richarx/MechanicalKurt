@@ -1,0 +1,20 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7bb1e75a1dc49af4e81201164d6cbdcc, type: 3}
+  m_Name: Brake
+  m_EditorClassIdentifier: Assembly-CSharp::InputInfoData
+  label: Brake
+  gamepadSprites:
+  - {fileID: 3336128370510153928, guid: e646a676dbab1c24491765e91a60ea41, type: 3}
+  keyboardSprites:
+  - {fileID: -8655167945723465343, guid: 3a6e095ebb5c8e343a0e64b18bd6b877, type: 3}
+  isSmallIcon: 0

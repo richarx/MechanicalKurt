@@ -2,7 +2,7 @@ using UnityEngine;
 
 public partial class PigeonController
 {
-    Vector3 GroundMovement(in PigeonInput input, ref PigeonState s)
+    Vector3 GroundMovement(in PigeonInput input, ref PigeonState s, float dt)
     {
         s.PreserveTeleportPitch = false;
         s.Pitch = 0f;
@@ -25,13 +25,16 @@ public partial class PigeonController
         }
         else
         {
-            velocity = forward * magnitude * _groundSpeed;
+            Vector3 current = new Vector3(s.LastVelocity.x, 0f, s.LastVelocity.z);
+            velocity = magnitude > 0.0001f
+                ? Vector3.MoveTowards(current, forward * magnitude * _groundSpeed, _groundMovementAcceleration * dt)
+                : Vector3.MoveTowards(current, Vector3.zero, _groundMovementDeceleration * dt);
             velocity.y = -1f;
         }
         return velocity;
     }
 
-    void ComputePitch(in PigeonInput input, ref PigeonState s, float pitchSpeed, float maxPitch, float dt)
+    void ComputePitch(in PigeonInput input, ref PigeonState s, MovementState mode, float pitchSpeed, float maxPitch, float dt)
     {
         bool hasVerticalInput = Mathf.Abs(input.RelativeMovement.y) >= 0.001f;
 
@@ -40,7 +43,7 @@ public partial class PigeonController
             return;
         s.PreserveTeleportPitch = false;
         float targetPitch;
-        if (input.Brake || (input.Flap && !hasVerticalInput))
+        if (mode == MovementState.Braking || (mode == MovementState.Flapping && !hasVerticalInput))
             targetPitch = maxPitch;
         else if (UnderWater(s.Position) && !hasVerticalInput)
             targetPitch = -maxPitch;
@@ -90,7 +93,7 @@ public partial class PigeonController
         }
     }
 
-    Vector3 CalculateFlightPhysics(in PigeonInput input, ref PigeonState s, float dt)
+    Vector3 CalculateFlightPhysics(in PigeonInput input, ref PigeonState s, MovementState mode, float dt)
     {
         float targetSpeed;
         float dragAtMaxSpeed;
@@ -98,29 +101,35 @@ public partial class PigeonController
         Vector3 velocity = s.LastVelocity + Physics.gravity * dt + s.PendingImpulse;
         s.PendingImpulse = Vector3.zero;
 
-        if (input.Brake)
+        if (mode == MovementState.Braking)
         {
             targetSpeed = _brakeMaxSpeed;
             dragAtMaxSpeed = _brakeDragAtMaxSpeed;
 
-            s.HoverTime += dt;
-            float targetVerticalVelocity = Mathf.Sin(s.HoverTime * _hoverWobbleFrequency) * _hoverWobbleAmplitude;
-            velocity.y = Mathf.MoveTowards(velocity.y, targetVerticalVelocity, 15f * dt);
             velocity = Vector3.MoveTowards(velocity, Vector3.zero, 5f * dt);
-            velocity += ForwardOf(s.Pitch, s.Yaw) * input.RelativeMovement.y * _hoverMoveSpeed * dt;
+            // Vol stationnaire : battre des ailes fait monter, tirer vers le bas fait descendre.
+            s.HoverTime += dt;
+            if (input.Flap)
+                velocity.y = Mathf.MoveTowards(velocity.y, 2f, 25f * dt);
+            else if (input.RelativeMovement.y < -0.15f)
+                velocity.y = Mathf.MoveTowards(velocity.y, -2f, 15f * dt);
+            else
+                velocity.y = Mathf.MoveTowards(velocity.y, Mathf.Sin(s.HoverTime * _hoverWobbleFrequency) * _hoverWobbleAmplitude, 15f * dt);
+            if (input.RelativeMovement.y > 0.0001f)
+                velocity += ForwardOf(s.Pitch, s.Yaw) * input.RelativeMovement.y * _hoverMoveSpeed * dt;
 
-            ComputePitch(input, ref s, _pitchSpeed, _maxPitch, dt);
+            ComputePitch(input, ref s, mode, _pitchSpeed, _maxPitch, dt);
             ComputeYaw(input, ref s, dt, _turnSpeed * 2f);
         }
-        else if (input.Flap)
+        else if (mode == MovementState.Flapping)
         {
             targetSpeed = _flapMaxSpeed;
             dragAtMaxSpeed = _flapDragAtMaxSpeed;
-            ComputePitch(input, ref s, _pitchSpeed, _maxPitch, dt);
+            ComputePitch(input, ref s, mode, _pitchSpeed, _maxPitch, dt);
             ComputeYaw(input, ref s, dt, _turnSpeed);
             velocity += Vector3.up * _flapAccel * dt;
         }
-        else if (input.Dive)
+        else if (mode == MovementState.Diving)
         {
             s.PreserveTeleportPitch = false;
             targetSpeed = _diveMaxSpeed;
@@ -134,7 +143,7 @@ public partial class PigeonController
         {
             targetSpeed = _maxSpeed;
             dragAtMaxSpeed = _dragAtMaxSpeed;
-            ComputePitch(input, ref s, _pitchSpeed, _maxPitch, dt);
+            ComputePitch(input, ref s, mode, _pitchSpeed, _maxPitch, dt);
             ComputeYaw(input, ref s, dt, _turnSpeed);
             ApplyFlightForces(ref s, ref velocity, dt);
         }
@@ -143,10 +152,10 @@ public partial class PigeonController
         Vector3 forward = ForwardOf(s.Pitch, s.Yaw);
         float forwardSpeed = Vector3.Dot(velocity, forward);
 
-        if (!input.Dive && !input.Brake && speed > 0.1f)
+        if (mode != MovementState.Diving && mode != MovementState.Braking && speed > 0.1f)
         {
             float steeringFactor = 4f;
-            if (!input.Flap && forward.y > 0.1f && forwardSpeed < _stallSpeed * 1.3f)
+            if (mode != MovementState.Flapping && forward.y > 0.1f && forwardSpeed < _stallSpeed * 1.3f)
                 steeringFactor = 0f;
 
             velocity = Vector3.Slerp(velocity.normalized, forward, steeringFactor * dt) * speed;
@@ -182,10 +191,12 @@ public partial class PigeonController
         return flat * (_underwaterThrust * factor * room);
     }
 
-    void TryBarrelRoll(in PigeonInput input, in PigeonState s, bool isLeft)
+    void TryBarrelRoll(in PigeonInput input, ref PigeonState s, bool isLeft)
     {
         if (input.Flap || input.Dive || s.LastVelocity.magnitude < _minBarrelRollSpeed)
             return;
         _rollEvent.Invoke(isLeft);
+        if (_stamina != null)
+            AddStaminaBoost(ref s, _stamina.InstantRecoveryRoll);
     }
 }

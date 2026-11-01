@@ -98,7 +98,6 @@ public partial class ScenarioRunner
 
             Quaternion noseUp = Quaternion.Euler(-45f, Pigeon.transform.eulerAngles.y, 0f);
             yield return Teleport(Pigeon, zone.transform.position, noseUp, $"Placement sur la zone {expected} ({zone.name})");
-            Bot.Flap = true;
             Bot.Brake = true;
             yield return ExpectStill(Pigeon, 4f, zone.StopSpeedThreshold);
             yield return Expect($"Zone {expected} : le prompt s'affiche", () => zone.Prompt != null && zone.IsPromptDisplayed
@@ -168,7 +167,13 @@ public partial class ScenarioRunner
         else
         {
             yield return Teleport(Pigeon, spot, Quaternion.Euler(-45f, yaw, 0f), $"Rien sous la zone : vol stationnaire ({label})");
-            Bot.Flap = Bot.Brake = true;
+            // Le vol stationnaire oscille au-dessus du seuil des zones d'arrêt : on descend doucement jusqu'à se poser.
+            Bot.Brake = true;
+            Bot.RelativeMovement = new Vector2(0f, -1f);
+            float landDeadline = Time.realtimeSinceStartup + 2f;
+            while (Time.realtimeSinceStartup < landDeadline && !Pigeon.IsGrounded)
+                yield return null;
+            Bot.RelativeMovement = Vector2.zero;
             yield return ExpectStill(Pigeon, 4f, stopSpeed);
         }
         yield return Check($"Dans le rayon : {label}", Vector3.Distance(Pigeon.transform.position, spot) <= radius,

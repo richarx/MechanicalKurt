@@ -3,10 +3,13 @@ using UnityEngine;
 public class CheckForGoal : MonoBehaviour
 {
     [SerializeField] private AchievementData achievement;
+    [SerializeField] private AudioClip successSfx;
+
+    private bool isUnlocked => AchievementManager.Instance.IsUnlocked(achievement);
 
     private void Start()
     {
-        if (AchievementManager.Instance != null && AchievementManager.Instance.IsUnlocked(achievement))
+        if (AchievementManager.Instance != null && isUnlocked)
             enabled = false;
     }
 
@@ -14,8 +17,11 @@ public class CheckForGoal : MonoBehaviour
     {
         if (other.CompareTag("BeachBall"))
         {
-            if (AchievementManager.Instance != null)
+            if (AchievementManager.Instance != null && !isUnlocked)
+            {
                 AchievementManager.Instance.Unlock(achievement);
+                SFXManager.Instance.PlaySFX(successSfx);
+            }
         }
     }
 }

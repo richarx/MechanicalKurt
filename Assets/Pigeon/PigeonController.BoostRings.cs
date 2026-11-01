@@ -50,6 +50,8 @@ public partial class PigeonController
             if (targetSpeed > speed)
                 s.PendingImpulse += direction * (targetSpeed - speed);
             _boostEvent.Invoke(ring);
+            if (_stamina != null)
+                AddStaminaBoost(ref s, _stamina.InstantRecoveryBoost);
         }
         s.InsideBoostRing = insideRing != null;
     }

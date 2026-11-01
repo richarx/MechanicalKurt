@@ -60,7 +60,7 @@ public class CameraSwapper : MonoBehaviour
         IPigeonControls controls = pigeonController.Controls;
         if (waterPlane != null && pigeonController.transform.position.y < waterPlane.transform.position.y)
             return CameraType.UnderWater;
-        else if (controls != null && controls.PrecisionCamera && !pigeonController.IsGrounded)
+        else if (controls != null && controls.PrecisionCamera && pigeonController.CurrentPigeonState != PigeonController.MovementState.Grounded && pigeonController.CurrentPigeonState != PigeonController.MovementState.Braking)
             return CameraType.Precision;
         else
             return CameraType.Orbital;
