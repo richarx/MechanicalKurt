@@ -45,6 +45,60 @@ public class MusicPlayer : MonoBehaviour
         WrongWay
     }
 
+    public readonly struct PlaybackState
+    {
+        public Songs Song { get; }
+        public AudioClip ClearClip { get; }
+        public AudioClip LowPassClip { get; }
+        public int ClearSamples { get; }
+        public int LowPassSamples { get; }
+        public bool ClearPlaying { get; }
+        public bool LowPassPlaying { get; }
+        public bool Started { get; }
+        public float Elapsed { get; }
+
+        public PlaybackState(MusicPlayer player)
+        {
+            Song = player.currentSong;
+            ClearClip = player.clearAudioSource.clip;
+            LowPassClip = player.lowPassAudioSource.clip;
+            ClearSamples = player.clearAudioSource.timeSamples;
+            LowPassSamples = player.lowPassAudioSource.timeSamples;
+            ClearPlaying = player.clearAudioSource.isPlaying;
+            LowPassPlaying = player.lowPassAudioSource.isPlaying;
+            Started = player.musicStarted;
+            Elapsed = player.elapsed;
+        }
+    }
+
+    public bool HasAudioSources => clearAudioSource != null && lowPassAudioSource != null;
+
+    public PlaybackState CapturePlaybackState() => new PlaybackState(this);
+
+    public void RestorePlaybackState(PlaybackState state)
+    {
+        playbackSequence?.Kill();
+        RestoreSource(clearAudioSource, state.ClearClip, state.ClearSamples, state.ClearPlaying);
+        RestoreSource(lowPassAudioSource, state.LowPassClip, state.LowPassSamples, state.LowPassPlaying);
+        currentSong = state.Song;
+        musicStarted = state.Started;
+        elapsed = state.Elapsed;
+        fadeVolume = 1f;
+        ApplyVolume();
+    }
+
+    private static void RestoreSource(AudioSource source, AudioClip clip, int samples, bool playing)
+    {
+        source.Stop();
+        source.clip = clip;
+        if (clip == null)
+            return;
+
+        source.timeSamples = Mathf.Clamp(samples, 0, clip.samples - 1);
+        if (playing)
+            source.Play();
+    }
+
     private void Awake()
     {
         instance = this;

@@ -17,6 +17,13 @@ public class PidgeonVfx : MonoBehaviour
         pigeonController = GetComponent<PigeonController>();
     }
 
+    public void ResetAfterTeleport()
+    {
+        wingTrailRendererLeft.Clear();
+        wingTrailRendererRight.Clear();
+        windParticles.Clear(true);
+    }
+
     private void Update()
     {
         bool shouldBeActive = !pigeonController.IsGrounded && !pigeonController.Controls.Brake;

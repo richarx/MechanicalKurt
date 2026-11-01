@@ -33,6 +33,75 @@ public class PigeonSFX : MonoBehaviour
 
     private Sequence flySequence;
 
+    public readonly struct FlightPlaybackState
+    {
+        public int ClearSamples { get; }
+        public int LowPassSamples { get; }
+        public bool ClearPlaying { get; }
+        public bool LowPassPlaying { get; }
+        public float ClearVolume { get; }
+        public float LowPassVolume { get; }
+        public float ClearPitch { get; }
+        public float LowPassPitch { get; }
+        public bool LowPassActive { get; }
+        public bool UnderWater { get; }
+
+        public FlightPlaybackState(PigeonSFX sfx)
+        {
+            AudioSource clear = sfx.clearFlySource;
+            AudioSource lowPass = sfx.lowPassFlySource;
+            ClearSamples = clear != null ? clear.timeSamples : 0;
+            LowPassSamples = lowPass != null ? lowPass.timeSamples : 0;
+            ClearPlaying = clear != null && clear.isPlaying;
+            LowPassPlaying = lowPass != null && lowPass.isPlaying;
+            ClearVolume = clear != null ? clear.volume : 0f;
+            LowPassVolume = lowPass != null ? lowPass.volume : 0f;
+            ClearPitch = clear != null ? clear.pitch : 1f;
+            LowPassPitch = lowPass != null ? lowPass.pitch : 1f;
+            LowPassActive = sfx.isLowPassActive;
+            UnderWater = sfx.isCurrentlyUnderWater;
+        }
+    }
+
+    public FlightPlaybackState CaptureFlightPlaybackState() => new FlightPlaybackState(this);
+
+    public void RestoreFlightPlaybackState(FlightPlaybackState state)
+    {
+        flySequence?.Kill();
+        if (state.ClearPlaying || state.LowPassPlaying)
+            EnsureFlightSources();
+
+        isLowPassActive = state.LowPassActive;
+        isCurrentlyUnderWater = state.UnderWater;
+        RestoreFlightSource(clearFlySource, state.ClearSamples, state.ClearPlaying, state.ClearVolume, state.ClearPitch);
+        RestoreFlightSource(lowPassFlySource, state.LowPassSamples, state.LowPassPlaying, state.LowPassVolume, state.LowPassPitch);
+    }
+
+    private static void RestoreFlightSource(AudioSource source, int samples, bool playing, float volume, float pitch)
+    {
+        // Les sources de vol sont créées à la demande et peuvent ne pas encore exister.
+        if (source == null)
+            return;
+
+        source.Stop();
+        source.volume = volume;
+        source.pitch = pitch;
+        if (source.clip == null)
+            return;
+
+        source.timeSamples = Mathf.Clamp(samples, 0, source.clip.samples - 1);
+        if (playing)
+            source.Play();
+    }
+
+    private void EnsureFlightSources()
+    {
+        if (clearFlySource == null)
+            clearFlySource = SFXManager.Instance.PlaySFX(flyLoopClip, isLowPassActive ? 0f : 0.5f, loop: true);
+        if (lowPassFlySource == null)
+            lowPassFlySource = SFXManager.Instance.PlaySFX(lowPassFlyLoopClip, isLowPassActive ? 0.5f : 0f, loop: true);
+    }
+
     private void Start()
     {
         controls = GetComponent<IPigeonControls>();
@@ -63,11 +132,11 @@ public class PigeonSFX : MonoBehaviour
 
         if (pigeonController.CurrentPigeonState == PigeonController.PigeonState.Gliding && !pigeonController.IsStun)
         {
-            if (currentAudioSource == null)
-            {
-                clearFlySource = SFXManager.Instance.PlaySFX(flyLoopClip, 0.5f, loop: true);
-                lowPassFlySource = SFXManager.Instance.PlaySFX(lowPassFlyLoopClip, 0.0f, loop: true);
-            }
+            EnsureFlightSources();
+            if (!clearFlySource.isPlaying)
+                clearFlySource.Play();
+            if (!lowPassFlySource.isPlaying)
+                lowPassFlySource.Play();
 
             flySequence?.Kill();
 
@@ -97,11 +166,34 @@ public class PigeonSFX : MonoBehaviour
 
     public void SetLowPassMode(bool isLowPass)
     {
+        if (isLowPassActive == isLowPass)
+            return;
+
         isLowPassActive = isLowPass;
+
+        if (currentAudioSource == null || otherAudioSource == null)
+            return;
 
         currentAudioSource.volume = otherAudioSource.volume;
         currentAudioSource.pitch = otherAudioSource.pitch;
 
         otherAudioSource.volume = 0.0f;
+    }
+
+    private void OnDisable()
+    {
+        flySequence?.Kill();
+        if (clearFlySource != null)
+            clearFlySource.Stop();
+        if (lowPassFlySource != null)
+            lowPassFlySource.Stop();
+    }
+
+    private void OnDestroy()
+    {
+        if (clearFlySource != null)
+            Destroy(clearFlySource.gameObject);
+        if (lowPassFlySource != null)
+            Destroy(lowPassFlySource.gameObject);
     }
 }

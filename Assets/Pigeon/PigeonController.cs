@@ -146,17 +146,32 @@ public class PigeonController : MonoBehaviour
 
     public void Teleport(Vector3 position, Quaternion rotation)
     {
+        Teleport(position, rotation, Vector3.zero);
+    }
+
+    public void Teleport(Vector3 position, Quaternion rotation, Vector3 velocity, bool snapCameraBehind = true)
+    {
         _onMoving?.ClearSupport();
         if (_controller == null)
             _controller = GetComponent<CharacterController>();
+        if (_stunned)
+        {
+            _stunned = false;
+            _stunRemaining = 0f;
+            _rigidbody.linearVelocity = Vector3.zero;
+            _rigidbody.angularVelocity = Vector3.zero;
+            _rigidbody.isKinematic = true;
+            _pigeonRagdollHandler.SetRagdollState(false);
+            _controller.enabled = true;
+        }
         bool wasEnabled = _controller.enabled;
         Vector3 previousPosition = transform.position;
         _controller.enabled = false;
         transform.SetPositionAndRotation(position, rotation);
         _controller.enabled = wasEnabled;
 
-        _velocity = Vector3.zero;
-        _lastVelocity = Vector3.zero;
+        _velocity = velocity;
+        _lastVelocity = velocity;
         _pendingImpulse = Vector3.zero;
         Vector3 forward = rotation * Vector3.forward;
         Vector3 horizontalForward = Vector3.ProjectOnPlane(forward, Vector3.up);
@@ -170,7 +185,7 @@ public class PigeonController : MonoBehaviour
         _skipVelocityRead = true;
 
         CinemachineCore.OnTargetObjectWarped(transform, position - previousPosition);
-        if (_controls is PlayerControls playerControls)
+        if (snapCameraBehind && _controls is PlayerControls playerControls)
             playerControls.SnapCameraBehind();
     }
 
