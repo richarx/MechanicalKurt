@@ -10,6 +10,7 @@ public struct FreeFallProgress
     public bool Finished;
     public bool Dismissed;
     public byte Place;
+    public float FinishTime;
     public FreeFallChallenge.LossReason Loss;
     public Vector3 InputPosition;
     public float CurrentHeight;

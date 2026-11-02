@@ -161,16 +161,47 @@ public class FreeFallChallenge : PredictedIdentity<FreeFallState>
             if (!progress.IsIn(id, state.StartCount) || progress.Finished || progress.Loss == LossReason.None)
                 continue;
             progress.Finished = true;
-            progress.Place = (byte)Mathf.Min(remaining + 1, byte.MaxValue);
+            progress.FinishTime = state.Elapsed;
             RecordAttempt(ref state, progress);
         }
 
         // Le dernier participant continue lui aussi : sa hauteur reste mesurée jusqu'à sa propre fin de tentative.
         if (remaining > 0)
             return;
+        RankParticipants(state.StartCount);
         state.Phase = ActivityPhase.Results;
         state.ResultsRemaining = _resultsTimeout;
     }
+
+    private void RankParticipants(int startCount)
+    {
+        foreach (PigeonController pigeon in PigeonController.All)
+        {
+            ref FreeFallProgress progress = ref pigeon.SimState.FreeFall;
+            if (!progress.IsIn(id, startCount))
+                continue;
+            int place = 1;
+            foreach (PigeonController other in PigeonController.All)
+            {
+                ref FreeFallProgress candidate = ref other.SimState.FreeFall;
+                if (candidate.IsIn(id, startCount) && CompareResults(candidate, progress) < 0)
+                    place++;
+            }
+            progress.Place = (byte)Mathf.Min(place, byte.MaxValue);
+        }
+    }
+
+    private static int CompareResults(in FreeFallProgress a, in FreeFallProgress b)
+    {
+        bool aValid = HasValidResult(a), bValid = HasValidResult(b);
+        if (aValid != bValid)
+            return aValid ? -1 : 1;
+        // À validité égale, le dernier à terminer passe devant ; même tick = ex æquo.
+        return b.FinishTime.CompareTo(a.FinishTime);
+    }
+
+    private static bool HasValidResult(in FreeFallProgress progress) => progress.Finished
+        && progress.Loss is LossReason.Flap or LossReason.Movement && HasValidHeight(progress);
 
     private void UpdateHeight(ref FreeFallProgress progress, Vector3 position)
     {
@@ -310,19 +341,32 @@ public class FreeFallChallenge : PredictedIdentity<FreeFallState>
 
     private string BuildResultsText(PigeonController local)
     {
-        _viewParticipants.Sort((a, b) => a.FreeFallProgress.Place.CompareTo(b.FreeFallProgress.Place));
+        _viewParticipants.Sort((a, b) => CompareResults(a.FreeFallProgress, b.FreeFallProgress));
         var text = new StringBuilder("<size=130%>Free fall results</size>\n\n");
+        bool hasWinner = false;
         foreach (PigeonController pigeon in _viewParticipants)
         {
             FreeFallProgress progress = pigeon.FreeFallProgress;
             string player = pigeon == local ? "You" : pigeon.owner.HasValue ? $"Player {pigeon.owner.Value.id.value}" : "Bot";
+            bool valid = HasValidResult(progress);
             string result = ReasonText(progress.Loss);
-            if (progress.Place == 1 && progress.Loss is LossReason.Flap or LossReason.Movement)
+            if (!valid)
+            {
+                if (progress.Loss is LossReason.Flap or LossReason.Movement)
+                    result = "No height measured";
+                result = "DQ: " + result;
+            }
+            if (progress.Place == 1 && valid)
+            {
                 result = $"Winner! ({result})";
+                hasWinner = true;
+            }
             string height = HasValidHeight(progress) ? $"{progress.MinimumHeight:0.00} m" : "--";
             string color = ColorUtility.ToHtmlStringRGB(pigeon.PlayerColor);
             text.Append($"<size=70%>{progress.Place}. <color=#{color}>{player}</color> - {result} - {height}</size>\n");
         }
+        if (!hasWinner)
+            text.Append("\n<size=80%>No valid attempt: no winner</size>\n");
         if (_viewState.BestHeight > 0f)
             text.Append(_viewState.RecordStartCount == _viewState.StartCount
                 ? $"\n<color=#FFD040>New record! {_viewState.BestHeight:0.00} m</color>\n"

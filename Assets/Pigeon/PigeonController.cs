@@ -393,7 +393,13 @@ public partial class PigeonController : PredictedIdentity<PigeonInput, PigeonSta
         result.Yaw = Mathf.LerpAngle(from.Yaw, to.Yaw, t);
         result.Pitch = Mathf.LerpAngle(from.Pitch, to.Pitch, t);
         result.LastVelocity = Vector3.Lerp(from.LastVelocity, to.LastVelocity, t);
-        if (from.FreeFall.IsIn(to.FreeFall.Activity, to.FreeFall.StartCount)
+        bool sameFreeFall = from.FreeFall.IsIn(to.FreeFall.Activity, to.FreeFall.StartCount);
+        if (sameFreeFall && IsFreeFalling(from) && to.FreeFall.Loss == FreeFallChallenge.LossReason.Ground)
+        {
+            // Au contact final, aligner le modèle sur la collision : aucune image encore en l'air avec un état déjà disqualifié.
+            result.Position = to.Position;
+        }
+        else if (sameFreeFall
             && IsFreeFalling(from) && IsFreeFalling(to)
             && from.FreeFall.CurrentHeight >= 0f && to.FreeFall.CurrentHeight >= 0f)
         {
