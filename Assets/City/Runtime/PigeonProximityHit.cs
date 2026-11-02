@@ -93,7 +93,7 @@ public class PigeonProximityHit : MonoBehaviour
         bool inside = Pigeon != null && Pigeon.isActiveAndEnabled &&
                       (Pigeon.transform.position - transform.position).sqrMagnitude <= Radius * Radius;
 
-        if (inside && !_wasInside && Pigeon.Speed >= MinimumSpeed &&
+        if (inside && !_wasInside && Pigeon.Speed >= MinimumSpeed && !Pigeon.IsGrounded &&
             _hitRoutine == null && _animator.isActiveAndEnabled)
             _hitRoutine = StartCoroutine(PlayHit());
 
@@ -246,6 +246,6 @@ public class PigeonProximityHit : MonoBehaviour
         if (hitAudioClips == null || hitAudioClips.Count == 0) return;
 
         AudioClip clip = hitAudioClips[Random.Range(0, hitAudioClips.Count)];
-        SFXManager.Instance.PlaySFX(clip);    
+        SFXManager.Instance.PlaySFX(clip);
     }
 }
