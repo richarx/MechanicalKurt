@@ -11,6 +11,8 @@ public class PigeonSFX : MonoBehaviour
     [SerializeField] private AudioClip poopClip;
     [SerializeField] private AudioClip hurtClip;
     [SerializeField] private List<AudioClip> rollClips;
+    [SerializeField] private List<AudioClip> StartDiveClips;
+    [SerializeField] private List<AudioClip> StopDiveClips;
 
     [Space]
     [SerializeField] private Transform waterPlane;
@@ -45,6 +47,13 @@ public class PigeonSFX : MonoBehaviour
         pigeonController.OnStunned.AddListener(() => SFXManager.Instance.PlaySFX(hurtClip));
         buttHoleManager.OnShit.AddListener(() => SFXManager.Instance.PlaySFX(poopClip));
         PauseMenu.OnPauseGame.AddListener(StopGlideSFX);
+        pigeonController.OnChangeState.AddListener((from, to) =>
+        {
+            if (to == PigeonController.PigeonState.Diving)
+                SFXManager.Instance.PlayRandomSFX(StartDiveClips);
+            else if (from == PigeonController.PigeonState.Diving)
+                SFXManager.Instance.PlayRandomSFX(StopDiveClips);
+        });
     }
 
     private void Update()

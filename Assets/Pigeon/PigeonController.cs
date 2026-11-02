@@ -90,6 +90,10 @@ public class PigeonController : MonoBehaviour
     [field: SerializeField]
     public UnityEvent OnBoost { get; private set; } = new UnityEvent();
 
+    [field: SerializeField]
+    public UnityEvent<PigeonState, PigeonState> OnChangeState { get; private set; } = new UnityEvent<PigeonState, PigeonState>();
+
+
     Vector3 _velocity;
     Vector3 _lastVelocity;
     Vector3 _pendingImpulse;
@@ -380,7 +384,12 @@ public class PigeonController : MonoBehaviour
 
         _velocity = Vector3.zero;
 
-        _currentPigeonState = ComputeCurrentPigeonState();
+        PigeonState newState = ComputeCurrentPigeonState();
+        if (newState != _currentPigeonState)
+        {
+            OnChangeState?.Invoke(_currentPigeonState, newState);
+            _currentPigeonState = newState;
+        }
 
         if (_currentPigeonState == PigeonState.Grounded || _currentPigeonState == PigeonState.Dancing)
         {
@@ -392,7 +401,6 @@ public class PigeonController : MonoBehaviour
             CalculateFlightPhysics(dt);
             UpdateVisualRotation(dt);
         }
-
 
         _velocity = PigeonFan.ApplyUpdrafts(transform.position, _velocity, dt, IsGrounded);
         if (IsUndeWater)

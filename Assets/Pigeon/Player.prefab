@@ -369,6 +369,9 @@ MonoBehaviour:
   <OnBoost>k__BackingField:
     m_PersistentCalls:
       m_Calls: []
+  <OnChangeState>k__BackingField:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!114 &7788707282503470594
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -468,6 +471,13 @@ MonoBehaviour:
   - {fileID: 8300000, guid: 33ec72da27e336446b91a3d7ad4f3e32, type: 3}
   - {fileID: 8300000, guid: 8b902c0fa7c9a974d8089d569cec9e6d, type: 3}
   - {fileID: 8300000, guid: 3418b1fa006b0b845b90a66e1cbdc08e, type: 3}
+  StartDiveClips:
+  - {fileID: 8300000, guid: cfc6e905979304c46ae1bc59d01b21d4, type: 3}
+  StopDiveClips:
+  - {fileID: 8300000, guid: e6266d9f18b9ef34d86c478b8486aa88, type: 3}
+  - {fileID: 8300000, guid: fa8ad57beef1dd643bc923f62dc46688, type: 3}
+  - {fileID: 8300000, guid: 4f04edd7c619f6e4294e74161a8add07, type: 3}
+  - {fileID: 8300000, guid: 02e9c392ce26d564d82b03e98f60cc75, type: 3}
   waterPlane: {fileID: 0}
   enterWater: {fileID: 8300000, guid: 2466f5e40cdf95841987426ab3fd8a8a, type: 3}
   exitWater: {fileID: 8300000, guid: 57d0a0e2f565fee49b46984530c9d3da, type: 3}
