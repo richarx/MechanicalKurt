@@ -16,6 +16,10 @@ public struct PigeonInput : IPredictedData
     public bool Interact;
     public bool Coo;
     public bool Respawn;
+    /// <summary>Premier appui de chute libre détecté entre deux ticks, même s'il est déjà relâché.</summary>
+    public FreeFallChallenge.LossReason FreeFallAction;
+    /// <summary>Secondes écoulées depuis le précédent relevé d'input jusqu'à cet appui.</summary>
+    public float FreeFallActionDelay;
     public byte EquipmentWear;
     public byte EquipmentToggle;
     /// <summary>Dernière cinématique partagée finie sur cet écran (zone ou course, numéro de départ), répétée à chaque tick. 0 = aucune.</summary>
@@ -389,6 +393,13 @@ public partial class PigeonController : PredictedIdentity<PigeonInput, PigeonSta
         result.Yaw = Mathf.LerpAngle(from.Yaw, to.Yaw, t);
         result.Pitch = Mathf.LerpAngle(from.Pitch, to.Pitch, t);
         result.LastVelocity = Vector3.Lerp(from.LastVelocity, to.LastVelocity, t);
+        if (from.FreeFall.IsIn(to.FreeFall.Activity, to.FreeFall.StartCount)
+            && IsFreeFalling(from) && IsFreeFalling(to)
+            && from.FreeFall.CurrentHeight >= 0f && to.FreeFall.CurrentHeight >= 0f)
+        {
+            result.FreeFall.CurrentHeight = Mathf.Lerp(from.FreeFall.CurrentHeight, to.FreeFall.CurrentHeight, t);
+            result.FreeFall.MinimumHeight = Mathf.Lerp(from.FreeFall.MinimumHeight, to.FreeFall.MinimumHeight, t);
+        }
         result.StunRotation = Quaternion.Slerp(from.StunRotation, to.StunRotation, t);
         if (from.SupportId == to.SupportId)
             result.SupportLocalAnchor = Vector3.Lerp(from.SupportLocalAnchor, to.SupportLocalAnchor, t);
@@ -409,7 +420,7 @@ public partial class PigeonController : PredictedIdentity<PigeonInput, PigeonSta
 #endif
         WritePosition(s.Position);
 
-        CaptureFreeFallInput(input, ref s);
+        float freeFallTime = CaptureFreeFallInput(input, ref s, dt);
         if (input.Respawn)
             TeleportTo(ref s, s.SpawnPosition, s.SpawnRotation);
 
@@ -428,6 +439,9 @@ public partial class PigeonController : PredictedIdentity<PigeonInput, PigeonSta
         }
 
         s.StunImmuneRemaining -= dt;
+        dt = Mathf.Max(0f, dt - freeFallTime);
+        if (dt <= 0f)
+            return;
 
         if (IsFreeFalling(s))
         {

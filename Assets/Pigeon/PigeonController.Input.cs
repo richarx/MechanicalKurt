@@ -49,10 +49,13 @@ public partial class PigeonController
         input.BarrelRight |= _controls.ConsumeRightFlex;
         input.Interact |= _controls.ConsumePredictedInteract;
         input.Coo |= _controls.ConsumeCooing;
+        CaptureTimedFreeFallAction(ref input);
     }
 
     protected override void GetFinalInput(ref PigeonInput input)
     {
+        CaptureTimedFreeFallAction(ref input);
+        _freeFallInputWindowStarted = Time.timeAsDouble;
         input.Respawn = _respawnRequested;
         _respawnRequested = false;
         input.EquipmentWear = _equipmentWearRequested;
@@ -81,6 +84,10 @@ public partial class PigeonController
         input.RelativeMovement = Vector2.ClampMagnitude(input.RelativeMovement, 1f);
         input.EquipmentWear &= PigeonEquipment.AllBits;
         input.EquipmentToggle &= PigeonEquipment.AllBits;
+        if (input.FreeFallAction is not (FreeFallChallenge.LossReason.Flap
+            or FreeFallChallenge.LossReason.Movement or FreeFallChallenge.LossReason.Respawn))
+            input.FreeFallAction = FreeFallChallenge.LossReason.None;
+        input.FreeFallActionDelay = FreeFallActionTime(input, predictionManager.tickDelta);
     }
 
     protected override void ModifyExtrapolatedInput(ref PigeonInput input)
@@ -92,6 +99,8 @@ public partial class PigeonController
         input.Respawn = false;
         input.EquipmentWear = 0;
         input.EquipmentToggle = 0;
+        input.FreeFallAction = FreeFallChallenge.LossReason.None;
+        input.FreeFallActionDelay = 0f;
     }
 
     void OnApplicationFocus(bool hasFocus)

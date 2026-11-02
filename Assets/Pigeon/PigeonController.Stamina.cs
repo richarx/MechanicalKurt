@@ -15,9 +15,8 @@ public partial class PigeonController
         return MovementState.Gliding;
     }
 
-    /// <summary>Arrivé d'une course ou vainqueur de la chute libre : vol stationnaire jusqu'à la sortie des résultats.</summary>
-    static bool FinishedRace(in PigeonState s) => (s.Race.Active && s.Race.Place > 0)
-        || (s.FreeFall.Active && s.FreeFall.Finished && s.FreeFall.Loss == FreeFallChallenge.LossReason.None);
+    /// <summary>Arrivé d'une course chronométrée : vol stationnaire jusqu'à la sortie des résultats.</summary>
+    static bool FinishedRace(in PigeonState s) => s.Race.Active && s.Race.Place > 0;
 
     /// <summary>Un battement commencé continue tant qu'il reste de l'endurance ; pour en commencer un, il faut le seuil.</summary>
     bool CanFlap(in PigeonState s)

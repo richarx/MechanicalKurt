@@ -23,6 +23,8 @@ public struct FreeFallProgress
 
 public partial class PigeonController
 {
+    private double _freeFallInputWindowStarted;
+
     public FreeFallProgress FreeFallProgress => _viewState.FreeFall;
     public bool IsInMultiplayerActivity => _viewState.Race.Active || _viewState.FreeFall.Active;
 
@@ -67,26 +69,61 @@ public partial class PigeonController
         CaptureFreeFallContact(ref state);
     }
 
-    // Capturer AVANT le déplacement : un battement ou une réapparition ne doit pas améliorer la hauteur.
-    static void CaptureFreeFallInput(in PigeonInput input, ref PigeonState state)
+    // Lecture locale par image ; seuls la cause et le délai borné de l'appui sont transmis, jamais une hauteur client.
+    private void CaptureTimedFreeFallAction(ref PigeonInput input)
+    {
+        if (!IsFreeFalling(currentState) || input.FreeFallAction != FreeFallChallenge.LossReason.None)
+            return;
+        var sampled = new PigeonInput
+        {
+            Movement = _controls != null ? _controls.Movement : Vector2.zero,
+            RelativeMovement = _controls != null ? _controls.RelativeMovement : Vector2.zero,
+            Flap = _controls != null && _controls.Flap,
+            Brake = _controls != null && _controls.Brake,
+            Dive = _controls != null && _controls.Dive,
+            BarrelLeft = input.BarrelLeft,
+            BarrelRight = input.BarrelRight,
+            Respawn = input.Respawn || _respawnRequested
+        };
+        input.FreeFallAction = FreeFallChallenge.GetInputLoss(sampled, currentState.FreeFall.MovementDeadZone);
+        if (input.FreeFallAction != FreeFallChallenge.LossReason.None)
+            input.FreeFallActionDelay = (float)System.Math.Max(0d, Time.timeAsDouble - _freeFallInputWindowStarted);
+    }
+
+    // Simuler la portion de chute précédant l'appui avant de figer sa position et de rétablir le vol habituel.
+    private float CaptureFreeFallInput(in PigeonInput input, ref PigeonState state, float dt)
     {
         ref FreeFallProgress progress = ref state.FreeFall;
-        if (!progress.Active || progress.Finished || progress.Loss != FreeFallChallenge.LossReason.None)
-            return;
+        if (!IsFreeFalling(state) || state.Frozen)
+            return 0f;
 
         FreeFallChallenge.LossReason reason = state.Grounded
             ? FreeFallChallenge.LossReason.Ground
+            : input.FreeFallAction != FreeFallChallenge.LossReason.None ? input.FreeFallAction
             : FreeFallChallenge.GetInputLoss(input, progress.MovementDeadZone);
         if (reason == FreeFallChallenge.LossReason.None)
-            return;
-        progress.Loss = reason;
-        progress.InputPosition = state.Position;
+            return 0f;
+
+        float fallTime = reason == FreeFallChallenge.LossReason.Ground ? 0f : FreeFallActionTime(input, dt);
+        if (fallTime > 0f)
+            SimulateFreeFall(ref state, fallTime);
+        if (progress.Loss == FreeFallChallenge.LossReason.None)
+        {
+            progress.Loss = reason;
+            progress.InputPosition = state.Position;
+        }
+        return fallTime;
     }
+
+    private static float FreeFallActionTime(in PigeonInput input, float dt)
+        => input.FreeFallAction == FreeFallChallenge.LossReason.None
+            || float.IsNaN(input.FreeFallActionDelay) || float.IsInfinity(input.FreeFallActionDelay)
+            ? 0f : Mathf.Clamp(input.FreeFallActionDelay, 0f, dt);
 
     void CaptureFreeFallContact(ref PigeonState state)
     {
         ref FreeFallProgress progress = ref state.FreeFall;
-        if (progress.Active && !progress.Finished && (state.Grounded || UnderWater(state.Position)))
+        if (IsFreeFalling(state) && (state.Grounded || UnderWater(state.Position)))
         {
             progress.Loss = FreeFallChallenge.LossReason.Ground;
             progress.InputPosition = state.Position;

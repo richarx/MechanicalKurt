@@ -19,7 +19,8 @@ public struct FreeFallState : IPredictedData<FreeFallState>
 }
 
 /// <summary>
-/// Chute libre multijoueur : le dernier pigeon sans commande gagne. Les égalités du même tick sont conservées.
+/// Chute libre multijoueur : chaque pigeon termine sa tentative ; le dernier appui valide obtient la première place.
+/// Les égalités du même tick sont conservées.
 /// Le StartPose place les participants en altitude, sans vitesse initiale ; seule la gravité agit pendant la chute.
 /// Le record est la plus petite distance positive au sol d'un essai terminé sans contact avec le sol ou l'eau.
 /// </summary>
@@ -133,7 +134,7 @@ public class FreeFallChallenge : PredictedIdentity<FreeFallState>
             if (progress.Finished)
                 continue;
 
-            if (ps.Grounded)
+            if (progress.Loss == LossReason.None && ps.Grounded)
                 progress.Loss = LossReason.Ground;
             else if (progress.Loss == LossReason.None && state.Elapsed >= _maximumDuration)
             {
@@ -164,21 +165,9 @@ public class FreeFallChallenge : PredictedIdentity<FreeFallState>
             RecordAttempt(ref state, progress);
         }
 
-        // En solo, on peut s'entraîner jusqu'à son premier appui. En multi, le dernier encore en jeu gagne.
-        if (remaining > 1 || (remaining == 1 && state.Participants == 1))
+        // Le dernier participant continue lui aussi : sa hauteur reste mesurée jusqu'à sa propre fin de tentative.
+        if (remaining > 0)
             return;
-        if (remaining == 1)
-        {
-            foreach (PigeonController pigeon in PigeonController.All)
-            {
-                ref FreeFallProgress progress = ref pigeon.SimState.FreeFall;
-                if (!progress.IsIn(id, state.StartCount) || progress.Finished)
-                    continue;
-                progress.Finished = true;
-                progress.Place = 1;
-                RecordAttempt(ref state, progress);
-            }
-        }
         state.Phase = ActivityPhase.Results;
         state.ResultsRemaining = _resultsTimeout;
     }
@@ -202,8 +191,7 @@ public class FreeFallChallenge : PredictedIdentity<FreeFallState>
 
     private static void RecordAttempt(ref FreeFallState state, in FreeFallProgress progress)
     {
-        if (!progress.HasHeight || !IsPositiveFinite(progress.MinimumHeight)
-            || progress.Loss is LossReason.Ground or LossReason.Respawn or LossReason.Timeout)
+        if (!HasValidHeight(progress))
             return;
         if (state.BestHeight > 0f && progress.MinimumHeight >= state.BestHeight)
             return;
@@ -310,10 +298,13 @@ public class FreeFallChallenge : PredictedIdentity<FreeFallState>
 
     private string BuildFallingText(in FreeFallProgress progress)
     {
-        string height = progress.CurrentHeight >= 0f ? $"{progress.CurrentHeight:0.00} m" : "--";
+        bool invalid = progress.Finished && !HasValidHeight(progress);
+        string height = !invalid && progress.CurrentHeight >= 0f ? $"{progress.CurrentHeight:0.00} m" : "--";
         string status = progress.Finished ? $"Out: {ReasonText(progress.Loss)}\nWaiting for the others" : "Don't move or flap!";
-        return $"<size=120%>Free fall</size>\n{height}\n<size=65%>{status}</size>"
-            + (progress.HasHeight ? $"\n<size=60%>Your lowest: {progress.MinimumHeight:0.00} m</size>" : "")
+        string heightLabel = progress.Finished ? "Your attempt" : "Height";
+        return $"<size=120%>Free fall</size>\n{heightLabel}: {height}\n<size=65%>{status}</size>"
+            + (invalid ? "\n<size=60%>Invalid attempt</size>"
+                : progress.HasHeight ? $"\n<size=60%>Your lowest: {progress.MinimumHeight:0.00} m</size>" : "")
             + (_viewState.BestHeight > 0f ? $"\n<size=60%>Record: {_viewState.BestHeight:0.00} m</size>" : "");
     }
 
@@ -325,8 +316,10 @@ public class FreeFallChallenge : PredictedIdentity<FreeFallState>
         {
             FreeFallProgress progress = pigeon.FreeFallProgress;
             string player = pigeon == local ? "You" : pigeon.owner.HasValue ? $"Player {pigeon.owner.Value.id.value}" : "Bot";
-            string result = progress.Loss == LossReason.None ? "Winner!" : ReasonText(progress.Loss);
-            string height = progress.HasHeight && progress.Loss != LossReason.Ground ? $"{progress.MinimumHeight:0.00} m" : "--";
+            string result = ReasonText(progress.Loss);
+            if (progress.Place == 1 && progress.Loss is LossReason.Flap or LossReason.Movement)
+                result = $"Winner! ({result})";
+            string height = HasValidHeight(progress) ? $"{progress.MinimumHeight:0.00} m" : "--";
             string color = ColorUtility.ToHtmlStringRGB(pigeon.PlayerColor);
             text.Append($"<size=70%>{progress.Place}. <color=#{color}>{player}</color> - {result} - {height}</size>\n");
         }
@@ -361,6 +354,10 @@ public class FreeFallChallenge : PredictedIdentity<FreeFallState>
     };
 
     private static bool IsPositiveFinite(float value) => value > 0f && !float.IsNaN(value) && !float.IsInfinity(value);
+
+    private static bool HasValidHeight(in FreeFallProgress progress) => progress.HasHeight
+        && IsPositiveFinite(progress.MinimumHeight)
+        && progress.Loss is not (LossReason.Ground or LossReason.Respawn or LossReason.Timeout);
 
     protected override void Destroyed()
     {
