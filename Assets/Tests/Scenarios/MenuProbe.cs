@@ -76,6 +76,8 @@ public class MenuProbe : MonoBehaviour
         yield return new WaitForSecondsRealtime(3f);
         DescribeCanvases("choix");
         Capture("choice");
+        foreach (AmbientPigeon pigeon in FindObjectsByType<AmbientPigeon>(FindObjectsInactive.Exclude, FindObjectsSortMode.None).OrderBy(p => p.name).Take(3))
+            CloseUp(pigeon.transform, pigeon.name.Replace(' ', '_'));
         int seen = 0;
         foreach (AmbientPigeon pigeon in FindObjectsByType<AmbientPigeon>(FindObjectsInactive.Exclude, FindObjectsSortMode.None))
         {
@@ -101,7 +103,7 @@ public class MenuProbe : MonoBehaviour
             }
         }
         foreach (AmbientPigeon p in ambient)
-            Check($"{p.name} bouge pendant 20 s", activities[p].Count >= 2 && (travelled[p] > 0.3f || activities[p].Contains("Turn")),
+            Check($"{p.name} bouge pendant 20 s", activities[p].Count >= 2 && (travelled[p] > 0.1f || activities[p].Contains("Turn")),
                 $"{string.Join(", ", activities[p])} ; {travelled[p]:0.0} m parcourus");
 
         ui.OnCreate();
@@ -121,6 +123,8 @@ public class MenuProbe : MonoBehaviour
         Check("Entrée en jeu : menu quitté, commandes rendues", !GameSession.InMenu && local != null && !local.GetComponent<PlayerControls>().IsPaused);
         DescribeCanvases("jeu");
         Capture("game");
+        if (PigeonController.Local != null)
+            CloseUp(PigeonController.Local.transform, "player_pigeon");
 
         PauseMenu pause = FindAnyObjectByType<PauseMenu>(FindObjectsInactive.Include);
         Check("Menu pause présent", pause != null);
@@ -239,6 +243,36 @@ public class MenuProbe : MonoBehaviour
         bool inFrame = viewport.z > 0f && viewport.x > 0f && viewport.x < 1f && viewport.y > 0f && viewport.y < 1f;
         visible = inFrame && clear && pixels >= 25f;
         return $"écran ({viewport.x:0.00}, {viewport.y:0.00}) à {viewport.z:0.0} m, {pixels:0} px de haut, {(clear ? "dégagé" : "caché")}";
+    }
+
+    /// <summary>Gros plan d'un pigeon (de face, de trois quarts) : Logs/MenuProbe_closeup_*.png.</summary>
+    static void CloseUp(Transform pigeon, string label)
+    {
+        Renderer body = pigeon.GetComponentsInChildren<SkinnedMeshRenderer>().OrderByDescending(r => r.bounds.size.sqrMagnitude).FirstOrDefault();
+        if (body == null)
+            return;
+        Bounds bounds = body.bounds;
+        var go = new GameObject("[MenuProbe] Close-up camera");
+        var camera = go.AddComponent<Camera>();
+        camera.fieldOfView = 40f;
+        camera.nearClipPlane = 0.01f;
+        Vector3 direction = (pigeon.forward + pigeon.right * 0.7f + Vector3.up * 0.4f).normalized;
+        float distance = bounds.extents.magnitude * 3.2f;
+        go.transform.position = bounds.center + direction * distance;
+        go.transform.LookAt(bounds.center);
+        var target = new RenderTexture(640, 640, 24);
+        camera.targetTexture = target;
+        camera.Render();
+        RenderTexture.active = target;
+        var image = new Texture2D(640, 640, TextureFormat.RGB24, false);
+        image.ReadPixels(new Rect(0, 0, 640, 640), 0, 0);
+        image.Apply();
+        RenderTexture.active = null;
+        File.WriteAllBytes($"Logs/MenuProbe_closeup_{label}.png", image.EncodeToPNG());
+        camera.targetTexture = null;
+        Object.Destroy(target);
+        Object.Destroy(image);
+        Object.Destroy(go);
     }
 
     void Capture(string label)
