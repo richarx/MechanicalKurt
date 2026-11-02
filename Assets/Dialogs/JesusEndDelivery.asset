@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1b0317d929739a34e839d08c8427854a, type: 3}
   m_Name: JesusEndDelivery
   m_EditorClassIdentifier: Assembly-CSharp::DialogSequence
-  speaker: JESUS
+  speaker: HIGH PRIEST
   lines:
   - text: 'Oh great! '
   - text: The offering we need to wake up our god.

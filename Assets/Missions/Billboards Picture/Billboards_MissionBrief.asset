@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1b0317d929739a34e839d08c8427854a, type: 3}
   m_Name: Billboards_MissionBrief
   m_EditorClassIdentifier: Assembly-CSharp::DialogSequence
-  speaker: MASTER
+  speaker: TOURIST
   lines:
   - text: 'Hey little pidgey '
   - text: You're doing god's work you know ? We were so hung up in our phones, now we have you !
