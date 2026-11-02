@@ -99723,6 +99723,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 8875113971220435731, guid: 013420fdddab85a48be5b875e08e2729, type: 3}
+      propertyPath: staminaDepletionRate_Flap
+      value: 15
+      objectReference: {fileID: 0}
     - target: {fileID: 8893443228925278897, guid: 013420fdddab85a48be5b875e08e2729, type: 3}
       propertyPath: m_Name
       value: Player
