@@ -99819,6 +99819,10 @@ PrefabInstance:
       propertyPath: 'TriggerModule.primitives.Array.data[0]'
       value: 
       objectReference: {fileID: 103027135}
+    - target: {fileID: 7595259944597442791, guid: 013420fdddab85a48be5b875e08e2729, type: 3}
+      propertyPath: waterSplashPrefab
+      value: 
+      objectReference: {fileID: 1811848824726438853, guid: d7edd3e0ab32fbf49b87110c8029e964, type: 3}
     - target: {fileID: 7718967718942241121, guid: 013420fdddab85a48be5b875e08e2729, type: 3}
       propertyPath: m_LocalPosition.x
       value: 24.949

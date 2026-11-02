@@ -430,6 +430,7 @@ MonoBehaviour:
   windParticles: {fileID: 3792138837400240535}
   wingTrailRendererLeft: {fileID: 8287067714026424246}
   wingTrailRendererRight: {fileID: 7628107183944301609}
+  waterSplashPrefab: {fileID: 1811848824726438853, guid: d7edd3e0ab32fbf49b87110c8029e964, type: 3}
 --- !u!114 &8858055023861483610
 MonoBehaviour:
   m_ObjectHideFlags: 0
