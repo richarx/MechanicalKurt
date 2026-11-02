@@ -1635,7 +1635,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Code de la partie
+  m_text: Game code
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: c98df9323a6a79443a9900d5e061bc6d, type: 2}
   m_sharedMaterial: {fileID: -3348306354782297453, guid: c98df9323a6a79443a9900d5e061bc6d, type: 2}
@@ -3577,7 +3577,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Copier le code
+  m_text: Copy code
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: c98df9323a6a79443a9900d5e061bc6d, type: 2}
   m_sharedMaterial: {fileID: -3348306354782297453, guid: c98df9323a6a79443a9900d5e061bc6d, type: 2}
@@ -3883,7 +3883,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Continuer
+  m_text: Continue
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: c98df9323a6a79443a9900d5e061bc6d, type: 2}
   m_sharedMaterial: {fileID: -3348306354782297453, guid: c98df9323a6a79443a9900d5e061bc6d, type: 2}
@@ -4020,7 +4020,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Coller
+  m_text: Paste
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: c98df9323a6a79443a9900d5e061bc6d, type: 2}
   m_sharedMaterial: {fileID: -3348306354782297453, guid: c98df9323a6a79443a9900d5e061bc6d, type: 2}
@@ -4157,7 +4157,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Rejoindre une partie
+  m_text: Join a game
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: c98df9323a6a79443a9900d5e061bc6d, type: 2}
   m_sharedMaterial: {fileID: -3348306354782297453, guid: c98df9323a6a79443a9900d5e061bc6d, type: 2}
@@ -5586,7 +5586,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "Cr\xE9er une partie"
+  m_text: Create a game
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: c98df9323a6a79443a9900d5e061bc6d, type: 2}
   m_sharedMaterial: {fileID: -3348306354782297453, guid: c98df9323a6a79443a9900d5e061bc6d, type: 2}
@@ -5822,7 +5822,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Copier le lien
+  m_text: Copy link
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: c98df9323a6a79443a9900d5e061bc6d, type: 2}
   m_sharedMaterial: {fileID: -3348306354782297453, guid: c98df9323a6a79443a9900d5e061bc6d, type: 2}
@@ -6045,7 +6045,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Retour
+  m_text: Back
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: c98df9323a6a79443a9900d5e061bc6d, type: 2}
   m_sharedMaterial: {fileID: -3348306354782297453, guid: c98df9323a6a79443a9900d5e061bc6d, type: 2}
@@ -7308,7 +7308,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Code de la partie
+  m_text: Game code
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: c98df9323a6a79443a9900d5e061bc6d, type: 2}
   m_sharedMaterial: {fileID: -3348306354782297453, guid: c98df9323a6a79443a9900d5e061bc6d, type: 2}
@@ -8015,7 +8015,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Continuer
+  m_text: Continue
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: c98df9323a6a79443a9900d5e061bc6d, type: 2}
   m_sharedMaterial: {fileID: -3348306354782297453, guid: c98df9323a6a79443a9900d5e061bc6d, type: 2}
@@ -8133,7 +8133,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "Chargement\u2026"
+  m_text: "Loading\u2026"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: c98df9323a6a79443a9900d5e061bc6d, type: 2}
   m_sharedMaterial: {fileID: -3348306354782297453, guid: c98df9323a6a79443a9900d5e061bc6d, type: 2}
@@ -9196,7 +9196,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Retour
+  m_text: Back
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: c98df9323a6a79443a9900d5e061bc6d, type: 2}
   m_sharedMaterial: {fileID: -3348306354782297453, guid: c98df9323a6a79443a9900d5e061bc6d, type: 2}

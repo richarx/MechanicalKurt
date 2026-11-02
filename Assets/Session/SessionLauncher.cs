@@ -59,7 +59,7 @@ public class SessionLauncher : MonoBehaviour
         {
             SceneManager.sceneLoaded -= OnSceneLoaded;
             NetworkManager.EnableFlags();
-            LoadError = $"Scène « {_gameScene} » introuvable (Build Profiles).";
+            LoadError = $"Scene \"{_gameScene}\" not found (Build Profiles).";
             yield break;
         }
         while (!load.isDone)
@@ -71,7 +71,7 @@ public class SessionLauncher : MonoBehaviour
         _network = NetworkManager.main;
         if (_network == null)
         {
-            LoadError = "Pas de NetworkManager dans la scène de jeu.";
+            LoadError = "No NetworkManager in the game scene.";
             yield break;
         }
         _network.onClientConnectionState += HandleClientState;
@@ -126,7 +126,7 @@ public class SessionLauncher : MonoBehaviour
         }
         if (code == null)
         {
-            onDone("Impossible de trouver un code libre, réessaie.");
+            onDone("Could not find a free code, please try again.");
             yield break;
         }
 
@@ -138,7 +138,7 @@ public class SessionLauncher : MonoBehaviour
         if (!ok)
         {
             Leave();
-            onDone("Impossible d'ouvrir la partie (connexion au serveur).");
+            onDone("Could not open the game (server connection).");
             yield break;
         }
         GameSession.Begin(code, host: true);
@@ -150,14 +150,14 @@ public class SessionLauncher : MonoBehaviour
     {
         if (!SessionCode.IsValid(code))
         {
-            onDone($"Le code fait {SessionCode.Length} caractères (lettres et chiffres).");
+            onDone($"The code is {SessionCode.Length} characters long (letters and digits).");
             yield break;
         }
         bool? exists = null;
         yield return CheckRoom(code, result => exists = result);
         if (exists == false)
         {
-            onDone("Aucune partie avec ce code.");
+            onDone("No game with this code.");
             yield break;
         }
 
@@ -169,7 +169,7 @@ public class SessionLauncher : MonoBehaviour
         if (!ok)
         {
             Leave();
-            onDone(exists == null ? "Connexion impossible : vérifie le code et ta connexion." : "La partie ne répond pas : l'hôte l'a peut-être quittée.");
+            onDone(exists == null ? "Could not connect: check the code and your connection." : "The game is not responding: the host may have left.");
             yield break;
         }
         GameSession.Begin(code, host: false);
@@ -221,7 +221,7 @@ public class SessionLauncher : MonoBehaviour
         if (!_inGame || state != ConnectionState.Disconnected)
             return;
         _inGame = false;
-        GameSession.PendingMessage = GameSession.IsHost ? "La partie a été fermée." : "La partie est terminée : l'hôte est parti ou la connexion a été perdue.";
+        GameSession.PendingMessage = GameSession.IsHost ? "The game was closed." : "The game has ended: the host left or the connection was lost.";
         GameSession.End();
         SceneManager.LoadScene(gameObject.scene.name, LoadSceneMode.Single);
     }

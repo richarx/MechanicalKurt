@@ -52,8 +52,8 @@ public class MainMenuUI : MonoBehaviour
     {
         _createButton.onClick.AddListener(OnCreate);
         _joinButton.onClick.AddListener(() => ShowJoin(null));
-        _copyCodeButton.onClick.AddListener(() => Copy(GameSession.Code, "Code copié !"));
-        _copyLinkButton.onClick.AddListener(() => Copy(GameSession.InviteLink, "Lien copié !"));
+        _copyCodeButton.onClick.AddListener(() => Copy(GameSession.Code, "Code copied!"));
+        _copyLinkButton.onClick.AddListener(() => Copy(GameSession.InviteLink, "Link copied!"));
         _createContinueButton.onClick.AddListener(_launcher.EnterGame);
         _createBackButton.onClick.AddListener(OnCreateBack);
         _pasteButton.onClick.AddListener(() => ClipboardBridge.RequestPaste(gameObject, PasteMethod));
@@ -63,7 +63,7 @@ public class MainMenuUI : MonoBehaviour
         _codeInput.onSubmit.AddListener(_ => OnJoin());
         ClipboardBridge.ListenBrowserPaste(gameObject, PasteMethod);
 
-        ShowBusy("Chargement de la ville…");
+        ShowBusy("Loading the city…");
         while (!_launcher.GameSceneLoaded && _launcher.LoadError == null)
             yield return null;
         if (_launcher.LoadError != null)
@@ -85,7 +85,7 @@ public class MainMenuUI : MonoBehaviour
 
     IEnumerator CreateRoutine()
     {
-        ShowBusy("Création de la partie…");
+        ShowBusy("Creating the game…");
         string error = null;
         yield return _launcher.Create(result => error = result);
         if (error != null)
@@ -123,10 +123,10 @@ public class MainMenuUI : MonoBehaviour
     {
         if (!SessionCode.IsValid(code))
         {
-            _joinError.text = $"Le code fait {SessionCode.Length} caractères (lettres et chiffres).";
+            _joinError.text = $"The code is {SessionCode.Length} characters long (letters and digits).";
             yield break;
         }
-        ShowBusy("Connexion à la partie…");
+        ShowBusy("Joining the game…");
         string error = null;
         yield return _launcher.Join(code, result => error = result);
         if (error != null)
