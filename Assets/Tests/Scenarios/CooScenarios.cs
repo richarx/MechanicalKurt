@@ -82,8 +82,18 @@ public partial class ScenarioRunner
         UnityAction count = () => ownCoos++;
         Pigeon.OnCoo.AddListener(count);
         Defer(() => Pigeon.OnCoo.RemoveListener(count));
+        var cooClips = (List<AudioClip>)typeof(PigeonSFX).GetField("coohClips", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic)
+            .GetValue(Pigeon.GetComponent<PigeonSFX>());
         Bot.PressCoo();
         yield return Expect("Le joueur roucoule", () => ownCoos > 0, 1f);
+        yield return Expect("… et entend son propre roucoulement (son 2D)", () =>
+        {
+            foreach (AudioSource source in Pigeon.GetComponentsInChildren<AudioSource>())
+                if (source.isPlaying && cooClips.Contains(source.clip) && source.spatialBlend < 0.5f && source.volume > 0.5f)
+                    return true;
+            return false;
+        }, 1f, () => string.Join(", ", System.Linq.Enumerable.Select(Pigeon.GetComponentsInChildren<AudioSource>(),
+            s => $"{(s.clip != null ? s.clip.name : "-")} joue {s.isPlaying} 3D {s.spatialBlend} vol {s.volume} pitch {s.pitch:0.00}")));
         yield return ExpectStays("Pas de bulle pour son propre pigeon", () => own.Indicator == null || !own.Indicator.IsShowing, 1f,
             () => Describe(own.Indicator));
     }

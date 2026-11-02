@@ -110,7 +110,8 @@ public class PigeonSFX : MonoBehaviour
                     flySequence.Append(currentAudioSource.DOFade(0.5f, 0.5f));
             }
 
-            currentAudioSource.pitch = Tools.NormalizeValue(pigeonController.Speed, 5.0f, 25.0f);
+            // Borné : sans limite, la hauteur devenait négative à basse vitesse (son à l'envers) et montait à ×2,5 en piqué.
+            currentAudioSource.pitch = Mathf.Clamp(Tools.NormalizeValue(pigeonController.Speed, 5.0f, 25.0f), 0.5f, 1.5f);
         }
         else
         {
