@@ -23,6 +23,8 @@ public class PauseMenu : MonoBehaviour
     [SerializeField] private InputActionReference pauseAction;
 
     [Header("Partie")]
+    [Tooltip("Panneau du code de la partie : il apparaît en fondu avec les autres panneaux.")]
+    [SerializeField] private CanvasGroup session;
     [Tooltip("Code de la partie, affiché quand elle a été créée ou rejointe depuis le menu principal.")]
     [SerializeField] private TextMeshProUGUI sessionCodeText;
     [SerializeField] private Button copyCodeButton;
@@ -80,6 +82,8 @@ public class PauseMenu : MonoBehaviour
         currentSequence.Join(volume.DOFade(1.0f, 0.3f));
         currentSequence.Join(controls.DOFade(1.0f, 0.3f));
         currentSequence.Join(achievements.DOFade(1.0f, 0.3f));
+        if (session != null)
+            currentSequence.Join(session.DOFade(1.0f, 0.3f));
         currentSequence.AppendCallback(() => SetCursorState(true));
         currentSequence.SetUpdate(true);
     }
@@ -95,6 +99,8 @@ public class PauseMenu : MonoBehaviour
         currentSequence.Join(volume.DOFade(0.0f, 0.1f));
         currentSequence.Join(controls.DOFade(0.0f, 0.1f));
         currentSequence.Join(achievements.DOFade(0.0f, 0.1f));
+        if (session != null)
+            currentSequence.Join(session.DOFade(0.0f, 0.1f));
         currentSequence.Join(title.DOFade(0.0f, 0.1f));
         currentSequence.Append(backgroundMaterial.DOColor(Color.clear, "_Tint", 0.3f));
         currentSequence.AppendCallback(() => menuHolder.SetActive(false));
@@ -105,10 +111,12 @@ public class PauseMenu : MonoBehaviour
     private void RefreshSessionCode()
     {
         bool hasCode = GameSession.Code != null;
+        if (session != null)
+            session.gameObject.SetActive(hasCode);
         if (sessionCodeText != null)
         {
             sessionCodeText.gameObject.SetActive(hasCode);
-            sessionCodeText.text = hasCode ? $"Code de la partie : {GameSession.Code}" : "";
+            sessionCodeText.text = hasCode ? $"Game code: <color=#FFD040>{GameSession.Code}</color>" : "";
         }
         if (copyCodeButton != null)
             copyCodeButton.gameObject.SetActive(hasCode);
@@ -120,7 +128,7 @@ public class PauseMenu : MonoBehaviour
     {
         ClipboardBridge.Copy(GameSession.InviteLink ?? GameSession.Code);
         if (copyFeedbackText != null)
-            copyFeedbackText.text = GameSession.InviteLink != null ? "Lien d'invitation copié !" : "Code copié !";
+            copyFeedbackText.text = GameSession.InviteLink != null ? "Invite link copied!" : "Code copied!";
     }
 
     /// <summary>La pause n'arrête pas le temps (partie partagée) : le pigeon du joueur se met en vol stationnaire.</summary>

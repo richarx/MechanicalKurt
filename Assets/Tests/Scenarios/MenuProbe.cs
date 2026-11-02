@@ -133,7 +133,7 @@ public class MenuProbe : MonoBehaviour
             pause.SetPaused(true);
             yield return new WaitForSecondsRealtime(1.5f);
             string codeLine = FindObjectsByType<TextMeshProUGUI>(FindObjectsInactive.Exclude, FindObjectsSortMode.None)
-                .Select(t => t.text).FirstOrDefault(t => t.StartsWith("Code de la partie"));
+                .Select(t => t.text).FirstOrDefault(t => t.StartsWith("Game code"));
             Check("Le code est affiché dans la pause", codeLine != null && codeLine.Contains(GameSession.Code ?? "??"), codeLine);
             Capture("pause");
             pause.SetPaused(false);
