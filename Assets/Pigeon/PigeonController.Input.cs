@@ -5,11 +5,23 @@ using UnityEngine.InputSystem;
 public partial class PigeonController
 {
     bool _respawnRequested;
+    bool _movementFreezeRequested;
     byte _equipmentWearRequested;
     byte _equipmentToggleRequested;
 
     /// <summary>Source d'input actuelle (joueur ou bot). Les scripts qui lisent des appuis passent par ici plutôt que par PlayerControls.</summary>
     public IPigeonControls Controls => _controls;
+
+    /// <summary>Demande locale de gel, indépendante du gel imposé par une zone ou une course.</summary>
+    public bool IsMovementFreezeRequested => _movementFreezeRequested;
+
+    /// <summary>Demande le gel du pigeon contrôlé ici. La simulation applique et réplique ce gel.</summary>
+    public void SetMovementFrozen(bool frozen)
+    {
+        if (!isController)
+            return;
+        _movementFreezeRequested = frozen;
+    }
 
     /// <summary>Remplace la source d'input (bots, scénarios de test). null rétablit le composant IPigeonControls.</summary>
     public void SetControlsOverride(IPigeonControls controls)
@@ -57,6 +69,7 @@ public partial class PigeonController
         CaptureTimedFreeFallAction(ref input);
         _freeFallInputWindowStarted = Time.timeAsDouble;
         input.Respawn = _respawnRequested;
+        input.MovementFrozen = _movementFreezeRequested;
         _respawnRequested = false;
         input.EquipmentWear = _equipmentWearRequested;
         input.EquipmentToggle = _equipmentToggleRequested;

@@ -1,0 +1,4 @@
+Tool: built-in image_gen, transparent_background=true
+Input: C:/Users/Clément/Pictures/tintin.jpg
+
+Use case: background-extraction. Asset type: transparent PNG photographic head cutout for manual game texture compositing. Edit target: the supplied photograph. Extract ONLY the person's complete head, including all hair, visible ears, face, glasses and chin; end the cutout just below the chin, retaining a tiny natural upper neck edge if necessary. Remove all background, ceiling, shirt, torso, hand and fingers. Preserve the exact person's identity, facial features, natural original expression, glasses, hair, original photographic pixels and camera angle as faithfully as possible. Do not beautify, redraw, stylize or invent unseen head surfaces. Keep original head orientation. Center the isolated head in a close square crop with a small transparent margin. Background must be truly transparent, no checkerboard baked in, no shadow, no text.

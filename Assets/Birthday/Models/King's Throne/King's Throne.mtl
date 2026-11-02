@@ -1,0 +1,32 @@
+newmtl Material148
+Ka 0.7843137 0.7843137 0.7843137
+Kd 0.972549 0.972549 0.972549
+d 1
+Tr 1
+map_Ka Material148.png
+map_Kd Material148.png
+map_d Material148.png
+newmtl Material149
+Ka 0.7843137 0.7843137 0.7843137
+Kd 0.972549 0.972549 0.972549
+d 1
+Tr 1
+map_Ka Material149.png
+map_Kd Material149.png
+map_d Material149.png
+newmtl Material152
+Ka 0.7843137 0.7843137 0.7843137
+Kd 0.972549 0.972549 0.972549
+d 1
+Tr 1
+map_Ka Material152.png
+map_Kd Material152.png
+map_d Material152.png
+newmtl Material161
+Ka 0.7843137 0.7843137 0.7843137
+Kd 0.972549 0.972549 0.972549
+d 1
+Tr 1
+map_Ka Material161.png
+map_Kd Material161.png
+map_d Material161.png

@@ -1,0 +1,5 @@
+Name: Royal Crown
+ID: 407
+Category: Rich
+Variant: Standard
+Description: This is only for super superior people. Must have a big head and big attitude.

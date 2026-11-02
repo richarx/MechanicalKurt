@@ -16,6 +16,7 @@ public struct PigeonInput : IPredictedData
     public bool Interact;
     public bool Coo;
     public bool Respawn;
+    public bool MovementFrozen;
     /// <summary>Premier appui de chute libre détecté entre deux ticks, même s'il est déjà relâché.</summary>
     public FreeFallChallenge.LossReason FreeFallAction;
     /// <summary>Secondes écoulées depuis le précédent relevé d'input jusqu'à cet appui.</summary>
@@ -58,6 +59,8 @@ public struct PigeonState : IPredictedData<PigeonState>
 
     /// <summary>Gel posé par un orchestrateur (zone de départ, course).</summary>
     public bool Frozen;
+    /// <summary>Gel demandé par les cinématiques locales, transmis par l'input.</summary>
+    public bool MovementFrozen;
     public PigeonMissionState Mission;
     /// <summary>Progression dans la dernière course chronométrée (TimedRace) courue par ce pigeon.</summary>
     public RaceProgress Race;
@@ -252,7 +255,7 @@ public partial class PigeonController : PredictedIdentity<PigeonInput, PigeonSta
     public bool HasSupport => _viewState.SupportId != 0;
     /// <summary>MovingSupport.Id du support sous le pigeon (0 = aucun), lu depuis la vue.</summary>
     public int SupportId => _viewState.SupportId;
-    public bool IsMovementFrozen => _viewState.Frozen;
+    public bool IsMovementFrozen => _viewState.Frozen || _viewState.MovementFrozen;
     public enum MovementState : byte
     {
         Grounded,
@@ -426,6 +429,7 @@ public partial class PigeonController : PredictedIdentity<PigeonInput, PigeonSta
 #endif
         WritePosition(s.Position);
 
+        s.MovementFrozen = input.MovementFrozen;
         float freeFallTime = CaptureFreeFallInput(input, ref s, dt);
         if (input.Respawn)
             TeleportTo(ref s, s.SpawnPosition, s.SpawnRotation);
@@ -436,7 +440,7 @@ public partial class PigeonController : PredictedIdentity<PigeonInput, PigeonSta
             s.CooCount++;
         s.Equipment = (byte)((s.Equipment | input.EquipmentWear) ^ input.EquipmentToggle);
 
-        if (s.Frozen)
+        if (s.Frozen || s.MovementFrozen)
         {
             s.LastVelocity = Vector3.zero;
             s.PendingImpulse = Vector3.zero;

@@ -1,5 +1,6 @@
 using System.Collections;
 using DG.Tweening;
+using Sirenix.OdinInspector;
 using UnityEngine;
 
 public class MusicPlayer : MonoBehaviour
@@ -29,6 +30,42 @@ public class MusicPlayer : MonoBehaviour
     private float fadeVolume = 1f;
     private float musicVolume = maxVolume;
     private bool musicStarted;
+    [ShowInInspector, ReadOnly]
+    public bool IsPlayingCinematicMusic { get; private set; }
+
+    public bool CanPlayCinematicMusic => isActiveAndEnabled && !IsPlayingCinematicMusic
+        && clearAudioSource != null && clearAudioSource.isActiveAndEnabled
+        && lowPassAudioSource != null && lowPassAudioSource.isActiveAndEnabled
+        && clearAudioSource != lowPassAudioSource;
+
+    private SourcePlaybackState previousClearAudio;
+    private SourcePlaybackState previousLowPassAudio;
+    private bool resumePlaybackTween;
+    private float previousFadeVolume;
+
+    private struct SourcePlaybackState
+    {
+        public AudioClip Clip;
+        public int TimeSamples;
+        public bool WasPlaying;
+
+        public static SourcePlaybackState Capture(AudioSource source) => new SourcePlaybackState
+        {
+            Clip = source.clip,
+            TimeSamples = source.timeSamples,
+            WasPlaying = source.isPlaying
+        };
+
+        public void Restore(AudioSource source)
+        {
+            if (source == null) return;
+            source.Stop();
+            source.clip = Clip;
+            if (Clip == null) return;
+            if (WasPlaying && source.isActiveAndEnabled) source.Play();
+            source.timeSamples = Mathf.Clamp(TimeSamples, 0, Mathf.Max(0, Clip.samples - 1));
+        }
+    }
 
     private const float maxVolume = 0.1f;
     private const float minVolume = 0.03f;
@@ -56,6 +93,7 @@ public class MusicPlayer : MonoBehaviour
     private IEnumerator Start()
     {
         yield return new WaitForSeconds(60.0f);
+        yield return new WaitUntil(() => !IsPlayingCinematicMusic);
 
         if (!musicStarted && !currentAudioSource.isPlaying)
             PlayMusic(Songs.NightDelivery);
@@ -63,7 +101,7 @@ public class MusicPlayer : MonoBehaviour
 
     private void Update()
     {
-        if (!musicStarted || nightDelivery == null || wrongWay == null)
+        if (IsPlayingCinematicMusic || !musicStarted || nightDelivery == null || wrongWay == null)
             return;
 
         elapsed += Time.deltaTime;
@@ -85,7 +123,7 @@ public class MusicPlayer : MonoBehaviour
 
     public void PlayMusic(Songs song, float delay = 0.0f)
     {
-        if (song == currentSong)
+        if (IsPlayingCinematicMusic || song == currentSong)
             return;
 
         playbackSequence?.Kill();
@@ -160,6 +198,45 @@ public class MusicPlayer : MonoBehaviour
         otherAudioSource.volume = 0.0f;
     }
 
+    // Uses the existing sources and mixer. Keep the normal song and its transition intact.
+    public bool PlayCinematicMusic(AudioClip clip)
+    {
+        if (clip == null || !CanPlayCinematicMusic)
+            return false;
+
+        previousClearAudio = SourcePlaybackState.Capture(clearAudioSource);
+        previousLowPassAudio = SourcePlaybackState.Capture(lowPassAudioSource);
+        previousFadeVolume = fadeVolume;
+        resumePlaybackTween = playbackSequence != null && playbackSequence.IsPlaying();
+        playbackSequence?.Pause();
+        IsPlayingCinematicMusic = true;
+
+        clearAudioSource.Stop();
+        lowPassAudioSource.Stop();
+        clearAudioSource.clip = clip;
+        lowPassAudioSource.clip = clip;
+        fadeVolume = 1f;
+        ApplyVolume();
+        clearAudioSource.Play();
+        lowPassAudioSource.Play();
+        return true;
+    }
+
+    public void RestoreMusicAfterCinematic()
+    {
+        if (!IsPlayingCinematicMusic)
+            return;
+
+        previousClearAudio.Restore(clearAudioSource);
+        previousLowPassAudio.Restore(lowPassAudioSource);
+        fadeVolume = previousFadeVolume;
+        IsPlayingCinematicMusic = false;
+        if (clearAudioSource != null && lowPassAudioSource != null) ApplyVolume();
+        if (resumePlaybackTween && playbackSequence.IsActive()) playbackSequence.Play();
+        resumePlaybackTween = false;
+        previousClearAudio = previousLowPassAudio = default;
+    }
+
     public void SetLowPassMode(bool isLowPass)
     {
         isLowPassActive = isLowPass;
@@ -168,9 +245,12 @@ public class MusicPlayer : MonoBehaviour
 
     private void OnDestroy()
     {
+        RestoreMusicAfterCinematic();
         playbackSequence?.Kill();
         currentSequence?.Kill();
     }
+
+    private void OnDisable() => RestoreMusicAfterCinematic();
 
     private AudioClip GetClearClip(Songs song)
     {

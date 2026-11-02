@@ -95,7 +95,7 @@ public partial class PigeonController
     private float CaptureFreeFallInput(in PigeonInput input, ref PigeonState state, float dt)
     {
         ref FreeFallProgress progress = ref state.FreeFall;
-        if (!IsFreeFalling(state) || state.Frozen)
+        if (!IsFreeFalling(state) || state.Frozen || state.MovementFrozen)
             return 0f;
 
         FreeFallChallenge.LossReason reason = state.Grounded
