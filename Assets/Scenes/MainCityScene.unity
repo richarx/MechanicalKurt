@@ -42223,6 +42223,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 7d66870f072495b44a066b4d72c1f5df, type: 2}
   - {fileID: 11400000, guid: 7fe39a371e3248e08c935c2bfb23e9ec, type: 2}
   - {fileID: 11400000, guid: b1b05b81ef2c9784ca7854ad10e4fbd4, type: 2}
+  - {fileID: 11400000, guid: 614ab2fc31edba44483f0e985bc84d04, type: 2}
 --- !u!4 &771039945
 Transform:
   m_ObjectHideFlags: 0
@@ -45547,7 +45548,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: d5d5cdecfad12ba42895ac3d2a8fc410, type: 3}
       propertyPath: m_Name
-      value: model
+      value: High Tower
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -53761,6 +53762,7 @@ Transform:
   - {fileID: 1580814633}
   - {fileID: 1732576853}
   - {fileID: 582599380}
+  - {fileID: 1274557483}
   m_Father: {fileID: 1122054001}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &959949186
@@ -63420,7 +63422,6 @@ Transform:
   - {fileID: 959647668}
   - {fileID: 1120758761}
   - {fileID: 1908415845}
-  - {fileID: 1274557483}
   - {fileID: 1205417713}
   - {fileID: 600718190}
   m_Father: {fileID: 0}
@@ -70139,7 +70140,7 @@ GameObject:
   - component: {fileID: 1274557485}
   - component: {fileID: 1274557484}
   m_Layer: 0
-  m_Name: AchievementTrigger
+  m_Name: DonutAchievementTrigger
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -70154,11 +70155,11 @@ Transform:
   m_GameObject: {fileID: 1274557482}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 46.976, y: 9.175, z: -141.49901}
+  m_LocalPosition: {x: 0.776001, y: 4.215, z: -6.199005}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 1122054001}
+  m_Father: {fileID: 959647668}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1274557484
 MonoBehaviour:
@@ -70192,7 +70193,7 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 0.5051899, y: 1.3977022, z: 1.4325562}
+  m_Size: {x: 1.19, y: 3.19, z: 2.75}
   m_Center: {x: 0.15653515, y: -0.019583225, z: -0.00038146973}
 --- !u!1001 &1275669494
 PrefabInstance:
@@ -74137,6 +74138,73 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1813995481}
   m_LocalEulerAnglesHint: {x: -40.13763, y: 8.997679, z: -33.941166}
+--- !u!1 &1329502248
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1329502249}
+  - component: {fileID: 1329502251}
+  - component: {fileID: 1329502250}
+  m_Layer: 0
+  m_Name: LifeguardChairAchievmentCollider (1)
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1329502249
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1329502248}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -1, z: -0, w: 0}
+  m_LocalPosition: {x: -0.042999268, y: 0.76399994, z: 0.37800598}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1885911760}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1329502250
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1329502248}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a938b3d0d82d0f94cbcc68a8d1375610, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::AchievementTriggerZone
+  _achievement: {fileID: 11400000, guid: 614ab2fc31edba44483f0e985bc84d04, type: 2}
+--- !u!65 &1329502251
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1329502248}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 1.21, y: 0.2279129, z: 1.35}
+  m_Center: {x: -0.015300751, y: 1.3641167, z: -0.04404831}
 --- !u!1 &1329743806
 GameObject:
   m_ObjectHideFlags: 0
@@ -99723,10 +99791,6 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 8875113971220435731, guid: 013420fdddab85a48be5b875e08e2729, type: 3}
-      propertyPath: staminaDepletionRate_Flap
-      value: 15
-      objectReference: {fileID: 0}
     - target: {fileID: 8893443228925278897, guid: 013420fdddab85a48be5b875e08e2729, type: 3}
       propertyPath: m_Name
       value: Player
@@ -105438,6 +105502,11 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1439896632}
   m_LocalEulerAnglesHint: {x: 3.7273035, y: -2.5203273, z: -2.322951}
+--- !u!4 &1885911760 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 498941091445137802, guid: d5421b66b51e59e4bb8e187029cdae3b, type: 3}
+  m_PrefabInstance: {fileID: 1908415844}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1886291313
 GameObject:
   m_ObjectHideFlags: 0
@@ -106755,6 +106824,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 1122054001}
     m_Modifications:
+    - target: {fileID: 983835221749054256, guid: d5421b66b51e59e4bb8e187029cdae3b, type: 3}
+      propertyPath: m_Name
+      value: Lifeguard Chair
+      objectReference: {fileID: 0}
     - target: {fileID: 2864886902964577100, guid: d5421b66b51e59e4bb8e187029cdae3b, type: 3}
       propertyPath: m_LocalPosition.x
       value: 23.1
@@ -106813,7 +106886,10 @@ PrefabInstance:
       objectReference: {fileID: 8300000, guid: 1786f53355c150344aa6d17a8379c64d, type: 3}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
-    m_AddedGameObjects: []
+    m_AddedGameObjects:
+    - targetCorrespondingSourceObject: {fileID: 498941091445137802, guid: d5421b66b51e59e4bb8e187029cdae3b, type: 3}
+      insertIndex: 0
+      addedObject: {fileID: 1329502249}
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: d5421b66b51e59e4bb8e187029cdae3b, type: 3}
 --- !u!4 &1908415845 stripped
