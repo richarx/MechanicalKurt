@@ -17,6 +17,9 @@ public class PigeonEquipment : MonoBehaviour
     [SerializeField] private AudioClip equipClip;
     [SerializeField] private GameObject equipVFX;
 
+    [Space]
+    [SerializeField] private AchievementData fashionAchievement;
+
     public enum Equipment
     {
         Backpack,
@@ -26,6 +29,9 @@ public class PigeonEquipment : MonoBehaviour
     }
 
     PlayerControls playerControls;
+
+    private int currentEquipmentCount;
+    private const int maxEquipmentCount = 4;
 
     private void Start()
     {
@@ -89,6 +95,12 @@ public class PigeonEquipment : MonoBehaviour
 
         sequence.AppendCallback(() => equipmentCamera.Priority = 0);
         sequence.AppendCallback(() => playerControls.SetControlsBlocked(false));
+        sequence.AppendCallback(() =>
+        {
+            currentEquipmentCount += 1;
+            if (currentEquipmentCount >= maxEquipmentCount)
+                AchievementManager.Instance.Unlock(fashionAchievement);
+        });
 
         sequence.AppendCallback(() => MusicPlayer.instance.PlayMusic(MusicPlayer.Songs.NightDelivery, 5.0f));
     }

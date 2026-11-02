@@ -414,6 +414,7 @@ MonoBehaviour:
   equipmentCamera: {fileID: 7152500247294746974}
   equipClip: {fileID: 8300000, guid: cdf612176ae2926458143a6d6c2393b1, type: 3}
   equipVFX: {fileID: 1575721338728490, guid: 4171bb92c5c591848b14be1db6f3efe2, type: 3}
+  fashionAchievement: {fileID: 11400000, guid: b9b8aeda86a55a24b801fcc32177ec42, type: 2}
 --- !u!114 &7595259944597442791
 MonoBehaviour:
   m_ObjectHideFlags: 0
