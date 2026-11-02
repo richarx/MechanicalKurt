@@ -339,7 +339,7 @@ GameObject:
   - component: {fileID: 8091239}
   - component: {fileID: 8091240}
   m_Layer: 0
-  m_Name: Emplacement nid 2
+  m_Name: Nest Spot 2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -372,7 +372,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c77b935c4c400e541a241932b2ca5f60, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AmbientPigeonSpot
-  _group: nid
+  _group: nest
   _groundRadius: 0.5
   _groundTolerance: 0.1
 --- !u!1 &13322310
@@ -736,7 +736,7 @@ GameObject:
   - component: {fileID: 26267304}
   - component: {fileID: 26267301}
   m_Layer: 0
-  m_Name: Bouton Copier le lien
+  m_Name: Copy Link Button
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -911,7 +911,7 @@ GameObject:
   - component: {fileID: 27825781}
   - component: {fileID: 27825778}
   m_Layer: 0
-  m_Name: Bouton Rejoindre une partie
+  m_Name: Join Game Button
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1053,7 +1053,7 @@ GameObject:
   - component: {fileID: 29543785}
   - component: {fileID: 29543784}
   m_Layer: 0
-  m_Name: Texte
+  m_Name: Text
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1428,7 +1428,7 @@ GameObject:
   - component: {fileID: 50861694}
   - component: {fileID: 50861691}
   m_Layer: 0
-  m_Name: Bouton Retour
+  m_Name: Back Button
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -3783,7 +3783,7 @@ GameObject:
   - component: {fileID: 184425267}
   - component: {fileID: 184425264}
   m_Layer: 0
-  m_Name: Bouton Coller
+  m_Name: Paste Button
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -5448,7 +5448,7 @@ GameObject:
   - component: {fileID: 279279893}
   - component: {fileID: 279279890}
   m_Layer: 0
-  m_Name: Bouton Continuer
+  m_Name: Continue Button
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -6861,7 +6861,7 @@ GameObject:
   - component: {fileID: 341142488}
   - component: {fileID: 341142487}
   m_Layer: 0
-  m_Name: Texte
+  m_Name: Text
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -7979,7 +7979,7 @@ GameObject:
   - component: {fileID: 391646369}
   - component: {fileID: 391646368}
   m_Layer: 0
-  m_Name: Texte
+  m_Name: Text
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -8385,7 +8385,7 @@ GameObject:
   - component: {fileID: 402998804}
   - component: {fileID: 402998805}
   m_Layer: 0
-  m_Name: Texte
+  m_Name: Text
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -8556,7 +8556,7 @@ GameObject:
   - component: {fileID: 403893296}
   - component: {fileID: 403893293}
   m_Layer: 0
-  m_Name: Bouton Copier le code
+  m_Name: Copy Code Button
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -8698,7 +8698,7 @@ GameObject:
   - component: {fileID: 405063687}
   - component: {fileID: 405063686}
   m_Layer: 0
-  m_Name: Texte
+  m_Name: Text
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -10553,7 +10553,7 @@ GameObject:
   - component: {fileID: 526870156}
   - component: {fileID: 526870157}
   m_Layer: 0
-  m_Name: Copier
+  m_Name: Copy
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -10892,7 +10892,7 @@ GameObject:
   - component: {fileID: 543163032}
   - component: {fileID: 543163031}
   m_Layer: 0
-  m_Name: Attente
+  m_Name: Waiting
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -11400,7 +11400,7 @@ GameObject:
   - component: {fileID: 568663519}
   - component: {fileID: 568663520}
   m_Layer: 0
-  m_Name: Emplacement plateforme 4
+  m_Name: Platform Spot 4
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -11433,7 +11433,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c77b935c4c400e541a241932b2ca5f60, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AmbientPigeonSpot
-  _group: plateforme
+  _group: platform
   _groundRadius: 1
   _groundTolerance: 0.6
 --- !u!1 &568973699
@@ -11820,7 +11820,7 @@ GameObject:
   - component: {fileID: 580079619}
   - component: {fileID: 580079618}
   m_Layer: 3
-  m_Name: Pigeon d'ambiance 1
+  m_Name: Ambient Pigeon 1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -11878,7 +11878,7 @@ MonoBehaviour:
   _groundLayers:
     serializedVersion: 2
     m_Bits: 4294967295
-  _spotGroup: nid
+  _spotGroup: nest
 --- !u!82 &580079619
 AudioSource:
   m_ObjectHideFlags: 0
@@ -12072,7 +12072,7 @@ GameObject:
   - component: {fileID: 586594074}
   - component: {fileID: 586594073}
   m_Layer: 0
-  m_Name: '[Menu] Lanceur'
+  m_Name: '[Menu] Launcher'
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -12407,7 +12407,7 @@ GameObject:
   - component: {fileID: 600079549}
   - component: {fileID: 600079548}
   m_Layer: 0
-  m_Name: Texte
+  m_Name: Text
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -13179,7 +13179,7 @@ GameObject:
   - component: {fileID: 631046914}
   - component: {fileID: 631046915}
   m_Layer: 0
-  m_Name: Emplacement plateforme 7
+  m_Name: Platform Spot 7
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -13212,7 +13212,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c77b935c4c400e541a241932b2ca5f60, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AmbientPigeonSpot
-  _group: plateforme
+  _group: platform
   _groundRadius: 1
   _groundTolerance: 0.6
 --- !u!1 &631261928
@@ -13226,7 +13226,7 @@ GameObject:
   - component: {fileID: 631261930}
   - component: {fileID: 631261929}
   m_Layer: 0
-  m_Name: "[Menu] Cam\xE9ra"
+  m_Name: '[Menu] Camera'
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -14396,7 +14396,7 @@ GameObject:
   - component: {fileID: 701017694}
   - component: {fileID: 701017695}
   m_Layer: 0
-  m_Name: Emplacement plateforme 6
+  m_Name: Platform Spot 6
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -14429,7 +14429,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c77b935c4c400e541a241932b2ca5f60, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AmbientPigeonSpot
-  _group: plateforme
+  _group: platform
   _groundRadius: 1
   _groundTolerance: 0.6
 --- !u!1 &702116669
@@ -16077,7 +16077,7 @@ GameObject:
   - component: {fileID: 798080242}
   - component: {fileID: 798080241}
   m_Layer: 0
-  m_Name: Texte
+  m_Name: Text
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -16464,7 +16464,7 @@ GameObject:
   - component: {fileID: 809398223}
   - component: {fileID: 809398222}
   m_Layer: 0
-  m_Name: Texte
+  m_Name: Text
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -16633,7 +16633,7 @@ GameObject:
   - component: {fileID: 813765495}
   - component: {fileID: 813765494}
   m_Layer: 3
-  m_Name: Pigeon d'ambiance 3
+  m_Name: Ambient Pigeon 3
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -16691,7 +16691,7 @@ MonoBehaviour:
   _groundLayers:
     serializedVersion: 2
     m_Bits: 4294967295
-  _spotGroup: plateforme
+  _spotGroup: platform
 --- !u!82 &813765495
 AudioSource:
   m_ObjectHideFlags: 0
@@ -17896,7 +17896,7 @@ GameObject:
   - component: {fileID: 867132356}
   - component: {fileID: 867132355}
   m_Layer: 0
-  m_Name: Texte
+  m_Name: Text
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -18623,7 +18623,7 @@ GameObject:
   - component: {fileID: 886140084}
   - component: {fileID: 886140081}
   m_Layer: 0
-  m_Name: Bouton Continuer
+  m_Name: Continue Button
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -19245,7 +19245,7 @@ GameObject:
   - component: {fileID: 924764276}
   - component: {fileID: 924764277}
   m_Layer: 0
-  m_Name: Emplacement plateforme 5
+  m_Name: Platform Spot 5
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -19278,7 +19278,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c77b935c4c400e541a241932b2ca5f60, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AmbientPigeonSpot
-  _group: plateforme
+  _group: platform
   _groundRadius: 1
   _groundTolerance: 0.6
 --- !u!1 &925185530
@@ -19811,7 +19811,7 @@ GameObject:
   - component: {fileID: 949802645}
   - component: {fileID: 949802642}
   m_Layer: 0
-  m_Name: Saisie du code
+  m_Name: Code Input
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -20774,7 +20774,7 @@ GameObject:
   - component: {fileID: 1010764224}
   - component: {fileID: 1010764223}
   m_Layer: 3
-  m_Name: Pigeon d'ambiance 4
+  m_Name: Ambient Pigeon 4
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -20832,7 +20832,7 @@ MonoBehaviour:
   _groundLayers:
     serializedVersion: 2
     m_Bits: 4294967295
-  _spotGroup: plateforme
+  _spotGroup: platform
 --- !u!82 &1010764224
 AudioSource:
   m_ObjectHideFlags: 0
@@ -21422,7 +21422,7 @@ GameObject:
   - component: {fileID: 1045002775}
   - component: {fileID: 1045002774}
   m_Layer: 0
-  m_Name: Texte
+  m_Name: Text
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -22013,7 +22013,7 @@ GameObject:
   - component: {fileID: 1072827052}
   - component: {fileID: 1072827051}
   m_Layer: 0
-  m_Name: Texte
+  m_Name: Text
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -22469,7 +22469,7 @@ GameObject:
   - component: {fileID: 1097296715}
   - component: {fileID: 1097296716}
   m_Layer: 0
-  m_Name: Emplacement nid 1
+  m_Name: Nest Spot 1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -22502,7 +22502,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c77b935c4c400e541a241932b2ca5f60, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AmbientPigeonSpot
-  _group: nid
+  _group: nest
   _groundRadius: 0.5
   _groundTolerance: 0.1
 --- !u!1 &1108690704
@@ -22601,7 +22601,7 @@ GameObject:
   - component: {fileID: 1114153804}
   - component: {fileID: 1114153803}
   m_Layer: 0
-  m_Name: Texte
+  m_Name: Text
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -22831,7 +22831,7 @@ GameObject:
   - component: {fileID: 1125822177}
   - component: {fileID: 1125822178}
   m_Layer: 0
-  m_Name: Emplacement plateforme 8
+  m_Name: Platform Spot 8
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -22864,7 +22864,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c77b935c4c400e541a241932b2ca5f60, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AmbientPigeonSpot
-  _group: plateforme
+  _group: platform
   _groundRadius: 1
   _groundTolerance: 0.6
 --- !u!1 &1129462870
@@ -24122,7 +24122,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1214616918}
   m_Layer: 0
-  m_Name: Emplacements
+  m_Name: Spots
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -24480,7 +24480,7 @@ GameObject:
   - component: {fileID: 1243809693}
   - component: {fileID: 1243809692}
   m_Layer: 0
-  m_Name: Texte
+  m_Name: Text
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -24651,7 +24651,7 @@ GameObject:
   - component: {fileID: 1245115046}
   - component: {fileID: 1245115045}
   m_Layer: 0
-  m_Name: "Cr\xE9er"
+  m_Name: Create
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -26138,7 +26138,7 @@ GameObject:
   - component: {fileID: 1307607630}
   - component: {fileID: 1307607631}
   m_Layer: 0
-  m_Name: Saisie
+  m_Name: Input
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -26267,7 +26267,7 @@ GameObject:
   - component: {fileID: 1313385639}
   - component: {fileID: 1313385638}
   m_Layer: 0
-  m_Name: '[Menu] Interface'
+  m_Name: '[Menu] UI'
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -29156,7 +29156,7 @@ GameObject:
   - component: {fileID: 1499863848}
   - component: {fileID: 1499863847}
   m_Layer: 3
-  m_Name: Pigeon d'ambiance 5
+  m_Name: Ambient Pigeon 5
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -29214,7 +29214,7 @@ MonoBehaviour:
   _groundLayers:
     serializedVersion: 2
     m_Bits: 4294967295
-  _spotGroup: plateforme
+  _spotGroup: platform
 --- !u!82 &1499863848
 AudioSource:
   m_ObjectHideFlags: 0
@@ -29534,7 +29534,7 @@ GameObject:
   - component: {fileID: 1523507051}
   - component: {fileID: 1523507050}
   m_Layer: 0
-  m_Name: Texte
+  m_Name: Text
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -31882,7 +31882,7 @@ GameObject:
   - component: {fileID: 1706957826}
   - component: {fileID: 1706957825}
   m_Layer: 0
-  m_Name: Rejoindre
+  m_Name: Join
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -32261,7 +32261,7 @@ GameObject:
   - component: {fileID: 1746523457}
   - component: {fileID: 1746523454}
   m_Layer: 0
-  m_Name: "Bouton Cr\xE9er une partie"
+  m_Name: Create Game Button
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -33008,7 +33008,7 @@ GameObject:
   - component: {fileID: 1770414810}
   - component: {fileID: 1770414809}
   m_Layer: 0
-  m_Name: Texte
+  m_Name: Text
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -33709,7 +33709,7 @@ GameObject:
   - component: {fileID: 1814068975}
   - component: {fileID: 1814068974}
   m_Layer: 0
-  m_Name: Choix
+  m_Name: Choice
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -34326,7 +34326,7 @@ GameObject:
   - component: {fileID: 1823315945}
   - component: {fileID: 1823315946}
   m_Layer: 0
-  m_Name: Emplacement nid 3
+  m_Name: Nest Spot 3
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -34359,7 +34359,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c77b935c4c400e541a241932b2ca5f60, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AmbientPigeonSpot
-  _group: nid
+  _group: nest
   _groundRadius: 0.5
   _groundTolerance: 0.1
 --- !u!1 &1823626735
@@ -34766,7 +34766,7 @@ GameObject:
   - component: {fileID: 1855673097}
   - component: {fileID: 1855673096}
   m_Layer: 0
-  m_Name: Texte
+  m_Name: Text
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -35621,7 +35621,7 @@ GameObject:
   - component: {fileID: 1901941890}
   - component: {fileID: 1901941889}
   m_Layer: 0
-  m_Name: Texte
+  m_Name: Text
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -35791,7 +35791,7 @@ GameObject:
   - component: {fileID: 1908847752}
   - component: {fileID: 1908847751}
   m_Layer: 3
-  m_Name: Pigeon d'ambiance 2
+  m_Name: Ambient Pigeon 2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -35849,7 +35849,7 @@ MonoBehaviour:
   _groundLayers:
     serializedVersion: 2
     m_Bits: 4294967295
-  _spotGroup: nid
+  _spotGroup: nest
 --- !u!82 &1908847752
 AudioSource:
   m_ObjectHideFlags: 0
@@ -36854,7 +36854,7 @@ GameObject:
   - component: {fileID: 1979310194}
   - component: {fileID: 1979310191}
   m_Layer: 0
-  m_Name: Bouton Retour
+  m_Name: Back Button
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -39538,7 +39538,7 @@ GameObject:
   - component: {fileID: 2120173194}
   - component: {fileID: 2120173193}
   m_Layer: 0
-  m_Name: Texte
+  m_Name: Text
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

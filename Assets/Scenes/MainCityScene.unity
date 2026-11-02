@@ -7701,7 +7701,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 68888612872691168, guid: 6e42f2ac50fc16949bceb082f0493c53, type: 3}
       propertyPath: m_Name
-      value: Anneau 3
+      value: Checkpoint 3
       objectReference: {fileID: 0}
     - target: {fileID: 654525573000855371, guid: 6e42f2ac50fc16949bceb082f0493c53, type: 3}
       propertyPath: m_Mesh
@@ -24545,7 +24545,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 68888612872691168, guid: 6e42f2ac50fc16949bceb082f0493c53, type: 3}
       propertyPath: m_Name
-      value: Anneau 6
+      value: Checkpoint 6
       objectReference: {fileID: 0}
     - target: {fileID: 654525573000855371, guid: 6e42f2ac50fc16949bceb082f0493c53, type: 3}
       propertyPath: m_Mesh
@@ -33607,7 +33607,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 68888612872691168, guid: 6e42f2ac50fc16949bceb082f0493c53, type: 3}
       propertyPath: m_Name
-      value: Anneau 7
+      value: Checkpoint 7
       objectReference: {fileID: 0}
     - target: {fileID: 654525573000855371, guid: 6e42f2ac50fc16949bceb082f0493c53, type: 3}
       propertyPath: m_Mesh
@@ -41318,7 +41318,7 @@ GameObject:
   - component: {fileID: 738240447}
   - component: {fileID: 738240446}
   m_Layer: 0
-  m_Name: Texte
+  m_Name: Text
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -45839,7 +45839,7 @@ GameObject:
   m_Component:
   - component: {fileID: 797033900}
   m_Layer: 0
-  m_Name: "Ligne de d\xE9part"
+  m_Name: Start Line
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -48848,7 +48848,7 @@ GameObject:
   - component: {fileID: 850117007}
   - component: {fileID: 850117008}
   m_Layer: 0
-  m_Name: "D\xE9part"
+  m_Name: Start
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -56898,7 +56898,7 @@ PrefabInstance:
       objectReference: {fileID: 911104806}
     - target: {fileID: 8203359570292573234, guid: 4a2a46ec361fab04fad83b828dd4acde, type: 3}
       propertyPath: m_Name
-      value: "Arriv\xE9e"
+      value: Finish
       objectReference: {fileID: 0}
     - target: {fileID: 8723786664171429959, guid: 4a2a46ec361fab04fad83b828dd4acde, type: 3}
       propertyPath: m_Mesh
@@ -57903,7 +57903,7 @@ GameObject:
   - component: {fileID: 997650686}
   - component: {fileID: 997650685}
   m_Layer: 0
-  m_Name: "Trafic synchronis\xE9"
+  m_Name: Traffic Network
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -70482,7 +70482,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1223652471}
   m_Layer: 0
-  m_Name: Points de passage
+  m_Name: Checkpoints
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -87344,7 +87344,7 @@ GameObject:
   - component: {fileID: 1517913644}
   - component: {fileID: 1517913643}
   m_Layer: 0
-  m_Name: "Cercle de d\xE9part"
+  m_Name: Start Circle
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -87971,7 +87971,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 68888612872691168, guid: 6e42f2ac50fc16949bceb082f0493c53, type: 3}
       propertyPath: m_Name
-      value: Anneau 2
+      value: Checkpoint 2
       objectReference: {fileID: 0}
     - target: {fileID: 654525573000855371, guid: 6e42f2ac50fc16949bceb082f0493c53, type: 3}
       propertyPath: m_Mesh
@@ -88871,7 +88871,7 @@ GameObject:
   - component: {fileID: 1546550118}
   - component: {fileID: 1546550117}
   m_Layer: 0
-  m_Name: Texte
+  m_Name: Text
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -96772,7 +96772,7 @@ GameObject:
   - component: {fileID: 1667912895}
   - component: {fileID: 1667912892}
   m_Layer: 0
-  m_Name: Bouton Copier
+  m_Name: Copy Button
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -97652,7 +97652,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 68888612872691168, guid: 6e42f2ac50fc16949bceb082f0493c53, type: 3}
       propertyPath: m_Name
-      value: Anneau 1
+      value: Checkpoint 1
       objectReference: {fileID: 0}
     - target: {fileID: 654525573000855371, guid: 6e42f2ac50fc16949bceb082f0493c53, type: 3}
       propertyPath: m_Mesh
@@ -100500,7 +100500,7 @@ GameObject:
   - component: {fileID: 1730686271}
   - component: {fileID: 1730686270}
   m_Layer: 0
-  m_Name: "Course chronom\xE9tr\xE9e"
+  m_Name: Timed Race
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -102016,7 +102016,7 @@ GameObject:
   - component: {fileID: 1755513559}
   - component: {fileID: 1755513560}
   m_Layer: 0
-  m_Name: Texte
+  m_Name: Text
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -104583,7 +104583,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 68888612872691168, guid: 6e42f2ac50fc16949bceb082f0493c53, type: 3}
       propertyPath: m_Name
-      value: Anneau 5
+      value: Checkpoint 5
       objectReference: {fileID: 0}
     - target: {fileID: 654525573000855371, guid: 6e42f2ac50fc16949bceb082f0493c53, type: 3}
       propertyPath: m_Mesh
@@ -108995,7 +108995,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 68888612872691168, guid: 6e42f2ac50fc16949bceb082f0493c53, type: 3}
       propertyPath: m_Name
-      value: Anneau 4
+      value: Checkpoint 4
       objectReference: {fileID: 0}
     - target: {fileID: 654525573000855371, guid: 6e42f2ac50fc16949bceb082f0493c53, type: 3}
       propertyPath: m_Mesh

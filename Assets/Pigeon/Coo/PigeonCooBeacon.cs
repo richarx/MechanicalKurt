@@ -48,7 +48,7 @@ static class CooIndicatorLayer
     {
         if (_layer != null)
             return _layer;
-        var go = new GameObject("[Roucoulements]", typeof(RectTransform), typeof(Canvas), typeof(UnityEngine.UI.CanvasScaler));
+        var go = new GameObject("[Coo Indicators]", typeof(RectTransform), typeof(Canvas), typeof(UnityEngine.UI.CanvasScaler));
         var canvas = go.GetComponent<Canvas>();
         canvas.renderMode = RenderMode.ScreenSpaceOverlay;
         canvas.sortingOrder = 5;

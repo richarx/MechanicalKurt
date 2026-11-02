@@ -6,7 +6,7 @@ public partial class PigeonController
     {
         if (s.Grounded && (s.LastVelocity.y <= 0.001f || s.SupportId != 0))
             return MovementState.Grounded;
-        if (input.Brake)
+        if (input.Brake || FinishedRace(s))
             return MovementState.Braking;
         if (input.Flap && CanFlap(s))
             return MovementState.Flapping;
@@ -14,6 +14,9 @@ public partial class PigeonController
             return MovementState.Diving;
         return MovementState.Gliding;
     }
+
+    /// <summary>Arrivé d'une course chronométrée, classement pas encore quitté : le pigeon reste en vol stationnaire.</summary>
+    static bool FinishedRace(in PigeonState s) => s.Race.Active && s.Race.Place > 0;
 
     /// <summary>Un battement commencé continue tant qu'il reste de l'endurance ; pour en commencer un, il faut le seuil.</summary>
     bool CanFlap(in PigeonState s)

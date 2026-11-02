@@ -60,7 +60,7 @@ public partial class ScenarioRunner
         yield return Expect("F à nouveau : il annule", () => !Pigeon.WantsStart && zone.Phase == MissionStartZone.StartPhase.Waiting, 2f,
             zone.Describe);
 
-        var stopObject = new GameObject("[Scénario] Zone d'arrêt");
+        var stopObject = new GameObject("[Scenario] Stop zone");
         stopObject.transform.position = zone.transform.position;
         PigeonStopZone stop = stopObject.AddComponent<PigeonStopZone>();
         Defer(() => Destroy(stopObject));

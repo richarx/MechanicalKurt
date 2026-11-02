@@ -7,7 +7,7 @@ using UnityEngine;
 /// </summary>
 public class AmbientPigeonSpot : MonoBehaviour
 {
-    [SerializeField] string _group = "nid";
+    [SerializeField] string _group = "nest";
     [Tooltip("Rayon de marche autour de l'emplacement.")]
     [SerializeField, Min(0.1f)] float _groundRadius = 0.5f;
     [Tooltip("Écart de hauteur accepté pour marcher : petit sur un perchoir (bord du nid) pour ne pas en descendre.")]
@@ -49,7 +49,7 @@ public class AmbientPigeonSpot : MonoBehaviour
 
     void OnDrawGizmos()
     {
-        Gizmos.color = _group == "nid" ? Color.yellow : Color.cyan;
+        Gizmos.color = _group == "nest" ? Color.yellow : Color.cyan;
         Gizmos.DrawWireSphere(transform.position, 0.15f);
         Gizmos.DrawLine(transform.position, transform.position + transform.forward * 0.4f);
     }

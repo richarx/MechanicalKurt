@@ -238,7 +238,7 @@ public class AmbientCar : MonoBehaviour
     {
         if (_view != null)
             return;
-        _view = new GameObject("Vue").transform;
+        _view = new GameObject("View").transform;
         _view.SetParent(transform, false);
         for (int i = transform.childCount - 1; i >= 0; i--)
         {

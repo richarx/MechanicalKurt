@@ -35,6 +35,8 @@ public struct RaceProgress
     public float FinishTime;
     /// <summary>A quitté l'écran des résultats (Interact).</summary>
     public bool Dismissed;
+    /// <summary>En course, du départ jusqu'à la sortie du classement : les autres missions l'ignorent.</summary>
+    public bool Active;
     /// <summary>Position en fin du tick précédent : le passage d'un anneau se teste sur le segment parcouru.</summary>
     public Vector3 PreviousPosition;
 
@@ -127,6 +129,7 @@ public class TimedRace : PredictedIdentity<TimedRaceState>
 
     protected override void Destroyed()
     {
+        MissionMarkers.SetHidden(false);
         if (_hud != null)
             Destroy(_hud.gameObject);
     }
@@ -215,7 +218,7 @@ public class TimedRace : PredictedIdentity<TimedRaceState>
             if (!_departureZone.IsInCurrentStart(pigeons[i]))
                 continue;
             ref PigeonState ps = ref pigeons[i].SimState;
-            ps.Race = new RaceProgress { Race = id, StartCount = startCount, PreviousPosition = ps.Position };
+            ps.Race = new RaceProgress { Race = id, StartCount = startCount, PreviousPosition = ps.Position, Active = true };
         }
     }
 
@@ -283,6 +286,7 @@ public class TimedRace : PredictedIdentity<TimedRaceState>
             if (ps.Mission.InteractPressed && !ps.Race.Dismissed)
             {
                 ps.Race.Dismissed = true;
+                ps.Race.Active = false;
                 // Consommé : ce même appui ne doit pas rendre le pigeon prêt dans la zone qui rouvre (il y est peut-être).
                 ps.Mission.InteractPressed = false;
             }
@@ -295,6 +299,13 @@ public class TimedRace : PredictedIdentity<TimedRaceState>
 
     void Reset(ref TimedRaceState s)
     {
+        var pigeons = PigeonController.All;
+        for (int i = 0; i < pigeons.Count; i++)
+        {
+            ref PigeonState ps = ref pigeons[i].SimState;
+            if (ps.Race.IsIn(id, s.StartCount))
+                ps.Race.Active = false;
+        }
         s.Phase = RacePhase.Idle;
         s.Elapsed = 0f;
         s.Grace = 0f;
@@ -321,6 +332,10 @@ public class TimedRace : PredictedIdentity<TimedRaceState>
         }
 
         RaceProgress progress = localRacer ? local.RaceProgress : default;
+        if (local != null && local.RaceProgress.IsIn(id, view.StartCount))
+            MissionMarkers.SetHidden(local.IsInTimedRace, _departureMarker);
+        else if (local == null || !local.IsInTimedRace)
+            MissionMarkers.SetHidden(false);
         int next = localRacer && view.Phase == RacePhase.Racing && progress.Place == 0 ? progress.Next : -1;
         UpdateCheckpoints(next);
         UpdateCompass(next >= 0 && next < _checkpoints.Length ? _checkpoints[next].transform : null, local);

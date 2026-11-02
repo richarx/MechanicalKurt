@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 1530921725000680328}
   - component: {fileID: 1032664739628209401}
   m_Layer: 0
-  m_Name: Pointe
+  m_Name: Pointer
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -160,7 +160,7 @@ GameObject:
   - component: {fileID: 7858992981452825007}
   - component: {fileID: 7219783194552164831}
   m_Layer: 0
-  m_Name: Texte
+  m_Name: Text
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -435,7 +435,7 @@ GameObject:
   - component: {fileID: 6237830639300160709}
   - component: {fileID: 5965914937648414795}
   m_Layer: 0
-  m_Name: Bulle
+  m_Name: Bubble
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

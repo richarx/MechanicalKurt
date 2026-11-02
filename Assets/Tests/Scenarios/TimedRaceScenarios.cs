@@ -95,6 +95,23 @@ public partial class ScenarioRunner
             && compass.DisplayedTopColor.r > 0.8f && compass.DisplayedTopColor.g < 0.4f,
             compass == null ? "pas de boussole" : $"cible {compass.CurrentTarget?.name}, couleur {compass.DisplayedTopColor}");
 
+        // En course, les autres missions ne se voient pas et ne réagissent pas.
+        yield return Expect("Les cercles des autres missions sont masqués", () => MissionMarkers.IsHidden, 1f);
+        MissionStartZone otherZone = null;
+        foreach (MissionStartZone z in FindObjectsByType<MissionStartZone>(FindObjectsSortMode.None))
+            if (z != zone)
+                otherZone = z;
+        if (otherZone != null)
+        {
+            yield return Teleport(Pigeon, otherZone.transform.position + Vector3.up * 0.5f, Quaternion.identity, "Le coureur passe dans la zone d'une autre mission");
+            yield return ExpectLanded(Pigeon, 4f, otherZone.StopSpeedThreshold);
+            yield return ExpectStays("Pas d'invite de l'autre mission", () => otherZone.Prompt == null || !otherZone.Prompt.activeInHierarchy
+                || (otherZone.Prompt.GetComponent<Popup>()?.KeyboardText ?? "").Contains("race"), 1f);
+            Bot.PressInteract();
+            yield return ExpectStays("F ne la lance pas", () => !Pigeon.WantsStart && otherZone.Phase == MissionStartZone.StartPhase.Waiting, 1f,
+                () => otherZone.Describe());
+        }
+
         for (int i = 0; i < race.Checkpoints.Count; i++)
         {
             RaceCheckpoint checkpoint = race.Checkpoints[i];
@@ -114,6 +131,8 @@ public partial class ScenarioRunner
         yield return Expect("Arrivé : place et temps, attente des autres", () => race.HudText != null && race.HudText.Contains("Finished")
             && race.HudText.Contains("1st") && race.HudText.Contains("Waiting"), 1f, () => DescribeRace(race));
         yield return Check("La boussole est rendue (plus de cible, couleurs d'origine)", compass.CurrentTarget == null);
+        yield return ExpectHolds("Arrivé : il se met en vol stationnaire et s'arrête", () => Pigeon.IsHovering && Pigeon.Speed < 1f, 0.5f, 2f,
+            () => $"état {Pigeon.CurrentPigeonState}, vitesse {Pigeon.Speed:0.0}");
         yield return Expect("Après le délai : classement final", () => race.Phase == TimedRace.RacePhase.Results && race.ResultsText != null, race.GraceSeconds + 2f,
             () => DescribeRace(race));
         yield return Check("Classement : le joueur 1er avec son temps, le bot pas arrivé", race.ResultsText.Contains("1st") && race.ResultsText.Contains("You")
@@ -125,6 +144,7 @@ public partial class ScenarioRunner
 
         Bot.PressInteract();
         yield return Expect("F : le joueur quitte le classement", () => race.ResultsText == null, 1f, () => DescribeRace(race));
+        yield return Expect("Libre : plus en course, missions de nouveau visibles", () => !Pigeon.IsInTimedRace && !MissionMarkers.IsHidden, 1f);
         yield return Check("La course attend encore le bot", race.Phase == TimedRace.RacePhase.Results, DescribeRace(race));
         bot.Controls.PressInteract();
         yield return Expect("Tous partis : la course rouvre", () => race.Phase == TimedRace.RacePhase.Idle

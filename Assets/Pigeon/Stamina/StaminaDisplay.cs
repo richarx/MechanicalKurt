@@ -3,6 +3,7 @@ using DG.Tweening;
 using UnityEngine;
 using UnityEngine.UI;
 
+[DefaultExecutionOrder(10000)]
 public class StaminaDisplay : MonoBehaviour
 {
     [SerializeField] private PigeonStamina pigeonStamina;
@@ -106,7 +107,13 @@ public class StaminaDisplay : MonoBehaviour
 
         UpdateStaminaValue(pigeonStamina.CurrentStaminaNormalized);
         UpdateBarColor();
-        UpdatePosition();
+    }
+
+    // Après la caméra (Cinemachine la déplace en LateUpdate) : sinon la jauge suit le pigeon avec une image de retard.
+    private void LateUpdate()
+    {
+        if (pigeonStamina != null && Camera.main != null)
+            UpdatePosition();
     }
 
     private void UpdatePosition()

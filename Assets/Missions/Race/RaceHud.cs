@@ -14,7 +14,7 @@ public class RaceHud : MonoBehaviour
 
     public static RaceHud Create(TMP_FontAsset font)
     {
-        var root = new GameObject("[Course] HUD", typeof(RectTransform), typeof(Canvas), typeof(CanvasScaler));
+        var root = new GameObject("[Race] HUD", typeof(RectTransform), typeof(Canvas), typeof(CanvasScaler));
         var canvas = root.GetComponent<Canvas>();
         canvas.renderMode = RenderMode.ScreenSpaceOverlay;
         canvas.sortingOrder = 6;
@@ -24,16 +24,16 @@ public class RaceHud : MonoBehaviour
         scaler.matchWidthOrHeight = 0.5f;
 
         var hud = root.AddComponent<RaceHud>();
-        hud._race = CreateText(root.transform, "Chrono", font, 54f, new Vector2(0.5f, 1f), new Vector2(0f, -150f), new Vector2(900f, 320f));
+        hud._race = CreateText(root.transform, "Timer", font, 54f, new Vector2(0.5f, 1f), new Vector2(0f, -150f), new Vector2(900f, 320f));
         hud._race.alignment = TextAlignmentOptions.Top;
 
-        hud._resultsPanel = new GameObject("Classement", typeof(RectTransform), typeof(Image));
+        hud._resultsPanel = new GameObject("Results", typeof(RectTransform), typeof(Image));
         var panel = (RectTransform)hud._resultsPanel.transform;
         panel.SetParent(root.transform, false);
         panel.anchorMin = panel.anchorMax = new Vector2(0.5f, 0.5f);
         panel.sizeDelta = new Vector2(900f, 700f);
         hud._resultsPanel.GetComponent<Image>().color = new Color(0.08f, 0.02f, 0.02f, 0.78f);
-        hud._results = CreateText(panel, "Texte", font, 48f, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(820f, 640f));
+        hud._results = CreateText(panel, "Text", font, 48f, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(820f, 640f));
         hud._results.alignment = TextAlignmentOptions.Center;
 
         hud.HideAll();

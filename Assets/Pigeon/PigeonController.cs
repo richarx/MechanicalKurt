@@ -271,6 +271,8 @@ public partial class PigeonController : PredictedIdentity<PigeonInput, PigeonSta
     public Color PlayerColor => PlayerColors.For(owner);
     /// <summary>Progression dans la course chronométrée, lue depuis la vue.</summary>
     public RaceProgress RaceProgress => _viewState.Race;
+    /// <summary>En course chronométrée (jusqu'à la sortie du classement) : les autres missions l'ignorent.</summary>
+    public bool IsInTimedRace => _viewState.Race.Active;
     /// <summary>Équipements portés, lus depuis la vue (bit = PigeonEquipment.Equipment).</summary>
     public byte WornEquipment => _viewState.Equipment;
 

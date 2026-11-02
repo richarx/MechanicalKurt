@@ -106,7 +106,8 @@ public partial class PigeonController
             targetSpeed = _brakeMaxSpeed;
             dragAtMaxSpeed = _brakeDragAtMaxSpeed;
 
-            velocity = Vector3.MoveTowards(velocity, Vector3.zero, 5f * dt);
+            // À l'arrivée d'une course, freinage net plutôt que la lente glissade du frein.
+            velocity = Vector3.MoveTowards(velocity, Vector3.zero, (FinishedRace(s) ? 40f : 5f) * dt);
             // Vol stationnaire : battre des ailes fait monter, tirer vers le bas fait descendre.
             s.HoverTime += dt;
             if (input.Flap)

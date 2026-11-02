@@ -2,6 +2,26 @@
 using System.Collections;
 using UnityEngine;
 
+/// <summary>Mesure, après la jauge d'endurance et la caméra, l'écart entre la jauge et la position du pigeon à l'écran.</summary>
+[DefaultExecutionOrder(20000)]
+public class StaminaFollowProbe : MonoBehaviour
+{
+    public StaminaDisplay Display;
+    public PigeonController Pigeon;
+    public Vector3 Offset;
+    public float Worst;
+    public int Frames;
+
+    void LateUpdate()
+    {
+        if (Display == null || Pigeon == null || Camera.main == null)
+            return;
+        Vector3 expected = Camera.main.WorldToScreenPoint(Pigeon.transform.position) + Offset;
+        Worst = Mathf.Max(Worst, Vector2.Distance(Display.transform.position, expected));
+        Frames++;
+    }
+}
+
 public partial class ScenarioRunner
 {
     IEnumerator StaminaAndHover()
@@ -16,6 +36,19 @@ public partial class ScenarioRunner
         Bot.Flap = true;
         yield return Expect("Il bat des ailes", () => Pigeon.CurrentPigeonState == PigeonController.MovementState.Flapping, 1f,
             () => $"état {Pigeon.CurrentPigeonState}");
+        // La jauge suit le pigeon sans retard : en fin d'image, elle est sur sa position à l'écran.
+        StaminaDisplay display = FindAnyObjectByType<StaminaDisplay>();
+        if (display != null)
+        {
+            var probe = new GameObject("[Scenario] Stamina probe").AddComponent<StaminaFollowProbe>();
+            probe.Display = display;
+            probe.Pigeon = Pigeon;
+            probe.Offset = (Vector3)typeof(StaminaDisplay).GetField("positionOffset", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic).GetValue(display);
+            Defer(() => Destroy(probe.gameObject));
+            yield return new WaitForSecondsRealtime(0.5f);
+            yield return Check("La jauge d'endurance colle au pigeon (même image)", probe.Frames > 5 && probe.Worst < 1f,
+                $"écart max {probe.Worst:0.0} px sur {probe.Frames} images");
+        }
         float max = stamina.MaxStamina;
         yield return Expect("Battre des ailes vide l'endurance, puis il ne peut plus", () => Pigeon.CurrentPigeonState != PigeonController.MovementState.Flapping,
             max / 10f + 3f, () => $"état {Pigeon.CurrentPigeonState}, endurance {Pigeon.Stamina:0.0}/{max}");
