@@ -138,12 +138,17 @@ public partial class PigeonController
             float deltaPitch = Mathf.Abs(Mathf.DeltaAngle(targetPitch, s.Pitch));
             s.Pitch = Mathf.MoveTowardsAngle(s.Pitch, targetPitch, Mathf.Max(_divePitchSpeed * dt, deltaPitch * 0.1f * dt));
             ComputeYaw(input, ref s, dt, _turnSpeed);
+            Vector3 diveForward = ForwardOf(s.Pitch, s.Yaw);
+            velocity += diveForward * (-diveForward.y * Physics.gravity.magnitude * _divePower) * dt;
+            s.SinceDive = 0f;
         }
         else
         {
             targetSpeed = _maxSpeed;
             dragAtMaxSpeed = _dragAtMaxSpeed;
-            ComputePitch(input, ref s, mode, _pitchSpeed, _maxPitch, dt);
+            // Juste après un piqué, le pigeon se redresse vite.
+            float pitchSpeed = s.SinceDive <= 0.5f ? _diveReleasePitchSpeed : _pitchSpeed;
+            ComputePitch(input, ref s, mode, pitchSpeed, _maxPitch, dt);
             ComputeYaw(input, ref s, dt, _turnSpeed);
             ApplyFlightForces(ref s, ref velocity, dt);
         }

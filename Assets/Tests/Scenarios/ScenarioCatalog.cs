@@ -36,6 +36,7 @@ public partial class ScenarioRunner
         Solo("Pause : le jeu continue, le pigeon reste en l'air", r => r.PauseKeepsGameRunning()),
         Solo("Endurance et vol stationnaire (monter, descendre)", r => r.StaminaAndHover()),
         Solo("Course chronométrée : anneaux, chrono, place, classement", r => r.TimedRaceSolo()),
+        Solo("Nuit : lampadaires et phares allumés, éteints le jour", r => r.NightLights()),
         Solo("Roucoulement : bulle pour les autres, au bord de l'écran si loin", r => r.CooBubbles()),
 
         Multi("Multi : départ de course à 2 joueurs", r => r.MultiRaceStart()),

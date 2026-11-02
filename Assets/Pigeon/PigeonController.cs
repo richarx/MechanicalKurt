@@ -65,6 +65,8 @@ public struct PigeonState : IPredictedData<PigeonState>
 
     /// <summary>PigeonController.MovementState du dernier tick.</summary>
     public byte Mode;
+    /// <summary>Temps depuis le dernier tick en piqué : redressement rapide juste après.</summary>
+    public float SinceDive;
     /// <summary>Endurance : battre des ailes en vol la consomme (voir PigeonStamina).</summary>
     public float Stamina;
     /// <summary>Regains instantanés d'endurance (modulo 256), pour l'animation de la jauge sur chaque machine.</summary>
@@ -137,6 +139,9 @@ public partial class PigeonController : PredictedIdentity<PigeonInput, PigeonSta
     [SerializeField] float _diveMaxPitch = 80f;
     [SerializeField] float _diveMaxSpeed = 40f;
     [SerializeField] float _diveDragAtMaxSpeed = 1.5f;
+    [SerializeField] float _divePower = 1.5f;
+    [Tooltip("Vitesse de redressement juste après un piqué (une demi-seconde).")]
+    [SerializeField] float _diveReleasePitchSpeed = 120f;
 
     [Header("Barrel Roll")]
     [Tooltip("Minimum speed to barrel roll. Keep above ~4 or the pigeon can roll while walking or taking off.")]
@@ -357,6 +362,7 @@ public partial class PigeonController : PredictedIdentity<PigeonInput, PigeonSta
             StunRotation = Quaternion.identity,
             Equipment = TryGetComponent(out PigeonEquipment equipment) ? equipment.CurrentWornMask() : (byte)0,
             Stamina = TryGetComponent(out PigeonStamina stamina) ? stamina.MaxStamina : 0f,
+            SinceDive = 10f,
             SpawnPosition = transform.position,
             SpawnRotation = transform.rotation
         };
@@ -444,6 +450,7 @@ public partial class PigeonController : PredictedIdentity<PigeonInput, PigeonSta
 
         MovementState mode = ComputeMovementState(input, s);
         s.Mode = (byte)mode;
+        s.SinceDive = Mathf.Min(s.SinceDive + dt, 10f);
         Vector3 velocity = mode == MovementState.Grounded
             ? GroundMovement(input, ref s, dt)
             : CalculateFlightPhysics(input, ref s, mode, dt);

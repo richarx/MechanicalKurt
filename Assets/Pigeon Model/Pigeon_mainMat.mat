@@ -25,6 +25,7 @@ Material:
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords:
+  - _ALPHATEST_ON
   - _OCCLUSION
   m_InvalidKeywords:
   - _UV_CHANNEL_SELECT
@@ -34,7 +35,7 @@ Material:
   m_CustomRenderQueue: 2000
   stringTagMap:
     MotionVector: User
-    RenderType: Opaque
+    RenderType: TransparentCutout
   disabledShaderPasses:
   - MOTIONVECTORS
   m_LockedProperties: 
@@ -42,7 +43,7 @@ Material:
     serializedVersion: 3
     m_TexEnvs:
     - baseColorTexture:
-        m_Texture: {fileID: -5390149515647955136, guid: 0065f115667c06940a51b2747e6108a2, type: 3}
+        m_Texture: {fileID: 2800000, guid: 3691400dc5c12374ba003d0c94dc7d4b, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - emissiveTexture:
@@ -79,8 +80,8 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
-    - _AlphaClip: 0
-    - _AlphaToMask: 0
+    - _AlphaClip: 1
+    - _AlphaToMask: 1
     - _BUILTIN_AlphaClip: 0
     - _BUILTIN_Blend: 0
     - _BUILTIN_CullMode: 2
@@ -95,7 +96,7 @@ Material:
     - _Blend: 2
     - _BlendModePreserveSpecular: 0
     - _CastShadows: 1
-    - _Cull: 0
+    - _Cull: 2
     - _DstBlend: 0
     - _DstBlendAlpha: 0
     - _QueueControl: 1
@@ -108,7 +109,7 @@ Material:
     - _ZTest: 4
     - _ZWrite: 1
     - _ZWriteControl: 0
-    - alphaCutoff: 0.5
+    - alphaCutoff: 0.3
     - baseColorTexture_texCoord: 0
     - emissiveExposureWeight: 0
     - emissiveTexture_texCoord: 0

@@ -20185,6 +20185,15 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+  beginNightTime: 162
+  endNightTime: 306
+  _streetLightsParent: {fileID: 396319960}
+  carMaterials:
+  - {fileID: 2100000, guid: 72b2668927d328a4a8811c518aa19709, type: 2}
+  - {fileID: 2100000, guid: 3d59be321c5277340855e74ca3e27a93, type: 2}
+  - {fileID: 2100000, guid: e01d4790a69d7af49b8093b6d69ae4c6, type: 2}
+  - {fileID: 2100000, guid: 74ea403c47bc98544883d2af53d234dd, type: 2}
+  headlightsIntensity: 3
 --- !u!1 &338650321
 GameObject:
   m_ObjectHideFlags: 0
@@ -97476,7 +97485,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AchievementProgressResetter
   <ResetProgressOnStart>k__BackingField: 1
-  <LaunchTuto>k__BackingField: 1
+  <LaunchTuto>k__BackingField: 0
 --- !u!1001 &1676392076
 PrefabInstance:
   m_ObjectHideFlags: 0
