@@ -24,6 +24,8 @@ public class CameraSwapper : MonoBehaviour
 
     private CameraType currentCameraType;
 
+    private float lastMovementTimestamp;
+
     private void Start()
     {
         pigeonController = GetComponent<PigeonController>();
@@ -41,9 +43,12 @@ public class CameraSwapper : MonoBehaviour
 
     private CameraType ComputeCameraType()
     {
+        if (pigeonController.Controls.Movement.magnitude > 0.001)
+            lastMovementTimestamp = Time.time;
+
         if (waterPlane != null && pigeonController.transform.position.y < waterPlane.transform.position.y)
             return CameraType.UnderWater;
-        if (pigeonController.CurrentPigeonState == PigeonController.PigeonState.Braking && pigeonController.Controls.RelativeMovement.magnitude > 0.001)
+        if (pigeonController.CurrentPigeonState == PigeonController.PigeonState.Braking && Time.time - lastMovementTimestamp <= 0.5f)
             return CameraType.Hover;
         else if (controls.PrecisionCamera && pigeonController.CurrentPigeonState != PigeonController.PigeonState.Grounded)
             return CameraType.Precision;

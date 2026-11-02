@@ -94187,7 +94187,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AchievementProgressResetter
   <ResetProgressOnStart>k__BackingField: 1
-  <LaunchTuto>k__BackingField: 0
+  <LaunchTuto>k__BackingField: 1
 --- !u!1001 &1676392076
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -99666,12 +99666,20 @@ PrefabInstance:
       objectReference: {fileID: 572717186}
     - target: {fileID: 896265278413080483, guid: 013420fdddab85a48be5b875e08e2729, type: 3}
       propertyPath: HorizontalAxis.Center
-      value: 122.69217
+      value: 122.69216
       objectReference: {fileID: 0}
     - target: {fileID: 3577777248601108592, guid: 013420fdddab85a48be5b875e08e2729, type: 3}
       propertyPath: waterPlane
       value: 
       objectReference: {fileID: 572717187}
+    - target: {fileID: 3655335919500863942, guid: 013420fdddab85a48be5b875e08e2729, type: 3}
+      propertyPath: Damping.x
+      value: 0.3
+      objectReference: {fileID: 0}
+    - target: {fileID: 3655335919500863942, guid: 013420fdddab85a48be5b875e08e2729, type: 3}
+      propertyPath: Damping.y
+      value: 0.3
+      objectReference: {fileID: 0}
     - target: {fileID: 5917645698477372326, guid: 013420fdddab85a48be5b875e08e2729, type: 3}
       propertyPath: 'TriggerModule.primitives.Array.data[0]'
       value: 

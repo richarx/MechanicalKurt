@@ -666,6 +666,14 @@ PrefabInstance:
       value: Hover Camera
       objectReference: {fileID: 0}
     - target: {fileID: 3740974542399878342, guid: 7c66027bb67380a4badc877c66b19c53, type: 3}
+      propertyPath: Damping.x
+      value: 0.3
+      objectReference: {fileID: 0}
+    - target: {fileID: 3740974542399878342, guid: 7c66027bb67380a4badc877c66b19c53, type: 3}
+      propertyPath: Damping.y
+      value: 0.3
+      objectReference: {fileID: 0}
+    - target: {fileID: 3740974542399878342, guid: 7c66027bb67380a4badc877c66b19c53, type: 3}
       propertyPath: TargetOffset.y
       value: 0
       objectReference: {fileID: 0}
