@@ -2,8 +2,10 @@ using UnityEngine;
 
 public class PigeonAnimationControl : MonoBehaviour
 {
+    private static readonly int FallState = Animator.StringToHash("Base Layer.Fall");
     Animator _animator;
     PigeonController _pigeonController;
+    private bool _wasFalling;
 
     void Start()
     {
@@ -20,9 +22,14 @@ public class PigeonAnimationControl : MonoBehaviour
 
         IPigeonControls controls = _pigeonController.Controls;
         bool hovering = _pigeonController.IsHovering;
+        bool falling = _pigeonController.CurrentPigeonState == PigeonController.MovementState.Falling;
         _animator.SetBool("Flap", _pigeonController.IsFlapping && !hovering);
-        _animator.SetBool("Dive", _pigeonController.IsDiving && !hovering);
+        // Le contrôleur existant utilise Dive pour conserver son animation Fall.
+        _animator.SetBool("Dive", (_pigeonController.IsDiving || falling) && !hovering);
         _animator.SetBool("Hover", hovering);
         _animator.SetBool("Dance", controls != null && controls.Flex);
+        if (falling && !_wasFalling)
+            _animator.CrossFadeInFixedTime(FallState, 0.1f);
+        _wasFalling = falling;
     }
 }

@@ -57,6 +57,7 @@ public struct PigeonState : IPredictedData<PigeonState>
     public PigeonMissionState Mission;
     /// <summary>Progression dans la dernière course chronométrée (TimedRace) courue par ce pigeon.</summary>
     public RaceProgress Race;
+    public FreeFallProgress FreeFall;
 
     /// <summary>Équipements portés, un bit par PigeonEquipment.Equipment.</summary>
     public byte Equipment;
@@ -254,7 +255,8 @@ public partial class PigeonController : PredictedIdentity<PigeonInput, PigeonSta
         Braking,
         Flapping,
         Diving,
-        Gliding
+        Gliding,
+        Falling
     }
 
     /// <summary>Ce que fait le pigeon (au sol, vol stationnaire, battements…), lu depuis la vue : le même sur chaque machine.</summary>
@@ -407,6 +409,7 @@ public partial class PigeonController : PredictedIdentity<PigeonInput, PigeonSta
 #endif
         WritePosition(s.Position);
 
+        CaptureFreeFallInput(input, ref s);
         if (input.Respawn)
             TeleportTo(ref s, s.SpawnPosition, s.SpawnRotation);
 
@@ -426,12 +429,19 @@ public partial class PigeonController : PredictedIdentity<PigeonInput, PigeonSta
 
         s.StunImmuneRemaining -= dt;
 
+        if (IsFreeFalling(s))
+        {
+            SimulateFreeFall(ref s, dt);
+            return;
+        }
+
         if (s.Stunned)
         {
             s.StunRemaining -= dt;
             if (s.StunRemaining > 0f || (!input.Flap && input.RelativeMovement.magnitude < 0.1f))
             {
                 StunStep(ref s, dt);
+                CaptureFreeFallContact(ref s);
                 return;
             }
 
@@ -493,6 +503,7 @@ public partial class PigeonController : PredictedIdentity<PigeonInput, PigeonSta
             Stun(ref s, _stunHitNormal, velocityBeforeStun);
 
         DetectBoostRings(ref s, positionBeforeMove);
+        CaptureFreeFallContact(ref s);
     }
 
     void TeleportTo(ref PigeonState s, Vector3 position, Quaternion rotation)

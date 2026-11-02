@@ -306,7 +306,7 @@ public class MissionStartZone : PredictedIdentity<MissionStartState>
     }
 
     bool IsInside(in PigeonState ps) =>
-        !ps.Stunned && !ps.Race.Active && (ps.Position - transform.position).sqrMagnitude <= _radius * _radius
+        !ps.Stunned && !ps.Race.Active && !ps.FreeFall.Active && (ps.Position - transform.position).sqrMagnitude <= _radius * _radius
         && ps.LastVelocity.magnitude <= _stopSpeedThreshold;
 
     bool IsParticipant(in PigeonState ps) => ps.Mission.IsReadyFor(id) && IsInside(ps);
@@ -375,7 +375,7 @@ public class MissionStartZone : PredictedIdentity<MissionStartState>
         PigeonController local = PigeonController.Local;
         bool show = view.Phase == StartPhase.Waiting
             && local != null
-            && !local.IsInTimedRace
+            && !local.IsInMultiplayerActivity
             && !local.IsReadyFor(id)
             && (local.transform.position - transform.position).sqrMagnitude <= _radius * _radius
             && local.Speed <= _stopSpeedThreshold
@@ -398,7 +398,7 @@ public class MissionStartZone : PredictedIdentity<MissionStartState>
     {
         PigeonController local = PigeonController.Local;
         string content = null;
-        if (local != null && !local.IsInTimedRace)
+        if (local != null && !local.IsInMultiplayerActivity)
         {
             switch (view.Phase)
             {

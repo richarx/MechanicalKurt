@@ -332,9 +332,9 @@ public class TimedRace : PredictedIdentity<TimedRaceState>
         }
 
         RaceProgress progress = localRacer ? local.RaceProgress : default;
-        if (local != null && local.RaceProgress.IsIn(id, view.StartCount))
-            MissionMarkers.SetHidden(local.IsInTimedRace, _departureMarker);
-        else if (local == null || !local.IsInTimedRace)
+        if (local != null && local.IsInTimedRace && local.RaceProgress.IsIn(id, view.StartCount))
+            MissionMarkers.SetHidden(true, _departureMarker);
+        else if (local == null || !local.IsInMultiplayerActivity)
             MissionMarkers.SetHidden(false);
         int next = localRacer && view.Phase == RacePhase.Racing && progress.Place == 0 ? progress.Next : -1;
         UpdateCheckpoints(next);
