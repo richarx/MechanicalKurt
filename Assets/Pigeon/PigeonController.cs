@@ -378,11 +378,11 @@ public class PigeonController : MonoBehaviour
         if (_controls.ConsumeRightFlex)
             BarrelRoll(false);
 
-
         _velocity = Vector3.zero;
 
         _currentPigeonState = ComputeCurrentPigeonState();
-        if (_currentPigeonState == PigeonState.Grounded)
+
+        if (_currentPigeonState == PigeonState.Grounded || _currentPigeonState == PigeonState.Dancing)
         {
             GroundMovement();
             ResetVisualRotation(dt);
@@ -439,7 +439,7 @@ public class PigeonController : MonoBehaviour
         Vector3 direction = new Vector3(input.x, 0f, input.y);
         float directionMagnitude = direction.magnitude;
 
-        if (directionMagnitude > 0.01f)
+        if (directionMagnitude > 0.01f && _currentPigeonState != PigeonState.Dancing)
             _yaw = Mathf.Atan2(direction.x, direction.z) * Mathf.Rad2Deg;
 
         transform.rotation = Quaternion.Euler(0f, _yaw, 0f);
@@ -451,7 +451,7 @@ public class PigeonController : MonoBehaviour
         }
         else
         {
-            if (directionMagnitude > 0.0001f)
+            if (directionMagnitude > 0.0001f && _currentPigeonState != PigeonState.Dancing)
             {
                 Vector3 targetVelocity = transform.forward * directionMagnitude * _groundSpeed;
                 _velocity = Vector3.MoveTowards(_lastVelocity, targetVelocity, _groundMovementAcceleration * Time.deltaTime);
@@ -557,13 +557,19 @@ public class PigeonController : MonoBehaviour
         Braking,
         Flapping,
         Diving,
-        Gliding
+        Gliding,
+        Dancing
     }
 
     private PigeonState ComputeCurrentPigeonState()
     {
         if (IsGrounded && (_lastVelocity.y <= 0.001f || (_onMoving != null && _onMoving.HasSupport)))
-            return PigeonState.Grounded;
+        {
+            if (_controls.Flex)
+                return PigeonState.Dancing;
+            else
+                return PigeonState.Grounded;
+        }
 
         if (_controls.Brake)
             return PigeonState.Braking;

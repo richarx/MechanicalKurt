@@ -24,6 +24,6 @@ public class PigeonAnimationControl : MonoBehaviour
         _animator.SetBool("Flap", _pigeonController.CurrentPigeonState == PigeonController.PigeonState.Flapping);
         _animator.SetBool("Dive", _pigeonController.CurrentPigeonState == PigeonController.PigeonState.Diving);
         _animator.SetBool("Hover", _pigeonController.CurrentPigeonState == PigeonController.PigeonState.Braking);
-        _animator.SetBool("Dance", _pigeonControls.Flex);
+        _animator.SetBool("Dance", _pigeonController.CurrentPigeonState == PigeonController.PigeonState.Dancing);
     }
 }
