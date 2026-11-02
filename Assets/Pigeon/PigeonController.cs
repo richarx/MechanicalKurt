@@ -563,6 +563,7 @@ public class PigeonController : MonoBehaviour
     {
         Grounded,
         Braking,
+        HoverFlapping,
         Flapping,
         Diving,
         Gliding,
@@ -580,7 +581,15 @@ public class PigeonController : MonoBehaviour
         }
 
         if (_controls.Brake)
+        {
+            bool keepsHoverFlapping = CurrentPigeonState == PigeonState.HoverFlapping && _pigeonStamina.HasStamina;
+            bool hasHoverStamina = keepsHoverFlapping || _pigeonStamina.HasEnoughStaminaToFlap;
+
+            if (_controls.Flap && (hasHoverStamina || !_useStaminaSystem))
+                return PigeonState.HoverFlapping;
+
             return PigeonState.Braking;
+        }
 
         bool keepsFlapping = CurrentPigeonState == PigeonState.Flapping && _pigeonStamina.HasStamina;
         bool hasStamina = keepsFlapping || _pigeonStamina.HasEnoughStaminaToFlap;
@@ -609,12 +618,26 @@ public class PigeonController : MonoBehaviour
 
             _velocity = Vector3.MoveTowards(_velocity, Vector3.zero, 5f * dt);
 
-            if (_controls.Flap)
-                _velocity.y = Mathf.MoveTowards(_velocity.y, 2.0f, 25f * dt);
-            else if (_controls.RelativeMovement.y < -0.15f)
+            if (_controls.RelativeMovement.y < -0.15f)
                 _velocity.y = Mathf.MoveTowards(_velocity.y, -2.0f, 15f * dt);
             else
                 _velocity.y = Mathf.MoveTowards(_velocity.y, Mathf.Sin(Time.time * _hoverWobbleFrequency) * _hoverWobbleAmplitude, 15f * dt);
+
+            if (_controls.RelativeMovement.y > 0.0001f)
+                _velocity += transform.forward * _controls.RelativeMovement.y * _hoverMoveSpeed * dt;
+
+            ComputePitch(_pitchSpeed, _maxPitch, dt);
+            ComputeRotation(dt, _turnSpeed * 2.0f);
+        }
+        else if (_currentPigeonState == PigeonState.HoverFlapping)
+        {
+            targetSpeed = _brakeMaxSpeed;
+            dragAtMaxSpeed = _brakeDragAtMaxSpeed;
+
+            _velocity = Vector3.MoveTowards(_velocity, Vector3.zero, 5f * dt);
+
+            if (_controls.Flap)
+                _velocity.y = Mathf.MoveTowards(_velocity.y, 2.0f, 25f * dt);
 
             if (_controls.RelativeMovement.y > 0.0001f)
                 _velocity += transform.forward * _controls.RelativeMovement.y * _hoverMoveSpeed * dt;

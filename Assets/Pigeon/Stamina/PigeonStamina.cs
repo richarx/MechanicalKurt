@@ -61,13 +61,13 @@ public class PigeonStamina : MonoBehaviour
 
     private void LateUpdate()
     {
-        if (pigeonController.CurrentPigeonState == PigeonController.PigeonState.Diving)
+        PigeonController.PigeonState pigeonState = pigeonController.CurrentPigeonState;
+
+        if (pigeonState == PigeonController.PigeonState.Diving)
             UpdateStaminaAtRate(staminaRecoveryRate_Dive);
-        else if (pigeonController.CurrentPigeonState == PigeonController.PigeonState.Flapping)
-        {
+        else if (pigeonState == PigeonController.PigeonState.Flapping || pigeonState == PigeonController.PigeonState.HoverFlapping)
             UpdateStaminaAtRate(-staminaDepletionRate_Flap);
-        }
-        else if (pigeonController.CurrentPigeonState == PigeonController.PigeonState.Braking)
+        else if (pigeonState == PigeonController.PigeonState.Braking)
             UpdateStaminaAtRate(staminaRecoveryRate_Brake);
         else if (pigeonController.IsUndeWater)
             UpdateStaminaAtRate(staminaRecoveryRate_UnderWater);

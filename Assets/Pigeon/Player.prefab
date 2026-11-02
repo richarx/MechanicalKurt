@@ -616,7 +616,7 @@ MonoBehaviour:
   staminaNormalizedThresholdToFlap: 0.3
   staminaDepletionRate_Flap: 20
   staminaRecoveryRate_Regular: 5
-  staminaRecoveryRate_Brake: 25
+  staminaRecoveryRate_Brake: 10
   staminaRecoveryRate_UnderWater: 25
   staminaRecoveryRate_Dive: 50
   staminaInstantRecovery_Roll: 25
