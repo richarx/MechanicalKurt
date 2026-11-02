@@ -8,9 +8,6 @@ public class OnMovingAchievementCheck : MonoBehaviour
     [SerializeField] private AchievementData carAchievement;
     [SerializeField] private AchievementData zeppelinAchievement;
 
-    private bool isCarUnlocked => AchievementManager.Instance.IsUnlocked(carAchievement);
-    private bool isZeppelinUnlocked => AchievementManager.Instance.IsUnlocked(zeppelinAchievement);
-
     private float carTimer;
     private const float carTimeThreshold = 1.0f;
 
@@ -21,6 +18,9 @@ public class OnMovingAchievementCheck : MonoBehaviour
     {
         if (pigeonOnMoving != null)
         {
+            bool isCarUnlocked = AchievementManager.Instance.IsUnlocked(carAchievement);
+            bool isZeppelinUnlocked = AchievementManager.Instance.IsUnlocked(zeppelinAchievement);
+
             if (!isCarUnlocked)
             {
                 if (pigeonOnMoving.SupportTag == "Car")
@@ -40,6 +40,9 @@ public class OnMovingAchievementCheck : MonoBehaviour
                         AchievementManager.Instance.Unlock(zeppelinAchievement);
                 }
             }
+
+            if (isCarUnlocked && isZeppelinUnlocked)
+                enabled = false;
         }
     }
 }
