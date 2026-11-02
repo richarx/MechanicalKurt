@@ -23,6 +23,8 @@ public class PigeonOnMoving : MonoBehaviour
 
     public event Action<MovingSupport> PigeonChangedSupport;
 
+    public string SupportTag => _support != null ? _support.gameObject.tag : "";
+
     private void Awake()
     {
         _controller = GetComponent<CharacterController>();

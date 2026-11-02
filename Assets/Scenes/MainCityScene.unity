@@ -36154,6 +36154,38 @@ Transform:
   - {fileID: 996763655}
   m_Father: {fileID: 92722960}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &653607985
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 653607986}
+  m_Layer: 0
+  m_Name: Zeppelin Manager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &653607986
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 653607985}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -43, y: 150, z: -24}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 1965907885}
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &654532242
 GameObject:
   m_ObjectHideFlags: 0
@@ -42189,6 +42221,7 @@ GameObject:
   - component: {fileID: 771039944}
   - component: {fileID: 771039946}
   - component: {fileID: 771039947}
+  - component: {fileID: 771039948}
   m_Layer: 0
   m_Name: __AchievementManager
   m_TagString: Untagged
@@ -42224,6 +42257,8 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 7fe39a371e3248e08c935c2bfb23e9ec, type: 2}
   - {fileID: 11400000, guid: b1b05b81ef2c9784ca7854ad10e4fbd4, type: 2}
   - {fileID: 11400000, guid: 614ab2fc31edba44483f0e985bc84d04, type: 2}
+  - {fileID: 11400000, guid: 4240d7f46e4934743ae6a27eb7f7b2fb, type: 2}
+  - {fileID: 11400000, guid: d588c7d35b5031846bb532c01e06e795, type: 2}
 --- !u!4 &771039945
 Transform:
   m_ObjectHideFlags: 0
@@ -42268,6 +42303,21 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ProximityHitAchievementCheck
   _achievement: {fileID: 11400000, guid: 7fe39a371e3248e08c935c2bfb23e9ec, type: 2}
   _requiredHits: 10
+--- !u!114 &771039948
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 771039943}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f2ecb79d36e562c469db1be7949986ca, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::OnMovingAchievementCheck
+  pigeonOnMoving: {fileID: 1769670856}
+  carAchievement: {fileID: 11400000, guid: 4240d7f46e4934743ae6a27eb7f7b2fb, type: 2}
+  zeppelinAchievement: {fileID: 11400000, guid: d588c7d35b5031846bb532c01e06e795, type: 2}
 --- !u!1 &772638077
 GameObject:
   m_ObjectHideFlags: 0
@@ -110227,6 +110277,159 @@ Transform:
   - {fileID: 802314044}
   m_Father: {fileID: 1215668839}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1001 &1965907882
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 653607986}
+    m_Modifications:
+    - target: {fileID: -8679921383154817045, guid: 4783f4db221dbe94388d0c37b8a75018, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 4783f4db221dbe94388d0c37b8a75018, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 4783f4db221dbe94388d0c37b8a75018, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 4783f4db221dbe94388d0c37b8a75018, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 4783f4db221dbe94388d0c37b8a75018, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 4783f4db221dbe94388d0c37b8a75018, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 4783f4db221dbe94388d0c37b8a75018, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 4783f4db221dbe94388d0c37b8a75018, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 4783f4db221dbe94388d0c37b8a75018, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 4783f4db221dbe94388d0c37b8a75018, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: 4783f4db221dbe94388d0c37b8a75018, type: 3}
+      propertyPath: m_Name
+      value: Zeppelin
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: 4783f4db221dbe94388d0c37b8a75018, type: 3}
+      propertyPath: m_Layer
+      value: 8
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: 4783f4db221dbe94388d0c37b8a75018, type: 3}
+      propertyPath: m_TagString
+      value: Zeppelin
+      objectReference: {fileID: 0}
+    - target: {fileID: 1151388028547126963, guid: 4783f4db221dbe94388d0c37b8a75018, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1151388028547126963, guid: 4783f4db221dbe94388d0c37b8a75018, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8164078558771037576, guid: 4783f4db221dbe94388d0c37b8a75018, type: 3}
+      propertyPath: m_Layer
+      value: 8
+      objectReference: {fileID: 0}
+    - target: {fileID: 8164078558771037576, guid: 4783f4db221dbe94388d0c37b8a75018, type: 3}
+      propertyPath: m_TagString
+      value: Zeppelin
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 4783f4db221dbe94388d0c37b8a75018, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1965907887}
+    - targetCorrespondingSourceObject: {fileID: 8164078558771037576, guid: 4783f4db221dbe94388d0c37b8a75018, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1965907884}
+    - targetCorrespondingSourceObject: {fileID: 8164078558771037576, guid: 4783f4db221dbe94388d0c37b8a75018, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1965907891}
+  m_SourcePrefab: {fileID: 100100000, guid: 4783f4db221dbe94388d0c37b8a75018, type: 3}
+--- !u!1 &1965907883 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 8164078558771037576, guid: 4783f4db221dbe94388d0c37b8a75018, type: 3}
+  m_PrefabInstance: {fileID: 1965907882}
+  m_PrefabAsset: {fileID: 0}
+--- !u!64 &1965907884
+MeshCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1965907883}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 5
+  m_Convex: 0
+  m_CookingOptions: 30
+  m_Mesh: {fileID: -2432090755550338912, guid: 4783f4db221dbe94388d0c37b8a75018, type: 3}
+--- !u!4 &1965907885 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 4783f4db221dbe94388d0c37b8a75018, type: 3}
+  m_PrefabInstance: {fileID: 1965907882}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &1965907886 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: 4783f4db221dbe94388d0c37b8a75018, type: 3}
+  m_PrefabInstance: {fileID: 1965907882}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1965907887
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1965907886}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c8be497865be3cb448d2fadfff5565ea, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MoveZeppelin
+  distanceFromCenter: 150
+  speed: 0.05
+--- !u!114 &1965907891
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1965907883}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3a89fa1eb385466a9bc11118d60ca816, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MovingSupport
 --- !u!1 &1966154126
 GameObject:
   m_ObjectHideFlags: 0
@@ -127335,3 +127538,4 @@ SceneRoots:
   - {fileID: 1844697968}
   - {fileID: 1356537266}
   - {fileID: 1185108502130787959}
+  - {fileID: 653607986}

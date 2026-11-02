@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 82bab3935ddb34544971da497063f042, type: 3}
   m_Name: LifeguardChair
   m_EditorClassIdentifier: Assembly-CSharp::AchievementData
-  _id: 
+  _id: Lifeguard
   _title: Lifeguard
   _description: Sat on the big boy's throne !
   _icon: {fileID: 8646882551110012148, guid: 06278a3c346c2974b8fafbd4e05cecbf, type: 3}
