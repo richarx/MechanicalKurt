@@ -32,6 +32,7 @@ public class PigeonSFX : MonoBehaviour
     private AudioSource otherAudioSource => isLowPassActive ? clearFlySource : lowPassFlySource;
 
     private Sequence flySequence;
+    private bool isFlySequencePlaying;
 
     private void Start()
     {
@@ -43,6 +44,7 @@ public class PigeonSFX : MonoBehaviour
         pigeonController.OnRoll.AddListener(() => SFXManager.Instance.PlayRandomSFX(rollClips));
         pigeonController.OnStunned.AddListener(() => SFXManager.Instance.PlaySFX(hurtClip));
         buttHoleManager.OnShit.AddListener(() => SFXManager.Instance.PlaySFX(poopClip));
+        PauseMenu.OnPauseGame.AddListener(StopGlideSFX);
     }
 
     private void Update()
@@ -61,36 +63,54 @@ public class PigeonSFX : MonoBehaviour
                 SFXManager.Instance.PlaySFX(exitWater);
         }
 
-        if (pigeonController.CurrentPigeonState == PigeonController.PigeonState.Gliding && !pigeonController.IsStun)
-        {
-            if (currentAudioSource == null)
-            {
-                clearFlySource = SFXManager.Instance.PlaySFX(flyLoopClip, 0.5f, loop: true);
-                lowPassFlySource = SFXManager.Instance.PlaySFX(lowPassFlyLoopClip, 0.0f, loop: true);
-            }
-
-            flySequence?.Kill();
-
-            if (currentAudioSource.volume < 0.5f)
-            {
-                flySequence = DOTween.Sequence();
-
-                if (currentAudioSource.isPlaying)
-                    flySequence.Append(currentAudioSource.DOFade(0.5f, 0.5f));
-            }
-
-            currentAudioSource.pitch = Tools.NormalizeValue(pigeonController.Speed, 5.0f, 25.0f);
-        }
+        if (pigeonController.CurrentPigeonState == PigeonController.PigeonState.Gliding && !pigeonController.IsStun && !PauseMenu.instance.IsPaused)
+            StartGlideSFX();
         else
+            StopGlideSFX();
+
+        if (isFlySequencePlaying)
+            currentAudioSource.pitch = Tools.NormalizeValue(pigeonController.Speed, 5.0f, 25.0f);
+    }
+
+    private void StartGlideSFX()
+    {
+        if (isFlySequencePlaying)
+            return;
+
+        isFlySequencePlaying = true;
+
+        if (currentAudioSource == null)
         {
-            if (currentAudioSource != null)
+            clearFlySource = SFXManager.Instance.PlaySFX(flyLoopClip, 0.5f, loop: true);
+            lowPassFlySource = SFXManager.Instance.PlaySFX(lowPassFlyLoopClip, 0.0f, loop: true);
+        }
+
+        if (currentAudioSource.volume < 0.45f)
+        {
+            flySequence?.Kill();
+            flySequence = DOTween.Sequence();
+
+            if (currentAudioSource.isPlaying)
+                flySequence.Append(currentAudioSource.DOFade(0.5f, 0.5f));
+        }
+    }
+
+    private void StopGlideSFX()
+    {
+        if (!isFlySequencePlaying)
+            return;
+
+        isFlySequencePlaying = false;
+
+        if (currentAudioSource != null)
+        {
+            flySequence?.Kill();
+            flySequence = DOTween.Sequence();
+
+            if (currentAudioSource.isPlaying)
             {
-                flySequence?.Kill();
-
-                flySequence = DOTween.Sequence();
-
-                if (currentAudioSource.isPlaying)
-                    flySequence.Append(currentAudioSource.DOFade(0.0f, 0.5f));
+                flySequence.Append(currentAudioSource.DOFade(0.0f, 0.5f))
+                .SetUpdate(true);
             }
         }
     }
