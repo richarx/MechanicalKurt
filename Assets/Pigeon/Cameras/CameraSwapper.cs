@@ -9,13 +9,15 @@ public class CameraSwapper : MonoBehaviour
     {
         Orbital,
         UnderWater,
-        Precision
+        Precision,
+        Hover
     }
 
     [SerializeField] private Water waterPlane;
     [SerializeField] private CinemachineCamera orbitalCamera;
     [SerializeField] private CinemachineCamera underWaterCamera;
     [SerializeField] private CinemachineCamera precisionCamera;
+    [SerializeField] private CinemachineCamera hoverCamera;
 
     private PigeonController pigeonController;
     private PlayerControls controls;
@@ -41,7 +43,9 @@ public class CameraSwapper : MonoBehaviour
     {
         if (waterPlane != null && pigeonController.transform.position.y < waterPlane.transform.position.y)
             return CameraType.UnderWater;
-        else if (controls.PrecisionCamera && pigeonController.CurrentPigeonState != PigeonController.PigeonState.Grounded && pigeonController.CurrentPigeonState != PigeonController.PigeonState.Braking)
+        if (pigeonController.CurrentPigeonState == PigeonController.PigeonState.Braking && pigeonController.Controls.RelativeMovement.magnitude > 0.001)
+            return CameraType.Hover;
+        else if (controls.PrecisionCamera && pigeonController.CurrentPigeonState != PigeonController.PigeonState.Grounded)
             return CameraType.Precision;
         else
             return CameraType.Orbital;
@@ -54,5 +58,6 @@ public class CameraSwapper : MonoBehaviour
         orbitalCamera.Priority = newCameraType == CameraType.Orbital ? 10 : 9;
         underWaterCamera.Priority = newCameraType == CameraType.UnderWater ? 10 : 9;
         precisionCamera.Priority = newCameraType == CameraType.Precision ? 10 : 9;
+        hoverCamera.Priority = newCameraType == CameraType.Hover ? 10 : 9;
     }
 }

@@ -109,6 +109,7 @@ public class PigeonController : MonoBehaviour
     float _lastDiveTimestamp;
     bool wasGroundedLastFrame;
     Vector3 _lastHitNormal;
+    bool _joystickNeedsReset;
     PigeonState _currentPigeonState;
 
     Rigidbody _rigidbody;
@@ -447,7 +448,10 @@ public class PigeonController : MonoBehaviour
         Vector3 direction = new Vector3(input.x, 0f, input.y);
         float directionMagnitude = direction.magnitude;
 
-        if (directionMagnitude > 0.01f && _currentPigeonState != PigeonState.Dancing)
+        if (_joystickNeedsReset && _controls.RelativeMovement.y >= 0.0f)
+            _joystickNeedsReset = false;
+
+        if (directionMagnitude > 0.01f && _currentPigeonState != PigeonState.Dancing && !_joystickNeedsReset)
             _yaw = Mathf.Atan2(direction.x, direction.z) * Mathf.Rad2Deg;
 
         transform.rotation = Quaternion.Euler(0f, _yaw, 0f);
@@ -459,7 +463,7 @@ public class PigeonController : MonoBehaviour
         }
         else
         {
-            if (directionMagnitude > 0.0001f && _currentPigeonState != PigeonState.Dancing)
+            if (directionMagnitude > 0.0001f && _currentPigeonState != PigeonState.Dancing && !_joystickNeedsReset)
             {
                 Vector3 targetVelocity = transform.forward * directionMagnitude * _groundSpeed;
                 _velocity = Vector3.MoveTowards(_lastVelocity, targetVelocity, _groundMovementAcceleration * Time.deltaTime);
@@ -619,9 +623,15 @@ public class PigeonController : MonoBehaviour
             _velocity = Vector3.MoveTowards(_velocity, Vector3.zero, 5f * dt);
 
             if (_controls.RelativeMovement.y < -0.15f)
+            {
                 _velocity.y = Mathf.MoveTowards(_velocity.y, -2.0f, 15f * dt);
+                _joystickNeedsReset = true;
+            }
             else
+            {
                 _velocity.y = Mathf.MoveTowards(_velocity.y, Mathf.Sin(Time.time * _hoverWobbleFrequency) * _hoverWobbleAmplitude, 15f * dt);
+                _joystickNeedsReset = false;
+            }
 
             if (_controls.RelativeMovement.y > 0.0001f)
                 _velocity += transform.forward * _controls.RelativeMovement.y * _hoverMoveSpeed * dt;

@@ -48,8 +48,6 @@ public class DayNightCycle : MonoBehaviour
         }
 
         _lampadaires = _streetLightsParent.GetComponentsInChildren<Light>(true);
-        foreach (var lamp in _lampadaires)
-            Debug.Log(lamp.gameObject.name);
     }
 
     private void Start()
