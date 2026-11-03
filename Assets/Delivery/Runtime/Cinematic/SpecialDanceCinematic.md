@@ -28,9 +28,9 @@ séquence. Aucun branchement de scène ou contrôleur Animator n'est modifié au
 | Zoom Pulse Curve | Courbe sur un temps de 0 à 1 : valeurs positives = zoom, négatives = dézoom. Le réglage initial fait un zoom bref, un léger rebond en dézoom, puis revient au cadrage initial. |
 | Dance Camera Transition Seconds | Durée de la transition Descent Camera -> Dance Camera, après l'impulsion. **0 = cut**, **0,2 s** = transition rapide, **0,6 s** = plus douce. |
 | Dance Target | Un GameObject vide commun à tous les personnages. Sa position définit l'arrivée ; chaque personnage s'oriente vers elle au départ. La rotation de ce point n'est pas utilisée. |
-| Actors | Les personnages dans leur ordre de passage. Pour chacun : Animator, Movement Root et durées Walk Seconds / Back Walk Seconds. |
+| Actors | Les personnages dans leur ordre de passage. Pour chacun : Animator, Movement Root et durées Walk Seconds / Dance Seconds / Back Walk Seconds. Dance Seconds > 0 définit sa durée de danse spéciale ; 0 utilise la durée commune. |
 | Start Dance Delay Seconds | **V**, délai après la fin de la transition vers Dance Camera avant de déclencher StartDance simultanément sur tous les Animators de Actors. 0 = dès que la caméra est prête. |
-| Dance Seconds | **Z**, durée de danse pour chaque personnage, transition Animator comprise. |
+| Dance Seconds | **Z**, durée de danse commune par défaut, transition Animator comprise. Chaque personnage peut la remplacer avec son propre Dance Seconds dans Actors. |
 | Between Actors Seconds | **W**, attente après le retour d'un personnage, avant le prochain. Aucune attente supplémentaire après le dernier. |
 | Scripts To Suspend | Les scripts qui déplacent déjà ces personnages ou le décor, par exemple `AmbientWalker`. Leur état activé/désactivé est restauré après le retour au jeu. |
 
@@ -111,8 +111,10 @@ courte, par exemple 0 à 0,1 s. Faire boucler les clips pour couvrir les durées
 configurées ; éviter une sortie automatique de la danse avant le trigger BackWalk.
 
 Le personnage se tourne vers la position de Dance Target au départ, uniquement
-autour de l'axe vertical pour rester droit, puis avance vers elle. Il conserve cette
-orientation pendant la danse de Z secondes et le recul vers sa position d'origine.
+autour de l'axe vertical pour rester droit, puis avance vers elle. À son arrivée,
+il se tourne vers Dance Camera pour sa durée de danse (ou Z par défaut), toujours autour de
+l'axe vertical. Il reprend ensuite son orientation d'approche pour reculer vers
+sa position d'origine.
 Si le point est déjà à sa position horizontale, il garde son orientation actuelle.
 Le modèle doit regarder dans la direction de la flèche bleue (+Z) de Movement Root ;
 si nécessaire, corriger la rotation locale du modèle enfant plutôt que celle du point.

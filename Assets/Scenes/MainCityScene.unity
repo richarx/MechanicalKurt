@@ -19895,30 +19895,36 @@ MonoBehaviour:
   - <Animator>k__BackingField: {fileID: 919132148025699553}
     <MovementRoot>k__BackingField: {fileID: 1363927856}
     <WalkSeconds>k__BackingField: 3
+    <DanceSeconds>k__BackingField: 10
     <BackWalkSeconds>k__BackingField: 3
   - <Animator>k__BackingField: {fileID: 42605769}
     <MovementRoot>k__BackingField: {fileID: 60204968}
     <WalkSeconds>k__BackingField: 3
+    <DanceSeconds>k__BackingField: 10.6
     <BackWalkSeconds>k__BackingField: 3
   - <Animator>k__BackingField: {fileID: 2146975655}
     <MovementRoot>k__BackingField: {fileID: 525572737}
     <WalkSeconds>k__BackingField: 3
+    <DanceSeconds>k__BackingField: 12
     <BackWalkSeconds>k__BackingField: 3
   - <Animator>k__BackingField: {fileID: 543420868}
     <MovementRoot>k__BackingField: {fileID: 1502069546}
     <WalkSeconds>k__BackingField: 3
+    <DanceSeconds>k__BackingField: 10.334
     <BackWalkSeconds>k__BackingField: 3
   - <Animator>k__BackingField: {fileID: 521241553}
     <MovementRoot>k__BackingField: {fileID: 1031434646}
     <WalkSeconds>k__BackingField: 3
+    <DanceSeconds>k__BackingField: 6.467
     <BackWalkSeconds>k__BackingField: 3
   - <Animator>k__BackingField: {fileID: 2094192573}
     <MovementRoot>k__BackingField: {fileID: 962897851}
     <WalkSeconds>k__BackingField: 3
+    <DanceSeconds>k__BackingField: 10
     <BackWalkSeconds>k__BackingField: 3
   <StartDanceDelaySeconds>k__BackingField: 1.8
   <StartSpecialDanceDelaySeconds>k__BackingField: 5
-  <DanceSeconds>k__BackingField: 8
+  <DanceSeconds>k__BackingField: 12
   <BetweenActorsSeconds>k__BackingField: 3
   <ScriptsToSuspend>k__BackingField: []
   <OnCinematicStarted>k__BackingField:

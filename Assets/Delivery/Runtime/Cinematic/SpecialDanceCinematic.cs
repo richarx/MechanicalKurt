@@ -18,6 +18,10 @@ public class SpecialDanceActor
     [field: SerializeField, MinValue(0.01f), SuffixLabel("s", true)]
     public float WalkSeconds { get; private set; } = 2f;
 
+    /// <summary>0 : utilise la durée de danse commune de la cinématique.</summary>
+    [field: SerializeField]
+    public float DanceSeconds { get; private set; }
+
     [field: SerializeField, MinValue(0.01f), SuffixLabel("s", true)]
     public float BackWalkSeconds { get; private set; } = 2f;
 
@@ -302,8 +306,14 @@ public class SpecialDanceCinematic : MonoBehaviour
                 actor.Root.rotation = Quaternion.LookRotation(heading, Vector3.up);
             Trigger(actor.Animator, WalkHash);
             yield return Move(actor.Root, DanceTarget.position, actor.WalkSeconds);
+            Quaternion returnRotation = actor.Root.rotation;
+            Vector3 cameraDirection = DanceCamera.transform.position - actor.Root.position;
+            cameraDirection.y = 0f;
+            if (cameraDirection.sqrMagnitude > 0.0001f)
+                actor.Root.rotation = Quaternion.LookRotation(cameraDirection, Vector3.up);
             Trigger(actor.Animator, DanceHash);
-            yield return Wait(DanceSeconds);
+            yield return Wait(actor.DanceSeconds > 0f ? actor.DanceSeconds : DanceSeconds);
+            actor.Root.rotation = returnRotation;
             Trigger(actor.Animator, BackWalkHash);
             // Keep facing the dance point while walking backwards.
             yield return Move(actor.Root, snapshot.Position, actor.BackWalkSeconds);
@@ -561,6 +571,7 @@ public class SpecialDanceCinematic : MonoBehaviour
         {
             if (actor == null || actor.Root == null || !actor.Root.gameObject.activeInHierarchy
                 || !ValidSeconds(actor.WalkSeconds) || !ValidSeconds(actor.BackWalkSeconds)
+                || !ValidDelay(actor.DanceSeconds)
                 || !HasTrigger(actor.Animator, StartDanceHash) || !HasTrigger(actor.Animator, WalkHash)
                 || !HasTrigger(actor.Animator, DanceHash)
                 || !HasTrigger(actor.Animator, BackWalkHash) || !HasTrigger(actor.Animator, BackHash)
