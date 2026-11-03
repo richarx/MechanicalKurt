@@ -40,6 +40,7 @@ public class MissionStartZone : PredictedIdentity<MissionStartState>
     [SerializeField] StartRule _startRule = StartRule.AllPigeons;
     [Tooltip("Revient en attente juste après un départ : chaque joueur peut lancer la zone à son tour. Laisser décoché pour une course.")]
     [SerializeField] bool _rearm;
+    [SerializeField] MissionStartZone _requiredStartZone;
 
     [Header("Départ")]
     [Tooltip("Décompte affiché avant la cinématique. Les participants sont gelés mais peuvent encore annuler (Interact).")]
@@ -83,6 +84,8 @@ public class MissionStartZone : PredictedIdentity<MissionStartState>
     string _hudContent;
 
     public StartPhase Phase => _viewState.Phase;
+    public MissionStartZone RequiredStartZone => _requiredStartZone;
+    public bool IsUnlocked => _requiredStartZone == null || _requiredStartZone.Phase == StartPhase.Started;
     public float CountdownRemaining => _viewState.Countdown;
     public int ReadyCount => _viewState.Ready;
     public int TotalCount => _viewState.Total;
@@ -194,6 +197,10 @@ public class MissionStartZone : PredictedIdentity<MissionStartState>
 
     void SimulatePhases(ref MissionStartState s, float dt)
     {
+        // Une arrivée de quête ne peut être validée qu'après son départ partagé.
+        if (_requiredStartZone != null && _requiredStartZone.SimState.Phase != StartPhase.Started)
+            return;
+
         if (s.Phase == StartPhase.Started)
         {
             if (!_rearm)
@@ -373,7 +380,7 @@ public class MissionStartZone : PredictedIdentity<MissionStartState>
             return;
 
         PigeonController local = PigeonController.Local;
-        bool show = view.Phase == StartPhase.Waiting
+        bool show = IsUnlocked && view.Phase == StartPhase.Waiting
             && local != null
             && !local.IsInMultiplayerActivity
             && !local.IsReadyFor(id)
@@ -398,7 +405,7 @@ public class MissionStartZone : PredictedIdentity<MissionStartState>
     {
         PigeonController local = PigeonController.Local;
         string content = null;
-        if (local != null && !local.IsInMultiplayerActivity)
+        if (IsUnlocked && local != null && !local.IsInMultiplayerActivity)
         {
             switch (view.Phase)
             {
