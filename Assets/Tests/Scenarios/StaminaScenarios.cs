@@ -105,6 +105,30 @@ public partial class ScenarioRunner
         Bot.Movement = Bot.RelativeMovement = Vector2.down;
         yield return Expect("Joystick revenu : il remarche", () => Pigeon.Speed > 1f, 1f, () => $"vitesse {Pigeon.Speed:0.00}");
         Bot.Movement = Bot.RelativeMovement = Vector2.zero;
+
+        // Effets du piqué : déplacés de la scène de main vers le prefab réseau.
+        WindVelocityControl wind = Pigeon.GetComponentInChildren<WindVelocityControl>();
+        yield return Check("L'effet de vent est sur le pigeon du joueur", wind != null && wind.isActiveAndEnabled);
+        PidgeonVfx vfx = Pigeon.GetComponentInChildren<PidgeonVfx>();
+        yield return Check("Le pigeon a ses effets de piqué", vfx != null);
+        if (vfx != null)
+        {
+            yield return Teleport(Pigeon, sky + Vector3.up * 100f, Quaternion.LookRotation(forward), "Haut dans le ciel pour piquer");
+            Bot.Dive = true;
+            float topSpeed = 0f;
+            float diveStartY = Pigeon.transform.position.y;
+            yield return Expect("Le piqué déforme l'écran du joueur", () =>
+                {
+                    topSpeed = Mathf.Max(topSpeed, Pigeon.Speed);
+                    return vfx.DiveLensDistortion < -0.01f;
+                }, 6f,
+                () => $"état {Pigeon.CurrentPigeonState}, vitesse {Pigeon.Speed:0.0} (max {topSpeed:0.0}), hauteur {Pigeon.transform.position.y:0.0} (départ {diveStartY:0.0}), "
+                    + $"local {Pigeon == PigeonController.Local}, gelé {Pigeon.IsMovementFrozen}, déformation {vfx.DiveLensDistortion:0.000}");
+            Bot.Dive = false;
+            yield return Expect("… et l'écran revient à la normale après", () => vfx.DiveLensDistortion > -0.01f, 6f,
+                () => $"état {Pigeon.CurrentPigeonState}, déformation {vfx.DiveLensDistortion:0.000}");
+            yield return ExpectLanded(Pigeon, 30f);
+        }
     }
 }
 #endif

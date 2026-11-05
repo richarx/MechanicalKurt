@@ -111,7 +111,8 @@ public class PigeonSFX : MonoBehaviour
         }
 
         bool pausedHere = !IsSpatial && PauseMenu.instance != null && PauseMenu.instance.IsPaused;
-        if (pigeonController.CurrentPigeonState == PigeonController.MovementState.Gliding && !pigeonController.IsStun && !pausedHere)
+        bool isValidState = pigeonController.CurrentPigeonState is PigeonController.MovementState.Gliding or PigeonController.MovementState.Diving;
+        if (isValidState && !pigeonController.IsStun && !pausedHere)
             StartGlideSFX();
         else
             StopGlideSFX();
