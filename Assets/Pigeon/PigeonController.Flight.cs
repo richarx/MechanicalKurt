@@ -2,7 +2,7 @@ using UnityEngine;
 
 public partial class PigeonController
 {
-    Vector3 GroundMovement(in PigeonInput input, ref PigeonState s, float dt)
+    Vector3 GroundMovement(in PigeonInput input, ref PigeonState s, MovementState mode, float dt)
     {
         s.PreserveTeleportPitch = false;
         s.Pitch = 0f;
@@ -12,7 +12,11 @@ public partial class PigeonController
         Vector3 direction = new Vector3(move.x, 0f, move.y);
         float magnitude = direction.magnitude;
 
-        if (magnitude > 0.01f)
+        if (s.JoystickNeedsReset && input.RelativeMovement.y >= 0f)
+            s.JoystickNeedsReset = false;
+        bool canWalk = mode != MovementState.Dancing && !s.JoystickNeedsReset;
+
+        if (magnitude > 0.01f && canWalk)
             s.Yaw = Mathf.Atan2(direction.x, direction.z) * Mathf.Rad2Deg;
 
         Vector3 forward = ForwardOf(0f, s.Yaw);
@@ -26,7 +30,7 @@ public partial class PigeonController
         else
         {
             Vector3 current = new Vector3(s.LastVelocity.x, 0f, s.LastVelocity.z);
-            velocity = magnitude > 0.0001f
+            velocity = magnitude > 0.0001f && canWalk
                 ? Vector3.MoveTowards(current, forward * magnitude * _groundSpeed, _groundMovementAcceleration * dt)
                 : Vector3.MoveTowards(current, Vector3.zero, _groundMovementDeceleration * dt);
             velocity.y = -1f;
@@ -108,14 +112,32 @@ public partial class PigeonController
 
             // À l'arrivée d'une course, freinage net plutôt que la lente glissade du frein.
             velocity = Vector3.MoveTowards(velocity, Vector3.zero, (FinishedRace(s) ? 40f : 5f) * dt);
-            // Vol stationnaire : battre des ailes fait monter, tirer vers le bas fait descendre.
+            // Tirer vers le bas fait descendre ; une fois posé, le joystick devra revenir avant de marcher.
             s.HoverTime += dt;
-            if (input.Flap)
-                velocity.y = Mathf.MoveTowards(velocity.y, 2f, 25f * dt);
-            else if (input.RelativeMovement.y < -0.15f)
+            if (input.RelativeMovement.y < -0.15f)
+            {
                 velocity.y = Mathf.MoveTowards(velocity.y, -2f, 15f * dt);
+                s.JoystickNeedsReset = true;
+            }
             else
+            {
                 velocity.y = Mathf.MoveTowards(velocity.y, Mathf.Sin(s.HoverTime * _hoverWobbleFrequency) * _hoverWobbleAmplitude, 15f * dt);
+                s.JoystickNeedsReset = false;
+            }
+            if (input.RelativeMovement.y > 0.0001f)
+                velocity += ForwardOf(s.Pitch, s.Yaw) * input.RelativeMovement.y * _hoverMoveSpeed * dt;
+
+            ComputePitch(input, ref s, mode, _pitchSpeed, _maxPitch, dt);
+            ComputeYaw(input, ref s, dt, _turnSpeed * 2f);
+        }
+        else if (mode == MovementState.HoverFlapping)
+        {
+            // Vol stationnaire en battant des ailes : le pigeon monte et consomme de l'endurance.
+            targetSpeed = _brakeMaxSpeed;
+            dragAtMaxSpeed = _brakeDragAtMaxSpeed;
+
+            velocity = Vector3.MoveTowards(velocity, Vector3.zero, (FinishedRace(s) ? 40f : 5f) * dt);
+            velocity.y = Mathf.MoveTowards(velocity.y, 2f, 25f * dt);
             if (input.RelativeMovement.y > 0.0001f)
                 velocity += ForwardOf(s.Pitch, s.Yaw) * input.RelativeMovement.y * _hoverMoveSpeed * dt;
 
@@ -158,7 +180,7 @@ public partial class PigeonController
         Vector3 forward = ForwardOf(s.Pitch, s.Yaw);
         float forwardSpeed = Vector3.Dot(velocity, forward);
 
-        if (mode != MovementState.Diving && mode != MovementState.Braking && speed > 0.1f)
+        if (mode != MovementState.Diving && mode != MovementState.Braking && mode != MovementState.HoverFlapping && speed > 0.1f)
         {
             float steeringFactor = 4f;
             if (mode != MovementState.Flapping && forward.y > 0.1f && forwardSpeed < _stallSpeed * 1.3f)

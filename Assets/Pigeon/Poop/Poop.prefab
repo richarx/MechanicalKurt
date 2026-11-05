@@ -127,6 +127,24 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 36c9ffb2edac70740a665e0121e506c7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Poop
+  splatterMaterial: {fileID: 2100000, guid: 305aabb82cda50043b4f8816b389370b, type: 2}
+  decalProjectorPrefab: {fileID: 8969770008209022720, guid: f3c27be7e613deb4ea542ff0cd01471b, type: 3}
+  splatterTextures:
+  - {fileID: 2800000, guid: e2110b5c58d6be444805b048227b0c16, type: 3}
+  - {fileID: 2800000, guid: d200c03bf8472c4438307377975cf89b, type: 3}
+  - {fileID: 2800000, guid: c435c9d4fc9b06142b5bd34801b14b64, type: 3}
+  - {fileID: 2800000, guid: f1643cd402570bd4284514c314faaa18, type: 3}
+  - {fileID: 2800000, guid: bd9fa4a6407c3f54d9ea0638bcbac33f, type: 3}
+  - {fileID: 2800000, guid: ef01acb476c803340aa638aaf7ef5657, type: 3}
+  - {fileID: 2800000, guid: 694a6f1a4fd8fd84cb90bfdd1f8f55ab, type: 3}
+  - {fileID: 2800000, guid: 24a8f997d8734ae4692ed56657ea509f, type: 3}
+  - {fileID: 2800000, guid: e99540cc7725f4745a553586501e61c8, type: 3}
+  - {fileID: 2800000, guid: 9deb6b0a6bceb9d499696274b5881c23, type: 3}
+  - {fileID: 2800000, guid: 4a7bba50f2e041745af7d91bb0f90da3, type: 3}
+  - {fileID: 2800000, guid: e3ace581de07095499ff2584459f6769, type: 3}
+  - {fileID: 2800000, guid: c895d0d81828b6144a4ee61490462cc1, type: 3}
+  - {fileID: 2800000, guid: ed1c6beb78da30a40bae6ff0bd228bfb, type: 3}
+  - {fileID: 2800000, guid: 3f1bf97d689517440af6054a09817fbf, type: 3}
 --- !u!1001 &8332090943848720986
 PrefabInstance:
   m_ObjectHideFlags: 0

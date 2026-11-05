@@ -62,20 +62,49 @@ public partial class ScenarioRunner
         yield return new WaitForSecondsRealtime(1f);
         float y = Pigeon.transform.position.y;
         Bot.Flap = true;
-        yield return Expect("En vol stationnaire, battre des ailes fait monter", () => Pigeon.transform.position.y > y + 1f, 3f,
+        yield return Expect("En vol stationnaire, battre des ailes fait monter", () => Pigeon.transform.position.y > y + 1f, 7f,
             () => $"hauteur {Pigeon.transform.position.y:0.0} (départ {y:0.0})");
+        yield return Check("… dans l'état vol stationnaire en battant", Pigeon.CurrentPigeonState == PigeonController.MovementState.HoverFlapping,
+            $"état {Pigeon.CurrentPigeonState}");
         Bot.Flap = false;
         y = Pigeon.transform.position.y;
         Bot.RelativeMovement = new Vector2(0f, -1f);
         yield return Expect("… et tirer vers le bas fait descendre", () => Pigeon.transform.position.y < y - 1f, 3f,
             () => $"hauteur {Pigeon.transform.position.y:0.0} (départ {y:0.0})");
         Bot.RelativeMovement = Vector2.zero;
-        yield return Expect("L'endurance remonte en vol stationnaire", () => Pigeon.Stamina > stamina.FlapThreshold, 5f,
+        yield return Expect("L'endurance remonte en vol stationnaire", () => Pigeon.Stamina > stamina.FlapThreshold, 8f,
             () => $"endurance {Pigeon.Stamina:0.0}");
         Bot.Brake = false;
 
         yield return ExpectLanded(Pigeon, 15f);
         yield return Expect("Posé : endurance pleine", () => stamina.HasMaxStamina, 1f, () => $"endurance {Pigeon.Stamina:0.0}");
+
+        // Danse : le pigeon reste sur place même si on pousse le joystick.
+        Bot.Flex = true;
+        Bot.Movement = Bot.RelativeMovement = Vector2.up;
+        yield return Expect("La danse passe en état Dancing", () => Pigeon.CurrentPigeonState == PigeonController.MovementState.Dancing, 1f,
+            () => $"état {Pigeon.CurrentPigeonState}");
+        yield return new WaitForSecondsRealtime(0.5f);
+        yield return Check("Il ne marche pas en dansant", Pigeon.Speed < 1f, $"vitesse {Pigeon.Speed:0.00}");
+        Bot.Flex = false;
+        yield return Expect("La danse finie, il remarche", () => Pigeon.CurrentPigeonState == PigeonController.MovementState.Grounded && Pigeon.Speed > 1f, 1f,
+            () => $"état {Pigeon.CurrentPigeonState}, vitesse {Pigeon.Speed:0.00}");
+        Bot.Movement = Bot.RelativeMovement = Vector2.zero;
+
+        // Descente en vol stationnaire : posé, le joystick encore tiré ne le fait pas marcher en arrière.
+        yield return Teleport(Pigeon, Pigeon.transform.position + Vector3.up * 2f, Quaternion.LookRotation(forward), "Juste au-dessus du sol");
+        Bot.Brake = true;
+        Bot.Movement = Bot.RelativeMovement = Vector2.down;
+        yield return ExpectLanded(Pigeon, 8f);
+        Bot.Brake = false;
+        yield return new WaitForSecondsRealtime(0.5f);
+        yield return Check("Joystick encore tiré après la descente : il ne marche pas", Pigeon.IsGrounded && Pigeon.Speed < 1f,
+            $"au sol {Pigeon.IsGrounded}, vitesse {Pigeon.Speed:0.00}");
+        Bot.Movement = Bot.RelativeMovement = Vector2.zero;
+        yield return new WaitForSecondsRealtime(0.2f);
+        Bot.Movement = Bot.RelativeMovement = Vector2.down;
+        yield return Expect("Joystick revenu : il remarche", () => Pigeon.Speed > 1f, 1f, () => $"vitesse {Pigeon.Speed:0.00}");
+        Bot.Movement = Bot.RelativeMovement = Vector2.zero;
     }
 }
 #endif

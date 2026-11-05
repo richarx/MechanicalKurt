@@ -257,6 +257,7 @@ Transform:
   - {fileID: 7541785080196244376}
   - {fileID: 4807081451739982482}
   - {fileID: 337780116950156580}
+  - {fileID: 7081891199890222273}
   - {fileID: 934811919850680220}
   - {fileID: 5253931551654317395}
   m_Father: {fileID: 0}
@@ -296,7 +297,7 @@ CharacterController:
   m_Radius: 0.08
   m_SlopeLimit: 45
   m_StepOffset: 0.16
-  m_SkinWidth: 0.001
+  m_SkinWidth: 0.005
   m_MinMoveDistance: 0
   m_Center: {x: 0, y: 0.08, z: 0}
 --- !u!114 &2514600447504455624
@@ -387,6 +388,9 @@ MonoBehaviour:
   <OnCoo>k__BackingField:
     m_PersistentCalls:
       m_Calls: []
+  <OnChangeState>k__BackingField:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!114 &7788707282503470594
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -428,6 +432,7 @@ MonoBehaviour:
   equipmentCamera: {fileID: 7152500247294746974}
   equipClip: {fileID: 8300000, guid: cdf612176ae2926458143a6d6c2393b1, type: 3}
   equipVFX: {fileID: 1575721338728490, guid: 4171bb92c5c591848b14be1db6f3efe2, type: 3}
+  fashionAchievement: {fileID: 11400000, guid: b9b8aeda86a55a24b801fcc32177ec42, type: 2}
 --- !u!114 &7595259944597442791
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -443,6 +448,7 @@ MonoBehaviour:
   windParticles: {fileID: 3792138837400240535}
   wingTrailRendererLeft: {fileID: 8287067714026424246}
   wingTrailRendererRight: {fileID: 7628107183944301609}
+  waterSplashPrefab: {fileID: 1811848824726438853, guid: d7edd3e0ab32fbf49b87110c8029e964, type: 3}
 --- !u!114 &8858055023861483610
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -486,6 +492,13 @@ MonoBehaviour:
   - {fileID: 8300000, guid: 33ec72da27e336446b91a3d7ad4f3e32, type: 3}
   - {fileID: 8300000, guid: 8b902c0fa7c9a974d8089d569cec9e6d, type: 3}
   - {fileID: 8300000, guid: 3418b1fa006b0b845b90a66e1cbdc08e, type: 3}
+  StartDiveClips:
+  - {fileID: 8300000, guid: cfc6e905979304c46ae1bc59d01b21d4, type: 3}
+  StopDiveClips:
+  - {fileID: 8300000, guid: e6266d9f18b9ef34d86c478b8486aa88, type: 3}
+  - {fileID: 8300000, guid: fa8ad57beef1dd643bc923f62dc46688, type: 3}
+  - {fileID: 8300000, guid: 4f04edd7c619f6e4294e74161a8add07, type: 3}
+  - {fileID: 8300000, guid: 02e9c392ce26d564d82b03e98f60cc75, type: 3}
   enterWater: {fileID: 8300000, guid: 2466f5e40cdf95841987426ab3fd8a8a, type: 3}
   exitWater: {fileID: 8300000, guid: 57d0a0e2f565fee49b46984530c9d3da, type: 3}
   underwaterBubbles: {fileID: 5917645698477372326}
@@ -536,6 +549,7 @@ MonoBehaviour:
   orbitalCamera: {fileID: 6749645902862693039}
   underWaterCamera: {fileID: 2776355963912601218}
   precisionCamera: {fileID: 8649118425525724192}
+  hoverCamera: {fileID: 2229335547163561413}
 --- !u!114 &8209984083396803717
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -595,6 +609,8 @@ MonoBehaviour:
   - target: {fileID: 1927857559252375256}
     activeAsOwner: 1
   - target: {fileID: 5653337509051854026}
+    activeAsOwner: 1
+  - target: {fileID: 5653337509051854027}
     activeAsOwner: 1
   _applyInLateUpdate: 0
   _toActivate: []
@@ -5356,9 +5372,9 @@ MonoBehaviour:
       m_Calls: []
   maxStamina: 100
   staminaNormalizedThresholdToFlap: 0.3
-  staminaDepletionRate_Flap: 20
+  staminaDepletionRate_Flap: 15
   staminaRecoveryRate_Regular: 5
-  staminaRecoveryRate_Brake: 25
+  staminaRecoveryRate_Brake: 10
   staminaRecoveryRate_UnderWater: 25
   staminaRecoveryRate_Dive: 50
   staminaInstantRecovery_Roll: 25
@@ -5389,4 +5405,138 @@ MonoBehaviour:
 Transform:
   m_CorrespondingSourceObject: {fileID: -7505855668175694854, guid: 0065f115667c06940a51b2747e6108a2, type: 3}
   m_PrefabInstance: {fileID: 8068947269522700808}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1001 &94786837743475968
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 7718967718942241121}
+    m_Modifications:
+    - target: {fileID: 2279086385912664261, guid: 7c66027bb67380a4badc877c66b19c53, type: 3}
+      propertyPath: Priority.m_Value
+      value: 9
+      objectReference: {fileID: 0}
+    - target: {fileID: 2279086385912664261, guid: 7c66027bb67380a4badc877c66b19c53, type: 3}
+      propertyPath: Target.TrackingTarget
+      value: 
+      objectReference: {fileID: 7718967718942241121}
+    - target: {fileID: 3013918735696304175, guid: 7c66027bb67380a4badc877c66b19c53, type: 3}
+      propertyPath: m_Name
+      value: Hover Camera
+      objectReference: {fileID: 0}
+    - target: {fileID: 3740974542399878342, guid: 7c66027bb67380a4badc877c66b19c53, type: 3}
+      propertyPath: Damping.x
+      value: 0.3
+      objectReference: {fileID: 0}
+    - target: {fileID: 3740974542399878342, guid: 7c66027bb67380a4badc877c66b19c53, type: 3}
+      propertyPath: Damping.y
+      value: 0.3
+      objectReference: {fileID: 0}
+    - target: {fileID: 3740974542399878342, guid: 7c66027bb67380a4badc877c66b19c53, type: 3}
+      propertyPath: TargetOffset.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3740974542399878342, guid: 7c66027bb67380a4badc877c66b19c53, type: 3}
+      propertyPath: Composition.ScreenPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7140227025431622081, guid: 7c66027bb67380a4badc877c66b19c53, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -0.000001847744
+      objectReference: {fileID: 0}
+    - target: {fileID: 7140227025431622081, guid: 7c66027bb67380a4badc877c66b19c53, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 2.4007053
+      objectReference: {fileID: 0}
+    - target: {fileID: 7140227025431622081, guid: 7c66027bb67380a4badc877c66b19c53, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -1.4537172
+      objectReference: {fileID: 0}
+    - target: {fileID: 7140227025431622081, guid: 7c66027bb67380a4badc877c66b19c53, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0.8711988
+      objectReference: {fileID: 0}
+    - target: {fileID: 7140227025431622081, guid: 7c66027bb67380a4badc877c66b19c53, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0.49093056
+      objectReference: {fileID: 0}
+    - target: {fileID: 7140227025431622081, guid: 7c66027bb67380a4badc877c66b19c53, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0.00000058710884
+      objectReference: {fileID: 0}
+    - target: {fileID: 7140227025431622081, guid: 7c66027bb67380a4badc877c66b19c53, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: -0.00000034096323
+      objectReference: {fileID: 0}
+    - target: {fileID: 7140227025431622081, guid: 7c66027bb67380a4badc877c66b19c53, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7140227025431622081, guid: 7c66027bb67380a4badc877c66b19c53, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7140227025431622081, guid: 7c66027bb67380a4badc877c66b19c53, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8536759895420419602, guid: 7c66027bb67380a4badc877c66b19c53, type: 3}
+      propertyPath: Radius
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8536759895420419602, guid: 7c66027bb67380a4badc877c66b19c53, type: 3}
+      propertyPath: TargetOffset.y
+      value: 2.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8536759895420419602, guid: 7c66027bb67380a4badc877c66b19c53, type: 3}
+      propertyPath: TargetOffset.z
+      value: -0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 8536759895420419602, guid: 7c66027bb67380a4badc877c66b19c53, type: 3}
+      propertyPath: VerticalAxis.Value
+      value: 17.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 8536759895420419602, guid: 7c66027bb67380a4badc877c66b19c53, type: 3}
+      propertyPath: TrackerSettings.BindingMode
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8536759895420419602, guid: 7c66027bb67380a4badc877c66b19c53, type: 3}
+      propertyPath: TrackerSettings.RotationDamping.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8536759895420419602, guid: 7c66027bb67380a4badc877c66b19c53, type: 3}
+      propertyPath: TrackerSettings.RotationDamping.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8536759895420419602, guid: 7c66027bb67380a4badc877c66b19c53, type: 3}
+      propertyPath: TrackerSettings.RotationDamping.z
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 7c66027bb67380a4badc877c66b19c53, type: 3}
+--- !u!1 &5653337509051854027 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 3013918735696304175, guid: 7c66027bb67380a4badc877c66b19c53, type: 3}
+  m_PrefabInstance: {fileID: 94786837743475968}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &2229335547163561413 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 2279086385912664261, guid: 7c66027bb67380a4badc877c66b19c53, type: 3}
+  m_PrefabInstance: {fileID: 94786837743475968}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5653337509051854027}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f9dfa5b682dcd46bda6128250e975f58, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.Cinemachine::Unity.Cinemachine.CinemachineCamera
+--- !u!4 &7081891199890222273 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 7140227025431622081, guid: 7c66027bb67380a4badc877c66b19c53, type: 3}
+  m_PrefabInstance: {fileID: 94786837743475968}
   m_PrefabAsset: {fileID: 0}

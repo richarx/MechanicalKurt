@@ -21,6 +21,9 @@ public class PigeonEquipment : MonoBehaviour
     [SerializeField] private AudioClip equipClip;
     [SerializeField] private GameObject equipVFX;
 
+    [Space]
+    [SerializeField] private AchievementData fashionAchievement;
+
     /// <summary>
     /// Valeur = numéro de bit dans l'état réseau, et sérialisée dans les prefabs de loot : n'ajouter qu'à la fin.
     /// </summary>
@@ -116,6 +119,11 @@ public class PigeonEquipment : MonoBehaviour
 
         sequence.AppendCallback(() => { if (equipmentCamera != null) equipmentCamera.Priority = 0; });
         sequence.AppendCallback(() => { if (playerControls != null) playerControls.SetControlsBlocked(false); });
+        sequence.AppendCallback(() =>
+        {
+            if (CurrentWornMask() == AllBits && fashionAchievement != null && AchievementManager.Instance != null)
+                AchievementManager.Instance.Unlock(fashionAchievement);
+        });
 
         sequence.AppendCallback(() => { if (MusicPlayer.instance != null) MusicPlayer.instance.PlayMusic(MusicPlayer.Songs.NightDelivery, 5.0f); });
     }

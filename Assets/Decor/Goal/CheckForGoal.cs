@@ -21,6 +21,7 @@ public class CheckForGoal : MonoBehaviour
             {
                 AchievementManager.Instance.Unlock(achievement);
                 SFXManager.Instance.PlaySFX(successSfx);
+                enabled = false;
             }
         }
     }

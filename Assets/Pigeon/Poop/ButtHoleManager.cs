@@ -22,7 +22,7 @@ public class ButtHoleManager : MonoBehaviour
 
     void Update()
     {
-        if (_cooldown < 0 && _pigeonControls.ConsumeShit)
+        if (_cooldown < 0 && !PauseMenu.instance.IsPaused && _pigeonControls.ConsumeShit)
         {
             Rigidbody poopRb = Instantiate(_poopPrefab, _buttHole.position, _buttHole.rotation).GetComponent<Rigidbody>();
             poopRb.linearVelocity = _characterController.velocity;

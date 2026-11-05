@@ -10,7 +10,8 @@ public class CameraSwapper : MonoBehaviour
     {
         Orbital,
         UnderWater,
-        Precision
+        Precision,
+        Hover
     }
 
     [SerializeField, Tooltip("Facultatif : retrouvé dans la scène si vide (le pigeon est un prefab réseau).")]
@@ -18,10 +19,12 @@ public class CameraSwapper : MonoBehaviour
     [SerializeField] private CinemachineCamera orbitalCamera;
     [SerializeField] private CinemachineCamera underWaterCamera;
     [SerializeField] private CinemachineCamera precisionCamera;
+    [SerializeField] private CinemachineCamera hoverCamera;
 
     private PigeonController pigeonController;
     private CameraType currentCameraType;
     private bool applied;
+    private float lastMovementTimestamp;
 
     public CameraType Current => currentCameraType;
     public CinemachineCamera OrbitalCamera => orbitalCamera;
@@ -58,9 +61,15 @@ public class CameraSwapper : MonoBehaviour
     private CameraType ComputeCameraType()
     {
         IPigeonControls controls = pigeonController.Controls;
+        if (controls != null && controls.Movement.magnitude > 0.001f)
+            lastMovementTimestamp = Time.time;
+
+        PigeonController.MovementState state = pigeonController.CurrentPigeonState;
         if (waterPlane != null && pigeonController.transform.position.y < waterPlane.transform.position.y)
             return CameraType.UnderWater;
-        else if (controls != null && controls.PrecisionCamera && pigeonController.CurrentPigeonState != PigeonController.MovementState.Grounded && pigeonController.CurrentPigeonState != PigeonController.MovementState.Braking)
+        if (state == PigeonController.MovementState.Braking && Time.time - lastMovementTimestamp <= 0.5f)
+            return CameraType.Hover;
+        else if (controls != null && controls.PrecisionCamera && state != PigeonController.MovementState.Grounded && state != PigeonController.MovementState.Dancing)
             return CameraType.Precision;
         else
             return CameraType.Orbital;
@@ -77,6 +86,8 @@ public class CameraSwapper : MonoBehaviour
             underWaterCamera.Priority = newCameraType == CameraType.UnderWater ? 10 : 9;
         if (precisionCamera != null)
             precisionCamera.Priority = newCameraType == CameraType.Precision ? 10 : 9;
+        if (hoverCamera != null)
+            hoverCamera.Priority = newCameraType == CameraType.Hover ? 10 : 9;
     }
 
     private CinemachineCamera CameraOf(CameraType type)
@@ -85,6 +96,7 @@ public class CameraSwapper : MonoBehaviour
         {
             case CameraType.UnderWater: return underWaterCamera;
             case CameraType.Precision: return precisionCamera;
+            case CameraType.Hover: return hoverCamera;
             default: return orbitalCamera;
         }
     }

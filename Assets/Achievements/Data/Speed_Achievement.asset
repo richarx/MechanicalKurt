@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 82bab3935ddb34544971da497063f042, type: 3}
   m_Name: Speed_Achievement
   m_EditorClassIdentifier: Assembly-CSharp::AchievementData
-  _id: 
+  _id: speedster
   _title: Gotta go FASTER
   _description: Reach Terminal Velocity
   _icon: {fileID: 8957324059118975939, guid: f242cca997ed9854a94e7afa1bffe973, type: 3}

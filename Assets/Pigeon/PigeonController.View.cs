@@ -20,6 +20,18 @@ public partial class PigeonController
         if (_equipment != null)
             _equipment.ApplyWorn(view.Equipment);
         UpdateCooView(view.CooCount);
+        UpdateModeView((MovementState)view.Mode);
+    }
+
+    MovementState _viewMode;
+    bool _viewModeKnown;
+
+    void UpdateModeView(MovementState mode)
+    {
+        if (_viewModeKnown && mode != _viewMode)
+            OnChangeState.Invoke(_viewMode, mode);
+        _viewMode = mode;
+        _viewModeKnown = true;
     }
 
     byte _viewCooCount;

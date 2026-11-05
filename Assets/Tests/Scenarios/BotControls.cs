@@ -8,7 +8,7 @@ public class BotControls : IPigeonControls
     public bool Flap { get; set; }
     public bool Dive { get; set; }
     public bool Brake { get; set; }
-    public bool Flex => false;
+    public bool Flex { get; set; }
     public bool PrecisionCamera { get; set; }
 
     bool _interact;
@@ -24,7 +24,7 @@ public class BotControls : IPigeonControls
     public void ReleaseAll()
     {
         Movement = RelativeMovement = Vector2.zero;
-        Flap = Dive = Brake = PrecisionCamera = false;
+        Flap = Dive = Brake = Flex = PrecisionCamera = false;
         _interact = _predictedInteract = _cooing = false;
     }
 

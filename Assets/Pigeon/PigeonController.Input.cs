@@ -80,7 +80,7 @@ public partial class PigeonController
         {
             input.Movement = Vector2.zero;
             input.RelativeMovement = Vector2.zero;
-            input.Flap = input.Dive = input.Brake = false;
+            input.Flap = input.Dive = input.Brake = input.Dance = false;
             return;
         }
 
@@ -89,6 +89,7 @@ public partial class PigeonController
         input.Flap = _controls.Flap;
         input.Dive = _controls.Dive;
         input.Brake = _controls.Brake;
+        input.Dance = _controls.Flex;
     }
 
     protected override void SanitizeInput(ref PigeonInput input)

@@ -84,7 +84,7 @@ public class PigeonHeightIndicator : MonoBehaviour
 
     private bool ComputeDisplayState()
     {
-        if (pigeonController.CurrentPigeonState != PigeonController.MovementState.Braking)
+        if (!pigeonController.IsHovering)
             return false;
 
         float distance = ComputeDistanceToGround();

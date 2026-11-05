@@ -11,6 +11,8 @@ public class PigeonSFX : MonoBehaviour
     [SerializeField] private AudioClip poopClip;
     [SerializeField] private AudioClip hurtClip;
     [SerializeField] private List<AudioClip> rollClips;
+    [SerializeField] private List<AudioClip> StartDiveClips;
+    [SerializeField] private List<AudioClip> StopDiveClips;
 
     [Space]
     [SerializeField] private AudioClip enterWater;
@@ -38,6 +40,7 @@ public class PigeonSFX : MonoBehaviour
     private AudioSource otherAudioSource => isLowPassActive ? clearFlySource : lowPassFlySource;
 
     private Sequence flySequence;
+    private bool isFlySequencePlaying;
 
     private void Start()
     {
@@ -53,6 +56,21 @@ public class PigeonSFX : MonoBehaviour
         pigeonController.OnRoll.AddListener(() => PlayRandom(rollClips));
         pigeonController.OnStunned.AddListener(() => Play(hurtClip));
         buttHoleManager.OnShit.AddListener(() => Play(poopClip));
+        PauseMenu.OnPauseGame.AddListener(HandlePause);
+        pigeonController.OnChangeState.AddListener((from, to) =>
+        {
+            if (to == PigeonController.MovementState.Diving)
+                PlayRandom(StartDiveClips);
+            else if (from == PigeonController.MovementState.Diving)
+                PlayRandom(StopDiveClips);
+        });
+    }
+
+    /// <summary>La pause n'arrête que le son du vent de son propre pigeon : les autres continuent de voler.</summary>
+    private void HandlePause()
+    {
+        if (!IsSpatial)
+            StopGlideSFX();
     }
 
     private bool IsSpatial => pigeonController == null || pigeonController != PigeonController.Local;
@@ -92,38 +110,54 @@ public class PigeonSFX : MonoBehaviour
                 Play(exitWater);
         }
 
-        if (pigeonController.CurrentPigeonState == PigeonController.MovementState.Gliding && !pigeonController.IsStun)
-        {
-            if (currentAudioSource == null)
-            {
-                clearFlySource = Play(flyLoopClip, 0.5f, loop: true);
-                lowPassFlySource = Play(lowPassFlyLoopClip, 0.0f, loop: true);
-            }
-
-            flySequence?.Kill();
-
-            if (currentAudioSource.volume < 0.5f)
-            {
-                flySequence = DOTween.Sequence();
-
-                if (currentAudioSource.isPlaying)
-                    flySequence.Append(currentAudioSource.DOFade(0.5f, 0.5f));
-            }
-
-            // Borné : sans limite, la hauteur devenait négative à basse vitesse (son à l'envers) et montait à ×2,5 en piqué.
-            currentAudioSource.pitch = Mathf.Clamp(Tools.NormalizeValue(pigeonController.Speed, 5.0f, 25.0f), 0.5f, 1.5f);
-        }
+        bool pausedHere = !IsSpatial && PauseMenu.instance != null && PauseMenu.instance.IsPaused;
+        if (pigeonController.CurrentPigeonState == PigeonController.MovementState.Gliding && !pigeonController.IsStun && !pausedHere)
+            StartGlideSFX();
         else
+            StopGlideSFX();
+
+        // Borné : sans limite, la hauteur devenait négative à basse vitesse (son à l'envers) et montait à ×2,5 en piqué.
+        if (isFlySequencePlaying)
+            currentAudioSource.pitch = Mathf.Clamp(Tools.NormalizeValue(pigeonController.Speed, 5.0f, 25.0f), 0.5f, 1.5f);
+    }
+
+    private void StartGlideSFX()
+    {
+        if (isFlySequencePlaying)
+            return;
+
+        isFlySequencePlaying = true;
+
+        if (currentAudioSource == null)
         {
-            if (currentAudioSource != null)
-            {
-                flySequence?.Kill();
+            clearFlySource = Play(flyLoopClip, 0.5f, loop: true);
+            lowPassFlySource = Play(lowPassFlyLoopClip, 0.0f, loop: true);
+        }
 
-                flySequence = DOTween.Sequence();
+        if (currentAudioSource.volume < 0.45f)
+        {
+            flySequence?.Kill();
+            flySequence = DOTween.Sequence();
 
-                if (currentAudioSource.isPlaying)
-                    flySequence.Append(currentAudioSource.DOFade(0.0f, 0.5f));
-            }
+            if (currentAudioSource.isPlaying)
+                flySequence.Append(currentAudioSource.DOFade(0.5f, 0.5f));
+        }
+    }
+
+    private void StopGlideSFX()
+    {
+        if (!isFlySequencePlaying)
+            return;
+
+        isFlySequencePlaying = false;
+
+        if (currentAudioSource != null)
+        {
+            flySequence?.Kill();
+            flySequence = DOTween.Sequence();
+
+            if (currentAudioSource.isPlaying)
+                flySequence.Append(currentAudioSource.DOFade(0.0f, 0.5f)).SetUpdate(true);
         }
     }
 
@@ -142,6 +176,7 @@ public class PigeonSFX : MonoBehaviour
 
     private void OnDestroy()
     {
+        PauseMenu.OnPauseGame.RemoveListener(HandlePause);
         flySequence?.Kill();
         if (clearFlySource != null)
             Destroy(clearFlySource.gameObject);

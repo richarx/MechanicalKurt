@@ -1,20 +1,32 @@
+using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Rendering.Universal;
 
 public class Poop : MonoBehaviour
 {
-    Rigidbody _rigidbody;
+    [SerializeField] private Material splatterMaterial;
+    [SerializeField] private DecalProjector decalProjectorPrefab;
+    [SerializeField] private List<Texture> splatterTextures;
 
+    private Rigidbody _rigidbody;
 
-    void Start()
+    private void Start()
     {
         _rigidbody = GetComponent<Rigidbody>();
     }
 
-    void OnCollisionEnter(Collision collision)
+    private void OnCollisionEnter(Collision collision)
     {
-        transform.position = collision.contacts[0].point;
-        transform.up = collision.contacts[0].normal;
-        transform.parent = collision.transform;
-        _rigidbody.isKinematic = true;
+        SpawnSplatter(collision.contacts[0].point);
+        Destroy(gameObject);
+    }
+
+    private void SpawnSplatter(Vector3 position)
+    {
+        DecalProjector decal = Instantiate(decalProjectorPrefab, position, Quaternion.identity);
+        Material material = new Material(splatterMaterial);
+        material.SetTexture("_DecalColorMap", splatterTextures[Random.Range(0, splatterTextures.Count)]);
+        decal.material = material;
+        decal.transform.rotation = Quaternion.Euler(new Vector3(90.0f, 0.0f, 0.0f));
     }
 }

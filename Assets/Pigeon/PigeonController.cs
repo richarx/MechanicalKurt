@@ -11,6 +11,7 @@ public struct PigeonInput : IPredictedData
     public bool Flap;
     public bool Dive;
     public bool Brake;
+    public bool Dance;
     public bool BarrelLeft;
     public bool BarrelRight;
     public bool Interact;
@@ -73,6 +74,8 @@ public struct PigeonState : IPredictedData<PigeonState>
 
     /// <summary>PigeonController.MovementState du dernier tick.</summary>
     public byte Mode;
+    /// <summary>Descente en vol stationnaire : au sol, le joystick doit revenir avant de pouvoir marcher.</summary>
+    public bool JoystickNeedsReset;
     /// <summary>Temps depuis le dernier tick en piqué : redressement rapide juste après.</summary>
     public float SinceDive;
     /// <summary>Endurance : battre des ailes en vol la consomme (voir PigeonStamina).</summary>
@@ -189,6 +192,9 @@ public partial class PigeonController : PredictedIdentity<PigeonInput, PigeonSta
     /// <summary>Roucoulement, déclenché sur chaque machine (son, bulle chez les autres joueurs).</summary>
     [field: SerializeField]
     public UnityEvent OnCoo { get; private set; } = new UnityEvent();
+    /// <summary>L'état de vol change (ancien, nouveau) : déclenché par la vue, sur chaque machine.</summary>
+    [field: SerializeField]
+    public UnityEvent<MovementState, MovementState> OnChangeState { get; private set; } = new UnityEvent<MovementState, MovementState>();
 
     CharacterController _controller;
     IPigeonControls _controls;
@@ -263,15 +269,18 @@ public partial class PigeonController : PredictedIdentity<PigeonInput, PigeonSta
         Flapping,
         Diving,
         Gliding,
-        Falling
+        Falling,
+        HoverFlapping,
+        Dancing
     }
 
     /// <summary>Ce que fait le pigeon (au sol, vol stationnaire, battements…), lu depuis la vue : le même sur chaque machine.</summary>
     public MovementState CurrentPigeonState => (MovementState)_viewState.Mode;
     public bool IsFlapping => CurrentPigeonState == MovementState.Flapping;
     public bool IsDiving => CurrentPigeonState == MovementState.Diving;
-    /// <summary>Frein tenu : vol stationnaire en l'air.</summary>
-    public bool IsHovering => CurrentPigeonState == MovementState.Braking;
+    /// <summary>Frein tenu : vol stationnaire en l'air, en battant des ailes ou non.</summary>
+    public bool IsHovering => CurrentPigeonState is MovementState.Braking or MovementState.HoverFlapping;
+    public bool IsDancing => CurrentPigeonState == MovementState.Dancing;
     /// <summary>Endurance lue depuis la vue (0 sans PigeonStamina).</summary>
     public float Stamina => _viewState.Stamina;
     public byte StaminaBoosts => _viewState.StaminaBoosts;
@@ -487,8 +496,8 @@ public partial class PigeonController : PredictedIdentity<PigeonInput, PigeonSta
         MovementState mode = ComputeMovementState(input, s);
         s.Mode = (byte)mode;
         s.SinceDive = Mathf.Min(s.SinceDive + dt, 10f);
-        Vector3 velocity = mode == MovementState.Grounded
-            ? GroundMovement(input, ref s, dt)
+        Vector3 velocity = mode is MovementState.Grounded or MovementState.Dancing
+            ? GroundMovement(input, ref s, mode, dt)
             : CalculateFlightPhysics(input, ref s, mode, dt);
 
         velocity = PigeonFan.ApplyUpdrafts(s.Position, velocity, dt, s.Grounded);

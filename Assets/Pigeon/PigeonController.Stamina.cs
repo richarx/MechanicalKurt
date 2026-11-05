@@ -5,10 +5,10 @@ public partial class PigeonController
     MovementState ComputeMovementState(in PigeonInput input, in PigeonState s)
     {
         if (s.Grounded && (s.LastVelocity.y <= 0.001f || s.SupportId != 0))
-            return MovementState.Grounded;
+            return input.Dance ? MovementState.Dancing : MovementState.Grounded;
         if (input.Brake || FinishedRace(s))
-            return MovementState.Braking;
-        if (input.Flap && CanFlap(s))
+            return input.Flap && CanFlap(s, MovementState.HoverFlapping) ? MovementState.HoverFlapping : MovementState.Braking;
+        if (input.Flap && CanFlap(s, MovementState.Flapping))
             return MovementState.Flapping;
         if (input.Dive)
             return MovementState.Diving;
@@ -19,11 +19,11 @@ public partial class PigeonController
     static bool FinishedRace(in PigeonState s) => s.Race.Active && s.Race.Place > 0;
 
     /// <summary>Un battement commencé continue tant qu'il reste de l'endurance ; pour en commencer un, il faut le seuil.</summary>
-    bool CanFlap(in PigeonState s)
+    bool CanFlap(in PigeonState s, MovementState flappingMode)
     {
         if (!UsesStamina)
             return true;
-        bool keepsFlapping = (MovementState)s.Mode == MovementState.Flapping && s.Stamina > 0f;
+        bool keepsFlapping = (MovementState)s.Mode == flappingMode && s.Stamina > 0f;
         return keepsFlapping || s.Stamina >= _stamina.FlapThreshold;
     }
 
@@ -34,7 +34,7 @@ public partial class PigeonController
         float rate;
         if (mode == MovementState.Diving)
             rate = _stamina.RecoveryRateDive;
-        else if (mode == MovementState.Flapping)
+        else if (mode is MovementState.Flapping or MovementState.HoverFlapping)
             rate = -_stamina.DepletionRateFlap;
         else if (mode == MovementState.Braking)
             rate = _stamina.RecoveryRateBrake;

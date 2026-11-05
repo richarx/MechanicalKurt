@@ -118,7 +118,7 @@ public partial class ScenarioRunner
 
         MissionStartZone startZone = null;
         foreach (MissionStartZone candidate in FindObjectsByType<MissionStartZone>(FindObjectsInactive.Exclude))
-            if (candidate.Prompt != null && (startZone == null || string.CompareOrdinal(candidate.name, startZone.name) < 0))
+            if (candidate.Prompt != null && candidate.IsUnlocked && (startZone == null || string.CompareOrdinal(candidate.name, startZone.name) < 0))
                 startZone = candidate;
         if (startZone != null)
         {

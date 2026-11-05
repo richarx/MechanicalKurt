@@ -2,6 +2,7 @@ using System;
 using DG.Tweening;
 using TMPro;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.InputSystem;
 using UnityEngine.UI;
 
@@ -30,10 +31,20 @@ public class PauseMenu : MonoBehaviour
     [SerializeField] private Button copyCodeButton;
     [SerializeField] private TextMeshProUGUI copyFeedbackText;
 
+    public static UnityEvent OnPauseGame = new UnityEvent();
+    public static UnityEvent OnResumeGame = new UnityEvent();
+
+    public static PauseMenu instance;
+
     private bool isPaused;
 
     private Sequence currentSequence;
     private PlayerControls pausedControls;
+
+    private void Awake()
+    {
+        instance = this;
+    }
 
     private void Start()
     {
@@ -66,6 +77,8 @@ public class PauseMenu : MonoBehaviour
 
     private void OpenMenu()
     {
+        OnPauseGame?.Invoke();
+
         if (currentSequence != null && currentSequence.IsPlaying())
             currentSequence.Kill();
 
@@ -105,6 +118,7 @@ public class PauseMenu : MonoBehaviour
         currentSequence.Append(backgroundMaterial.DOColor(Color.clear, "_Tint", 0.3f));
         currentSequence.AppendCallback(() => menuHolder.SetActive(false));
         currentSequence.AppendCallback(() => SetLocalPigeonPaused(false));
+        currentSequence.AppendCallback(() => OnResumeGame?.Invoke());
         currentSequence.SetUpdate(true);
     }
 
