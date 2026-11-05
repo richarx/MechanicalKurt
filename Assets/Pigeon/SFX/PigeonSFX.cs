@@ -72,7 +72,8 @@ public class PigeonSFX : MonoBehaviour
                 SFXManager.Instance.PlaySFX(exitWater);
         }
 
-        if (pigeonController.CurrentPigeonState == PigeonController.PigeonState.Gliding && !pigeonController.IsStun && !PauseMenu.instance.IsPaused)
+        bool isValidState = pigeonController.CurrentPigeonState == PigeonController.PigeonState.Gliding || pigeonController.CurrentPigeonState == PigeonController.PigeonState.Diving;
+        if (isValidState && !pigeonController.IsStun && !PauseMenu.instance.IsPaused)
             StartGlideSFX();
         else
             StopGlideSFX();
