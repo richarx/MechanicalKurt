@@ -41,6 +41,7 @@ public partial class ScenarioRunner
         Solo("Lancement en batch sans son", r => r.BatchIsSilent()),
         Solo("Commandes tactiles et inclinaison", r => r.MobileTouchControls()),
         Solo("Caca : lâché comme une bombe", r => r.PoopDropsLikeABomb()),
+        Solo("Téléphone : rendu allégé, assets intacts", r => r.MobileRenderingIsLighter()),
         Solo("Dialogues : invite et touches", r => r.DialogPrompt()),
         Solo("Course chronométrée : anneaux, chrono, place, classement", r => r.TimedRaceSolo()),
         Solo("Course chronométrée : plusieurs tours, sans place quand on est seul", r => r.TimedRaceLapsAlone()),
