@@ -18,6 +18,8 @@ public struct PigeonInput : IPredictedData
     public bool Coo;
     public bool Respawn;
     public bool MovementFrozen;
+    /// <summary>Plaqué au sol par une cinématique tant qu'il n'y est pas.</summary>
+    public bool ForceLanding;
     /// <summary>Premier appui de chute libre détecté entre deux ticks, même s'il est déjà relâché.</summary>
     public FreeFallChallenge.LossReason FreeFallAction;
     /// <summary>Secondes écoulées depuis le précédent relevé d'input jusqu'à cet appui.</summary>
@@ -454,12 +456,6 @@ public partial class PigeonController : PredictedIdentity<PigeonInput, PigeonSta
             s.LastVelocity = Vector3.zero;
             s.PendingImpulse = Vector3.zero;
             ClearSupport(ref s);
-            if (s.MovementFrozen && !s.Frozen && !s.Stunned)
-            {
-                // Arrêté par une cinématique, même en plein vol : remis à l'horizontale, il bat des ailes sur place ou danse.
-                s.Pitch = Mathf.MoveTowardsAngle(s.Pitch, 0f, FrozenLevelingSpeed * dt);
-                s.Mode = (byte)(input.Dance ? MovementState.Dancing : s.Grounded ? MovementState.Grounded : MovementState.Braking);
-            }
             return;
         }
 
@@ -494,6 +490,12 @@ public partial class PigeonController : PredictedIdentity<PigeonInput, PigeonSta
             }
         }
 
+        if (input.ForceLanding && !s.Grounded)
+        {
+            SimulateForcedLanding(ref s, dt);
+            return;
+        }
+
         if (input.BarrelLeft)
             TryBarrelRoll(input, ref s, true);
         if (input.BarrelRight)
@@ -514,12 +516,7 @@ public partial class PigeonController : PredictedIdentity<PigeonInput, PigeonSta
             velocity += UnderwaterThrust(s, velocity) * dt;
         }
 
-        if (_water != null && velocity.y < 0f && dt > 0f)
-        {
-            float minimumY = _water.transform.position.y - _waterLevelModifier - _maxUnderwaterDepth;
-            float allowedDrop = Mathf.Max(0f, s.Position.y - minimumY);
-            velocity.y = Mathf.Max(velocity.y, -allowedDrop / dt);
-        }
+        velocity = LimitUnderwaterDepth(s, velocity, dt);
 
         _stunPossible = !UnderWater(s.Position)
             && s.StunImmuneRemaining < 0f
@@ -570,7 +567,39 @@ public partial class PigeonController : PredictedIdentity<PigeonInput, PigeonSta
         _teleportEvent.Invoke(position - previous);
     }
 
-    const float FrozenLevelingSpeed = 180f;
+    Vector3 LimitUnderwaterDepth(in PigeonState s, Vector3 velocity, float dt)
+    {
+        if (_water == null || velocity.y >= 0f || dt <= 0f)
+            return velocity;
+        float minimumY = _water.transform.position.y - _waterLevelModifier - _maxUnderwaterDepth;
+        float allowedDrop = Mathf.Max(0f, s.Position.y - minimumY);
+        velocity.y = Mathf.Max(velocity.y, -allowedDrop / dt);
+        return velocity;
+    }
+
+    const float ForcedLandingSpeed = 30f;
+    const float ForcedLandingAcceleration = 80f;
+    const float ForcedLandingLeveling = 360f;
+
+    /// <summary>Plaqué au sol par une cinématique : il perd son élan et tombe droit, sans s'assommer.</summary>
+    void SimulateForcedLanding(ref PigeonState s, float dt)
+    {
+        s.Mode = (byte)MovementState.Falling;
+        s.PendingImpulse = Vector3.zero;
+        s.PreserveTeleportPitch = false;
+        s.Pitch = Mathf.MoveTowardsAngle(s.Pitch, 0f, ForcedLandingLeveling * dt);
+        _stunPossible = false;
+
+        float fall = Mathf.MoveTowards(Mathf.Min(s.LastVelocity.y, 0f), -ForcedLandingSpeed, ForcedLandingAcceleration * dt);
+        MoveController(ref s, LimitUnderwaterDepth(s, new Vector3(0f, fall, 0f), dt), dt);
+        UpdateStamina(ref s, MovementState.Falling, dt);
+        if (s.Grounded)
+        {
+            _landEvent.Invoke();
+            if (_stamina != null)
+                AddStaminaBoost(ref s, _stamina.MaxStamina);
+        }
+    }
 
     static Vector3 ForwardOf(float pitch, float yaw) => Quaternion.Euler(-pitch, yaw, 0f) * Vector3.forward;
 

@@ -1,3 +1,4 @@
+using System.Collections;
 using DG.Tweening;
 using Unity.Cinemachine;
 using UnityEngine;
@@ -110,13 +111,27 @@ public class PigeonEquipment : MonoBehaviour
             return;
         }
 
-        // Au sol comme en plein vol : le pigeon s'arrête sur place et joue l'animation.
+        // En plein vol, le pigeon est d'abord plaqué au sol : la danse se joue posée.
         _cinematicPlaying = true;
-        bool wasFrozen = _pigeon != null && _pigeon.IsMovementFreezeRequested;
         if (_pigeon != null)
-            _pigeon.SetMovementFrozen(true);
+            _pigeon.SetForcedLanding(true);
         if (playerControls != null)
             playerControls.SetControlsBlocked(true);
+        StartCoroutine(PlayCinematic(equipment, toggle));
+    }
+
+    /// <summary>Sans sol à atteindre (au-dessus de l'eau), la cinématique part quand même.</summary>
+    const float MaxLandingWait = 3f;
+
+    private IEnumerator PlayCinematic(Equipment equipment, bool toggle)
+    {
+        float landingWait = 0f;
+        while (_pigeon != null && !_pigeon.IsGrounded && landingWait < MaxLandingWait)
+        {
+            landingWait += Time.deltaTime;
+            yield return null;
+        }
+
         if (equipmentCamera != null)
             equipmentCamera.Priority = 100;
 
@@ -133,7 +148,7 @@ public class PigeonEquipment : MonoBehaviour
 
         sequence.AppendCallback(() => { if (equipmentCamera != null) equipmentCamera.Priority = 0; });
         sequence.AppendCallback(() => { if (playerControls != null) playerControls.SetControlsBlocked(false); });
-        sequence.AppendCallback(() => { if (_pigeon != null) _pigeon.SetMovementFrozen(wasFrozen); });
+        sequence.AppendCallback(() => { if (_pigeon != null) _pigeon.SetForcedLanding(false); });
         sequence.AppendCallback(() => _cinematicPlaying = false);
         sequence.AppendCallback(FinishUnlock);
     }

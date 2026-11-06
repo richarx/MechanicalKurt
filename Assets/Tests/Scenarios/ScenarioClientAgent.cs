@@ -243,7 +243,7 @@ public class ScenarioClientAgent : MonoBehaviour
             case "racesetup":
             {
                 string[] parts = argument.Split(';');
-                TimedRace race = FindAnyObjectByType<TimedRace>();
+                TimedRace race = ScenarioRunner.FindTimedRace();
                 race.SetLapsForTests(int.Parse(parts[0], System.Globalization.CultureInfo.InvariantCulture));
                 race.SetGraceForTests(float.Parse(parts[1], System.Globalization.CultureInfo.InvariantCulture));
                 return "";
@@ -519,7 +519,7 @@ public class ScenarioClientAgent : MonoBehaviour
         if (zeppelin != null)
             Add(RemoteKeys.ZeppelinPosition, CityClock.Now.ToString("0.00", CultureInfo.InvariantCulture)
                 + ";" + ScenarioRunner.DescribeVector(zeppelin.transform.position));
-        TimedRace timedRace = FindAnyObjectByType<TimedRace>();
+        TimedRace timedRace = ScenarioRunner.FindTimedRace();
         Add(RemoteKeys.TimedRaceHud, (timedRace != null ? timedRace.HudText : null) ?? "");
         Add(RemoteKeys.TimedRaceResults, (timedRace != null ? timedRace.ResultsText : null) ?? "");
 

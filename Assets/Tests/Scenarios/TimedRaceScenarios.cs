@@ -5,7 +5,15 @@ using UnityEngine;
 
 public partial class ScenarioRunner
 {
-    static TimedRace FindTimedRace() => FindAnyObjectByType<TimedRace>();
+    /// <summary>Course de test, la même sur chaque machine et d'une exécution à l'autre (plus petit nom).</summary>
+    public static TimedRace FindTimedRace()
+    {
+        TimedRace race = null;
+        foreach (TimedRace candidate in FindObjectsByType<TimedRace>(FindObjectsInactive.Exclude))
+            if (race == null || string.CompareOrdinal(candidate.name, race.name) < 0)
+                race = candidate;
+        return race;
+    }
 
     /// <summary>Photo de la vue du joueur avec le HUD de course (son canvas passe un instant devant la caméra).</summary>
     static void CaptureWithRaceHud(string label)
@@ -59,8 +67,10 @@ public partial class ScenarioRunner
         yield return Check("Le dernier anneau est l'arrivée (triple)", race.Checkpoints[race.Checkpoints.Count - 1].GetComponentsInChildren<Renderer>(true).Length >= 3,
             race.Checkpoints[race.Checkpoints.Count - 1].name);
         float previousGrace = race.GraceSeconds;
+        int previousLaps = race.Laps;
         race.SetGraceForTests(4f);
-        Defer(() => race.SetGraceForTests(previousGrace));
+        race.SetLapsForTests(1);
+        Defer(() => { race.SetGraceForTests(previousGrace); race.SetLapsForTests(previousLaps); });
         // Record de session à 1 s, impossible à battre ici ; le record enregistré du joueur ne doit pas bouger.
         float savedRecord = race.SavedBestTime;
         Defer(() => race.SavedBestTime = savedRecord);
@@ -76,10 +86,26 @@ public partial class ScenarioRunner
             () => $"affichée {zone.Prompt.activeInHierarchy}, texte « {popup.KeyboardText} »");
         Capture(Camera.main, "timedrace_start");
 
+        DeliverySelectionCircle circle = zone.GetComponentInChildren<DeliverySelectionCircle>(true);
+        Renderer circleRenderer = circle != null ? circle.GetComponent<Renderer>() : null;
+        float restBottom = circleRenderer != null ? circleRenderer.bounds.min.y : 0f;
+        float highestBottom = float.MinValue, lowestBottom = float.MaxValue;
+
         Bot.PressInteract();
         bot.Controls.PressInteract();
-        yield return Expect("Décompte puis départ (sans cinématique)", () => race.Phase == TimedRace.RacePhase.Racing, zone.CountdownSeconds + 2f,
-            () => DescribeRace(race));
+        yield return Expect("Décompte puis départ (sans cinématique)", () =>
+        {
+            if (circleRenderer != null && zone.IsCircleHighlighted && circleRenderer.gameObject.activeInHierarchy)
+            {
+                highestBottom = Mathf.Max(highestBottom, circleRenderer.bounds.min.y);
+                lowestBottom = Mathf.Min(lowestBottom, circleRenderer.bounds.min.y);
+            }
+            return race.Phase == TimedRace.RacePhase.Racing;
+        }, zone.CountdownSeconds + 2f, () => DescribeRace(race));
+        if (circleRenderer != null)
+            yield return Check("Pendant le décompte, le cercle s'enfonce sans jamais sortir du sol",
+                lowestBottom < restBottom - 0.1f && highestBottom <= restBottom + 0.01f,
+                $"bas au repos {restBottom:0.00}, puis entre {lowestBottom:0.00} et {highestBottom:0.00}");
         yield return Expect("HUD : chrono, place sur 2 et meilleur temps", () => race.HudText != null && race.HudText.Contains("/ 2") && race.HudText.Contains("Ring 1")
             && race.HudText.Contains("Best 0:01.00"), 1f, () => DescribeRace(race));
 
@@ -158,10 +184,10 @@ public partial class ScenarioRunner
     {
         TimedRace race = FindTimedRace();
         yield return Check("Une course chronométrée existe", race != null && race.Checkpoints.Count >= 3);
-        yield return Check("Par défaut, un seul tour", race.Laps == 1, $"{race.Laps} tours");
         int count = race.Checkpoints.Count;
+        int previousLaps = race.Laps;
         race.SetLapsForTests(2);
-        Defer(() => race.SetLapsForTests(1));
+        Defer(() => race.SetLapsForTests(previousLaps));
         float savedRecord = race.SavedBestTime;
         Defer(() => race.SavedBestTime = savedRecord);
         PigeonController.RunInSimulation(_ => race.SetBestTimeForTests(1f));
@@ -212,11 +238,12 @@ public partial class ScenarioRunner
         yield return Check("Une course chronométrée existe", race != null);
         PigeonController remote = RemotePigeon;
         int count = race.Checkpoints.Count;
-        string previous = $"1;{race.GraceSeconds.ToString(System.Globalization.CultureInfo.InvariantCulture)}";
+        int previousLaps = race.Laps;
         float previousGrace = race.GraceSeconds;
+        string previous = $"{previousLaps};{previousGrace.ToString(System.Globalization.CultureInfo.InvariantCulture)}";
         race.SetLapsForTests(2);
         race.SetGraceForTests(3f);
-        Defer(() => { race.SetLapsForTests(1); race.SetGraceForTests(previousGrace); StartCoroutine(RemoteDo("racesetup", previous)); });
+        Defer(() => { race.SetLapsForTests(previousLaps); race.SetGraceForTests(previousGrace); StartCoroutine(RemoteDo("racesetup", previous)); });
         yield return RemoteDo("racesetup", "2;3");
         float savedRecord = race.SavedBestTime;
         Defer(() => race.SavedBestTime = savedRecord);
@@ -269,6 +296,12 @@ public partial class ScenarioRunner
         yield return Check("Une course chronométrée existe", race != null);
         MissionStartZone zone = race.DepartureZone;
         PigeonController remote = RemotePigeon;
+        int previousLaps = race.Laps;
+        string previousSetup = $"{previousLaps};{race.GraceSeconds.ToString(System.Globalization.CultureInfo.InvariantCulture)}";
+        string oneLap = $"1;{race.GraceSeconds.ToString(System.Globalization.CultureInfo.InvariantCulture)}";
+        race.SetLapsForTests(1);
+        Defer(() => { race.SetLapsForTests(previousLaps); StartCoroutine(RemoteDo("racesetup", previousSetup)); });
+        yield return RemoteDo("racesetup", oneLap);
         // Pas de record au départ : le premier arrivé en établit un, gardé par l'hôte (restauré après le test).
         float savedRecord = race.SavedBestTime;
         Defer(() => race.SavedBestTime = savedRecord);

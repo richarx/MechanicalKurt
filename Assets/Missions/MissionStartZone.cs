@@ -463,8 +463,9 @@ public class MissionStartZone : PredictedIdentity<MissionStartState>
         if (_circle == null)
             return;
 
+        // Toujours au moins sa taille de repos : grandir enfonce son bas dans le sol, rétrécir le ferait sortir du sol.
         if (counting)
-            _circle.localScale = _circleScale * (1f + 0.12f * Mathf.Sin(Time.time * 10f));
+            _circle.localScale = _circleScale * (1f + 0.12f * (1f + Mathf.Sin(Time.time * 10f)));
         if (counting == _circleHighlighted)
             return;
 

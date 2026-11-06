@@ -7,6 +7,7 @@ public partial class PigeonController
     bool _respawnRequested;
     bool _movementFreezeRequested;
     bool _forcedDance;
+    bool _forcedLanding;
     byte _equipmentWearRequested;
     byte _equipmentToggleRequested;
 
@@ -29,6 +30,13 @@ public partial class PigeonController
     {
         if (isController)
             _forcedDance = dancing;
+    }
+
+    /// <summary>Plaque au sol le pigeon contrôlé ici pendant une cinématique. La simulation applique et réplique la chute.</summary>
+    public void SetForcedLanding(bool landing)
+    {
+        if (isController)
+            _forcedLanding = landing;
     }
 
     /// <summary>Remplace la source d'input (bots, scénarios de test). null rétablit le composant IPigeonControls.</summary>
@@ -78,6 +86,7 @@ public partial class PigeonController
         _freeFallInputWindowStarted = Time.timeAsDouble;
         input.Respawn = _respawnRequested;
         input.MovementFrozen = _movementFreezeRequested;
+        input.ForceLanding = _forcedLanding;
         _respawnRequested = false;
         input.EquipmentWear = _equipmentWearRequested;
         input.EquipmentToggle = _equipmentToggleRequested;

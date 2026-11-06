@@ -194,7 +194,7 @@ public class PidgeonVfx : MonoBehaviour
 
     private void UpdateWingTrails()
     {
-        bool shouldBeActive = !pigeonController.IsGrounded && !pigeonController.IsHovering && !pigeonController.IsDancing && Time.time - preventEarlyWingEmissionTimestamp >= 0.3f;
+        bool shouldBeActive = !pigeonController.IsGrounded && !pigeonController.IsHovering && Time.time - preventEarlyWingEmissionTimestamp >= 0.3f;
 
         if (shouldBeActive != isFlyingVfxActive)
         {

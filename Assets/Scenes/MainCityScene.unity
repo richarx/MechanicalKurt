@@ -47486,6 +47486,7 @@ MonoBehaviour:
   _departureZone: {fileID: 729907227}
   _departureMarker: {fileID: 649412719}
   _checkpointsRoot: {fileID: 248999258}
+  _laps: 3
   _upcomingVisible: 3
   _upcomingAlpha: 0.45
   _graceSeconds: 30
@@ -103990,6 +103991,7 @@ MonoBehaviour:
   _departureZone: {fileID: 850117008}
   _departureMarker: {fileID: 1517913642}
   _checkpointsRoot: {fileID: 1223652471}
+  _laps: 1
   _upcomingVisible: 3
   _upcomingAlpha: 0.45
   _graceSeconds: 30
