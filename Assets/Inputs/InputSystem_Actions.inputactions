@@ -633,6 +633,28 @@
                     "action": "PrecisionCamera",
                     "isComposite": false,
                     "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "b6a1f3d2-7c84-4e1b-9a52-3d0e6f7a1c41",
+                    "path": "<Keyboard>/x",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "PrecisionCamera",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "c7b2e4a3-8d95-4f2c-8b63-4e1f7a8b2d52",
+                    "path": "<Mouse>/middleButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "PrecisionCamera",
+                    "isComposite": false,
+                    "isPartOfComposite": false
                 }
             ]
         },
