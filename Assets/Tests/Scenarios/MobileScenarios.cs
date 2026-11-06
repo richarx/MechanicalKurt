@@ -26,6 +26,18 @@ public partial class ScenarioRunner
                 () => $"caméra {swapper.Current}, active {brain.ActiveVirtualCamera?.Name}, état {Pigeon.CurrentPigeonState}, position {Pigeon.transform.position}");
         }
 
+        Vector3 inZone = colliders[0].bounds.center;
+        yield return Check("Dans la zone : forcée en vol, pas au sol", PrecisionCameraZone.Forces(inZone, false) && !PrecisionCameraZone.Forces(inZone, true));
+        Bot.Brake = false;
+        bool hasFloor = Physics.Raycast(inZone, Vector3.down, out RaycastHit floor, 50f, Physics.DefaultRaycastLayers, QueryTriggerInteraction.Ignore);
+        yield return Check("Un sol sous la zone", hasFloor, $"depuis {inZone}");
+        yield return Teleport(Pigeon, floor.point + Vector3.up * 0.4f, Quaternion.identity, "Posé dans la zone");
+        yield return ExpectLanded(Pigeon, 4f);
+        yield return Expect("Au sol : retour à la caméra normale", () => Pigeon.IsGrounded && swapper.Current != CameraSwapper.CameraType.Precision, 2f,
+            () => $"caméra {swapper.Current}, état {Pigeon.CurrentPigeonState}, position {Pigeon.transform.position}, dans la zone {zone.Contains(Pigeon.transform.position)}");
+        Capture(Camera.main, "precision_zone_ground");
+        Bot.Brake = true;
+
         yield return Teleport(Pigeon, colliders[0].bounds.center + Vector3.up * 300f, Quaternion.identity, "Loin au-dessus de la zone");
         yield return Expect("Hors de la zone : retour à l'orbitale", () => swapper.Current == CameraSwapper.CameraType.Orbital, 2f, () => $"caméra {swapper.Current}");
         Bot.Brake = false;

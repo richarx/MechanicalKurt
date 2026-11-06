@@ -10,8 +10,6 @@ public class PrecisionCameraZone : MonoBehaviour
 {
     static readonly List<PrecisionCameraZone> Zones = new List<PrecisionCameraZone>();
 
-    [SerializeField, Tooltip("Forcer aussi la caméra quand le pigeon est posé. Décoché : seulement en vol.")]
-    bool _alsoOnGround = true;
     [SerializeField, Tooltip("Couleur des colliders dans la vue Scene, pour les placer.")]
     Color _gizmoColor = new Color(0.2f, 1f, 0.4f, 0.25f);
 
@@ -36,8 +34,11 @@ public class PrecisionCameraZone : MonoBehaviour
     /// <summary>Une zone active force la caméra de précision à cet endroit.</summary>
     public static bool Forces(Vector3 position, bool grounded)
     {
+        // Au sol, la caméra de précision empêche de bien se diriger en marchant.
+        if (grounded)
+            return false;
         for (int i = 0; i < Zones.Count; i++)
-            if ((!grounded || Zones[i]._alsoOnGround) && Zones[i].Contains(position))
+            if (Zones[i].Contains(position))
                 return true;
         return false;
     }
