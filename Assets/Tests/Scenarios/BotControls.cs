@@ -57,7 +57,15 @@ public class BotControls : IPigeonControls
     {
         get { bool v = _cooing; _cooing = false; return v; }
     }
-    public bool ConsumeShit => false;
+    bool _shit;
+
+    /// <summary>Un appui sur la touche de caca.</summary>
+    public void PressShit() => _shit = true;
+
+    public bool ConsumeShit
+    {
+        get { bool v = _shit; _shit = false; return v; }
+    }
     public bool ConsumeLeftFlex => false;
     public bool ConsumeRightFlex => false;
 }
