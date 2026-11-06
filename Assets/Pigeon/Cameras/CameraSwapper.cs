@@ -67,6 +67,8 @@ public class CameraSwapper : MonoBehaviour
         PigeonController.MovementState state = pigeonController.CurrentPigeonState;
         if (waterPlane != null && pigeonController.transform.position.y < waterPlane.transform.position.y)
             return CameraType.UnderWater;
+        if (PrecisionCameraZone.Forces(pigeonController.transform.position, pigeonController.IsGrounded))
+            return CameraType.Precision;
         if (state == PigeonController.MovementState.Braking && Time.time - lastMovementTimestamp <= 0.5f)
             return CameraType.Hover;
         else if (controls != null && controls.PrecisionCamera && state != PigeonController.MovementState.Grounded && state != PigeonController.MovementState.Dancing)
