@@ -73,6 +73,7 @@ public class MenuProbe : MonoBehaviour
         }
         yield return Until(() => ui.IsChoiceShown, 5f);
         Check("Écran de choix affiché", ui.IsChoiceShown);
+        Check("Dans le menu : le compteur de la musique n'a pas démarré", MusicPlayer.instance == null || !MusicPlayer.instance.HasJoinedGame);
         yield return new WaitForSecondsRealtime(3f);
         DescribeCanvases("choix");
         Capture("choice");
@@ -114,6 +115,7 @@ public class MenuProbe : MonoBehaviour
         Check("Pigeon du joueur apparu", local != null);
         yield return new WaitForSecondsRealtime(1f);
         Check("Pendant l'écran du code, commandes en pause", local != null && local.GetComponent<PlayerControls>().IsPaused);
+        Check("Écran du code : le compteur de la musique n'a toujours pas démarré", MusicPlayer.instance == null || !MusicPlayer.instance.HasJoinedGame);
         Check("Curseur libre dans le menu", Cursor.lockState == CursorLockMode.None, $"{Cursor.lockState}");
         DescribeCanvases("création");
         Capture("create");

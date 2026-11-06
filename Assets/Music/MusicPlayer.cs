@@ -90,8 +90,13 @@ public class MusicPlayer : MonoBehaviour
         lowPassAudioSource.loop = true;
     }
 
+    /// <summary>Le joueur est arrivé dans la partie : son pigeon existe et le menu est fermé.</summary>
+    public bool HasJoinedGame => PigeonController.Local != null && !GameSession.InMenu;
+
     private IEnumerator Start()
     {
+        // Le délai compte depuis l'arrivée dans la partie : la musique ne démarre jamais dans le menu.
+        yield return new WaitUntil(() => HasJoinedGame);
         yield return new WaitForSeconds(60.0f);
         yield return new WaitUntil(() => !IsPlayingCinematicMusic);
 
