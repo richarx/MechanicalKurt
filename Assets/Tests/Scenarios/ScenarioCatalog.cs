@@ -38,6 +38,7 @@ public partial class ScenarioRunner
         Solo("Course chronométrée : anneaux, chrono, place, classement", r => r.TimedRaceSolo()),
         Solo("Nuit : lampadaires et phares allumés, éteints le jour", r => r.NightLights()),
         Solo("Roucoulement : bulle pour les autres, au bord de l'écran si loin", r => r.CooBubbles()),
+        Solo("Autres pigeons : traînée colorée et point discret", r => r.SeeOtherPigeons()),
 
         Multi("Multi : départ de course à 2 joueurs", r => r.MultiRaceStart()),
         Multi("Multi : victoire, gel et course refaite", r => r.MultiRaceWin()),

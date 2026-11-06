@@ -12,6 +12,16 @@ public class PidgeonVfx : MonoBehaviour
     [SerializeField] private CinemachineCamera cinemachineCamera;
     [SerializeField] private CinemachineImpulseSource impulseSource;
     [SerializeField] private float shakeForce;
+    [Header("Traînée des autres joueurs")]
+    [SerializeField, Min(1.0f)] private float otherTrailWidthFactor = 2.5f;
+    [SerializeField, Min(1.0f)] private float otherTrailTimeFactor = 2.5f;
+
+    private float defaultTrailWidth;
+    private float defaultTrailTime;
+    private Gradient defaultTrailGradient;
+    private bool trailStyleApplied;
+    private bool trailIsOther;
+    private Color trailColor;
 
     private CharacterController characterController;
     private PigeonController pigeonController;
@@ -38,10 +48,15 @@ public class PidgeonVfx : MonoBehaviour
         wingTrailRendererLeft.emitting = false;
         wingTrailRendererRight.emitting = false;
         preventEarlyWingEmissionTimestamp = Time.time;
+
+        defaultTrailWidth = wingTrailRendererLeft.widthMultiplier;
+        defaultTrailTime = wingTrailRendererLeft.time;
+        defaultTrailGradient = wingTrailRendererLeft.colorGradient;
     }
 
     private void Update()
     {
+        UpdateTrailStyle();
         UpdateWingTrails();
         UpdateUnderWaterEffects();
 
@@ -144,6 +159,36 @@ public class PidgeonVfx : MonoBehaviour
         {
             if (postProcessSequence.IsActive())
                 postProcessSequence.Complete();
+        }
+    }
+
+    /// <summary>Traînée des autres joueurs à leur couleur, plus large et plus longue ; la sienne ne change pas.</summary>
+    private void UpdateTrailStyle()
+    {
+        bool isOther = pigeonController != PigeonController.Local;
+        Color color = pigeonController.PlayerColor;
+        if (trailStyleApplied && isOther == trailIsOther && color == trailColor)
+            return;
+
+        trailStyleApplied = true;
+        trailIsOther = isOther;
+        trailColor = color;
+        ApplyTrailStyle(wingTrailRendererLeft, isOther, color);
+        ApplyTrailStyle(wingTrailRendererRight, isOther, color);
+    }
+
+    private void ApplyTrailStyle(TrailRenderer trail, bool isOther, Color color)
+    {
+        trail.widthMultiplier = isOther ? defaultTrailWidth * otherTrailWidthFactor : defaultTrailWidth;
+        trail.time = isOther ? defaultTrailTime * otherTrailTimeFactor : defaultTrailTime;
+        if (isOther)
+        {
+            trail.startColor = new Color(color.r, color.g, color.b, 1.0f);
+            trail.endColor = new Color(color.r, color.g, color.b, 0.0f);
+        }
+        else
+        {
+            trail.colorGradient = defaultTrailGradient;
         }
     }
 

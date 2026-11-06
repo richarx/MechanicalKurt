@@ -19,6 +19,7 @@ public class PigeonCooBeacon : MonoBehaviour
     {
         _pigeon = GetComponent<PigeonController>();
         _pigeon.OnCoo.AddListener(OnCoo);
+        gameObject.AddComponent<PigeonPlayerDot>();
     }
 
     void OnDestroy()

@@ -36,6 +36,49 @@ public partial class ScenarioRunner
             canvas.renderMode = RenderMode.ScreenSpaceOverlay;
     }
 
+    IEnumerator SeeOtherPigeons()
+    {
+        CameraFrame(out Vector3 forward, out Vector3 _);
+        TrailRenderer ownTrail = Pigeon.GetComponentInChildren<TrailRenderer>();
+        float ownWidth = ownTrail.widthMultiplier;
+        Color ownStart = ownTrail.startColor;
+
+        var bots = new List<SpawnedBot>();
+        yield return SpawnBot(InView(0.5f, 0.6f, 15f), Quaternion.LookRotation(forward), bots);
+        PigeonController other = bots[0].Pigeon;
+        bots[0].Controls.Brake = true;
+        PigeonPlayerDot dot = other.GetComponent<PigeonPlayerDot>();
+        yield return Check("L'autre pigeon a son point", dot != null);
+        yield return Expect("Point affiché à sa couleur", () => dot.IsShown && ColorsMatch(dot.Color, other.PlayerColor), 2f,
+            () => $"affiché {dot.IsShown}, point #{ColorUtility.ToHtmlStringRGB(dot.Color)}, joueur #{ColorUtility.ToHtmlStringRGB(other.PlayerColor)}");
+        yield return Check("Point discret", dot.Color.a <= 0.8f, $"opacité {dot.Color.a:0.00}");
+
+        PigeonPlayerDot ownDot = Pigeon.GetComponent<PigeonPlayerDot>();
+        yield return Check("Pas de point sur son propre pigeon", ownDot == null || !ownDot.IsShown);
+
+        TrailRenderer otherTrail = other.GetComponentInChildren<TrailRenderer>();
+        yield return Expect("Traînée de l'autre à sa couleur, plus large et plus longue",
+            () => ColorsMatch(otherTrail.startColor, other.PlayerColor) && otherTrail.widthMultiplier > ownWidth * 2f && otherTrail.time > ownTrail.time * 2f, 1f,
+            () => $"couleur #{ColorUtility.ToHtmlStringRGB(otherTrail.startColor)}, largeur {otherTrail.widthMultiplier:0.00} / {ownWidth:0.00}, durée {otherTrail.time:0.00}");
+        yield return Check("Sa propre traînée ne change pas", ownTrail.widthMultiplier == ownWidth && ownTrail.startColor == ownStart,
+            $"largeur {ownTrail.widthMultiplier:0.00}, couleur #{ColorUtility.ToHtmlStringRGB(ownTrail.startColor)}");
+
+        // Un mur entre la caméra et l'autre pigeon cache le point.
+        Vector3 cameraPosition = Camera.main.transform.position;
+        Vector3 otherPosition = other.transform.position + Vector3.up * 1.2f;
+        GameObject wall = GameObject.CreatePrimitive(PrimitiveType.Cube);
+        Defer(() => Destroy(wall));
+        wall.name = "[Scenario] Wall";
+        wall.transform.position = Vector3.Lerp(cameraPosition, otherPosition, 0.5f);
+        wall.transform.localScale = new Vector3(6f, 6f, 0.5f);
+        wall.transform.rotation = Quaternion.LookRotation(otherPosition - cameraPosition);
+        yield return Expect("Un obstacle devant : le point disparaît", () => !dot.IsShown, 1.5f, () => $"opacité {dot.Color.a:0.00}");
+        Destroy(wall);
+        yield return Expect("Plus d'obstacle : le point revient", () => dot.IsShown, 1.5f, () => $"opacité {dot.Color.a:0.00}");
+    }
+
+    static bool ColorsMatch(Color a, Color b) => Mathf.Abs(a.r - b.r) < 0.01f && Mathf.Abs(a.g - b.g) < 0.01f && Mathf.Abs(a.b - b.b) < 0.01f;
+
     IEnumerator CooBubbles()
     {
         CameraFrame(out Vector3 forward, out Vector3 right);
@@ -107,6 +150,12 @@ public partial class ScenarioRunner
         Defer(() => _link?.Send("brake", "0"));
         yield return RemoteDo("brake", "1");
         PigeonCooBeacon beacon = remote.GetComponent<PigeonCooBeacon>();
+
+        PigeonPlayerDot dot = remote.GetComponent<PigeonPlayerDot>();
+        TrailRenderer trail = remote.GetComponentInChildren<TrailRenderer>();
+        yield return Expect("L'hôte voit le point et la traînée du second joueur à sa couleur",
+            () => dot.IsShown && ColorsMatch(dot.Color, remote.PlayerColor) && ColorsMatch(trail.startColor, remote.PlayerColor), 2f,
+            () => $"point {dot.IsShown} #{ColorUtility.ToHtmlStringRGB(dot.Color)}, traînée #{ColorUtility.ToHtmlStringRGB(trail.startColor)}, joueur #{ColorUtility.ToHtmlStringRGB(remote.PlayerColor)}");
 
         yield return RemoteDo("coo");
         yield return Expect("L'hôte voit la bulle du second joueur", () => beacon.Indicator != null && beacon.Indicator.IsShowing, 2f,
