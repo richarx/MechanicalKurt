@@ -312,6 +312,14 @@ public class ScenarioClientAgent : MonoBehaviour
                 return rule.ToString();
             }
 
+            case "reset-statue":
+            {
+                RoarCinematic roar = FindAnyObjectByType<RoarCinematic>(FindObjectsInactive.Include);
+                if (roar != null)
+                    roar.ResetForTests();
+                return "";
+            }
+
             case "reset-achievements":
                 if (AchievementManager.Instance != null)
                     AchievementManager.Instance.ResetAll();

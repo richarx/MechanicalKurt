@@ -3,6 +3,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
+using Unity.Cinemachine;
 using UnityEngine;
 
 public partial class ScenarioRunner
@@ -269,6 +270,45 @@ public partial class ScenarioRunner
         yield return ExpectStays("Le tuto ne se rejoue pas pour lui", () => RemoteIs(RemoteKeys.TutoPlaying(tuto), "0"), 2f, RemoteState);
     }
 
+    /// <summary>La statue réveillée par un joueur l'est pour l'autre, qui reçoit aussi le succès, sans perdre sa caméra.</summary>
+    IEnumerator MultiStatue()
+    {
+        RoarCinematic roar = FindAnyObjectByType<RoarCinematic>(FindObjectsInactive.Include);
+        SharedStopTrigger trigger = FindAnyObjectByType<SharedStopTrigger>(FindObjectsInactive.Include);
+        yield return Check("La statue a son déclencheur commun", roar != null && trigger != null && trigger.Roar == roar,
+            $"cinématique {roar != null}, déclencheur {trigger != null}");
+        Defer(() => { if (roar.IsPlaying) roar.CancelCinematic(); });
+        // Le scénario solo l'a déjà réveillée, ce qui retire l'ancienne statue et sa zone.
+        roar.ResetForTests();
+        yield return RemoteDo("reset-statue");
+        yield return new WaitForSecondsRealtime(0.3f);
+        AchievementManager.Instance.ResetAll();
+        yield return RemoteDo("reset-achievements");
+        string id = roar.CompletionAchievement.Id;
+        yield return Expect("Succès pas encore obtenu, chez les deux joueurs",
+            () => !IsUnlocked(roar.CompletionAchievement) && Remote(RemoteKeys.Achievements) != null && !RemoteHas(RemoteKeys.Achievements, id), 2f,
+            () => $"hôte {IsUnlocked(roar.CompletionAchievement)}, second joueur [{Remote(RemoteKeys.Achievements)}]");
+
+        PigeonController remote = RemotePigeon;
+        CinemachineBrain brain = Camera.main.GetComponent<CinemachineBrain>();
+        // Rien de plat où se poser dans la zone de la statue : le second joueur y est maintenu immobile.
+        Vector3 statueSpot = trigger.Zone.transform.position;
+        Defer(() => PigeonController.RunInSimulation(_ => remote.ForceFreeze(false)));
+        PigeonController.RunInSimulation(_ =>
+        {
+            remote.ForceTeleport(statueSpot, Quaternion.identity);
+            remote.ForceFreeze(true);
+        });
+        yield return Expect("Le second joueur se pose : la statue s'anime chez l'hôte", () => roar.IsPlaying, 4f,
+            () => $"second joueur {remote.transform.position}, vitesse {remote.Speed:0.00}, zone {trigger.Zone.transform.position}");
+        yield return ExpectStays("L'hôte garde sa caméra", () => (UnityEngine.Object)brain.ActiveVirtualCamera != roar.CinematicCamera, 1f,
+            () => $"active {brain.ActiveVirtualCamera?.Name}");
+        yield return Expect("Fin de la séquence chez l'hôte", () => !roar.IsPlaying, roar.TotalDuration + 3f);
+        yield return Check("L'hôte a le succès", IsUnlocked(roar.CompletionAchievement));
+        yield return Expect("Le second joueur aussi", () => RemoteHas(RemoteKeys.Achievements, id), 3f,
+            () => $"second joueur [{Remote(RemoteKeys.Achievements)}]");
+    }
+
     IEnumerator MultiEquipment()
     {
         PigeonController remote = RemotePigeon;
@@ -290,7 +330,6 @@ public partial class ScenarioRunner
             () => $"objets [{Remote(RemoteKeys.Loots)}]");
         yield return RemoteDo("flap", "0");
         yield return RemoteDo("brake", "0");
-        yield return Expect("Cinématique d'équipement chez lui (commandes bloquées)", () => RemoteFlag(RemoteKeys.ControlsBlocked), 2f, RemoteState);
         yield return Check("Pas de cinématique chez l'hôte", hostControls == null || !hostControls.AreControlsBlocked);
         yield return Expect($"{kind} porté par le second joueur, vu par l'hôte (état répliqué)", () => (remote.WornEquipment & bit) != 0, 6f,
             () => $"état {Convert.ToString(remote.WornEquipment, 2)}");

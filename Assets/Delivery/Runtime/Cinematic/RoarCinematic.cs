@@ -49,7 +49,16 @@ public class RoarCinematic : MonoBehaviour
     private PrioritySettings _previousPriority;
 
     // Conserve le nom pour les UnityEvents deja branches.
-    public void PlayCinematic()
+    public void PlayCinematic() => PlayShared(true);
+
+    /// <summary>Durée de la séquence, jusqu'à la fin de l'attente après Die.</summary>
+    public float TotalDuration => CameraToRoarDelay + RoarToDieDelay + DieToRestoreDelay;
+
+    /// <summary>
+    /// Joue la séquence sur cet écran. La caméra ne bascule que pour le joueur qui l'a déclenchée (<paramref name="withCamera"/>) :
+    /// les autres voient la statue s'animer sans perdre leur vue, et tous reçoivent le succès.
+    /// </summary>
+    public void PlayShared(bool withCamera)
     {
         if (!isActiveAndEnabled || IsPlaying)
             return;
@@ -60,12 +69,16 @@ public class RoarCinematic : MonoBehaviour
             return;
         }
 
-        CinemachineBrain brain = Camera.main != null ? Camera.main.GetComponent<CinemachineBrain>() : null;
-        if (CinematicCamera == null || !CinematicCamera.isActiveAndEnabled
-            || brain == null || !brain.isActiveAndEnabled || !brain.IsValidChannel(CinematicCamera))
+        CinemachineBrain brain = null;
+        if (withCamera)
         {
-            Debug.LogWarning("RoarCinematic : assigner une camera Cinemachine active, avec un Brain compatible sur la Main Camera.", this);
-            return;
+            brain = Camera.main != null ? Camera.main.GetComponent<CinemachineBrain>() : null;
+            if (CinematicCamera == null || !CinematicCamera.isActiveAndEnabled
+                || brain == null || !brain.isActiveAndEnabled || !brain.IsValidChannel(CinematicCamera))
+            {
+                Debug.LogWarning("RoarCinematic : assigner une camera Cinemachine active, avec un Brain compatible sur la Main Camera.", this);
+                return;
+            }
         }
 
         ActorAnimator.gameObject.SetActive(true);
@@ -84,19 +97,41 @@ public class RoarCinematic : MonoBehaviour
             StopCoroutine(_restoreRoutine);
             _restoreRoutine = null;
         }
-        if (_overriddenCamera != CinematicCamera)
+        if (withCamera)
         {
-            RestoreCameraImmediately();
-            _overriddenCamera = CinematicCamera;
-            _previousPriority = CinematicCamera.Priority;
-            _returnCamera = brain.ActiveVirtualCamera as CinemachineVirtualCameraBase;
+            if (_overriddenCamera != CinematicCamera)
+            {
+                RestoreCameraImmediately();
+                _overriddenCamera = CinematicCamera;
+                _previousPriority = CinematicCamera.Priority;
+                _returnCamera = brain.ActiveVirtualCamera as CinemachineVirtualCameraBase;
+            }
+            int livePriority = brain.ActiveVirtualCamera is CinemachineVirtualCameraBase liveCamera
+                ? liveCamera.Priority.Value : 0;
+            CinematicCamera.Priority = Mathf.Max(CameraPriority,
+                livePriority < int.MaxValue ? livePriority + 1 : int.MaxValue);
+            CinematicCamera.Prioritize();
         }
-        int livePriority = brain.ActiveVirtualCamera is CinemachineVirtualCameraBase liveCamera
-            ? liveCamera.Priority.Value : 0;
-        CinematicCamera.Priority = Mathf.Max(CameraPriority,
-            livePriority < int.MaxValue ? livePriority + 1 : int.MaxValue);
-        CinematicCamera.Prioritize();
         _routine = StartCoroutine(PlaySequence());
+    }
+
+#if UNITY_EDITOR
+    /// <summary>Scénarios : remet la statue d'origine, qui porte la zone de déclenchement.</summary>
+    public void ResetForTests()
+    {
+        CancelCinematic();
+        if (_oldGameObject != null)
+            _oldGameObject.SetActive(true);
+    }
+#endif
+
+    /// <summary>État final, sans séquence ni succès : pour un joueur arrivé après le réveil de la statue.</summary>
+    public void ShowAftermath()
+    {
+        if (ActorAnimator != null)
+            ActorAnimator.gameObject.SetActive(true);
+        if (_oldGameObject != null)
+            _oldGameObject.SetActive(false);
     }
 
     private IEnumerator PlaySequence()

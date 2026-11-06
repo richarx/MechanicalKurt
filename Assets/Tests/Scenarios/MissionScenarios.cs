@@ -132,8 +132,9 @@ public partial class ScenarioRunner
     {
         RoarCinematic roar = FindAnyObjectByType<RoarCinematic>();
         yield return Check("Une RoarCinematic active existe", roar != null);
-        PigeonStopZone stop = FindStopZoneCalling(roar);
-        yield return Check("Une PigeonStopZone déclenche la cinématique", stop != null);
+        SharedStopTrigger trigger = FindAnyObjectByType<SharedStopTrigger>();
+        yield return Check("Un déclencheur commun lance la cinématique", trigger != null && trigger.Roar == roar);
+        PigeonStopZone stop = trigger.Zone;
         yield return Check("Achievement de prière pas encore débloqué", !IsUnlocked(roar.CompletionAchievement));
         Defer(() => { if (roar.IsPlaying) roar.CancelCinematic(); });
 
