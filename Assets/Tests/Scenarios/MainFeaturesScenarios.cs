@@ -127,6 +127,12 @@ public partial class ScenarioRunner
             () => $"active {brain.ActiveVirtualCamera?.Name}, bot sous l'eau {bots[0].Pigeon.IsUndeWater}, choix du bot {botSwapper?.Current}");
         BotSpawner.Delete(bots[0].Pigeon);
 
+        var inputs = new Controls();
+        string bindings = string.Join(", ", System.Linq.Enumerable.Select(inputs.Player.PrecisionCamera.bindings, b => b.path));
+        inputs.Dispose();
+        yield return Check("Caméra de précision : touche X et bouton du milieu de la souris",
+            bindings.Contains("<Keyboard>/x") && bindings.Contains("<Mouse>/middleButton"), bindings);
+
         Vector3 sky = Pigeon.transform.position + Vector3.up * 25f;
         yield return Teleport(Pigeon, sky, Pigeon.transform.rotation, "En l'air");
         Bot.PrecisionCamera = true;
@@ -154,7 +160,7 @@ public partial class ScenarioRunner
         yield return Check("Lunettes pas encore portées", (Pigeon.WornEquipment & bit) == 0 && !equipment.IsWorn(PigeonEquipment.Equipment.Sunglasses));
         byte before = Pigeon.WornEquipment;
 
-        yield return HoldStillAt(loot.transform.position, loot.Radius, loot.StopSpeedThreshold, "loot de lunettes");
+        yield return HoldStillAt(loot.transform.position, loot.Radius, 0.15f, "loot de lunettes");
         yield return Expect("Le loot de lunettes est ramassé", () => loot == null, 2f);
         yield return Expect("Lunettes dans l'état du pigeon (bit 3)", () => (Pigeon.WornEquipment & bit) != 0, 3f,
             () => $"état {System.Convert.ToString(Pigeon.WornEquipment, 2)}");

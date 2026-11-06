@@ -22,19 +22,43 @@ public partial class ScenarioRunner
         yield return Check("Le pigeon a un PigeonEquipment", equipment != null);
         yield return Check($"{kind} pas encore porté", (Pigeon.WornEquipment & bit) == 0 && !equipment.IsWorn(kind));
 
-        yield return HoldStillAt(loot.transform.position, loot.Radius, loot.StopSpeedThreshold, $"objet {loot.name}");
-        yield return Expect("L'objet est ramassé (il disparaît)", () => loot == null, 2f);
-        yield return Expect("Cinématique d'équipement chez le joueur (commandes bloquées)",
-            () => playerControls == null || playerControls.AreControlsBlocked, 1f);
+        // En plein vol, à bonne vitesse : ramassé au passage, sans s'arrêter ni perdre les commandes.
+        Vector3 lootPosition = loot.transform.position;
+        yield return Teleport(Pigeon, lootPosition + Vector3.up * 20f, Quaternion.Euler(85f, 0f, 0f), $"Au-dessus de l'objet {loot.name}, nez en bas");
+        Bot.Dive = true;
+        float speedAtContact = 0f;
+        bool groundedAtContact = true;
+        float closest = float.MaxValue;
+        yield return Expect("Ramassé au contact, sans s'arrêter", () =>
+        {
+            speedAtContact = Pigeon.Speed;
+            groundedAtContact = Pigeon.IsGrounded;
+            closest = Mathf.Min(closest, Vector3.Distance(Pigeon.transform.position, lootPosition));
+            return loot == null;
+        }, 6f, () => $"vitesse {Pigeon.Speed:0.0}, au plus près {closest:0.0} m (rayon {(loot != null ? loot.Radius : 0f):0.0}), position {Pigeon.transform.position}, objet {lootPosition}");
+        Bot.Dive = false;
+        yield return Check("Il volait au moment du contact", speedAtContact > 1f && !groundedAtContact, $"vitesse {speedAtContact:0.0}, au sol {groundedAtContact}");
+        yield return Check("Pas de cinématique en vol : commandes libres", playerControls == null || !playerControls.AreControlsBlocked);
         yield return Expect($"{kind} porté dans l'état du pigeon (répliqué)", () => (Pigeon.WornEquipment & bit) != 0, 3f,
             () => $"état {System.Convert.ToString(Pigeon.WornEquipment, 2)}");
         yield return Expect($"{kind} visible sur le pigeon", () => equipment.IsWorn(kind), 1f);
-        yield return Expect("Fin de la cinématique : commandes rendues",
-            () => playerControls == null || !playerControls.AreControlsBlocked, 6f);
 
         PigeonEquipment.Equipment otherKind = kind == PigeonEquipment.Equipment.Shoes
             ? PigeonEquipment.Equipment.Hat : PigeonEquipment.Equipment.Shoes;
         byte otherBit = PigeonEquipment.Bit(otherKind);
+
+        // Posé et immobile : la cinématique d'équipement reste jouée.
+        PigeonEquipment.Equipment groundKind = PigeonEquipment.Equipment.Backpack;
+        if (groundKind == kind || groundKind == otherKind)
+            groundKind = kind != PigeonEquipment.Equipment.Hat && otherKind != PigeonEquipment.Equipment.Hat
+                ? PigeonEquipment.Equipment.Hat : PigeonEquipment.Equipment.Shoes;
+        yield return Teleport(Pigeon, lootPosition + Vector3.up * 0.5f, Quaternion.identity, "Retour au-dessus de l'objet");
+        yield return ExpectLanded(Pigeon, 6f);
+        equipment.UnlockItem(groundKind);
+        yield return Expect("Au sol : cinématique d'équipement (commandes bloquées)",
+            () => playerControls == null || playerControls.AreControlsBlocked, 1f);
+        yield return Expect("Fin de la cinématique : commandes rendues",
+            () => playerControls == null || !playerControls.AreControlsBlocked, 6f);
         var bots = new List<SpawnedBot>();
         Vector3 beside = Pigeon.transform.position + Pigeon.transform.right * 2f + Vector3.up * 0.5f;
         yield return SpawnBot(beside, Pigeon.transform.rotation, bots);

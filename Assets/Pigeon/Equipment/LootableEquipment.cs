@@ -20,14 +20,6 @@ public class LootableEquipment : MonoBehaviour
     [field: SerializeField, MinValue(0.01f), SuffixLabel("unités", true)]
     public float Radius { get; private set; } = 2f;
 
-    [field: SerializeField, MinValue(0f), SuffixLabel("unités/s", true)]
-    [field: Tooltip("Vitesse maximale pour considérer le pigeon à l'arrêt.")]
-    public float StopSpeedThreshold { get; private set; } = 0.15f;
-
-    [field: SerializeField, MinValue(0f), SuffixLabel("s", true)]
-    [field: Tooltip("Durée d'arrêt requise avant de déclencher l'événement. Mettre 0 pour un déclenchement immédiat.")]
-    public float StopDuration { get; private set; } = 0.25f;
-
     [field: SerializeField]
     [field: Tooltip("Reçoit le pigeon qui a ramassé l'objet, après l'équipement.")]
     public UnityEvent<PigeonController> OnPlayerStopped { get; private set; } = new UnityEvent<PigeonController>();
@@ -47,47 +39,26 @@ public class LootableEquipment : MonoBehaviour
         spinSequence.SetLoops(-1, LoopType.Restart);
     }
 
-    private float _stoppedTime;
-    private bool _hasTriggered;
-
     private void LateUpdate()
     {
-        if (Time.deltaTime <= 0f)
-            return;
-
         PigeonController pigeon = _pigeon != null ? _pigeon : PigeonController.Local;
 
-        // Evaluate after the player has moved in Update, using its actual speed.
-        bool stoppedInside = pigeon != null && pigeon.isActiveAndEnabled && !pigeon.IsStun &&
-                             (pigeon.transform.position - transform.position).sqrMagnitude <= Radius * Radius &&
-                             pigeon.Speed <= StopSpeedThreshold;
-
-        if (!stoppedInside)
-        {
-            _stoppedTime = 0f;
-            _hasTriggered = false;
-            return;
-        }
-
-        if (_hasTriggered)
+        // Ramassé au contact de la zone, même en plein vol. Evaluate after the player has moved in Update.
+        bool inside = pigeon != null && pigeon.isActiveAndEnabled && !pigeon.IsStun &&
+                      (pigeon.transform.position - transform.position).sqrMagnitude <= Radius * Radius;
+        if (!inside)
             return;
 
-        _stoppedTime += Time.deltaTime;
-        if (_stoppedTime >= StopDuration)
-        {
-            _hasTriggered = true;
+        glideSequence.Kill();
+        spinSequence.Kill();
 
-            glideSequence.Kill();
-            spinSequence.Kill();
+        PigeonEquipment equipment = pigeon.GetComponentInChildren<PigeonEquipment>();
+        if (equipment != null)
+            equipment.UnlockItem(_equipment);
+        else
+            Debug.LogWarning("LootableEquipment : le pigeon n'a pas de PigeonEquipment.", this);
 
-            PigeonEquipment equipment = pigeon.GetComponentInChildren<PigeonEquipment>();
-            if (equipment != null)
-                equipment.UnlockItem(_equipment);
-            else
-                Debug.LogWarning("LootableEquipment : le pigeon n'a pas de PigeonEquipment.", this);
-
-            OnPlayerStopped?.Invoke(pigeon);
-            Destroy(gameObject);
-        }
+        OnPlayerStopped?.Invoke(pigeon);
+        Destroy(gameObject);
     }
 }

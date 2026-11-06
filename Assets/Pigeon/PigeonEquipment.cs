@@ -101,6 +101,16 @@ public class PigeonEquipment : MonoBehaviour
             return;
         }
 
+        // En vol ou en marchant vite : pas de cinématique, le joueur garde ses commandes.
+        bool stillOnGround = _pigeon == null || (_pigeon.IsGrounded && _pigeon.Speed <= CinematicMaxSpeed);
+        if (!stillOnGround)
+        {
+            Request(equipment, toggle);
+            SFXManager.Instance.PlaySFX(equipClip, 0.5f);
+            DOVirtual.DelayedCall(0.2f, FinishUnlock);
+            return;
+        }
+
         if (playerControls != null)
             playerControls.SetControlsBlocked(true);
         if (equipmentCamera != null)
@@ -119,13 +129,19 @@ public class PigeonEquipment : MonoBehaviour
 
         sequence.AppendCallback(() => { if (equipmentCamera != null) equipmentCamera.Priority = 0; });
         sequence.AppendCallback(() => { if (playerControls != null) playerControls.SetControlsBlocked(false); });
-        sequence.AppendCallback(() =>
-        {
-            if (CurrentWornMask() == AllBits && fashionAchievement != null && AchievementManager.Instance != null)
-                AchievementManager.Instance.Unlock(fashionAchievement);
-        });
+        sequence.AppendCallback(FinishUnlock);
+    }
 
-        sequence.AppendCallback(() => { if (MusicPlayer.instance != null) MusicPlayer.instance.PlayMusic(MusicPlayer.Songs.NightDelivery, 5.0f); });
+    const float CinematicMaxSpeed = 0.5f;
+
+    void FinishUnlock()
+    {
+        if (this == null)
+            return;
+        if (CurrentWornMask() == AllBits && fashionAchievement != null && AchievementManager.Instance != null)
+            AchievementManager.Instance.Unlock(fashionAchievement);
+        if (MusicPlayer.instance != null)
+            MusicPlayer.instance.PlayMusic(MusicPlayer.Songs.NightDelivery, 5.0f);
     }
 
     private void Request(Equipment equipment, bool toggle)
