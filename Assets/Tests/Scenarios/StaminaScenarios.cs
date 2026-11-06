@@ -24,6 +24,57 @@ public class StaminaFollowProbe : MonoBehaviour
 
 public partial class ScenarioRunner
 {
+    /// <summary>En plein vol, la fiente tombe sous le pigeon au lieu de partir devant lui.</summary>
+    IEnumerator PoopFallsBehind()
+    {
+        CameraFrame(out Vector3 forward, out Vector3 _);
+        yield return Teleport(Pigeon, Pigeon.transform.position + Vector3.up * 120f, Quaternion.LookRotation(forward), "Haut dans le ciel");
+        Bot.Dive = true;
+        yield return Expect("Il prend de la vitesse", () => Pigeon.Speed > 20f, 4f, () => $"vitesse {Pigeon.Speed:0.0}");
+        Bot.Dive = false;
+        yield return new WaitForSecondsRealtime(0.2f);
+
+        Vector3 pigeonVelocity = Pigeon.Velocity;
+        Bot.PressShit();
+        Rigidbody poop = null;
+        yield return Expect("Une fiente part", () =>
+        {
+            Poop found = FindAnyObjectByType<Poop>();
+            poop = found != null ? found.GetComponent<Rigidbody>() : null;
+            return poop != null;
+        }, 1f);
+        Vector3 poopVelocity = poop.linearVelocity;
+        float forwardSpeed = Vector3.Dot(poopVelocity, pigeonVelocity.normalized);
+        yield return Check("Elle garde peu de la vitesse du pigeon", forwardSpeed < pigeonVelocity.magnitude * 0.5f,
+            $"fiente {poopVelocity} ({forwardSpeed:0.0} dans son sens), pigeon {pigeonVelocity} ({pigeonVelocity.magnitude:0.0})");
+        yield return Check("Elle part vers le bas", poopVelocity.y < 0f, $"fiente {poopVelocity}");
+    }
+
+    /// <summary>Invite et touches qui font avancer un dialogue.</summary>
+    IEnumerator DialogPrompt()
+    {
+        DialogManager dialogs = DialogManager.instance;
+        yield return Check("Le gestionnaire de dialogues existe", dialogs != null);
+        var sequence = ScriptableObject.CreateInstance<DialogSequence>();
+        Defer(() => { dialogs.CancelDialog(sequence); Destroy(sequence); });
+        sequence.speaker = "Test";
+        sequence.lines.Add(new DialogLine { text = "One" });
+        sequence.lines.Add(new DialogLine { text = "Two" });
+
+        dialogs.StartDialog(sequence);
+        yield return Expect("Entre deux lignes : l'invite dit quoi faire", () => dialogs.ShownPromptText == "Press any key to continue", 4f,
+            () => $"invite « {dialogs.ShownPromptText} »");
+        dialogs.RequestConfirm();
+        yield return Expect("Dernière ligne : l'invite aussi", () => dialogs.ShownPromptText == "Press any key", 4f,
+            () => $"invite « {dialogs.ShownPromptText} »");
+        yield return Check("Une touche quelconque fait avancer", DialogManager.CanConfirmDialog(UnityEngine.InputSystem.Key.F)
+            && DialogManager.CanConfirmDialog(UnityEngine.InputSystem.Key.Space) && DialogManager.CanConfirmDialog(UnityEngine.InputSystem.Key.Enter));
+        yield return Check("Mais pas le déplacement ni la pause", !DialogManager.CanConfirmDialog(UnityEngine.InputSystem.Key.W)
+            && !DialogManager.CanConfirmDialog(UnityEngine.InputSystem.Key.DownArrow) && !DialogManager.CanConfirmDialog(UnityEngine.InputSystem.Key.Escape));
+        dialogs.RequestConfirm();
+        yield return Expect("Le dialogue se ferme", () => !dialogs.IsPlaying, 2f);
+    }
+
     /// <summary>Marcher dans une pente, à la montée comme à la descente, sans décoller.</summary>
     IEnumerator WalkOnSlopes()
     {

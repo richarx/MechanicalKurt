@@ -59,6 +59,30 @@ public class DialogManager : MonoBehaviour
 
         SetVisible(false);
         canvasGroup.alpha = 0f;
+        SetPromptText(confirmPrompt, ConfirmPromptText);
+        SetPromptText(nextPrompt, NextPromptText);
+    }
+
+    private const string ConfirmPromptText = "Press any key";
+    private const string NextPromptText = "Press any key to continue";
+
+    private static void SetPromptText(GameObject prompt, string text)
+    {
+        TMP_Text label = prompt != null ? prompt.GetComponentInChildren<TMP_Text>(true) : null;
+        if (label == null)
+            return;
+        label.text = text;
+        label.textWrappingMode = TextWrappingModes.NoWrap;
+    }
+
+    /// <summary>Texte de l'invite affichée en ce moment (null si aucune).</summary>
+    public string ShownPromptText
+    {
+        get
+        {
+            GameObject prompt = confirmPrompt.activeSelf ? confirmPrompt : nextPrompt.activeSelf ? nextPrompt : null;
+            return prompt != null ? prompt.GetComponentInChildren<TMP_Text>(true).text : null;
+        }
     }
 
     private void Update()
@@ -272,14 +296,73 @@ public class DialogManager : MonoBehaviour
 
     private bool confirmRequested;
 
-    // Temporary input, to be replaced once the Input Actions are decided.
     private bool ConfirmPressed()
     {
         bool requested = confirmRequested;
         confirmRequested = false;
-        return requested
-            || (Keyboard.current != null && Keyboard.current.spaceKey.wasPressedThisFrame)
-            || (Gamepad.current != null && Gamepad.current.buttonSouth.wasPressedThisFrame);
+        return requested || KeyboardConfirmPressed() || MouseConfirmPressed() || GamepadConfirmPressed() || TouchConfirmPressed();
+    }
+
+    /// <summary>
+    /// N'importe quelle touche fait avancer le dialogue, sauf celles qu'on tient sans y penser ou qui ont un autre rôle :
+    /// déplacement, pause et modificateurs.
+    /// </summary>
+    public static bool CanConfirmDialog(Key key)
+    {
+        switch (key)
+        {
+            case Key.W:
+            case Key.A:
+            case Key.S:
+            case Key.D:
+            case Key.UpArrow:
+            case Key.DownArrow:
+            case Key.LeftArrow:
+            case Key.RightArrow:
+            case Key.Escape:
+            case Key.Tab:
+            case Key.LeftAlt:
+            case Key.RightAlt:
+            case Key.LeftCtrl:
+            case Key.RightCtrl:
+            case Key.LeftMeta:
+            case Key.RightMeta:
+                return false;
+            default:
+                return true;
+        }
+    }
+
+    private static bool KeyboardConfirmPressed()
+    {
+        Keyboard keyboard = Keyboard.current;
+        if (keyboard == null || !keyboard.anyKey.wasPressedThisFrame)
+            return false;
+        foreach (UnityEngine.InputSystem.Controls.KeyControl key in keyboard.allKeys)
+            if (key != null && key.wasPressedThisFrame && CanConfirmDialog(key.keyCode))
+                return true;
+        return false;
+    }
+
+    private static bool MouseConfirmPressed()
+    {
+        Mouse mouse = Mouse.current;
+        return mouse != null && (mouse.leftButton.wasPressedThisFrame || mouse.rightButton.wasPressedThisFrame);
+    }
+
+    private static bool GamepadConfirmPressed()
+    {
+        Gamepad gamepad = Gamepad.current;
+        return gamepad != null && (gamepad.buttonSouth.wasPressedThisFrame || gamepad.buttonEast.wasPressedThisFrame
+            || gamepad.buttonWest.wasPressedThisFrame || gamepad.buttonNorth.wasPressedThisFrame
+            || gamepad.leftShoulder.wasPressedThisFrame || gamepad.rightShoulder.wasPressedThisFrame
+            || gamepad.leftTrigger.wasPressedThisFrame || gamepad.rightTrigger.wasPressedThisFrame);
+    }
+
+    private static bool TouchConfirmPressed()
+    {
+        Touchscreen touchscreen = Touchscreen.current;
+        return touchscreen != null && touchscreen.primaryTouch.press.wasPressedThisFrame;
     }
 
     // Show/hide only through the CanvasGroup, the alpha is faded by the caller.
