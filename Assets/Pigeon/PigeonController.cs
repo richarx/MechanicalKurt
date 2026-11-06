@@ -454,6 +454,12 @@ public partial class PigeonController : PredictedIdentity<PigeonInput, PigeonSta
             s.LastVelocity = Vector3.zero;
             s.PendingImpulse = Vector3.zero;
             ClearSupport(ref s);
+            if (s.MovementFrozen && !s.Frozen && !s.Stunned)
+            {
+                // Arrêté par une cinématique, même en plein vol : remis à l'horizontale, il bat des ailes sur place ou danse.
+                s.Pitch = Mathf.MoveTowardsAngle(s.Pitch, 0f, FrozenLevelingSpeed * dt);
+                s.Mode = (byte)(input.Dance ? MovementState.Dancing : s.Grounded ? MovementState.Grounded : MovementState.Braking);
+            }
             return;
         }
 
@@ -563,6 +569,8 @@ public partial class PigeonController : PredictedIdentity<PigeonInput, PigeonSta
         transform.rotation = rotation;
         _teleportEvent.Invoke(position - previous);
     }
+
+    const float FrozenLevelingSpeed = 180f;
 
     static Vector3 ForwardOf(float pitch, float yaw) => Quaternion.Euler(-pitch, yaw, 0f) * Vector3.forward;
 

@@ -151,6 +151,112 @@ public partial class ScenarioRunner
             && zone.Phase == MissionStartZone.StartPhase.Waiting, 1f, () => DescribeRace(race));
     }
 
+    static int RingsPassed(PigeonController pigeon, TimedRace race) =>
+        pigeon.RaceProgress.Lap * race.Checkpoints.Count + pigeon.RaceProgress.Next;
+
+    IEnumerator TimedRaceLapsAlone()
+    {
+        TimedRace race = FindTimedRace();
+        yield return Check("Une course chronométrée existe", race != null && race.Checkpoints.Count >= 3);
+        yield return Check("Par défaut, un seul tour", race.Laps == 1, $"{race.Laps} tours");
+        int count = race.Checkpoints.Count;
+        race.SetLapsForTests(2);
+        Defer(() => race.SetLapsForTests(1));
+        float savedRecord = race.SavedBestTime;
+        Defer(() => race.SavedBestTime = savedRecord);
+        PigeonController.RunInSimulation(_ => race.SetBestTimeForTests(1f));
+
+        yield return LandInRaceZone(Pigeon, race, Vector3.zero, "Le joueur se pose seul dans le cercle de départ");
+        Bot.PressInteract();
+        yield return Expect("Départ", () => race.Phase == TimedRace.RacePhase.Racing, race.DepartureZone.CountdownSeconds + 2f, () => DescribeRace(race));
+        yield return Expect("HUD : tour 1 sur 2, anneau 1", () => race.HudText != null && race.HudText.Contains("Lap 1 / 2") && race.HudText.Contains("Ring 1"), 1f,
+            () => DescribeRace(race));
+        yield return Check("Seul en course : pas de place affichée", !race.HudText.Contains("1st"), DescribeRace(race));
+        CaptureWithRaceHud("timedrace_laps");
+
+        for (int i = 0; i < count; i++)
+        {
+            int expected = i + 1;
+            yield return FlyThrough(Pigeon, race.Checkpoints[i], $"Tour 1 : vers {race.Checkpoints[i].name}");
+            yield return Expect($"Tour 1 : {race.Checkpoints[i].name} passé", () => RingsPassed(Pigeon, race) >= expected, 3f,
+                () => $"tours {Pigeon.RaceProgress.Lap}, prochain {Pigeon.RaceProgress.Next}");
+            if (i == count - 2)
+                yield return Expect("Devant le dernier anneau du tour : le premier s'annonce déjà", () => race.Checkpoints[count - 1].IsNext && race.Checkpoints[0].IsShown, 1f,
+                    () => $"opacités {string.Join(", ", ListAlphas(race))}");
+        }
+        yield return Check("Le dernier anneau ne termine pas la course", Pigeon.RaceProgress.Place == 0 && race.Phase == TimedRace.RacePhase.Racing, DescribeRace(race));
+        yield return Expect("HUD : tour 2 sur 2, retour à l'anneau 1", () => race.HudText != null && race.HudText.Contains("Lap 2 / 2") && race.HudText.Contains("Ring 1"), 1f,
+            () => DescribeRace(race));
+        yield return Expect("Le premier anneau redevient le prochain", () => race.Checkpoints[0].IsNext, 1f, () => $"opacités {string.Join(", ", ListAlphas(race))}");
+
+        for (int i = 0; i < count; i++)
+        {
+            int expected = count + i + 1;
+            yield return FlyThrough(Pigeon, race.Checkpoints[i], $"Tour 2 : vers {race.Checkpoints[i].name}");
+            yield return Expect($"Tour 2 : {race.Checkpoints[i].name} passé", () => RingsPassed(Pigeon, race) >= expected, 3f,
+                () => $"tours {Pigeon.RaceProgress.Lap}, prochain {Pigeon.RaceProgress.Next}");
+            if (i == count - 2)
+                yield return Expect("Dernier tour : plus rien après l'arrivée", () => race.Checkpoints[count - 1].IsNext && !race.Checkpoints[0].IsShown, 1f,
+                    () => $"opacités {string.Join(", ", ListAlphas(race))}");
+        }
+        yield return Expect("Arrivé au bout des deux tours : classement", () => race.Phase == TimedRace.RacePhase.Results && race.ResultsText != null, 2f, () => DescribeRace(race));
+        yield return Check("Classement solo : son temps, sans place", race.ResultsText.Contains("You") && !race.ResultsText.Contains("1st"), race.ResultsText.Replace('\n', ' '));
+        CaptureWithRaceHud("timedrace_laps_results");
+        Bot.PressInteract();
+        yield return Expect("La course rouvre", () => race.Phase == TimedRace.RacePhase.Idle, 2f, () => DescribeRace(race));
+    }
+
+    IEnumerator MultiTimedRaceLaps()
+    {
+        TimedRace race = FindTimedRace();
+        yield return Check("Une course chronométrée existe", race != null);
+        PigeonController remote = RemotePigeon;
+        int count = race.Checkpoints.Count;
+        string previous = $"1;{race.GraceSeconds.ToString(System.Globalization.CultureInfo.InvariantCulture)}";
+        float previousGrace = race.GraceSeconds;
+        race.SetLapsForTests(2);
+        race.SetGraceForTests(3f);
+        Defer(() => { race.SetLapsForTests(1); race.SetGraceForTests(previousGrace); StartCoroutine(RemoteDo("racesetup", previous)); });
+        yield return RemoteDo("racesetup", "2;3");
+        float savedRecord = race.SavedBestTime;
+        Defer(() => race.SavedBestTime = savedRecord);
+        PigeonController.RunInSimulation(_ => race.SetBestTimeForTests(1f));
+
+        yield return LandInRaceZone(Pigeon, race, Vector3.zero, "L'hôte se pose dans le cercle");
+        yield return LandInRaceZone(remote, race, race.DepartureZone.transform.right * 1f, "Le second joueur aussi");
+        Bot.PressInteract();
+        yield return RemoteDo("interact");
+        yield return Expect("Départ des deux joueurs", () => race.Phase == TimedRace.RacePhase.Racing && remote.RaceProgress.IsIn(race.id, race.StartCount),
+            race.DepartureZone.CountdownSeconds + 3f, () => DescribeRace(race));
+        yield return Expect("Le second joueur voit le tour 1 sur 2 et sa place", () => (Remote(RemoteKeys.TimedRaceHud) ?? "").Contains("Lap 1 / 2")
+            && (Remote(RemoteKeys.TimedRaceHud) ?? "").Contains("/ 2</size>"), 3f, RemoteState);
+
+        for (int i = 0; i < count; i++)
+        {
+            int expected = i + 1;
+            yield return FlyThrough(remote, race.Checkpoints[i], $"Second joueur, tour 1 : vers {race.Checkpoints[i].name}");
+            yield return Expect($"Tour 1 : {race.Checkpoints[i].name} passé", () => RingsPassed(remote, race) >= expected, 3f,
+                () => $"tours {remote.RaceProgress.Lap}, prochain {remote.RaceProgress.Next}");
+        }
+        yield return Expect("Il voit le tour 2 sur son écran", () => (Remote(RemoteKeys.TimedRaceHud) ?? "").Contains("Lap 2 / 2"), 3f, RemoteState);
+        yield return Expect("L'hôte le voit devant lui : 2e", () => race.HudText != null && race.HudText.Contains("2nd") && race.HudText.Contains("Lap 1 / 2"), 2f, () => DescribeRace(race));
+
+        for (int i = 0; i < count; i++)
+        {
+            int expected = count + i + 1;
+            yield return FlyThrough(remote, race.Checkpoints[i], $"Second joueur, tour 2 : vers {race.Checkpoints[i].name}");
+            yield return Expect($"Tour 2 : {race.Checkpoints[i].name} passé", () => RingsPassed(remote, race) >= expected, 3f,
+                () => $"tours {remote.RaceProgress.Lap}, prochain {remote.RaceProgress.Next}");
+        }
+        yield return Expect("Second joueur arrivé, sur son écran", () => (Remote(RemoteKeys.TimedRaceHud) ?? "").Contains("Finished")
+            || (Remote(RemoteKeys.TimedRaceResults) ?? "").Contains("1st"), 3f, RemoteState);
+        yield return Expect("Après le délai : classement, l'hôte pas arrivé", () => race.Phase == TimedRace.RacePhase.Results && race.ResultsText != null
+            && race.ResultsText.Contains("DNF"), race.GraceSeconds + 3f, () => DescribeRace(race));
+        Bot.PressInteract();
+        yield return RemoteDo("interact");
+        yield return Expect("La course rouvre", () => race.Phase == TimedRace.RacePhase.Idle, 3f, () => DescribeRace(race));
+    }
+
     static IEnumerable<string> ListAlphas(TimedRace race)
     {
         foreach (RaceCheckpoint checkpoint in race.Checkpoints)

@@ -22,7 +22,7 @@ public partial class ScenarioRunner
         yield return Check("Le pigeon a un PigeonEquipment", equipment != null);
         yield return Check($"{kind} pas encore porté", (Pigeon.WornEquipment & bit) == 0 && !equipment.IsWorn(kind));
 
-        // En plein vol, à bonne vitesse : ramassé au passage, sans s'arrêter ni perdre les commandes.
+        // En plein vol, à bonne vitesse : ramassé au contact, sans que le joueur ait à s'arrêter ; le pigeon s'arrête alors de lui-même.
         Vector3 lootPosition = loot.transform.position;
         yield return Teleport(Pigeon, lootPosition + Vector3.up * 20f, Quaternion.Euler(85f, 0f, 0f), $"Au-dessus de l'objet {loot.name}, nez en bas");
         Bot.Dive = true;
@@ -38,16 +38,31 @@ public partial class ScenarioRunner
         }, 6f, () => $"vitesse {Pigeon.Speed:0.0}, au plus près {closest:0.0} m (rayon {(loot != null ? loot.Radius : 0f):0.0}), position {Pigeon.transform.position}, objet {lootPosition}");
         Bot.Dive = false;
         yield return Check("Il volait au moment du contact", speedAtContact > 1f && !groundedAtContact, $"vitesse {speedAtContact:0.0}, au sol {groundedAtContact}");
-        yield return Check("Pas de cinématique en vol : commandes libres", playerControls == null || !playerControls.AreControlsBlocked);
+        yield return Check("Cinématique même en vol : commandes bloquées", playerControls == null || playerControls.AreControlsBlocked);
+        yield return Expect("Le pigeon s'arrête en plein vol", () => Pigeon.IsMovementFrozen && Pigeon.Speed < 0.1f && !Pigeon.IsGrounded, 1f,
+            () => $"gelé {Pigeon.IsMovementFrozen}, vitesse {Pigeon.Speed:0.0}, au sol {Pigeon.IsGrounded}");
+        Vector3 stoppedAt = Pigeon.transform.position;
+        yield return Expect("Il bat des ailes sur place, à l'horizontale", () => Pigeon.IsHovering && Pigeon.transform.forward.y > -0.1f, 1f,
+            () => $"état {Pigeon.CurrentPigeonState}, nez {Pigeon.transform.forward}");
         yield return Expect($"{kind} porté dans l'état du pigeon (répliqué)", () => (Pigeon.WornEquipment & bit) != 0, 3f,
             () => $"état {System.Convert.ToString(Pigeon.WornEquipment, 2)}");
         yield return Expect($"{kind} visible sur le pigeon", () => equipment.IsWorn(kind), 1f);
+        Animator animator = Pigeon.GetComponentInChildren<PigeonAnimationControl>().GetComponent<Animator>();
+        yield return Expect("L'animation de danse se joue, en l'air", () => Pigeon.IsDancing && !Pigeon.IsGrounded
+            && animator.GetCurrentAnimatorStateInfo(0).IsName("Dance") && !animator.IsInTransition(0), 3f,
+            () => $"état {Pigeon.CurrentPigeonState}, au sol {Pigeon.IsGrounded}, animateur danse {animator.GetCurrentAnimatorStateInfo(0).IsName("Dance")}");
+        Capture(Camera.main, "equipment_flight_dance");
+        yield return Check("Il n'a pas bougé pendant la cinématique", Vector3.Distance(Pigeon.transform.position, stoppedAt) < 0.05f,
+            $"{Vector3.Distance(Pigeon.transform.position, stoppedAt):0.00} m");
+        yield return Expect("Fin de la cinématique : le joueur reprend la main", () => !Pigeon.IsMovementFrozen
+            && (playerControls == null || !playerControls.AreControlsBlocked) && !Pigeon.IsDancing, 6f,
+            () => $"gelé {Pigeon.IsMovementFrozen}, état {Pigeon.CurrentPigeonState}");
 
         PigeonEquipment.Equipment otherKind = kind == PigeonEquipment.Equipment.Shoes
             ? PigeonEquipment.Equipment.Hat : PigeonEquipment.Equipment.Shoes;
         byte otherBit = PigeonEquipment.Bit(otherKind);
 
-        // Posé et immobile : la cinématique d'équipement reste jouée.
+        // Posé : la même cinématique.
         PigeonEquipment.Equipment groundKind = PigeonEquipment.Equipment.Backpack;
         if (groundKind == kind || groundKind == otherKind)
             groundKind = kind != PigeonEquipment.Equipment.Hat && otherKind != PigeonEquipment.Equipment.Hat

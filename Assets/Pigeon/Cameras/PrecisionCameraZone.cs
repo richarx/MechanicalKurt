@@ -3,7 +3,7 @@ using UnityEngine;
 
 /// <summary>
 /// Zone où le joueur passe en caméra de précision sans appuyer sur rien. Sa forme est l'union des colliders de cet objet
-/// et de ses enfants (Box, Sphere, Capsule ou Mesh convexe), à cocher « Is Trigger » pour ne pas gêner le vol :
+/// et de ses enfants (Box, Sphere, Capsule ou Mesh convexe), passés en trigger au lancement pour ne pas gêner le vol :
 /// dupliquer ou déplacer un enfant suffit à l'adapter (donut, égout…). Seule la caméra du joueur local est concernée.
 /// </summary>
 public class PrecisionCameraZone : MonoBehaviour
@@ -25,6 +25,9 @@ public class PrecisionCameraZone : MonoBehaviour
     void OnEnable()
     {
         _colliders = GetComponentsInChildren<Collider>();
+        // Une case oubliée ne doit pas laisser un mur invisible dans la zone.
+        foreach (Collider part in _colliders)
+            part.isTrigger = true;
         Zones.Add(this);
     }
 

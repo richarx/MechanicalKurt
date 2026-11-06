@@ -422,7 +422,14 @@ public partial class ScenarioRunner
         yield return Teleport(remote, start, glide, "Le second joueur plane vers l'anneau");
         yield return Expect("Il traverse l'anneau (boost vu par l'hôte)", () => remoteBoosts >= 1, 4f,
             () => $"boosts {remoteBoosts}, vitesse {remote.Speed:0.0}");
-        yield return Expect("Lignes de vitesse sur son écran", () => RemoteNumber(RemoteKeys.ScreenSpeedLines) > 0.3f, 2f, RemoteState);
+        float highestLines = 0f;
+        bool stunSeen = false;
+        yield return Expect("Lignes de vitesse sur son écran", () =>
+        {
+            highestLines = Mathf.Max(highestLines, RemoteNumber(RemoteKeys.ScreenSpeedLines));
+            stunSeen |= remote.IsStun;
+            return RemoteNumber(RemoteKeys.ScreenSpeedLines) > 0.3f;
+        }, 2f, () => $"lignes max {highestLines:0.00}, assommé {stunSeen}, vitesse {remote.Speed:0.0}, anneau {ring.name} en {ring.transform.position} | {RemoteState()}");
         yield return ExpectStays("Pas de lignes de vitesse sur l'écran de l'hôte", () => hostFeedback.ScreenEffectAlpha < 0.01f, 1.5f,
             () => $"opacité chez l'hôte {hostFeedback.ScreenEffectAlpha:0.00}");
 

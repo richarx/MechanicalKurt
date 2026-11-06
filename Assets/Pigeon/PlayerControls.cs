@@ -20,8 +20,6 @@ public class PlayerControls : MonoBehaviour, IPigeonControls
 
     bool _rightFlex;
 
-    bool _forceFlex;
-
     [ShowInInspector, ReadOnly]
     public bool AreControlsBlocked { get; private set; }
 
@@ -98,11 +96,6 @@ public class PlayerControls : MonoBehaviour, IPigeonControls
             _controls.Player.Enable();
     }
 
-    public void SetForceFlex(bool isForcing)
-    {
-        _forceFlex = isForcing;
-    }
-
     CinemachineOrbitalFollow OrbitalCamera
     {
         get
@@ -165,7 +158,7 @@ public class PlayerControls : MonoBehaviour, IPigeonControls
 
     public bool Brake => (isActiveAndEnabled && IsPaused) || (CanReadControls && _controls.Player.Brake.IsPressed());
 
-    public bool Flex => (CanReadControls && (_controls.Player.LeftFlex.IsPressed() || _controls.Player.RightFlex.IsPressed())) || _forceFlex;
+    public bool Flex => CanReadControls && (_controls.Player.LeftFlex.IsPressed() || _controls.Player.RightFlex.IsPressed());
 
     public bool PrecisionCamera => CanReadControls && _controls.Player.PrecisionCamera.IsPressed();
 

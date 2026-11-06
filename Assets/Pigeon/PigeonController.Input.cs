@@ -6,6 +6,7 @@ public partial class PigeonController
 {
     bool _respawnRequested;
     bool _movementFreezeRequested;
+    bool _forcedDance;
     byte _equipmentWearRequested;
     byte _equipmentToggleRequested;
 
@@ -21,6 +22,13 @@ public partial class PigeonController
         if (!isController)
             return;
         _movementFreezeRequested = frozen;
+    }
+
+    /// <summary>Fait danser le pigeon contrôlé ici pendant une cinématique, quelles que soient ses commandes.</summary>
+    public void SetForcedDance(bool dancing)
+    {
+        if (isController)
+            _forcedDance = dancing;
     }
 
     /// <summary>Remplace la source d'input (bots, scénarios de test). null rétablit le composant IPigeonControls.</summary>
@@ -89,7 +97,7 @@ public partial class PigeonController
         input.Flap = _controls.Flap;
         input.Dive = _controls.Dive;
         input.Brake = _controls.Brake;
-        input.Dance = _controls.Flex;
+        input.Dance = _controls.Flex || _forcedDance;
     }
 
     protected override void SanitizeInput(ref PigeonInput input)

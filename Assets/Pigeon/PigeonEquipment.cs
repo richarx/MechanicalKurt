@@ -43,6 +43,7 @@ public class PigeonEquipment : MonoBehaviour
     PlayerControls playerControls;
     bool _viewApplied;
     byte _shownMask;
+    bool _cinematicPlaying;
 
     private void Awake()
     {
@@ -101,38 +102,41 @@ public class PigeonEquipment : MonoBehaviour
             return;
         }
 
-        // En vol ou en marchant vite : pas de cinématique, le joueur garde ses commandes.
-        bool stillOnGround = _pigeon == null || (_pigeon.IsGrounded && _pigeon.Speed <= CinematicMaxSpeed);
-        if (!stillOnGround)
+        // Un second objet ramassé pendant la cinématique ne relance pas la sienne : elle rendrait la main trop tôt.
+        if (_cinematicPlaying)
         {
             Request(equipment, toggle);
             SFXManager.Instance.PlaySFX(equipClip, 0.5f);
-            DOVirtual.DelayedCall(0.2f, FinishUnlock);
             return;
         }
 
+        // Au sol comme en plein vol : le pigeon s'arrête sur place et joue l'animation.
+        _cinematicPlaying = true;
+        bool wasFrozen = _pigeon != null && _pigeon.IsMovementFreezeRequested;
+        if (_pigeon != null)
+            _pigeon.SetMovementFrozen(true);
         if (playerControls != null)
             playerControls.SetControlsBlocked(true);
         if (equipmentCamera != null)
             equipmentCamera.Priority = 100;
 
-        Sequence sequence = DOTween.Sequence();
+        Sequence sequence = DOTween.Sequence().SetLink(gameObject);
 
         sequence.AppendInterval(1.5f);
         sequence.AppendCallback(() => Request(equipment, toggle));
         sequence.AppendCallback(() => SFXManager.Instance.PlaySFX(equipClip, 0.5f));
         sequence.AppendInterval(0.5f);
 
-        sequence.AppendCallback(() => { if (playerControls != null) playerControls.SetForceFlex(true); });
+        sequence.AppendCallback(() => { if (_pigeon != null) _pigeon.SetForcedDance(true); });
         sequence.AppendInterval(3.0f);
-        sequence.AppendCallback(() => { if (playerControls != null) playerControls.SetForceFlex(false); });
+        sequence.AppendCallback(() => { if (_pigeon != null) _pigeon.SetForcedDance(false); });
 
         sequence.AppendCallback(() => { if (equipmentCamera != null) equipmentCamera.Priority = 0; });
         sequence.AppendCallback(() => { if (playerControls != null) playerControls.SetControlsBlocked(false); });
+        sequence.AppendCallback(() => { if (_pigeon != null) _pigeon.SetMovementFrozen(wasFrozen); });
+        sequence.AppendCallback(() => _cinematicPlaying = false);
         sequence.AppendCallback(FinishUnlock);
     }
-
-    const float CinematicMaxSpeed = 0.5f;
 
     void FinishUnlock()
     {

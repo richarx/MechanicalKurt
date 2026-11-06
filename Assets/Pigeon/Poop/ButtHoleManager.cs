@@ -6,10 +6,6 @@ public class ButtHoleManager : MonoBehaviour
     [SerializeField] Transform _buttHole;
     [SerializeField] GameObject _poopPrefab;
     [SerializeField] float _cooldownMax;
-    [SerializeField, Range(0f, 1f), Tooltip("Part de la vitesse du pigeon gardée par la fiente : assez faible pour qu'elle tombe sous lui au lieu de partir devant.")]
-    float _inheritedVelocity = 0.25f;
-    [SerializeField, Min(0f), Tooltip("Vitesse vers le bas donnée à la fiente quand elle part.")]
-    float _dropSpeed = 2f;
 
     [HideInInspector] public UnityEvent OnShit = new UnityEvent();
 
@@ -28,8 +24,9 @@ public class ButtHoleManager : MonoBehaviour
         if (_cooldown < 0 && !paused && controls != null && controls.ConsumeShit)
         {
             Rigidbody poopRb = Instantiate(_poopPrefab, _buttHole.position, _buttHole.rotation).GetComponent<Rigidbody>();
+            // Lâchée comme une bombe : elle part à la vitesse du pigeon, puis seule la gravité agit.
             // La vitesse de la simulation : celle du CharacterController dépend de la durée de l'image et s'emballe entre deux ticks.
-            poopRb.linearVelocity = _pigeon.Velocity * _inheritedVelocity + Vector3.down * _dropSpeed;
+            poopRb.linearVelocity = _pigeon.Velocity;
             _cooldown = _cooldownMax;
             OnShit?.Invoke();
         }

@@ -240,6 +240,15 @@ public class ScenarioClientAgent : MonoBehaviour
                 _bot.Brake = argument == "1";
                 return "";
 
+            case "racesetup":
+            {
+                string[] parts = argument.Split(';');
+                TimedRace race = FindAnyObjectByType<TimedRace>();
+                race.SetLapsForTests(int.Parse(parts[0], System.Globalization.CultureInfo.InvariantCulture));
+                race.SetGraceForTests(float.Parse(parts[1], System.Globalization.CultureInfo.InvariantCulture));
+                return "";
+            }
+
             case "walk":
                 RequireDriven(local);
                 _bot.Movement = argument == "1" ? new Vector2(0f, 0.4f) : Vector2.zero;

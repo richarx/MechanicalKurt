@@ -24,8 +24,8 @@ public class StaminaFollowProbe : MonoBehaviour
 
 public partial class ScenarioRunner
 {
-    /// <summary>En plein vol, la fiente tombe sous le pigeon au lieu de partir devant lui.</summary>
-    IEnumerator PoopFallsBehind()
+    /// <summary>Lâchée en plein vol, la fiente part à la vitesse du pigeon, puis seule la gravité agit.</summary>
+    IEnumerator PoopDropsLikeABomb()
     {
         CameraFrame(out Vector3 forward, out Vector3 _);
         yield return Teleport(Pigeon, Pigeon.transform.position + Vector3.up * 120f, Quaternion.LookRotation(forward), "Haut dans le ciel");
@@ -34,20 +34,29 @@ public partial class ScenarioRunner
         Bot.Dive = false;
         yield return new WaitForSecondsRealtime(0.2f);
 
-        Vector3 pigeonVelocity = Pigeon.Velocity;
         Bot.PressShit();
         Rigidbody poop = null;
+        Vector3 pigeonVelocity = Vector3.zero;
         yield return Expect("Une fiente part", () =>
         {
+            pigeonVelocity = Pigeon.Velocity;
             Poop found = FindAnyObjectByType<Poop>();
             poop = found != null ? found.GetComponent<Rigidbody>() : null;
             return poop != null;
         }, 1f);
-        Vector3 poopVelocity = poop.linearVelocity;
-        float forwardSpeed = Vector3.Dot(poopVelocity, pigeonVelocity.normalized);
-        yield return Check("Elle garde peu de la vitesse du pigeon", forwardSpeed < pigeonVelocity.magnitude * 0.5f,
-            $"fiente {poopVelocity} ({forwardSpeed:0.0} dans son sens), pigeon {pigeonVelocity} ({pigeonVelocity.magnitude:0.0})");
-        yield return Check("Elle part vers le bas", poopVelocity.y < 0f, $"fiente {poopVelocity}");
+        Vector3 start = poop.linearVelocity;
+        yield return Check("Elle part à la vitesse du pigeon", Vector3.Distance(start, pigeonVelocity) < pigeonVelocity.magnitude * 0.15f,
+            $"fiente {start}, pigeon {pigeonVelocity}");
+
+        float startTime = Time.time;
+        yield return new WaitForSeconds(0.5f);
+        yield return Check("Elle est encore en l'air", poop != null);
+        float elapsed = Time.time - startTime;
+        Vector3 now = poop.linearVelocity;
+        yield return Check("Sa vitesse horizontale ne change pas", Vector2.Distance(new Vector2(now.x, now.z), new Vector2(start.x, start.z)) < 0.2f,
+            $"au départ {start}, puis {now}");
+        yield return Check("Seule la gravité la fait tomber", Mathf.Abs(start.y - now.y + Physics.gravity.y * elapsed) < 1f,
+            $"vitesse verticale {start.y:0.0} puis {now.y:0.0} en {elapsed:0.00} s");
     }
 
     /// <summary>Invite et touches qui font avancer un dialogue.</summary>

@@ -40,9 +40,10 @@ public partial class ScenarioRunner
         Solo("Zone de caméra de précision forcée", r => r.PrecisionZone()),
         Solo("Lancement en batch sans son", r => r.BatchIsSilent()),
         Solo("Commandes tactiles et inclinaison", r => r.MobileTouchControls()),
-        Solo("Caca : la fiente tombe sous le pigeon", r => r.PoopFallsBehind()),
+        Solo("Caca : lâché comme une bombe", r => r.PoopDropsLikeABomb()),
         Solo("Dialogues : invite et touches", r => r.DialogPrompt()),
         Solo("Course chronométrée : anneaux, chrono, place, classement", r => r.TimedRaceSolo()),
+        Solo("Course chronométrée : plusieurs tours, sans place quand on est seul", r => r.TimedRaceLapsAlone()),
         Solo("Nuit : lampadaires et phares allumés, éteints le jour", r => r.NightLights()),
         Solo("Roucoulement : bulle pour les autres, au bord de l'écran si loin", r => r.CooBubbles()),
         Solo("Autres pigeons : traînée colorée et point discret", r => r.SeeOtherPigeons()),
@@ -63,6 +64,7 @@ public partial class ScenarioRunner
         Multi("Multi : roucoulement vu par l'autre joueur, à sa couleur", r => r.MultiCoo()),
         Multi("Multi : mêmes voitures chez tous, solides, on roule dessus", r => r.MultiTrafficShared()),
         Multi("Multi : course chronométrée à deux, classement chez chacun", r => r.MultiTimedRace()),
+        Multi("Multi : course à plusieurs tours", r => r.MultiTimedRaceLaps()),
         Multi("Multi : même dirigeable et même ballon chez les deux joueurs", r => r.MultiSharedZeppelinAndBall()),
     };
 

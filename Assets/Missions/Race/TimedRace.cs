@@ -28,7 +28,9 @@ public struct RaceProgress
 {
     public PredictedComponentID Race;
     public int StartCount;
-    /// <summary>Indice du prochain anneau à passer ; égal au nombre d'anneaux une fois arrivé.</summary>
+    /// <summary>Tours déjà terminés.</summary>
+    public byte Lap;
+    /// <summary>Indice du prochain anneau à passer dans ce tour ; égal au nombre d'anneaux une fois arrivé.</summary>
     public byte Next;
     /// <summary>Place à l'arrivée, 0 = pas (encore) arrivé.</summary>
     public byte Place;
@@ -63,6 +65,8 @@ public class TimedRace : PredictedIdentity<TimedRaceState>
     [Header("Parcours")]
     [Tooltip("Parent des anneaux : ses enfants RaceCheckpoint, dans l'ordre de la hiérarchie, forment le parcours ; le dernier est l'arrivée.")]
     [SerializeField] Transform _checkpointsRoot;
+    [Tooltip("Nombre de tours à faire : après le dernier anneau, le parcours reprend au premier. À 1, le dernier anneau est l'arrivée et le HUD ne parle pas de tours.")]
+    [SerializeField, Range(1, 99)] int _laps = 1;
     [Tooltip("Nombre d'anneaux suivants visibles (en transparence décroissante) après le prochain.")]
     [SerializeField, Range(0, 6)] int _upcomingVisible = 3;
     [Tooltip("Opacité du premier anneau suivant ; chaque anneau plus loin l'est moins.")]
@@ -100,6 +104,7 @@ public class TimedRace : PredictedIdentity<TimedRaceState>
     public RacePhase Phase => _viewState.Phase;
     public int StartCount => _viewState.StartCount;
     public float GraceSeconds => _graceSeconds;
+    public int Laps => _laps;
     public float GraceRemaining => _viewState.Grace;
     /// <summary>Textes affichés au joueur local (null si masqués), pour les tests.</summary>
     public string HudText => _hud != null ? _hud.RaceText : null;
@@ -108,6 +113,8 @@ public class TimedRace : PredictedIdentity<TimedRaceState>
 #if UNITY_EDITOR
     /// <summary>Scénarios : raccourcit l'attente après la première arrivée. À faire sur chaque machine.</summary>
     public void SetGraceForTests(float seconds) => _graceSeconds = seconds;
+    /// <summary>Scénarios : change le nombre de tours. À faire sur chaque machine, avant le départ.</summary>
+    public void SetLapsForTests(int laps) => _laps = laps;
 #endif
 
     protected override void LateAwake()
@@ -239,7 +246,12 @@ public class TimedRace : PredictedIdentity<TimedRaceState>
                 && _checkpoints[race.Next].Crossed(race.PreviousPosition, ps.Position))
             {
                 race.Next++;
-                if (race.Next >= _checkpoints.Length)
+                if (race.Next >= _checkpoints.Length && race.Lap + 1 < _laps)
+                {
+                    race.Lap++;
+                    race.Next = 0;
+                }
+                else if (race.Next >= _checkpoints.Length)
                 {
                     s.Finished++;
                     race.Place = s.Finished;
@@ -337,7 +349,7 @@ public class TimedRace : PredictedIdentity<TimedRaceState>
         else if (local == null || !local.IsInMultiplayerActivity)
             MissionMarkers.SetHidden(false);
         int next = localRacer && view.Phase == RacePhase.Racing && progress.Place == 0 ? progress.Next : -1;
-        UpdateCheckpoints(next);
+        UpdateCheckpoints(next, progress.Lap + 1 < _laps);
         UpdateCompass(next >= 0 && next < _checkpoints.Length ? _checkpoints[next].transform : null, local);
         PlayLocalFeedback(localRacer ? view.StartCount : 0, progress);
 
@@ -378,12 +390,17 @@ public class TimedRace : PredictedIdentity<TimedRaceState>
             SavedBestTime = best;
     }
 
-    /// <summary>Le prochain anneau est opaque, les suivants de plus en plus transparents ; -1 masque tout.</summary>
-    void UpdateCheckpoints(int next)
+    /// <summary>
+    /// Le prochain anneau est opaque, les suivants de plus en plus transparents ; -1 masque tout.
+    /// S'il reste un tour après celui-ci (<paramref name="loops"/>), les anneaux suivants reprennent au premier.
+    /// </summary>
+    void UpdateCheckpoints(int next, bool loops)
     {
         for (int i = 0; i < _checkpoints.Length; i++)
         {
             int ahead = i - next;
+            if (loops && ahead < 0)
+                ahead += _checkpoints.Length;
             if (next < 0 || ahead < 0 || ahead > _upcomingVisible)
                 _checkpoints[i].Hide();
             else
@@ -421,16 +438,17 @@ public class TimedRace : PredictedIdentity<TimedRaceState>
             _lastLocalStart = 0;
             return;
         }
+        int passed = progress.Lap * _checkpoints.Length + progress.Next;
         if (startCount != _lastLocalStart)
         {
             _lastLocalStart = startCount;
-            _lastLocalNext = progress.Next;
+            _lastLocalNext = passed;
             return;
         }
-        if (progress.Next <= _lastLocalNext)
+        if (passed <= _lastLocalNext)
             return;
-        _lastLocalNext = progress.Next;
-        AudioClip clip = progress.Next >= _checkpoints.Length ? _finishClip : _checkpointClip;
+        _lastLocalNext = passed;
+        AudioClip clip = passed >= _laps * _checkpoints.Length ? _finishClip : _checkpointClip;
         if (clip != null && SFXManager.Instance != null)
             SFXManager.Instance.PlaySFX(clip);
     }
@@ -453,12 +471,14 @@ public class TimedRace : PredictedIdentity<TimedRaceState>
         return finished >= _viewState.Finished;
     }
 
-    /// <summary>Classement : arrivés par place, puis par anneaux passés, puis par distance au prochain anneau.</summary>
+    /// <summary>Classement : arrivés par place, puis par tours, par anneaux passés, puis par distance au prochain anneau.</summary>
     int Compare(PigeonController a, PigeonController b)
     {
         RaceProgress pa = a.RaceProgress, pb = b.RaceProgress;
         if (pa.Place > 0 || pb.Place > 0)
             return pa.Place == 0 ? 1 : pb.Place == 0 ? -1 : pa.Place.CompareTo(pb.Place);
+        if (pa.Lap != pb.Lap)
+            return pb.Lap.CompareTo(pa.Lap);
         if (pa.Next != pb.Next)
             return pb.Next.CompareTo(pa.Next);
         return DistanceToNext(a).CompareTo(DistanceToNext(b));
@@ -474,16 +494,22 @@ public class TimedRace : PredictedIdentity<TimedRaceState>
     {
         _viewRacers.Sort(Compare);
         int place = _viewRacers.IndexOf(local) + 1;
+        // Seul en course, une place ne dit rien.
+        bool solo = _viewRacers.Count <= 1;
         var sb = new StringBuilder();
         if (progress.Place > 0)
         {
-            sb.Append($"<size=130%>Finished!</size>\n{Ordinal(progress.Place)} - {FormatTime(progress.FinishTime)}");
-            if (_viewRacers.Count > 1)
+            sb.Append("<size=130%>Finished!</size>\n");
+            sb.Append(solo ? FormatTime(progress.FinishTime) : $"{Ordinal(progress.Place)} - {FormatTime(progress.FinishTime)}");
+            if (!solo)
                 sb.Append($"\n<size=70%>Waiting for the other racers: {Mathf.CeilToInt(view.Grace)} s</size>");
             return sb.ToString();
         }
         sb.Append($"<size=140%>{FormatTime(view.Elapsed)}</size>\n");
-        sb.Append($"<size=120%>{Ordinal(place)}</size><size=80%> / {_viewRacers.Count}</size>\n");
+        if (!solo)
+            sb.Append($"<size=120%>{Ordinal(place)}</size><size=80%> / {_viewRacers.Count}</size>\n");
+        if (_laps > 1)
+            sb.Append($"<size=100%>Lap {progress.Lap + 1} / {_laps}</size>\n");
         sb.Append($"<size=70%>Ring {Mathf.Min(progress.Next + 1, _checkpoints.Length)} / {_checkpoints.Length}</size>");
         if (view.BestTime > 0f)
             sb.Append($"\n<size=60%>Best {FormatTime(view.BestTime)}</size>");
@@ -503,7 +529,8 @@ public class TimedRace : PredictedIdentity<TimedRaceState>
             string name = racer == local ? "You" : racer.owner.HasValue ? $"Player {racer.owner.Value.id.value}" : "Bot";
             string color = ColorUtility.ToHtmlStringRGB(racer.PlayerColor);
             string time = p.Place > 0 ? FormatTime(p.FinishTime) : "DNF";
-            sb.Append($"<align=left><pos=8%>{(p.Place > 0 ? Ordinal(p.Place) : "-")}<pos=30%><color=#{color}>{name}</color><pos=70%>{time}</align>\n");
+            string place = _viewRacers.Count <= 1 ? "" : p.Place > 0 ? Ordinal(p.Place) : "-";
+            sb.Append($"<align=left><pos=8%>{place}<pos=30%><color=#{color}>{name}</color><pos=70%>{time}</align>\n");
         }
         if (_viewState.BestTime > 0f)
             sb.Append(_viewState.RecordStartCount == _viewState.StartCount
@@ -541,5 +568,7 @@ public class TimedRace : PredictedIdentity<TimedRaceState>
             Gizmos.DrawLine(previous, child.position);
             previous = child.position;
         }
+        if (_laps > 1 && _checkpointsRoot.childCount > 0)
+            Gizmos.DrawLine(previous, _checkpointsRoot.GetChild(0).position);
     }
 }

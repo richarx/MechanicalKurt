@@ -18,7 +18,8 @@ public class PigeonAnimationControl : MonoBehaviour
         Vector3 velocity = _pigeonController.LastVelocity;
         _animator.SetFloat("Speed", velocity.magnitude);
         _animator.SetFloat("VerticalSpeed", velocity.y);
-        _animator.SetBool("IsGrounded", _pigeonController.IsGrounded);
+        // L'animateur ne danse qu'au sol ; une cinématique peut faire danser le pigeon arrêté en plein vol.
+        _animator.SetBool("IsGrounded", _pigeonController.IsGrounded || _pigeonController.IsDancing);
 
         bool hovering = _pigeonController.IsHovering;
         bool falling = _pigeonController.CurrentPigeonState == PigeonController.MovementState.Falling;
