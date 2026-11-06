@@ -16,7 +16,7 @@ public partial class PigeonController
     int _foundSupportId;
     float _foundSupportNormalY;
 
-    void MoveController(ref PigeonState s, Vector3 velocity, float dt, bool allowSupport = true)
+    void MoveController(ref PigeonState s, Vector3 velocity, float dt, bool allowSupport = true, bool snapToGround = false)
     {
         _velocityBeforeMove = s.LastVelocity;
         _hasStunHit = false;
@@ -52,6 +52,8 @@ public partial class PigeonController
 
         Vector3 before = transform.position;
         _controller.Move(velocity * dt);
+        if (snapToGround && !_controller.isGrounded && TryFindGroundBelow(out float drop))
+            _controller.Move(Vector3.down * drop);
         _simulating = false;
         _collectSupport = false;
         Vector3 after = transform.position;
@@ -74,6 +76,25 @@ public partial class PigeonController
         }
 
         s.Grounded = _controller.isGrounded || s.SupportId != 0;
+    }
+
+    /// <summary>
+    /// Sol praticable à moins d'une marche sous le pigeon. Le Character Controller monte les marches (stepOffset) mais
+    /// ne redescend pas : sans recalage, marcher dans une descente le ferait décoller.
+    /// </summary>
+    bool TryFindGroundBelow(out float distance)
+    {
+        distance = 0f;
+        float radius = _controller.radius * 0.95f;
+        Vector3 origin = transform.position + _controller.center;
+        // Le pigeon lui-même et les autres ne comptent pas comme un sol.
+        int mask = Physics.DefaultRaycastLayers & ~(1 << gameObject.layer);
+        if (!Physics.SphereCast(origin, radius, Vector3.down, out RaycastHit hit, _controller.stepOffset, mask, QueryTriggerInteraction.Ignore))
+            return false;
+        if (hit.normal.y < Mathf.Cos(_controller.slopeLimit * Mathf.Deg2Rad))
+            return false;
+        distance = hit.distance;
+        return true;
     }
 
     const float MaxSupportCarry = 1.5f;

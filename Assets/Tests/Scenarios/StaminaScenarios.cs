@@ -24,6 +24,46 @@ public class StaminaFollowProbe : MonoBehaviour
 
 public partial class ScenarioRunner
 {
+    /// <summary>Marcher dans une pente, à la montée comme à la descente, sans décoller.</summary>
+    IEnumerator WalkOnSlopes()
+    {
+        Vector3 center = Pigeon.transform.position + Vector3.up * 60f;
+        GameObject ramp = GameObject.CreatePrimitive(PrimitiveType.Cube);
+        Defer(() => Destroy(ramp));
+        ramp.name = "[Scenario] Ramp";
+        ramp.transform.SetPositionAndRotation(center, Quaternion.Euler(30f, 0f, 0f));
+        ramp.transform.localScale = new Vector3(8f, 0.5f, 30f);
+        Vector3 Surface(float along) => center + ramp.transform.up * 0.3f + ramp.transform.forward * along;
+
+        yield return Teleport(Pigeon, Surface(-8f), Quaternion.identity, "En haut de la rampe");
+        yield return ExpectLanded(Pigeon, 4f);
+
+        Bot.Movement = Bot.RelativeMovement = Vector2.up;
+        yield return new WaitForSecondsRealtime(0.2f);
+        float startY = Pigeon.transform.position.y;
+        yield return ExpectStays("Descente : il reste au sol", () => Pigeon.IsGrounded && Pigeon.CurrentPigeonState == PigeonController.MovementState.Grounded, 2f,
+            () => $"état {Pigeon.CurrentPigeonState}, au sol {Pigeon.IsGrounded}, vitesse {Pigeon.Velocity}");
+        yield return Check("… et il a bien descendu", Pigeon.transform.position.y < startY - 0.3f, $"hauteur {Pigeon.transform.position.y:0.00} (départ {startY:0.00})");
+
+        Bot.Movement = Bot.RelativeMovement = Vector2.down;
+        yield return new WaitForSecondsRealtime(0.5f);
+        startY = Pigeon.transform.position.y;
+        yield return ExpectStays("Montée : il reste au sol", () => Pigeon.IsGrounded && Pigeon.CurrentPigeonState == PigeonController.MovementState.Grounded, 2f,
+            () => $"état {Pigeon.CurrentPigeonState}, au sol {Pigeon.IsGrounded}, vitesse {Pigeon.Velocity}");
+        yield return Check("… et il a bien monté", Pigeon.transform.position.y > startY + 0.3f, $"hauteur {Pigeon.transform.position.y:0.00} (départ {startY:0.00})");
+
+        Bot.Flap = true;
+        yield return Expect("Battre des ailes dans la pente : il décolle", () => !Pigeon.IsGrounded, 1f, () => $"état {Pigeon.CurrentPigeonState}");
+        Bot.Flap = false;
+        Bot.Movement = Bot.RelativeMovement = Vector2.zero;
+        yield return Teleport(Pigeon, Surface(14f), Quaternion.identity, "En bas de la rampe, près du bord");
+        yield return ExpectLanded(Pigeon, 4f);
+        Bot.Movement = Bot.RelativeMovement = Vector2.up;
+        yield return Expect("Au bout de la rampe, il tombe dans le vide au lieu de rester collé", () => !Pigeon.IsGrounded && Pigeon.transform.position.y < Surface(15f).y - 1f, 6f,
+            () => $"état {Pigeon.CurrentPigeonState}, hauteur {Pigeon.transform.position.y:0.00}");
+        Bot.Movement = Bot.RelativeMovement = Vector2.zero;
+    }
+
     IEnumerator StaminaAndHover()
     {
         PigeonStamina stamina = Pigeon.GetComponent<PigeonStamina>();

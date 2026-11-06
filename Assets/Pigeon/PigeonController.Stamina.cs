@@ -4,7 +4,9 @@ public partial class PigeonController
 {
     MovementState ComputeMovementState(in PigeonInput input, in PigeonState s)
     {
-        if (s.Grounded && (s.LastVelocity.y <= 0.001f || s.SupportId != 0))
+        // Déjà au sol : monter une pente en marchant donne une vitesse vers le haut, ce n'est pas un décollage.
+        bool wasWalking = (MovementState)s.Mode is MovementState.Grounded or MovementState.Dancing;
+        if (s.Grounded && (s.LastVelocity.y <= 0.001f || s.SupportId != 0 || wasWalking))
             return input.Dance ? MovementState.Dancing : MovementState.Grounded;
         if (input.Brake || FinishedRace(s))
             return input.Flap && CanFlap(s, MovementState.HoverFlapping) ? MovementState.HoverFlapping : MovementState.Braking;

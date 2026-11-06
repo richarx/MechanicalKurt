@@ -522,7 +522,8 @@ public partial class PigeonController : PredictedIdentity<PigeonInput, PigeonSta
         Vector3 velocityBeforeStun = s.LastVelocity;
         Vector3 positionBeforeMove = s.Position;
         bool groundedBeforeMove = s.Grounded;
-        MoveController(ref s, velocity, dt);
+        bool walking = mode is MovementState.Grounded or MovementState.Dancing;
+        MoveController(ref s, velocity, dt, snapToGround: walking && groundedBeforeMove && velocity.y <= 0f);
 
         UpdateStamina(ref s, mode, dt);
         if (!groundedBeforeMove && s.Grounded)

@@ -35,6 +35,7 @@ public partial class ScenarioRunner
         Solo("Sons : 2D pour soi, 3D pour les autres", r => r.RunPigeonAudio()),
         Solo("Pause : le jeu continue, le pigeon reste en l'air", r => r.PauseKeepsGameRunning()),
         Solo("Endurance et vol stationnaire (monter, descendre)", r => r.StaminaAndHover()),
+        Solo("Pentes : marcher sans décoller", r => r.WalkOnSlopes()),
         Solo("Course chronométrée : anneaux, chrono, place, classement", r => r.TimedRaceSolo()),
         Solo("Nuit : lampadaires et phares allumés, éteints le jour", r => r.NightLights()),
         Solo("Roucoulement : bulle pour les autres, au bord de l'écran si loin", r => r.CooBubbles()),
