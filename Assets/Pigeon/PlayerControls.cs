@@ -1,6 +1,7 @@
 using Sirenix.OdinInspector;
 using Unity.Cinemachine;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class PlayerControls : MonoBehaviour, IPigeonControls
 {
@@ -33,6 +34,12 @@ public class PlayerControls : MonoBehaviour, IPigeonControls
     void Awake()
     {
         _controls = new Controls();
+        // Sur téléphone, le roucoulement a son bouton : un toucher n'importe où sur l'écran ne doit plus le déclencher.
+        if (MobileControls.IsEnabled)
+        {
+            _controls.Player.Cooing.ApplyBindingOverride("", path: "<Touchscreen>/primaryTouch/tap");
+            _controls.Player.Cooing.ApplyBindingOverride("", path: "<Mouse>/leftButton");
+        }
     }
 
     void OnEnable()
