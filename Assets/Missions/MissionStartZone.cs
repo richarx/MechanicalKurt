@@ -1,4 +1,5 @@
 using PurrNet.Prediction;
+using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -62,6 +63,14 @@ public class MissionStartZone : PredictedIdentity<MissionStartState>
     [Tooltip("Affiché au joueur qui se pose dans la zone pendant un départ ou une course auxquels il ne participe pas.")]
     [SerializeField] string _inProgressText = "Race in progress\n<size=60%>Wait for it to finish</size>";
 
+    [Header("Décompte vu par tous")]
+    [Tooltip("Couleur du cercle de départ pendant le décompte.")]
+    [SerializeField] Color _countdownCircleColor = new Color(1f, 0.8f, 0.1f);
+    [Tooltip("Hauteur du décompte affiché au-dessus de la zone, visible par les joueurs qui ne participent pas.")]
+    [SerializeField] float _countdownTextHeight = 5f;
+    [Tooltip("Au-delà de cette distance, le décompte au-dessus de la zone n'est plus affiché.")]
+    [SerializeField] float _countdownTextRange = 120f;
+
     [field: SerializeField, Tooltip("Présentation uniquement : déclenché une fois l'état vérifié, avec un léger retard chez les clients.")]
     public UnityEvent OnCountdownStarted { get; private set; } = new UnityEvent();
     [field: SerializeField, Tooltip("Présentation uniquement : déclenché une fois l'état vérifié, avec un léger retard chez les clients.")]
@@ -82,6 +91,18 @@ public class MissionStartZone : PredictedIdentity<MissionStartState>
     bool _promptShown;
     MissionCountdownHud _hud;
     string _hudContent;
+    Transform _circle;
+    Renderer _circleRenderer;
+    Vector3 _circleScale;
+    MaterialPropertyBlock _circleBlock;
+    bool _circleLookedUp;
+    bool _circleHighlighted;
+    TextMeshPro _countdownText;
+
+    /// <summary>Le cercle de départ est en couleur de décompte (null-safe : faux sans cercle).</summary>
+    public bool IsCircleHighlighted => _circleHighlighted;
+    /// <summary>Décompte affiché au-dessus de la zone chez ce joueur (null si masqué).</summary>
+    public string CountdownTextShown => _countdownText != null && _countdownText.gameObject.activeSelf ? _countdownText.text : null;
 
     public StartPhase Phase => _viewState.Phase;
     public MissionStartZone RequiredStartZone => _requiredStartZone;
@@ -225,7 +246,17 @@ public class MissionStartZone : PredictedIdentity<MissionStartState>
             bool wasReady = ps.Mission.IsReadyFor(id);
             bool isReady = inside && (ps.Mission.InteractPressed ? !wasReady : wasReady);
             if (isReady != wasReady)
+            {
                 ps.Mission.SetReady(id, isReady);
+                // Rejoindre un décompte en cours gèle comme les autres ; le quitter sans l'annuler rend les commandes.
+                if (s.Phase == StartPhase.CountingDown)
+                {
+                    if (isReady)
+                        pigeons[i].FreezeFor(id);
+                    else
+                        pigeons[i].ReleaseFrom(id);
+                }
+            }
             if (isReady)
                 ready++;
         }
@@ -372,6 +403,83 @@ public class MissionStartZone : PredictedIdentity<MissionStartState>
         _viewState = view;
         UpdatePrompt(view);
         UpdateHud(view);
+        UpdateCountdownBeacon(view);
+    }
+
+    /// <summary>Décompte visible de tous : cercle de départ en couleur qui pulse, nombre au-dessus de la zone.</summary>
+    void UpdateCountdownBeacon(in MissionStartState view)
+    {
+        bool counting = IsUnlocked && view.Phase == StartPhase.CountingDown;
+        UpdateCircle(counting);
+
+        PigeonController local = PigeonController.Local;
+        Camera view3D = Camera.main;
+        bool showText = counting && local != null && !local.IsInMultiplayerActivity && !local.IsReadyFor(id) && view3D != null
+            && (view3D.transform.position - transform.position).sqrMagnitude <= _countdownTextRange * _countdownTextRange;
+        if (!showText)
+        {
+            if (_countdownText != null && _countdownText.gameObject.activeSelf)
+                _countdownText.gameObject.SetActive(false);
+            return;
+        }
+
+        if (_countdownText == null)
+            _countdownText = CreateCountdownText();
+        if (!_countdownText.gameObject.activeSelf)
+            _countdownText.gameObject.SetActive(true);
+        _countdownText.text = Mathf.Max(1, Mathf.CeilToInt(view.Countdown)).ToString();
+        Transform text = _countdownText.transform;
+        text.position = transform.position + Vector3.up * _countdownTextHeight;
+        text.rotation = Quaternion.LookRotation(text.position - view3D.transform.position);
+    }
+
+    TextMeshPro CreateCountdownText()
+    {
+        var text = new GameObject("Countdown Text").AddComponent<TextMeshPro>();
+        text.transform.SetParent(transform, true);
+        text.alignment = TextAlignmentOptions.Center;
+        text.fontSize = 36f;
+        text.fontStyle = FontStyles.Bold;
+        text.color = _countdownCircleColor;
+        text.outlineWidth = 0.2f;
+        text.outlineColor = Color.black;
+        text.rectTransform.sizeDelta = new Vector2(8f, 8f);
+        return text;
+    }
+
+    void UpdateCircle(bool counting)
+    {
+        if (!_circleLookedUp)
+        {
+            _circleLookedUp = true;
+            DeliverySelectionCircle circle = GetComponentInChildren<DeliverySelectionCircle>(true);
+            if (circle != null)
+            {
+                _circle = circle.transform;
+                _circleScale = _circle.localScale;
+                _circleRenderer = circle.GetComponent<Renderer>();
+            }
+        }
+        if (_circle == null)
+            return;
+
+        if (counting)
+            _circle.localScale = _circleScale * (1f + 0.12f * Mathf.Sin(Time.time * 10f));
+        if (counting == _circleHighlighted)
+            return;
+
+        _circleHighlighted = counting;
+        if (!counting)
+            _circle.localScale = _circleScale;
+        if (_circleRenderer == null)
+            return;
+        _circleBlock ??= new MaterialPropertyBlock();
+        _circleRenderer.GetPropertyBlock(_circleBlock);
+        if (counting)
+            _circleBlock.SetColor("_Color", _countdownCircleColor);
+        else
+            _circleBlock.Clear();
+        _circleRenderer.SetPropertyBlock(_circleBlock);
     }
 
     void UpdatePrompt(in MissionStartState view)
@@ -417,6 +525,8 @@ public class MissionStartZone : PredictedIdentity<MissionStartState>
                     if (local.IsReadyFor(id))
                         content = $"<size=250%>{Mathf.Max(1, Mathf.CeilToInt(view.Countdown))}</size>\n"
                             + $"Players: {view.Ready}/{view.Total}\n<size=60%>F / Y: cancel</size>";
+                    else if (IsLocalInZone(local))
+                        content = $"Starting in {Mathf.Max(1, Mathf.CeilToInt(view.Countdown))}\n<size=60%>Land here and press F / Y to join</size>";
                     break;
                 case StartPhase.Cinematic:
                     if (local.WasStartedBy(id, view.StartCount))

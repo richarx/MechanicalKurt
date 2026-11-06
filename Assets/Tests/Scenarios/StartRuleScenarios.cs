@@ -122,6 +122,7 @@ public partial class ScenarioRunner
             () => zone.Describe());
         yield return Expect("Le décompte s'affiche chez le second joueur aussi", () => Remote(RemoteKeys.ZonePhase(zone)) == "CountingDown", 2f,
             RemoteState);
+        yield return Expect("Le second joueur, dans la zone, est invité à rejoindre", () => RemoteHudContains(zone, "to join"), 2f, RemoteState);
         yield return Check("Le cercle de départ reste affiché chez l'hôte pendant le décompte", MarkerShown(race));
         yield return Check("… et chez le second joueur, qui ne participe pas",
             race.DepartureMarker == null || RemoteFlag(RemoteKeys.RaceMarker(race)), RemoteState());
@@ -136,6 +137,41 @@ public partial class ScenarioRunner
         yield return Expect("Course lancée", () => race.Phase == PigeonCharacterRace.RacePhase.Racing, 5f, () => zone.Describe());
         yield return Check("L'hôte court, pas le second joueur", zone.IsInCurrentStart(Pigeon) && !zone.IsInCurrentStart(remote), zone.Describe());
         yield return Check("Le second joueur n'est pas gelé", !remote.IsMovementFrozen && RemoteIs(RemoteKeys.Frozen, "0"), RemoteState());
+    }
+
+    /// <summary>L'hôte voit le décompte lancé par l'autre, le rejoint, puis le quitte sans l'annuler.</summary>
+    IEnumerator MultiJoinCountdown()
+    {
+        PigeonCharacterRace race = FindRace();
+        yield return Check("Une course avec MissionStartZone existe", race != null);
+        Defer(() => CleanupRace(race));
+        MissionStartZone zone = race.DepartureZone;
+        yield return UseStartRule(zone, MissionStartZone.StartRule.AnyPigeon, withRemote: true);
+        yield return PlaceHostAndRemoteInDepartureZone(race);
+        PigeonController remote = RemotePigeon;
+
+        yield return RemoteDo("interact");
+        yield return Expect("Le second joueur lance le décompte", () => zone.Phase == MissionStartZone.StartPhase.CountingDown, 2f, zone.Describe);
+        yield return Expect("L'hôte voit l'invitation à rejoindre", () => HudContains(zone, "to join"), 1f, () => HudState(zone));
+        yield return Check("Le décompte s'affiche au-dessus de la zone chez l'hôte", !string.IsNullOrEmpty(zone.CountdownTextShown),
+            $"texte « {zone.CountdownTextShown} »");
+        if (zone.GetComponentInChildren<DeliverySelectionCircle>(true) != null)
+            yield return Check("Le cercle change de couleur pendant le décompte", zone.IsCircleHighlighted);
+
+        Bot.PressInteract();
+        yield return Expect("F de l'hôte : il rejoint, gelé comme l'autre", () => Pigeon.IsReadyFor(zone.id) && Pigeon.IsMovementFrozen, 1f, zone.Describe);
+        yield return Expect("Sans le texte au-dessus de la zone pour celui qui participe", () => zone.CountdownTextShown == null, 0.5f,
+            () => $"texte « {zone.CountdownTextShown} »");
+        Bot.PressInteract();
+        yield return Expect("F de l'hôte à nouveau : il quitte, libre, sans annuler le décompte",
+            () => !Pigeon.IsReadyFor(zone.id) && !Pigeon.IsMovementFrozen && zone.Phase == MissionStartZone.StartPhase.CountingDown, 1f, zone.Describe);
+        Bot.PressInteract();
+        yield return Expect("Il rejoint encore", () => Pigeon.IsReadyFor(zone.id) && Pigeon.IsMovementFrozen, 1f, zone.Describe);
+
+        yield return Expect("Fin du décompte : les deux joueurs sont du départ",
+            () => zone.Phase != MissionStartZone.StartPhase.CountingDown && zone.IsInCurrentStart(Pigeon) && zone.IsInCurrentStart(remote),
+            zone.CountdownSeconds + 3f, zone.Describe);
+        yield return Check("Le cercle retrouve sa couleur", !zone.IsCircleHighlighted);
     }
 
     /// <summary>Change la règle de départ le temps du scénario, chez l'hôte et (multi) chez le second joueur.</summary>

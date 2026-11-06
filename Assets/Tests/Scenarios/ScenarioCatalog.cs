@@ -45,6 +45,7 @@ public partial class ScenarioRunner
         Multi("Multi : arrivée en pleine course", r => r.MultiLateJoin()),
         Multi("Multi : un seul suffit, lancé par le second joueur", r => r.MultiAnyStartedByRemote()),
         Multi("Multi : un seul suffit, lancé par l'hôte", r => r.MultiAnyStartedByHost()),
+        Multi("Multi : décompte vu par l'autre joueur, qui le rejoint", r => r.MultiJoinCountdown()),
         Multi("Multi : tuto local au second joueur", r => r.MultiTuto()),
         Multi("Multi : équipement du second joueur", r => r.MultiEquipment()),
         Multi("Multi : sons chez le second joueur", r => r.MultiAudio()),
