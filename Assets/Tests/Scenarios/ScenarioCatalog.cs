@@ -32,6 +32,7 @@ public partial class ScenarioRunner
         Solo("Voitures : toutes créées, visibles et en route", r => r.TrafficIsRunning()),
         Solo("Voitures : mouvement fluide entre deux ticks réseau", r => r.TrafficIsSmooth()),
         Solo("Voitures : photos d'une voiture et du pigeon posé dessus", r => r.PigeonOnCar()),
+        Solo("Dirigeable : mouvement fluide entre deux ticks réseau", r => r.ZeppelinIsSmooth()),
         Solo("Sons : 2D pour soi, 3D pour les autres", r => r.RunPigeonAudio()),
         Solo("Pause : le jeu continue, le pigeon reste en l'air", r => r.PauseKeepsGameRunning()),
         Solo("Endurance et vol stationnaire (monter, descendre)", r => r.StaminaAndHover()),
@@ -62,6 +63,7 @@ public partial class ScenarioRunner
         Multi("Multi : roucoulement vu par l'autre joueur, à sa couleur", r => r.MultiCoo()),
         Multi("Multi : mêmes voitures chez tous, solides, on roule dessus", r => r.MultiTrafficShared()),
         Multi("Multi : course chronométrée à deux, classement chez chacun", r => r.MultiTimedRace()),
+        Multi("Multi : même dirigeable et même ballon chez les deux joueurs", r => r.MultiSharedZeppelinAndBall()),
     };
 
     class ScenarioDef

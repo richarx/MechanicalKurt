@@ -240,6 +240,11 @@ public class ScenarioClientAgent : MonoBehaviour
                 _bot.Brake = argument == "1";
                 return "";
 
+            case "walk":
+                RequireDriven(local);
+                _bot.Movement = argument == "1" ? new Vector2(0f, 0.4f) : Vector2.zero;
+                return "";
+
             case "respawn":
                 if (local == null)
                     throw new InvalidOperationException("pas de pigeon local");
@@ -498,6 +503,13 @@ public class ScenarioClientAgent : MonoBehaviour
             Add(RemoteKeys.TrafficCars, ScenarioRunner.DescribeTraffic(traffic));
         Add(RemoteKeys.CarsGhosts, Flag(TrafficCollisionGate.CarsAreGhosts));
         Add(RemoteKeys.SupportId, local != null ? local.SupportId.ToString(CultureInfo.InvariantCulture) : "0");
+        BallRolling ball = FindAnyObjectByType<BallRolling>();
+        if (ball != null)
+            Add(RemoteKeys.BallPosition, ScenarioRunner.DescribeVector(ball.transform.position));
+        MoveZeppelin zeppelin = FindAnyObjectByType<MoveZeppelin>();
+        if (zeppelin != null)
+            Add(RemoteKeys.ZeppelinPosition, CityClock.Now.ToString("0.00", CultureInfo.InvariantCulture)
+                + ";" + ScenarioRunner.DescribeVector(zeppelin.transform.position));
         TimedRace timedRace = FindAnyObjectByType<TimedRace>();
         Add(RemoteKeys.TimedRaceHud, (timedRace != null ? timedRace.HudText : null) ?? "");
         Add(RemoteKeys.TimedRaceResults, (timedRace != null ? timedRace.ResultsText : null) ?? "");

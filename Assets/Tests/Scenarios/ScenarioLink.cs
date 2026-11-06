@@ -86,6 +86,10 @@ public static class RemoteKeys
     public const string CarsGhosts = "traffic/ghosts";
     /// <summary>MovingSupport.Id du support sous son pigeon (0 = aucun).</summary>
     public const string SupportId = "local/support";
+    /// <summary>Position du ballon de plage, et de son affichage.</summary>
+    public const string BallPosition = "ball/pos";
+    /// <summary>Heure de l'horloge partagée et angle du dirigeable affiché.</summary>
+    public const string ZeppelinPosition = "zeppelin/pos";
     /// <summary>Course chronométrée : textes du HUD (chrono, place) et du classement, vides si masqués.</summary>
     public const string TimedRaceHud = "timedrace/hud";
     public const string TimedRaceResults = "timedrace/results";

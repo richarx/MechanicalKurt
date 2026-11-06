@@ -211,11 +211,13 @@ public class TrafficNetwork : DeterministicIdentity<TrafficState>
             b.Rotation = Quaternion.Slerp(a.Rotation, b.Rotation, t);
             _viewCars.Add(b);
         }
-        return new TrafficState { Clock = to.Clock, Cars = _viewCars, Cooldowns = to.Cooldowns };
+        double clock = from.Clock + (to.Clock - from.Clock) * t;
+        return new TrafficState { Clock = clock, Cars = _viewCars, Cooldowns = to.Cooldowns };
     }
 
     protected override void UpdateView(TrafficState view, TrafficState? verified)
     {
+        CityClock.ShowView(view.Clock);
         if (view.Cars.isDisposed || view.Cars.Count != _cars.Count)
             return;
         for (int i = 0; i < _cars.Count; i++)

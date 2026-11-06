@@ -5,13 +5,16 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 
 /// <summary>
-/// Ballon de plage local à chaque client, roulé par les pigeons posés dessus d'après leur état prédit.
+/// Ballon de plage partagé (PredictedRigidbody, l'hôte fait référence), roulé par les pigeons posés dessus d'après
+/// leur état prédit. Son affichage est lissé entre deux ticks sur le pivot <see cref="_view"/>.
 /// </summary>
 [RequireComponent(typeof(Rigidbody), typeof(SphereCollider), typeof(MovingSupport))]
 public class BallRolling : MonoBehaviour
 {
     [SerializeField] float _rotationMax = 1f;
     [SerializeField] float _powerTorque = 1f;
+    [SerializeField, Tooltip("Pivot vide, « graphics » du PredictedTransform : le maillage du ballon y est rangé au lancement.")]
+    Transform _view;
 
     [ReadOnly] public Vector3 rotationAxis = new Vector3();
     [ReadOnly] public Vector3 angularVelocity = new Vector3();
@@ -30,6 +33,15 @@ public class BallRolling : MonoBehaviour
         _movingSupport = GetComponent<MovingSupport>();
         _rgbd = GetComponent<Rigidbody>();
         _collider = GetComponent<SphereCollider>();
+
+        if (_view == null)
+            return;
+        for (int i = transform.childCount - 1; i >= 0; i--)
+        {
+            Transform child = transform.GetChild(i);
+            if (child != _view)
+                child.SetParent(_view, true);
+        }
     }
 
     void OnEnable()
